@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14109" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina4_7" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14088"/>
+        <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
+        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
+        <capability name="Constraints with non-1.0 multipliers" minToolsVersion="5.1"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <customFonts key="customFonts">
+        <array key="Roboto-Regular.ttf">
+            <string>Roboto-Regular</string>
+        </array>
+    </customFonts>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <tableViewCell contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" reuseIdentifier="EmergencyCell" rowHeight="85" id="V1R-Xk-ZMy" customClass="EmergencyCell" customModule="DoctorDesktop" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="320" height="75"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="V1R-Xk-ZMy" id="1JK-kT-kUL">
+                <rect key="frame" x="0.0" y="0.0" width="320" height="74.5"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="2LE-69-sQN">
+                        <rect key="frame" x="8" y="11" width="304" height="53"/>
+                        <subviews>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="GdQ-hT-tcl">
+                                <rect key="frame" x="8" y="5.5" width="42" height="42"/>
+                                <subviews>
+                                    <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="6ER-Ss-4d4">
+                                        <rect key="frame" x="12.5" y="12.5" width="17" height="17"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" secondItem="6ER-Ss-4d4" secondAttribute="height" id="CEt-ju-mpj"/>
+                                        </constraints>
+                                    </imageView>
+                                </subviews>
+                                <color key="backgroundColor" red="0.34041944149999998" green="0.7417956591" blue="0.73586249349999999" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <constraints>
+                                    <constraint firstItem="6ER-Ss-4d4" firstAttribute="width" secondItem="GdQ-hT-tcl" secondAttribute="width" multiplier="0.4" id="1BT-io-IQf"/>
+                                    <constraint firstAttribute="width" secondItem="GdQ-hT-tcl" secondAttribute="height" id="Kqg-YP-C5D"/>
+                                    <constraint firstItem="6ER-Ss-4d4" firstAttribute="centerY" secondItem="GdQ-hT-tcl" secondAttribute="centerY" id="LaT-Hg-ZuT"/>
+                                    <constraint firstItem="6ER-Ss-4d4" firstAttribute="centerX" secondItem="GdQ-hT-tcl" secondAttribute="centerX" id="rBO-iy-vHt"/>
+                                </constraints>
+                            </view>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="aT6-uC-4ST">
+                                <rect key="frame" x="271" y="8" width="25" height="25"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="25" id="4Es-yG-vAq"/>
+                                    <constraint firstAttribute="width" secondItem="aT6-uC-4ST" secondAttribute="height" id="qic-NX-OZV"/>
+                                </constraints>
+                            </imageView>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="vo0-pH-hPz">
+                                <rect key="frame" x="58" y="37" width="238" height="1"/>
+                                <color key="backgroundColor" red="0.56078431370000004" green="0.55294117649999996" blue="0.56078431370000004" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="1" id="254-yF-plm"/>
+                                </constraints>
+                            </view>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Patient Name" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Y74-aa-G4n">
+                                <rect key="frame" x="58" y="8" width="205" height="15.5"/>
+                                <fontDescription key="fontDescription" name="Roboto-Regular" family="Roboto" pointSize="13"/>
+                                <color key="textColor" red="0.56078431370000004" green="0.55294117649999996" blue="0.56078431370000004" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="aT6-uC-4ST" firstAttribute="top" secondItem="2LE-69-sQN" secondAttribute="topMargin" id="Bco-te-Fq4"/>
+                            <constraint firstItem="GdQ-hT-tcl" firstAttribute="leading" secondItem="2LE-69-sQN" secondAttribute="leadingMargin" id="CYy-OA-4Rw"/>
+                            <constraint firstItem="Y74-aa-G4n" firstAttribute="leading" secondItem="GdQ-hT-tcl" secondAttribute="trailing" constant="8" id="DXT-Qt-9Dd"/>
+                            <constraint firstItem="GdQ-hT-tcl" firstAttribute="height" secondItem="2LE-69-sQN" secondAttribute="height" multiplier="0.8" id="FGU-w3-aHt"/>
+                            <constraint firstItem="Y74-aa-G4n" firstAttribute="top" secondItem="2LE-69-sQN" secondAttribute="topMargin" id="SLh-pb-Vay"/>
+                            <constraint firstItem="aT6-uC-4ST" firstAttribute="leading" secondItem="Y74-aa-G4n" secondAttribute="trailing" constant="8" id="axa-dU-WKc"/>
+                            <constraint firstItem="GdQ-hT-tcl" firstAttribute="centerY" secondItem="2LE-69-sQN" secondAttribute="centerY" id="bJL-EE-bck"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="vo0-pH-hPz" secondAttribute="trailing" id="idl-Iu-RoC"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="aT6-uC-4ST" secondAttribute="trailing" id="nUI-pd-xsH"/>
+                            <constraint firstItem="vo0-pH-hPz" firstAttribute="leading" secondItem="Y74-aa-G4n" secondAttribute="leading" id="psy-ZU-shn"/>
+                            <constraint firstItem="vo0-pH-hPz" firstAttribute="top" secondItem="aT6-uC-4ST" secondAttribute="bottom" constant="4" id="sfp-IP-wSI"/>
+                        </constraints>
+                    </view>
+                </subviews>
+                <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
+                <constraints>
+                    <constraint firstItem="2LE-69-sQN" firstAttribute="top" secondItem="1JK-kT-kUL" secondAttribute="topMargin" id="Lsm-jU-Eza"/>
+                    <constraint firstItem="2LE-69-sQN" firstAttribute="bottom" secondItem="1JK-kT-kUL" secondAttribute="bottomMargin" id="QkC-Gk-U5A"/>
+                    <constraint firstAttribute="trailing" secondItem="2LE-69-sQN" secondAttribute="trailing" constant="8" id="cOm-kk-Y3w"/>
+                    <constraint firstItem="2LE-69-sQN" firstAttribute="leading" secondItem="1JK-kT-kUL" secondAttribute="leading" constant="8" id="ffR-Eg-0Gp"/>
+                </constraints>
+            </tableViewCellContentView>
+            <viewLayoutGuide key="safeArea" id="mHq-Qn-Hjc"/>
+            <inset key="separatorInset" minX="1000" minY="0.0" maxX="0.0" maxY="0.0"/>
+            <connections>
+                <outlet property="cellView" destination="2LE-69-sQN" id="emC-jl-EeN"/>
+                <outlet property="genderAgeImageView" destination="6ER-Ss-4d4" id="Ngx-CX-7yB"/>
+                <outlet property="genderAgeView" destination="GdQ-hT-tcl" id="EmE-lm-SnK"/>
+                <outlet property="patientCountryFlagImage" destination="aT6-uC-4ST" id="7fc-vJ-9xW"/>
+                <outlet property="patientNameLabel" destination="Y74-aa-G4n" id="3lY-uO-kww"/>
+            </connections>
+            <point key="canvasLocation" x="26" y="85.5"/>
+        </tableViewCell>
+    </objects>
+</document>

@@ -1,0 +1,181 @@
+PODS:
+  - Alamofire (5.11.0)
+  - DropDown (2.3.1)
+  - DynamicBlurView (2.0.2)
+  - IQKeyboardManagerSwift (6.5.16)
+  - Kingfisher (4.7.0)
+  - KMPlaceholderTextView (1.3.0)
+  - MaterialComponents/AnimationTiming (124.2.0)
+  - MaterialComponents/Availability (124.2.0)
+  - MaterialComponents/Elevation (124.2.0):
+    - MaterialComponents/Availability
+    - MaterialComponents/private/Color
+    - MaterialComponents/private/Math
+  - MaterialComponents/Ink (124.2.0):
+    - MaterialComponents/Availability
+    - MaterialComponents/private/Color
+    - MaterialComponents/private/Math
+  - MaterialComponents/Palettes (124.2.0)
+  - MaterialComponents/private/Application (124.2.0)
+  - MaterialComponents/private/Color (124.2.0):
+    - MaterialComponents/Availability
+  - MaterialComponents/private/Math (124.2.0)
+  - MaterialComponents/Ripple (124.2.0):
+    - MaterialComponents/AnimationTiming
+    - MaterialComponents/Availability
+    - MaterialComponents/private/Color
+    - MaterialComponents/private/Math
+  - MaterialComponents/ShadowElevations (124.2.0)
+  - MaterialComponents/ShadowLayer (124.2.0):
+    - MaterialComponents/ShadowElevations
+  - MaterialComponents/Tabs (124.2.0):
+    - MaterialComponents/AnimationTiming
+    - MaterialComponents/Elevation
+    - MaterialComponents/Ink
+    - MaterialComponents/Palettes
+    - MaterialComponents/private/Math
+    - MaterialComponents/Ripple
+    - MaterialComponents/ShadowElevations
+    - MaterialComponents/ShadowLayer
+    - MaterialComponents/Typography
+    - MDFInternationalization
+  - MaterialComponents/Typography (124.2.0):
+    - MaterialComponents/private/Application
+    - MaterialComponents/private/Math
+    - MDFTextAccessibility
+  - MDFInternationalization (3.0.0)
+  - MDFTextAccessibility (2.0.1)
+  - MOLH (1.4.3)
+  - MZAppearance (1.1.6)
+  - MZFormSheetController (3.1.3):
+    - MZAppearance
+    - MZFormSheetController/Core (= 3.1.3)
+  - MZFormSheetController/Core (3.1.3):
+    - MZAppearance
+  - NVActivityIndicatorView (4.1.1):
+    - NVActivityIndicatorView/Presenter (= 4.1.1)
+  - NVActivityIndicatorView/Presenter (4.1.1)
+  - OAuthSwift (1.2.2)
+  - ObjectMapper (4.2.0)
+  - OhhAuth (1.1.0)
+  - PocketSVG (2.4.0)
+  - PopupDialog (0.7.1):
+    - DynamicBlurView (~> 2.0)
+  - Reachability (3.2)
+  - SCLAlertView (0.8.1)
+  - SearchTextField (1.2.0)
+  - SideMenu (6.5.0)
+  - Stuff/Codable (0.6.0)
+  - SwiftyBeaver (1.5.2)
+  - SwiftyJSON (5.0.1)
+  - Swinject (2.4.0)
+  - SwinjectStoryboard (2.0.2):
+    - Swinject (~> 2.4)
+  - Toast-Swift (3.0.1)
+  - UICollectionViewLeftAlignedLayout (1.0.2)
+  - VHBoomMenuButton/Swift (2.0.0)
+
+DEPENDENCIES:
+  - Alamofire
+  - DropDown
+  - IQKeyboardManagerSwift
+  - Kingfisher
+  - KMPlaceholderTextView
+  - MaterialComponents/Tabs
+  - MOLH
+  - MZFormSheetController (~> 3.1)
+  - NVActivityIndicatorView
+  - OAuthSwift (~> 1.2.0)
+  - ObjectMapper
+  - OhhAuth
+  - PocketSVG
+  - PopupDialog
+  - Reachability
+  - SCLAlertView (from `https://github.com/vikmeup/SCLAlertView-Swift`)
+  - SearchTextField
+  - SideMenu
+  - Stuff/Codable
+  - SwiftyBeaver
+  - SwiftyJSON
+  - Swinject
+  - SwinjectStoryboard
+  - Toast-Swift
+  - UICollectionViewLeftAlignedLayout
+  - VHBoomMenuButton/Swift
+
+SPEC REPOS:
+  trunk:
+    - Alamofire
+    - DropDown
+    - DynamicBlurView
+    - IQKeyboardManagerSwift
+    - Kingfisher
+    - KMPlaceholderTextView
+    - MaterialComponents
+    - MDFInternationalization
+    - MDFTextAccessibility
+    - MOLH
+    - MZAppearance
+    - MZFormSheetController
+    - NVActivityIndicatorView
+    - OAuthSwift
+    - ObjectMapper
+    - OhhAuth
+    - PocketSVG
+    - PopupDialog
+    - Reachability
+    - SearchTextField
+    - SideMenu
+    - Stuff
+    - SwiftyBeaver
+    - SwiftyJSON
+    - Swinject
+    - SwinjectStoryboard
+    - Toast-Swift
+    - UICollectionViewLeftAlignedLayout
+    - VHBoomMenuButton
+
+EXTERNAL SOURCES:
+  SCLAlertView:
+    :git: https://github.com/vikmeup/SCLAlertView-Swift
+
+CHECKOUT OPTIONS:
+  SCLAlertView:
+    :commit: f08ec93c299a221210e59462c84c79410050e5b7
+    :git: https://github.com/vikmeup/SCLAlertView-Swift
+
+SPEC CHECKSUMS:
+  Alamofire: bd5e7b23a1a750975288482c1831d71e74415f86
+  DropDown: 20499c7b2731b0d21609af924e47c7677a2be50d
+  DynamicBlurView: aa6db4defc6e537eb86fc5e58dd3991666178399
+  IQKeyboardManagerSwift: 12d89768845bb77b55cc092ecc2b1f9370f06b76
+  Kingfisher: da6b005aa96d37698e3e4f1ccfe96a5b9bbf27d6
+  KMPlaceholderTextView: 2bbcd19a273648a80a61e1e48f9743a24d8930e3
+  MaterialComponents: 1a9b2d9d45b1601ae544de85089adc4c464306d4
+  MDFInternationalization: d697c55307816222a55685c4ccb1044ffb030c12
+  MDFTextAccessibility: f4bb4cc2194286651b59a215fdeaa0e05dc90ba5
+  MOLH: e45827d200aeb1310641090fd8cd03ad2b42ae72
+  MZAppearance: 0c06d3fa9cc55142f1da14bc8631fbe8fd6e19d5
+  MZFormSheetController: da2df509805d757e04b052915057d8e1a338b050
+  NVActivityIndicatorView: 60109b9bf46efc2e71ab81453196ccdfdfeea870
+  OAuthSwift: 27b34fe80b76b67cd8f45571e0be2432bc9f6de1
+  ObjectMapper: 1eb41f610210777375fa806bf161dc39fb832b81
+  OhhAuth: 0c43cb209df11abaeced699b08508fe9f577ff0b
+  PocketSVG: 8ac7b20a881ca1a3d46ba1e54ee2b0f2307c3d48
+  PopupDialog: 39598b7d41719f5c025b4b70e62728bae7734fef
+  Reachability: 33e18b67625424e47b6cde6d202dce689ad7af96
+  SCLAlertView: 776813fb1f62248965f37cb7edf4088ee6394460
+  SearchTextField: a5bb7e4c33affadb115afdbe8100d84ef10a8024
+  SideMenu: f583187d21c5b1dd04c72002be544b555a2627a2
+  Stuff: 1fc2acb281c8a89d7c6bcf89dcdaa8bd29c5ae68
+  SwiftyBeaver: 85daaaa2b3ae6e31b7b55c99430e8b91dac088af
+  SwiftyJSON: 2f33a42c6fbc52764d96f13368585094bfd8aa5e
+  Swinject: a1364b0f66c2736bb03c1c7cab54809e16df25da
+  SwinjectStoryboard: 365698aec11b57c6b14a3c1f52d0308759d377bf
+  Toast-Swift: ba0b01b095aada709d915f9beb1d38184a2721c3
+  UICollectionViewLeftAlignedLayout: 830bf6fa5bab9f9b464f62e3384f9d2e00b3c0f6
+  VHBoomMenuButton: 77a7ae6742220b57b54eec28183fc123a3dd98ed
+
+PODFILE CHECKSUM: 4847f5ac62044b2767dda812562c10707d57ee5a
+
+COCOAPODS: 1.16.2

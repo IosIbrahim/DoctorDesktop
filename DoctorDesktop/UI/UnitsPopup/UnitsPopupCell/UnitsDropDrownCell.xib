@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="13771" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina4_7" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13772"/>
+        <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
+        <capability name="Constraints with non-1.0 multipliers" minToolsVersion="5.1"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view contentMode="scaleToFill" id="iN0-l3-epB" customClass="UnitsPopupCell" customModule="DoctorDesktop" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="375" height="45"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Unit Title" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="4Fs-bq-Xb3">
+                    <rect key="frame" x="56" y="0.0" width="319" height="45"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                    <nil key="textColor"/>
+                    <nil key="highlightedColor"/>
+                </label>
+                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="UfM-QQ-k64">
+                    <rect key="frame" x="8" y="2.5" width="40" height="40.5"/>
+                    <subviews>
+                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="0" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="kON-sT-F8w">
+                            <rect key="frame" x="15.5" y="9.5" width="10.5" height="21"/>
+                            <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                            <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                            <nil key="highlightedColor"/>
+                        </label>
+                    </subviews>
+                    <color key="backgroundColor" red="0.33664411309999998" green="0.73400098089999999" blue="0.74353730679999996" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                    <constraints>
+                        <constraint firstItem="kON-sT-F8w" firstAttribute="centerY" secondItem="UfM-QQ-k64" secondAttribute="centerY" id="gCS-2V-Gbs"/>
+                        <constraint firstItem="kON-sT-F8w" firstAttribute="centerX" secondItem="UfM-QQ-k64" secondAttribute="centerX" id="mNk-sE-UhV"/>
+                    </constraints>
+                </view>
+            </subviews>
+            <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <constraints>
+                <constraint firstItem="4Fs-bq-Xb3" firstAttribute="top" secondItem="vUN-kp-3ea" secondAttribute="top" id="Fag-Ol-gza"/>
+                <constraint firstItem="UfM-QQ-k64" firstAttribute="width" secondItem="UfM-QQ-k64" secondAttribute="height" id="Fyy-YZ-RE8"/>
+                <constraint firstItem="UfM-QQ-k64" firstAttribute="centerY" secondItem="iN0-l3-epB" secondAttribute="centerY" id="K1N-PB-EBb"/>
+                <constraint firstItem="vUN-kp-3ea" firstAttribute="bottom" secondItem="4Fs-bq-Xb3" secondAttribute="bottom" id="LOh-hp-QqD"/>
+                <constraint firstItem="UfM-QQ-k64" firstAttribute="leading" secondItem="vUN-kp-3ea" secondAttribute="leading" constant="8" id="Q0t-DY-PMM"/>
+                <constraint firstItem="vUN-kp-3ea" firstAttribute="trailing" secondItem="4Fs-bq-Xb3" secondAttribute="trailing" id="Wbc-4e-op1"/>
+                <constraint firstItem="4Fs-bq-Xb3" firstAttribute="leading" secondItem="UfM-QQ-k64" secondAttribute="trailing" constant="8" id="YFo-SO-IaH"/>
+                <constraint firstItem="UfM-QQ-k64" firstAttribute="height" secondItem="iN0-l3-epB" secondAttribute="height" multiplier="0.9" id="hRY-FY-FKe"/>
+            </constraints>
+            <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
+            <viewLayoutGuide key="safeArea" id="vUN-kp-3ea"/>
+            <connections>
+                <outlet property="countLabel" destination="kON-sT-F8w" id="AhO-KW-kFC"/>
+                <outlet property="countView" destination="UfM-QQ-k64" id="sch-hy-hGT"/>
+                <outlet property="optionLabel" destination="4Fs-bq-Xb3" id="gTC-ES-8xG"/>
+                <outlet property="unitTitle" destination="4Fs-bq-Xb3" id="1uO-if-squ"/>
+            </connections>
+            <point key="canvasLocation" x="32.5" y="46.5"/>
+        </view>
+    </objects>
+</document>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="13771" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina4_7" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13772"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="DatePopup" customModule="DoctorDesktop" customModuleProvider="target">
+            <connections>
+                <outlet property="datePicker" destination="IXX-HH-5x7" id="6Wf-1q-M5v"/>
+                <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
+            </connections>
+        </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view clearsContextBeforeDrawing="NO" contentMode="scaleToFill" id="i5M-Pr-FkT">
+            <rect key="frame" x="0.0" y="0.0" width="375" height="310"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <datePicker contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" datePickerMode="date" minuteInterval="1" translatesAutoresizingMaskIntoConstraints="NO" id="IXX-HH-5x7">
+                    <rect key="frame" x="0.0" y="0.0" width="375" height="310"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="310" id="gk5-Li-n8e"/>
+                    </constraints>
+                    <date key="date" timeIntervalSinceReferenceDate="535540253.31689799">
+                        <!--2017-12-21 09:10:53 +0000-->
+                    </date>
+                    <date key="minimumDate" timeIntervalSinceReferenceDate="-978267600">
+                        <!--1970-01-01 11:00:00 +0000-->
+                    </date>
+                </datePicker>
+            </subviews>
+            <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <constraints>
+                <constraint firstItem="IXX-HH-5x7" firstAttribute="leading" secondItem="fnl-2z-Ty3" secondAttribute="leading" id="5vf-cM-Ok9"/>
+                <constraint firstItem="IXX-HH-5x7" firstAttribute="trailing" secondItem="fnl-2z-Ty3" secondAttribute="trailing" id="ID7-WT-Z6A"/>
+                <constraint firstItem="IXX-HH-5x7" firstAttribute="top" secondItem="fnl-2z-Ty3" secondAttribute="top" id="OMc-sq-NQD"/>
+                <constraint firstItem="IXX-HH-5x7" firstAttribute="bottom" secondItem="fnl-2z-Ty3" secondAttribute="bottom" id="bih-H3-cxJ"/>
+            </constraints>
+            <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
+            <viewLayoutGuide key="safeArea" id="fnl-2z-Ty3"/>
+            <point key="canvasLocation" x="-1.5" y="238"/>
+        </view>
+    </objects>
+</document>

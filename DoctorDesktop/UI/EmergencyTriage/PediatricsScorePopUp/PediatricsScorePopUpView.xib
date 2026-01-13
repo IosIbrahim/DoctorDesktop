@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="13771" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina4_7" orientation="landscape">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13772"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="PediatricsScorePopUp" customModule="DoctorDesktop" customModuleProvider="target">
+            <connections>
+                <outlet property="cellView" destination="nr0-zC-4WC" id="nu6-2o-oBS"/>
+                <outlet property="totalScore" destination="Md0-Rm-3Ph" id="DyW-4n-IgH"/>
+                <outlet property="view" destination="iN0-l3-epB" id="dI6-rw-diO"/>
+            </connections>
+        </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view contentMode="scaleToFill" id="iN0-l3-epB">
+            <rect key="frame" x="0.0" y="0.0" width="667" height="375"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="CcF-Kr-zaP" userLabel="Header View">
+                    <rect key="frame" x="0.0" y="0.0" width="667" height="64"/>
+                    <subviews>
+                        <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="3" translatesAutoresizingMaskIntoConstraints="NO" id="d7w-nB-aF6" userLabel="Score View">
+                            <rect key="frame" x="16" y="11.5" width="73" height="41.5"/>
+                            <subviews>
+                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Total Score" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="W1c-FZ-ckw">
+                                    <rect key="frame" x="0.0" y="0.0" width="73" height="17"/>
+                                    <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                    <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                    <nil key="highlightedColor"/>
+                                </label>
+                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="0" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Md0-Rm-3Ph">
+                                    <rect key="frame" x="0.0" y="20" width="73" height="21.5"/>
+                                    <fontDescription key="fontDescription" type="boldSystem" pointSize="18"/>
+                                    <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                    <nil key="highlightedColor"/>
+                                </label>
+                            </subviews>
+                        </stackView>
+                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Pediatric Pain Assesment" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="pNC-4i-PUB">
+                            <rect key="frame" x="229" y="8" width="208" height="48"/>
+                            <fontDescription key="fontDescription" type="boldSystem" pointSize="17"/>
+                            <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                            <nil key="highlightedColor"/>
+                        </label>
+                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="HaY-97-NYD">
+                            <rect key="frame" x="578" y="16" width="73" height="32"/>
+                            <color key="backgroundColor" red="0.55294117647058827" green="0.74901960784313726" blue="0.25490196078431371" alpha="1" colorSpace="calibratedRGB"/>
+                            <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                            <state key="normal" title="Save">
+                                <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                            </state>
+                            <connections>
+                                <action selector="didClickSaveButton:" destination="-1" eventType="touchUpInside" id="lHa-eU-6zP"/>
+                            </connections>
+                        </button>
+                    </subviews>
+                    <color key="backgroundColor" red="0.0078431372549019607" green="0.58039215686274503" blue="0.80784313725490198" alpha="1" colorSpace="calibratedRGB"/>
+                    <constraints>
+                        <constraint firstItem="HaY-97-NYD" firstAttribute="top" secondItem="CcF-Kr-zaP" secondAttribute="top" constant="16" id="A4u-ea-nyy"/>
+                        <constraint firstAttribute="trailing" secondItem="HaY-97-NYD" secondAttribute="trailing" constant="16" id="B5d-a8-fDS"/>
+                        <constraint firstItem="d7w-nB-aF6" firstAttribute="leading" secondItem="CcF-Kr-zaP" secondAttribute="leading" constant="16" id="UGe-pY-Et7"/>
+                        <constraint firstAttribute="bottom" secondItem="HaY-97-NYD" secondAttribute="bottom" constant="16" id="VNq-zN-rRm"/>
+                        <constraint firstItem="HaY-97-NYD" firstAttribute="width" secondItem="d7w-nB-aF6" secondAttribute="width" id="cfX-hb-lZR"/>
+                        <constraint firstItem="d7w-nB-aF6" firstAttribute="centerY" secondItem="CcF-Kr-zaP" secondAttribute="centerY" id="dIb-ek-u2t"/>
+                        <constraint firstAttribute="bottom" secondItem="pNC-4i-PUB" secondAttribute="bottom" constant="8" id="eAV-on-rwS"/>
+                        <constraint firstAttribute="height" constant="64" id="gcH-SK-mrT"/>
+                        <constraint firstItem="pNC-4i-PUB" firstAttribute="top" secondItem="CcF-Kr-zaP" secondAttribute="top" constant="8" id="qph-QK-NBY"/>
+                        <constraint firstItem="pNC-4i-PUB" firstAttribute="centerX" secondItem="CcF-Kr-zaP" secondAttribute="centerX" id="xiT-RS-pJn"/>
+                    </constraints>
+                </view>
+                <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="none" translatesAutoresizingMaskIntoConstraints="NO" id="nr0-zC-4WC" userLabel="Score Cell View">
+                    <rect key="frame" x="0.0" y="64" width="667" height="311"/>
+                    <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="0.0" minimumInteritemSpacing="0.0" id="j6R-Rs-jqv">
+                        <size key="itemSize" width="25" height="10"/>
+                        <size key="headerReferenceSize" width="0.0" height="0.0"/>
+                        <size key="footerReferenceSize" width="0.0" height="0.0"/>
+                        <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
+                    </collectionViewFlowLayout>
+                    <connections>
+                        <outlet property="dataSource" destination="-1" id="3xV-g3-Re1"/>
+                        <outlet property="delegate" destination="-1" id="Ab3-I0-Tbv"/>
+                    </connections>
+                </collectionView>
+            </subviews>
+            <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <constraints>
+                <constraint firstItem="CcF-Kr-zaP" firstAttribute="trailing" secondItem="vUN-kp-3ea" secondAttribute="trailing" id="8mh-nb-Eqy"/>
+                <constraint firstItem="CcF-Kr-zaP" firstAttribute="top" secondItem="vUN-kp-3ea" secondAttribute="top" id="Xt1-YV-ywu"/>
+                <constraint firstItem="vUN-kp-3ea" firstAttribute="trailing" secondItem="nr0-zC-4WC" secondAttribute="trailing" id="ZNi-2Q-CoJ"/>
+                <constraint firstItem="nr0-zC-4WC" firstAttribute="leading" secondItem="vUN-kp-3ea" secondAttribute="leading" id="buF-CR-Hxc"/>
+                <constraint firstItem="CcF-Kr-zaP" firstAttribute="leading" secondItem="vUN-kp-3ea" secondAttribute="leading" id="crs-u5-b5p"/>
+                <constraint firstItem="nr0-zC-4WC" firstAttribute="top" secondItem="CcF-Kr-zaP" secondAttribute="bottom" id="izV-bc-RYc"/>
+                <constraint firstItem="vUN-kp-3ea" firstAttribute="bottom" secondItem="nr0-zC-4WC" secondAttribute="bottom" id="mj2-3o-EZz"/>
+            </constraints>
+            <viewLayoutGuide key="safeArea" id="vUN-kp-3ea"/>
+        </view>
+    </objects>
+</document>

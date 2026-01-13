@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="13771" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina4_7" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13772"/>
+        <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
+        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
+        <capability name="Constraints with non-1.0 multipliers" minToolsVersion="5.1"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <customFonts key="customFonts">
+        <array key="Roboto-Medium.ttf">
+            <string>Roboto-Medium</string>
+        </array>
+        <array key="Roboto-Regular.ttf">
+            <string>Roboto-Regular</string>
+        </array>
+    </customFonts>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <tableViewCell contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" reuseIdentifier="OutpatientCell" rowHeight="130" id="caA-h0-q31" userLabel="Outpatient Cell" customClass="OutpatientCell" customModule="DoctorDesktop" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="320" height="131"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="caA-h0-q31" id="4DX-Vl-F3g">
+                <rect key="frame" x="0.0" y="0.0" width="320" height="130.5"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="rZY-5q-wag">
+                        <rect key="frame" x="8" y="11" width="304" height="109"/>
+                        <subviews>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="laV-aA-yH3">
+                                <rect key="frame" x="8" y="8" width="65" height="65"/>
+                                <subviews>
+                                    <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="NZp-7e-yXe">
+                                        <rect key="frame" x="20" y="20.5" width="26" height="25.5"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" secondItem="NZp-7e-yXe" secondAttribute="height" id="3S7-JB-k9y"/>
+                                        </constraints>
+                                    </imageView>
+                                </subviews>
+                                <color key="backgroundColor" red="0.34041944149999998" green="0.7417956591" blue="0.73586249349999999" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" secondItem="laV-aA-yH3" secondAttribute="height" id="6ob-qC-Scm"/>
+                                    <constraint firstAttribute="height" constant="65" id="B2K-1h-D1v"/>
+                                    <constraint firstItem="NZp-7e-yXe" firstAttribute="width" secondItem="laV-aA-yH3" secondAttribute="width" multiplier="0.4" id="EWL-7j-Gkn"/>
+                                    <constraint firstItem="NZp-7e-yXe" firstAttribute="centerY" secondItem="laV-aA-yH3" secondAttribute="centerY" id="UCd-w9-Hta"/>
+                                    <constraint firstItem="NZp-7e-yXe" firstAttribute="centerX" secondItem="laV-aA-yH3" secondAttribute="centerX" id="rNV-r6-not"/>
+                                </constraints>
+                            </view>
+                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="top" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="oeE-fQ-f4e">
+                                <rect key="frame" x="81" y="8" width="215" height="39"/>
+                                <subviews>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Patient Name" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="MJg-kb-5qb">
+                                        <rect key="frame" x="0.0" y="0.0" width="79" height="15.5"/>
+                                        <fontDescription key="fontDescription" name="Roboto-Regular" family="Roboto" pointSize="13"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <stackView opaque="NO" contentMode="scaleToFill" spacing="24" translatesAutoresizingMaskIntoConstraints="NO" id="c0G-lL-5e1">
+                                        <rect key="frame" x="0.0" y="23.5" width="174" height="15.5"/>
+                                        <subviews>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Clinic Title" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="5BO-LO-0Lk">
+                                                <rect key="frame" x="0.0" y="0.0" width="60.5" height="15.5"/>
+                                                <fontDescription key="fontDescription" name="Roboto-Regular" family="Roboto" pointSize="13"/>
+                                                <color key="textColor" red="0.34136751294136047" green="0.7459447979927063" blue="0.50798290967941284" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                <nil key="highlightedColor"/>
+                                            </label>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Patient Country" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Stp-kW-5UT">
+                                                <rect key="frame" x="84.5" y="0.0" width="89.5" height="15.5"/>
+                                                <fontDescription key="fontDescription" name="Roboto-Regular" family="Roboto" pointSize="13"/>
+                                                <nil key="textColor"/>
+                                                <nil key="highlightedColor"/>
+                                            </label>
+                                        </subviews>
+                                    </stackView>
+                                </subviews>
+                            </stackView>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="D0C-At-Lzd">
+                                <rect key="frame" x="81" y="55" width="223" height="2"/>
+                                <color key="backgroundColor" red="0.87834513187408447" green="0.87847524881362915" blue="0.87832736968994141" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="2" id="Jo0-Cg-O1S"/>
+                                </constraints>
+                            </view>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="RfJ-Sq-ZcZ">
+                                <rect key="frame" x="91" y="65" width="75" height="32"/>
+                                <color key="backgroundColor" red="0.91690033674240112" green="0.2250995934009552" blue="0.055934593081474304" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <fontDescription key="fontDescription" name="Roboto-Medium" family="Roboto" pointSize="13"/>
+                                <inset key="contentEdgeInsets" minX="8" minY="8" maxX="8" maxY="8"/>
+                                <state key="normal" title="Check out">
+                                    <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                            </button>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="laV-aA-yH3" firstAttribute="leading" secondItem="rZY-5q-wag" secondAttribute="leadingMargin" id="7tZ-I2-bET"/>
+                            <constraint firstAttribute="trailing" secondItem="oeE-fQ-f4e" secondAttribute="trailing" constant="8" id="D6f-MC-eo8"/>
+                            <constraint firstAttribute="trailing" secondItem="D0C-At-Lzd" secondAttribute="trailing" id="MhI-t8-pWA"/>
+                            <constraint firstItem="RfJ-Sq-ZcZ" firstAttribute="leading" secondItem="D0C-At-Lzd" secondAttribute="leading" constant="10" id="NnT-lq-PCS"/>
+                            <constraint firstItem="oeE-fQ-f4e" firstAttribute="leading" secondItem="laV-aA-yH3" secondAttribute="trailing" constant="8" id="Oja-SN-LvS"/>
+                            <constraint firstItem="D0C-At-Lzd" firstAttribute="top" secondItem="oeE-fQ-f4e" secondAttribute="bottom" constant="8" id="UCU-DJ-1HQ"/>
+                            <constraint firstItem="D0C-At-Lzd" firstAttribute="top" secondItem="oeE-fQ-f4e" secondAttribute="bottom" constant="8" id="eQD-He-4kF"/>
+                            <constraint firstItem="oeE-fQ-f4e" firstAttribute="top" secondItem="rZY-5q-wag" secondAttribute="top" constant="8" id="fGe-mc-tUw"/>
+                            <constraint firstItem="RfJ-Sq-ZcZ" firstAttribute="top" secondItem="D0C-At-Lzd" secondAttribute="bottom" constant="8" id="qrG-Jj-5Yy"/>
+                            <constraint firstItem="laV-aA-yH3" firstAttribute="top" secondItem="rZY-5q-wag" secondAttribute="top" constant="8" id="rtZ-Lt-i98"/>
+                            <constraint firstItem="oeE-fQ-f4e" firstAttribute="leading" secondItem="D0C-At-Lzd" secondAttribute="leading" id="v3c-qT-I5d"/>
+                        </constraints>
+                    </view>
+                </subviews>
+                <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
+                <constraints>
+                    <constraint firstAttribute="trailing" secondItem="rZY-5q-wag" secondAttribute="trailing" constant="8" id="U31-zu-6oV"/>
+                    <constraint firstItem="rZY-5q-wag" firstAttribute="bottom" secondItem="4DX-Vl-F3g" secondAttribute="bottomMargin" id="fCf-kc-fqM"/>
+                    <constraint firstItem="rZY-5q-wag" firstAttribute="top" secondItem="4DX-Vl-F3g" secondAttribute="topMargin" id="uap-Ql-Qzb"/>
+                    <constraint firstItem="rZY-5q-wag" firstAttribute="leading" secondItem="4DX-Vl-F3g" secondAttribute="leading" constant="8" id="v7I-Tv-7th"/>
+                </constraints>
+            </tableViewCellContentView>
+            <viewLayoutGuide key="safeArea" id="3HW-ad-1Gc"/>
+            <inset key="separatorInset" minX="1000" minY="0.0" maxX="0.0" maxY="0.0"/>
+            <connections>
+                <outlet property="cellView" destination="rZY-5q-wag" id="MsV-R6-uA3"/>
+                <outlet property="clinicTitleLabel" destination="5BO-LO-0Lk" id="cZk-aQ-yVT"/>
+                <outlet property="genderAgeImageView" destination="NZp-7e-yXe" id="Ixf-NJ-cVm"/>
+                <outlet property="genderAgeView" destination="laV-aA-yH3" id="GKa-41-Pdt"/>
+                <outlet property="patientNameLabel" destination="MJg-kb-5qb" id="2Rj-wf-jfp"/>
+                <outlet property="patientNationalityLabel" destination="Stp-kW-5UT" id="D5A-QP-IIf"/>
+                <outlet property="statusButton" destination="RfJ-Sq-ZcZ" id="3rV-jp-Ihi"/>
+            </connections>
+            <point key="canvasLocation" x="93" y="116.5"/>
+        </tableViewCell>
+    </objects>
+</document>
