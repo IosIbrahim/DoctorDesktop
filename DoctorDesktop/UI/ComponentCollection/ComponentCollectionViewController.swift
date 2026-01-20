@@ -111,7 +111,7 @@ extension ComponentCollectionViewController: UICollectionViewDataSource {
   }
   
   func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-    let componentType = ComponentType(rawValue: presenter.components[indexPath.row].processInfoCode)!
+      let componentType = ComponentType(rawValue: presenter.components[indexPath.row].processInfoCode) ?? .operations
     let colorAndImageTuble = getComponentBackgroundColorAndImage(componentType: componentType)
     return componentCellMaker(collectionView, indexPath,
                               presenter.components[indexPath.row],

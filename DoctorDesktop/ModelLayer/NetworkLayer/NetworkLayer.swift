@@ -17,8 +17,8 @@ struct AppURLS {
     
     //  static let ip = "http://10.10.10.150"
 
- static let ip =      "http://192.168.1.187"
-//    static let ip = "http://197.50.215.42:150"
+  static let oldIP =      "http://192.168.1.187"
+  static let ip =      "http://41.33.82.156:29804"
   static let mobileApi = "MobileApi/api/"
   static let imageApi = "primecare/Hospital%20Images/"
 }
@@ -64,9 +64,7 @@ class NetworkLayerImpl: NetworkLayer {
                                        parameters: params,
                                        encoding: URLEncoding.httpBody)
       .responseJSON { response in
-        
         print(response)
-        
         guard let data = response.data else { return }
         finished(data)
     }
@@ -77,10 +75,12 @@ class NetworkLayerImpl: NetworkLayer {
 extension NetworkLayerImpl {
   func getPatientsCount(with params: [String: String], finished: @escaping DataBlock) {
     let url = AppURLS.ip+"/MobileApi/api/get_patients_counts"
-    
+    print(params)
+      print(url)
     AlamofireAppManager.shared.request(url, parameters: params)
       .responseJSON { response in
         guard let data = response.data else { return }
+          print(response.value ?? "")
         finished(data)
     }
   }

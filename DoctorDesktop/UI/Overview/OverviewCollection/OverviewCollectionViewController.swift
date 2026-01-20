@@ -50,7 +50,12 @@ class OverviewCollectionViewController: UIViewController, NVActivityIndicatorVie
   }
 
   @IBAction func didPressMenu(_ sender: Any) {
-    present(SideMenuManager.default.menuRightNavigationController!, animated: true, completion: nil)
+      if let menu = SideMenuManager.default.rightMenuNavigationController {
+          present(menu , animated: true, completion: nil)
+      }else if let menu = SideMenuManager.default.leftMenuNavigationController {
+          present(menu , animated: true, completion: nil)
+      }
+ //     present(SideMenuManager.default.menuRightNavigationController! , animated: true, completion: nil)
   }
 }
 

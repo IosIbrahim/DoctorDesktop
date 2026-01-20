@@ -156,7 +156,7 @@ extension PatientsViewController {
     // Define the menus
     let menuLeftNavigationController = UISideMenuNavigationController(rootViewController: patientOverviewViewController)
     SideMenuManager.default.menuPresentMode = .menuDissolveIn
-    SideMenuManager.default.menuRightNavigationController = menuLeftNavigationController
+    SideMenuManager.default.rightMenuNavigationController = menuLeftNavigationController
 //    SideMenuManager.default.menuAddPanGestureToPresent(toView: self.navigationController!.navigationBar)
     SideMenuManager.default.menuWidth = self.view.frame.width - 80
 //    SideMenuManager.default.menuAddScreenEdgePanGesturesToPresent(toView: self.navigationController!.view)

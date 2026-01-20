@@ -73,8 +73,13 @@ class TranslationLayerImpl: TranslationLayer {
 
 extension TranslationLayerImpl {
     func getCountsFromJson(_ data: Data) -> PatientCount {
-        let patientCount = try! PatientCount (data: data, keyPath: "Root.OUT_PARMS.OUT_PARMS_ROW")
-        return patientCount
+        print(data.toJsonString() ?? "")
+        if let patientCount = try? PatientCount (data: data, keyPath: "Root.OUT_PARMS.OUT_PARMS_ROW") {
+            return patientCount
+        }else {
+            let emp = try! PatientCount(data: .init())
+            return emp
+        }
     }
     
     func getInpatientUnitDTOsFromJson(_ data: Data) -> PatientUnits {

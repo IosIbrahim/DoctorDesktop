@@ -29,7 +29,7 @@ class LoginViewController: UIViewController, NVActivityIndicatorViewable {
     self.loginView.layer.borderWidth = 1
     self.loginBtn.layer.cornerRadius = 20
     
-    userName.text = "khabeer"
+    userName.text = "KHABEER"
     passWord.text = "920250270"
   }
   

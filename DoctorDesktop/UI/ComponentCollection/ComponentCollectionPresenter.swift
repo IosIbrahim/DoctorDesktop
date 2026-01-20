@@ -47,6 +47,7 @@ extension ComponentCollectionPresenterImpl {
     let params = [
       "BRANCH_ID": user.branch ?? "",
       "USER_ID": user.userName ?? "",
+      "GROUP_ID":user.group ?? "",
       "SER_ARRAY": processInfoCode,
       "COMPUTER_NAME": "iOS",
       "USER_OPEN_FLAG": "D",

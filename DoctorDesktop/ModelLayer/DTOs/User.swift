@@ -14,6 +14,7 @@ struct User: Decodable {
   let id: String?
   let userName: String?
   let branch: String?
+  let group:String?
   var name: String? { return englishName }
 
   enum CodingKeys: String, CodingKey {
@@ -22,6 +23,7 @@ struct User: Decodable {
     case arabicName = "EMP_AR_NAME"
     case englishName = "EMP_EN_NAME"
     case branch = "DEFAULTBRANCH"
+    case group = "DEFAULTGROUP"
   }
 }
 //{

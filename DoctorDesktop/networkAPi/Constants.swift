@@ -57,8 +57,8 @@ struct Constants {
     struct APIProvider {
 //        static var IPLocal = "197.50.215.42:150"
 //        static var IP = "172.16.10.248"
-        static var IP = "172.25.26.140"
-
+   //     static var IP = "172.25.26.140"
+        static var NEWIP = "41.33.82.156:29804"
 //        static var IP =  "197.50.215.42:210"
 //        #if DEBUG
 //            static var IP =  "192.168.1.234"
@@ -76,7 +76,7 @@ struct Constants {
 //        static var APIBase = "http://192.168.1.127"
 //        static var APIBase = "http://10.10.10.150"
 //        static var APIBase = "http://197.50.197.107/MobileApi/api/"
-        static var APIBase = "http://"+IP+"/MobileApi/api/"
+        static var APIBase = "http://"+NEWIP+"/MobileApi/api/"
         
 //    http://192.168.1.193/MobileApi/api/MedicalRecordController/loadServiceResult?P_IDENTFIER=225551&USER_ID=KHABEER
    
@@ -118,7 +118,7 @@ struct Constants {
         
    
         
-        static var DDDocNurseNotesLoad = IP + "MobileApi/api/MedicalRcordController/DDDocNurseNotesLoad?"
+        static var DDDocNurseNotesLoad = NEWIP + "MobileApi/api/MedicalRcordController/DDDocNurseNotesLoad?"
         
         
     static var patientReportsRequests = APIBaseURL+"MedicalRecordController/patientReportsRequests?"
@@ -134,7 +134,7 @@ struct Constants {
 
         static var getVisitDetailsForPatient = APIBaseURL +    "DoctorController/getVisitDetailsForPatient?"
 
-        static var PrimeCareTempFiles =  "http://"  + IP  + "/sihtest/TempFiles/ReportPDFS/"
+        static var PrimeCareTempFiles =  "http://"  + NEWIP  + "/sihtest/TempFiles/ReportPDFS/"
 
 
        
@@ -152,7 +152,7 @@ struct Constants {
         static var GetDoctorTimeSlots = APIBaseURL+"get_doc_next_availble_slot?"
         static var SubmitAppointment = APIBaseURL+"submit_appointment?"
         
-        static var sendMessage = IP+"MobileApi/api/MedicalRcordController/DDDocNurseNotesSave"
+        static var sendMessage = NEWIP+"MobileApi/api/MedicalRcordController/DDDocNurseNotesSave"
 
         static var SubmitStepNew = APIBaseURL+"SubmitStepNew"
 
@@ -196,7 +196,7 @@ struct Constants {
        }
    
     public func updateIP(ip:String) {
-        Constants.APIProvider.IP = ip
+        Constants.APIProvider.NEWIP = ip
         Constants.APIProvider.APIBase = "http://"+ip+"/MobileApi/api/"
         Constants.APIProvider.APIBaseURL = Constants.APIProvider.APIBase
         Constants.APIProvider.Register = Constants.APIProvider.APIBaseURL+"register"
