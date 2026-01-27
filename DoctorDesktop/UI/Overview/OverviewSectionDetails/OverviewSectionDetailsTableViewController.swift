@@ -53,6 +53,14 @@ class OverviewSectionDetailsViewController: UIViewController {
       navigationCoordinator?.movingBack()
     }
   }
+    
+    @IBAction func addOntap(_ sender: Any) {
+      //  navigationController?.pushViewController(patientlis, animated: <#T##Bool#>)
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        let vc = storyboard.instantiateViewController(withIdentifier: "prescriptionListVC")
+        navigationController?.pushViewController(vc, animated: true)
+    }
+    
 
   func configure(with presenter: OverviewSectionDetailsPresenter,
                  navigationCoordinator: NavigationCoordinator,

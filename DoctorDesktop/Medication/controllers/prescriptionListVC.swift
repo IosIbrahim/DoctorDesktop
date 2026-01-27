@@ -59,12 +59,11 @@ extension prescriptionListVC:UITableViewDelegate ,UITableViewDataSource{
     }
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
-        processinfocode1 = precrilist[indexPath.row].processinfocode!
-        
-        
-        
         let vc = UIStoryboard.init(name: "Main", bundle: Bundle.main).instantiateViewController(withIdentifier: "prescriptionDetails") as? prescriptionDetails
-        vc?.processinfocode1 = self.processinfocode1
+        if let model = precrilist[indexPath.row].processinfocode {
+            processinfocode1 = model
+            vc?.processinfocode1 = model
+        }
         self.navigationController?.pushViewController(vc!, animated: true)
         
       

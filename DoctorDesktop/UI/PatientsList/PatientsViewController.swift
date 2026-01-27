@@ -82,8 +82,14 @@ class PatientsViewController: UIViewController, NVActivityIndicatorViewable {
     super.viewDidLoad()
     self.title = presenter.title
     registerCell()
-      self.navigationController?.navigationBar.tintColor = UIColor.green
+      
+  //  navigationController?.navigationBar.largeTitleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.black]
+      
+    let textAttributes = [NSAttributedStringKey.foregroundColor:UIColor.black]
+    navigationController?.navigationBar.titleTextAttributes = textAttributes
 
+    self.navigationController?.navigationBar.tintColor = UIColor.green
+    //self.navigationController?.navigationBar.backgroundColor = UIColor.blue
     countView.layer.cornerRadius = countView.bounds.width/2
     dropDownView.layer.cornerRadius = 10
     dateView.layer.cornerRadius = 10
@@ -223,7 +229,7 @@ extension PatientsViewController {
   
   fileprivate func registerCell() {
     switch presenter.componentType {
-    case .inpatient, .ICU , .operations: InpatientCell.register(with: tableView)
+    case .inpatient, .ICU ,.nicu, .operations: InpatientCell.register(with: tableView)
     case .outpatient: OutpatientCell.register(with: tableView)
     case .emergency: EmergencyCell.register(with: tableView)
     case .clinicalAlert: ClinicalAlertCell.register(with: tableView)
@@ -234,12 +240,12 @@ extension PatientsViewController {
   fileprivate func getPatientsUnits() {
     switch presenter.componentType {
     case .inpatient:
-      presenter.getInpatientUnits(isICU: false) {
+      presenter.getInpatientUnits(isICU: 0) {
         self.showUnitsPopupDialog()
         self.setupDropDownMenu(dropDown: self.dropDown)
       }
     case .ICU:
-      presenter.getInpatientUnits(isICU: true) {
+      presenter.getInpatientUnits(isICU: 1) {
         self.showUnitsPopupDialog()
         self.setupDropDownMenu(dropDown: self.dropDown)
       }
@@ -256,6 +262,11 @@ extension PatientsViewController {
       getPatientsDetails(withSelectedUnitIndex: -1)
     case .clinicalAlert:
       break
+    case .nicu :
+        presenter.getInpatientUnits(isICU: 2) {
+          self.showUnitsPopupDialog()
+          self.setupDropDownMenu(dropDown: self.dropDown)
+        }
     default: break
     }
   }
@@ -264,13 +275,18 @@ extension PatientsViewController {
     startAnimating(message: "Load Patients Details...")
     
     switch presenter.componentType {
+    case .nicu:
+        presenter.getInpatientPatients(withSelectedUnitIndex: index, isICU: 2) {
+          self.stopAnimating()
+          self.tableView.reloadData()
+        }
     case .inpatient:
-      presenter.getInpatientPatients(withSelectedUnitIndex: index, isICU: false) {
+      presenter.getInpatientPatients(withSelectedUnitIndex: index, isICU: 0) {
         self.stopAnimating()
         self.tableView.reloadData()
       }
     case .ICU:
-      presenter.getInpatientPatients(withSelectedUnitIndex: index, isICU: true) {
+      presenter.getInpatientPatients(withSelectedUnitIndex: index, isICU: 1) {
         self.stopAnimating()
         self.tableView.reloadData()
       }
@@ -331,7 +347,7 @@ extension PatientsViewController {
 extension PatientsViewController: UITableViewDataSource {
   func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
     switch presenter.componentType {
-    case .inpatient, .ICU: return presenter.inpatientPatients.count
+    case .inpatient,.nicu, .ICU: return presenter.inpatientPatients.count
     case .outpatient: return presenter.outpatientPatients.count
     case .emergency:
       if self.isTriagedSelected {
@@ -348,7 +364,7 @@ extension PatientsViewController: UITableViewDataSource {
   
   func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
     switch presenter.componentType {
-    case .inpatient, .ICU:
+    case .inpatient,.nicu, .ICU:
       return self.inpatientCellMaker(tableView, indexPath, self.presenter.inpatientPatients[indexPath.row])
     case .outpatient:
       return outpatientCellMaker(tableView, indexPath, presenter.outpatientPatients[indexPath.row])
@@ -373,14 +389,15 @@ extension PatientsViewController: UITableViewDataSource {
 
 extension PatientsViewController: UITableViewDelegate {
   func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-    switch presenter.componentType {
-    case .inpatient, .ICU ,.operations: return 100
-    case .outpatient: return 130
-    case .emergency: return 75
-    case .clinicalAlert: return 100
+//    switch presenter.componentType {
+//    case .inpatient, .ICU , .nicu,.operations: return 110
+//    case .outpatient: return 130
+//    case .emergency: return 75
+//    case .clinicalAlert: return 100
     
-    default: return 0
-    }
+  //  default: return UITableViewAutomaticDimension
+  //  }
+      return UITableViewAutomaticDimension
   }
   
   func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
@@ -401,7 +418,7 @@ extension PatientsViewController: UITableViewDelegate {
        
         navigationCoordinator?.next(arguments: args)
         
-    case .inpatient, .ICU:
+    case .inpatient,.nicu, .ICU:
         
         UserDefaults.standard.set(presenter.inpatientPatients[indexPath.row].id, forKey: "patient_id") //setObject
 

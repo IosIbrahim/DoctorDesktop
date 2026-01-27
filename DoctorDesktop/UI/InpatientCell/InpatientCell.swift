@@ -11,13 +11,15 @@ import Kingfisher
 
 class InpatientCell: UITableViewCell {
   
-  @IBOutlet weak var cellView: UIView!
+    @IBOutlet weak var lblAge: UILabel!
+    @IBOutlet weak var lblDate: UILabel!
+    @IBOutlet weak var cellView: UIView!
   @IBOutlet weak var genderAgeView: UIView!
   @IBOutlet weak var genderAgeImageView: UIImageView!
   @IBOutlet weak var patientNameLabel: UILabel!
   @IBOutlet weak var doctorNameLabel: UILabel!
   @IBOutlet weak var bedNumberLabel: UILabel!
-  @IBOutlet weak var patientCountryFlagImage: UIImageView!
+//  @IBOutlet weak var patientCountryFlagImage: UIImageView!
 
   override func awakeFromNib() {
     super.awakeFromNib()
@@ -29,15 +31,20 @@ class InpatientCell: UITableViewCell {
 //MARK: - Configure
 extension InpatientCell {
   func configure(with presenter: InpatientCellPresenter) {
-    let doctorFirstName = presenter.doctorName.components(separatedBy: CharacterSet(charactersIn: " ")).first ?? presenter.doctorName
+  //  let doctorFirstName = presenter.doctorName.components(separatedBy: CharacterSet(charactersIn: " ")).first ?? presenter.doctorName
     self.patientNameLabel.text = presenter.patientName
-    self.genderAgeImageView.image = presenter.genderAgeImage
-    self.doctorNameLabel.text = "Dr/ \(doctorFirstName)"
-    self.bedNumberLabel.text = presenter.bedNumberName
-    self.genderAgeImageView.image = presenter.genderAgeImage
-
-    let url = URL(string: AppURLS.ip+AppURLS.imageApi+presenter.flagImageName)
-    patientCountryFlagImage.kf.setImage(with: url)
+    let com = presenter.date.components(separatedBy: .whitespaces)
+    lblDate.text = com.first
+      
+    genderAgeImageView.image = presenter.genderAgeImage
+    doctorNameLabel.text = "Dr/ \(presenter.doctorName)"
+      
+    bedNumberLabel.text = presenter.bedNumberName
+    bedNumberLabel.adjustsFontSizeToFitWidth = true
+    genderAgeImageView.image = presenter.genderAgeImage
+    lblAge.text = presenter.age
+//    let url = URL(string: AppURLS.ip+AppURLS.imageApi+presenter.flagImageName)
+//    patientCountryFlagImage.kf.setImage(with: url)
   }
 }
 

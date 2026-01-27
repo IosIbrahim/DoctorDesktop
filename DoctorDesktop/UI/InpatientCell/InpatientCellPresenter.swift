@@ -23,8 +23,10 @@ protocol InpatientCellPresenter {
   var genderAgeImage: UIImage? { get }
   var patientName: String { get }
   var doctorName: String { get }
+  var date: String { get }
   var bedNumberName: String { get }
   var flagImageName: String { get }
+   var age:String {  get }
 }
 
 class InpatientCellPresenterImpl: InpatientCellPresenter {
@@ -37,9 +39,11 @@ class InpatientCellPresenterImpl: InpatientCellPresenter {
     return getGenderAgeImage(genderAgeType: genderAgeType)
   }
   
-  var patientName: String { return inpatientPatient.name }
-  var doctorName: String { return inpatientPatient.doctorName }
+  var patientName: String { return inpatientPatient.getPatientName() }
+  var doctorName: String { return inpatientPatient.getDocName() }
+  var date:String { return  inpatientPatient.date  }
   var bedNumberName: String { return inpatientPatient.bedNumber }
+  var age:String { return inpatientPatient.age }
   var flagImageName: String { return inpatientPatient.flagImageName }
 
   init(with inpatientPatient: InpatientPatient) {

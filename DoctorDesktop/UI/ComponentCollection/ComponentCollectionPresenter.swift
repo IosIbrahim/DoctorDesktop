@@ -77,8 +77,14 @@ extension ComponentCollectionPresenterImpl {
             component.patientsCount = patientCounts.clinicalAlert
           case .consultation:
             component.patientsCount = patientCounts.cosultationFromDoctor
+          case .nicu:
+              component.patientsCount = patientCounts.inpatientNICU
+//          case .nurseTL:
+//              component.patientsCount = patientCounts.inpatientNICU
           }
-          component.type = componentType
+            component.type = componentType
+
+            
             
 //            print(component.type)
         }

@@ -16,8 +16,8 @@ enum ComponentType: Int {
   case clinicalAlert = 1020 // 1020  X
   case ICU = 2284 // 2665 X
   case operations = 70 // 70 X
-  //case nicu = 2260
-  //case nurseTL = 1478
+  case nicu = 2260
+ // case nurseTL = 1478
 }
 
 class Component: Decodable {

@@ -14,6 +14,7 @@ protocol Patient {
   var genderAge: String { get }
   var visitId: String { get }
   var placeId: String { get }
+  var date: String { get }
   var financialAccount: String { get }
   var flagImageName: String { get }
   var countyFlag: UIImage? { get set }
@@ -28,7 +29,6 @@ struct InpatientPatient: Decodable, Patient {
   private let nationalityInArabic: String
   private let ageInEnglish: String
   private let ageInArabic: String
-
   private let doctorNameInEnglish: String
   private let doctorNameInArabic: String
   private let bedNumberInEnglish: String
@@ -38,6 +38,7 @@ struct InpatientPatient: Decodable, Patient {
   var genderAge: String
   var visitId: String
   var placeId: String
+  var date:String
   var financialAccount: String
   var flagImageName: String
   var countyFlag: UIImage?
@@ -47,6 +48,13 @@ struct InpatientPatient: Decodable, Patient {
   var age: String { return ageInEnglish}
   var doctorName: String { return doctorNameInEnglish }
   var bedNumber: String { return bedNumberInEnglish }
+    func getPatientName()-> String {
+        return "\(id) - \(nameInEnglish)"
+    }
+    
+    func getDocName() -> String {
+        return doctorNameInEnglish
+    }
 
     enum CodingKeys: String, CodingKey {
     case nameInEnglish = "PATIENT_DESC_EN"
@@ -66,6 +74,7 @@ struct InpatientPatient: Decodable, Patient {
     case placeId = "PLACE_ID"
     case financialAccount = "PATFINANACCOUNT"
     case flagImageName = "PIC_PATH"
+    case date = "VISIT_START_DATE"
   }
 }
 
@@ -85,6 +94,7 @@ struct OutpatientPatient: Decodable, Patient {
   var financialAccount: String
   var flagImageName: String
   var countyFlag: UIImage?
+    var date:String
   var name: String { return nameInEnglish }
   var nationality: String { return nationalityInEnglish }
 
@@ -105,6 +115,7 @@ struct OutpatientPatient: Decodable, Patient {
     case placeId = "PLACE_ID"
     case financialAccount = "PATFINANACCOUNT"
     case flagImageName = "PIC_PATH"
+    case date = "VISIT_START_DATE"
   }
 }
 
@@ -123,6 +134,7 @@ struct EmergencyPatient: Decodable, Patient {
   var genderAge: String
   var visitId: String
   var placeId: String
+    var date:String { return visitStartDate}
   var financialAccount: String
   var flagImageName: String
   var countyFlag: UIImage?
@@ -152,6 +164,7 @@ struct EmergencyPatient: Decodable, Patient {
 }
 
 struct ClinicalPatient: Decodable, Patient {
+
   private let nameInEnglish: String
   private let nameInArabic: String
   private let nationalityInEnglish: String
@@ -162,6 +175,7 @@ struct ClinicalPatient: Decodable, Patient {
   var id: String
   var genderAge: String
   var visitId: String
+ var date:String
   var financialAccount: String
   var flagImageName: String
   var countyFlag: UIImage?
@@ -192,6 +206,7 @@ struct ClinicalPatient: Decodable, Patient {
     case scores = "PAT_SCORES"
     case panicLabResults = "PANIC_LAB_RESULT"
     case panicRadResults = "PANIC_RAD_RESULT"
+    case date = "VISIT_START_DATE"
   }
 
   enum CodingKeysRows: String, CodingKey {
@@ -213,6 +228,7 @@ extension ClinicalPatient {
     let id = try container.decode(String.self, forKey: .id)
     let genderAge = try container.decode(String.self, forKey: .genderAge)
     let visitId = try container.decode(String.self, forKey: .visitId)
+    let date = try container.decode(String.self, forKey: .date)
     let financialAccount = try container.decode(String.self, forKey: .financialAccount)
     let flagImageName = try container.decode(String.self, forKey: .flagImageName)
     var scores: [ClinicalPatientScore]?
@@ -243,7 +259,7 @@ extension ClinicalPatient {
     self.init(nameInEnglish: nameInEnglish, nameInArabic: nameInArabic,
               nationalityInEnglish: nationalityInEnglish, nationalityInArabic: nationalityInArabic,
               ageInEnglish: ageInEnglish, ageInArabic: ageInArabic,
-              id: id, genderAge: genderAge, visitId: visitId, financialAccount: financialAccount,
+              id: id, genderAge: genderAge, visitId: visitId, date:date , financialAccount: financialAccount,
               flagImageName: flagImageName, countyFlag: nil, scores: scores,
               panicLabResults: panicLabResults, panicRadResults: panicRadResults)
   }

@@ -74,8 +74,11 @@ class apis :NSObject {
                     do{
                         
                         let welcome1 = try?    JSONDecoder().decode(Welcome.self, from: data)
-                        
-                        completion(welcome1!)
+                        if let model = welcome1 {
+                            completion(model)
+                        }else {
+                            print("Error Error Error")
+                        }
                         
                     }
                     

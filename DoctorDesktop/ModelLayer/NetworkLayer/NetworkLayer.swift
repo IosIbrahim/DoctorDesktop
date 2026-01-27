@@ -91,6 +91,7 @@ extension NetworkLayerImpl {
     AlamofireAppManager.shared.request(url, parameters: params)
       .responseJSON { response in
         guard let data = response.data else { return }
+          print(response.value ?? "")
         finished(data)
     }
   }
@@ -101,6 +102,7 @@ extension NetworkLayerImpl {
     AlamofireAppManager.shared.request(url, parameters: params)
       .responseJSON { response in
         guard let data = response.data else { return }
+          print(response.value ?? "")
         finished(data)
     }
   }
@@ -113,6 +115,7 @@ extension NetworkLayerImpl {
     AlamofireAppManager.shared.request(url, parameters: params)
       .responseJSON { response in
         guard let data = response.data else { return }
+          print(response.value ?? "")
         finished(data)
     }
   }
@@ -123,6 +126,7 @@ extension NetworkLayerImpl {
         AlamofireAppManager.shared.request(url, parameters: params)
             .responseJSON { response in
                 guard let data = response.data else { return }
+                print(response.value ?? "")
                 finished(data)
         }
     }
@@ -132,6 +136,7 @@ extension NetworkLayerImpl {
     AlamofireAppManager.shared.request(url, parameters: params)
       .responseJSON { response in
         guard let data = response.data else { return }
+          print(response.value ?? "")
         finished(data)
     }
   }

@@ -61,12 +61,12 @@ protocol PatientsPresenter {
     var operationPatients : [OperationPatient] { get }
 
   func clearData()
-  func getInpatientUnits(isICU: Bool, finished: @escaping EmptyBlock)
-  func getInpatientPatients(withSelectedUnitIndex index: Int, isICU: Bool, finished: @escaping EmptyBlock)
+  func getInpatientUnits(isICU: Int, finished: @escaping EmptyBlock)
+  func getInpatientPatients(withSelectedUnitIndex index: Int, isICU: Int, finished: @escaping EmptyBlock)
   func getOutpatientClinics(withDate: Date, finished: @escaping EmptyBlock)
   func getOutpatientPatients(withDate: Date, selectedClinicIndex: Int, finished: @escaping EmptyBlock)
-    func getEmergencyPatients(withDate: Date, finished: @escaping EmptyBlock)
-    func getOperationPatients(withDate: Date, finished: @escaping EmptyBlock)
+  func getEmergencyPatients(withDate: Date, finished: @escaping EmptyBlock)
+  func getOperationPatients(withDate: Date, finished: @escaping EmptyBlock)
   func getClinicalPatients(date: Date, finished: @escaping EmptyBlock)
   func loadFlagImage(flageImageName: String, finished: @escaping ImageBlock)
 }
@@ -96,6 +96,8 @@ class PatientsPresenterImpl: PatientsPresenter {
 
   var title: String {
     switch componentType {
+    case .nicu:
+        return "NICU"
     case .inpatient:
       return "Inpatients"
     case .ICU:
@@ -117,11 +119,11 @@ class PatientsPresenterImpl: PatientsPresenter {
 }
 
 extension PatientsPresenterImpl {
-  func getInpatientUnits(isICU: Bool = false, finished: @escaping EmptyBlock) {
+  func getInpatientUnits(isICU: Int, finished: @escaping EmptyBlock) {
     let params = [
         "BRANCH_ID": user.branch ?? "",
       "USER_ID": user.userName ?? "",
-      "UNIT_ICU_FLAG": isICU ? "1" : "0",
+      "UNIT_ICU_FLAG": "\(isICU)",
       "COMPUTER_NAME": "iOS",
       "USER_OPEN_FLAG": "D"
     ]
@@ -132,12 +134,12 @@ extension PatientsPresenterImpl {
     }
   }
   
-  func getInpatientPatients(withSelectedUnitIndex index: Int, isICU: Bool = false, finished: @escaping EmptyBlock) {
+  func getInpatientPatients(withSelectedUnitIndex index: Int, isICU: Int, finished: @escaping EmptyBlock) {
     let params = [
       "BRANCH_ID": user.branch ?? "",
       "USER_ID": user.userName ?? "",
       "SER": patientUnits[index].id,
-      "UNIT_ICU_FLAG": isICU ? "1" : "0",
+      "UNIT_ICU_FLAG": "\(isICU)",
       "COMPUTER_NAME": "iOS",
       "USER_OPEN_FLAG": "D"
     ]
