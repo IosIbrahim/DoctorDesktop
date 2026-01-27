@@ -12,19 +12,23 @@ class PatientHistoryFiltrationCell: UICollectionViewCell {
   @IBOutlet weak var contentImageView: UIImageView!
   @IBOutlet weak var iconImageView: UIImageView!
   @IBOutlet weak var titleLabel: UILabel!
-
-  var presenter: PatientHistoryFiltrationCellPresenter!
+    @IBOutlet weak var pickerImage: UIView!
+    
+    @IBOutlet weak var pickerShadow: UIView!
+    var presenter: PatientHistoryFiltrationCellPresenter!
 
   override func awakeFromNib() {
     super.awakeFromNib()
+      pickerShadow.makeShadow(color: .lightGray, alpha: 0.2, radius: 8)
   }
 }
 
 //MARK: - Configure
 extension PatientHistoryFiltrationCell {
-  func configure(with presenter: PatientHistoryFiltrationCellPresenter) {
+    func configure(with presenter: PatientHistoryFiltrationCellPresenter,hideImage:Bool = true) {
     self.presenter = presenter
-    contentImageView.image = #imageLiteral(resourceName: "visit_content_not_active")
+ //   contentImageView.image = #imageLiteral(resourceName: "visit_content_not_active")
+    contentImageView.image = UIImage(named: "visit_content_not_active")
     iconImageView.image = presenter.patientHistoryFiltrationType.inactiveIconImage
     switch presenter.patientHistoryFiltrationType {
     case let .currentVisit(title): titleLabel.text = title
@@ -32,6 +36,7 @@ extension PatientHistoryFiltrationCell {
     case let .currentSpeciality(title): titleLabel.text = title
     case let .currentDoctor(title): titleLabel.text = title
     }
+        pickerImage.isHidden = hideImage
   }
 }
 
@@ -73,4 +78,15 @@ extension PatientHistoryFiltrationCell {
     cell.configure(with: presenter)
     return cell
   }
+}
+
+
+extension UIView {
+    func makeShadow(color: UIColor, alpha: Float, radius: CGFloat) {
+        self.layer.shadowColor = color.cgColor
+        self.layer.shadowOpacity = alpha
+        self.layer.shadowOffset = CGSize.zero
+        self.layer.shadowRadius = radius
+        layer.shadowOffset = CGSize(width: 0, height: radius * UIScreen.main.bounds.width / 360)
+    }
 }

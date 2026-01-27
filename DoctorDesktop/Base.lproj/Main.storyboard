@@ -764,7 +764,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="ZiM-KN-qN2">
-                                <rect key="frame" x="0.0" y="207" width="375" height="460"/>
+                                <rect key="frame" x="0.0" y="142" width="375" height="525"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="vEl-zn-CZm">
                                     <size key="itemSize" width="50" height="50"/>
@@ -779,10 +779,10 @@
                                 </connections>
                             </collectionView>
                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="TL9-AN-Jiq">
-                                <rect key="frame" x="0.0" y="74" width="375" height="125"/>
+                                <rect key="frame" x="0.0" y="74" width="375" height="60"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <constraints>
-                                    <constraint firstAttribute="height" constant="125" id="aMo-Pe-OHw"/>
+                                    <constraint firstAttribute="height" constant="60" id="aMo-Pe-OHw"/>
                                 </constraints>
                                 <collectionViewFlowLayout key="collectionViewLayout" scrollDirection="horizontal" minimumLineSpacing="10" minimumInteritemSpacing="10" id="OD2-32-852">
                                     <size key="itemSize" width="50" height="50"/>

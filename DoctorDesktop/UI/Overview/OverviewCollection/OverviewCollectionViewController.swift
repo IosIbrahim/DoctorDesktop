@@ -111,7 +111,7 @@ extension OverviewCollectionViewController: UICollectionViewDelegate {
 extension OverviewCollectionViewController: UICollectionViewDelegateFlowLayout {
   func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
     if collectionView == historyCollectionView {
-      return CGSize(width: (historyCollectionView.bounds.width / 4) - 10, height: 125)
+      return CGSize(width: (historyCollectionView.bounds.width / 4) - 10, height: 45)
     } else {
       return CGSize(width: (summaryCollectionView.bounds.width / 3) - 10,
                     height: (summaryCollectionView.bounds.width / 3) - 10)

@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="13771" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
-    <device id="retina4_7" orientation="portrait">
-        <adaptation id="fullscreen"/>
-    </device>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="24506" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina4_7" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13772"/>
-        <capability name="Constraints with non-1.0 multipliers" minToolsVersion="5.1"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24504"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <customFonts key="customFonts">
@@ -25,45 +23,74 @@
                 <rect key="frame" x="0.0" y="0.0" width="100" height="125"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
-                    <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="visit_content_not_active" translatesAutoresizingMaskIntoConstraints="NO" id="Dew-fR-xrv">
-                        <rect key="frame" x="0.0" y="0.0" width="100" height="101"/>
-                    </imageView>
-                    <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="visit_icon_no_activ" translatesAutoresizingMaskIntoConstraints="NO" id="JtX-BV-li6">
-                        <rect key="frame" x="25.5" y="25.5" width="50" height="50.5"/>
-                    </imageView>
-                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Current Visit" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Mrs-BH-qUu">
-                        <rect key="frame" x="8" y="112" width="84" height="13"/>
-                        <fontDescription key="fontDescription" name="Roboto-Regular" family="Roboto" pointSize="11"/>
-                        <nil key="textColor"/>
-                        <nil key="highlightedColor"/>
-                    </label>
+                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Fcf-iI-1o7">
+                        <rect key="frame" x="2" y="2" width="96" height="121"/>
+                        <subviews>
+                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="k4F-Yf-soG">
+                                <rect key="frame" x="3" y="3" width="90" height="115"/>
+                                <subviews>
+                                    <view hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="R8L-m1-mLL">
+                                        <rect key="frame" x="0.0" y="0.0" width="90" height="0.0"/>
+                                        <subviews>
+                                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="visit_content_not_active" translatesAutoresizingMaskIntoConstraints="NO" id="Dew-fR-xrv">
+                                                <rect key="frame" x="0.0" y="0.0" width="90" height="0.0"/>
+                                            </imageView>
+                                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="visit_icon_no_activ" translatesAutoresizingMaskIntoConstraints="NO" id="JtX-BV-li6">
+                                                <rect key="frame" x="21.5" y="-22" width="47" height="44"/>
+                                            </imageView>
+                                        </subviews>
+                                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <constraints>
+                                            <constraint firstAttribute="trailing" secondItem="Dew-fR-xrv" secondAttribute="trailing" id="1Wd-EL-guG"/>
+                                            <constraint firstItem="JtX-BV-li6" firstAttribute="centerX" secondItem="R8L-m1-mLL" secondAttribute="centerX" id="2RK-7q-BCH"/>
+                                            <constraint firstItem="JtX-BV-li6" firstAttribute="centerY" secondItem="R8L-m1-mLL" secondAttribute="centerY" id="Cml-Ee-oRk"/>
+                                            <constraint firstAttribute="bottom" secondItem="Dew-fR-xrv" secondAttribute="bottom" id="GBt-cF-OFY"/>
+                                            <constraint firstItem="Dew-fR-xrv" firstAttribute="top" secondItem="R8L-m1-mLL" secondAttribute="top" id="wM3-ba-SzO"/>
+                                            <constraint firstItem="Dew-fR-xrv" firstAttribute="leading" secondItem="R8L-m1-mLL" secondAttribute="leading" id="wgs-g0-siw"/>
+                                        </constraints>
+                                    </view>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" text="Current Visit" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Mrs-BH-qUu">
+                                        <rect key="frame" x="0.0" y="0.0" width="90" height="115"/>
+                                        <fontDescription key="fontDescription" name="Roboto-Regular" family="Roboto" pointSize="11"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                </subviews>
+                            </stackView>
+                        </subviews>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstAttribute="trailing" secondItem="k4F-Yf-soG" secondAttribute="trailing" constant="3" id="4p7-JN-lYR"/>
+                            <constraint firstItem="k4F-Yf-soG" firstAttribute="leading" secondItem="Fcf-iI-1o7" secondAttribute="leading" constant="3" id="mLZ-Gi-dAy"/>
+                            <constraint firstAttribute="bottom" secondItem="k4F-Yf-soG" secondAttribute="bottom" constant="3" id="szG-Sf-Saq"/>
+                            <constraint firstItem="k4F-Yf-soG" firstAttribute="top" secondItem="Fcf-iI-1o7" secondAttribute="top" constant="3" id="yiv-NU-56x"/>
+                        </constraints>
+                    </view>
                 </subviews>
             </view>
-            <constraints>
-                <constraint firstItem="Dew-fR-xrv" firstAttribute="centerX" secondItem="dtG-iE-UOS" secondAttribute="centerX" id="2KV-FU-4ng"/>
-                <constraint firstItem="Mrs-BH-qUu" firstAttribute="leading" secondItem="dtG-iE-UOS" secondAttribute="leading" constant="8" id="Kjy-vK-pv9"/>
-                <constraint firstItem="JtX-BV-li6" firstAttribute="width" secondItem="Dew-fR-xrv" secondAttribute="width" multiplier="0.5" id="NBw-nM-U51"/>
-                <constraint firstAttribute="trailing" secondItem="Mrs-BH-qUu" secondAttribute="trailing" constant="8" id="TV8-hi-eQu"/>
-                <constraint firstAttribute="trailing" secondItem="Dew-fR-xrv" secondAttribute="trailing" id="UPW-ky-nsP"/>
-                <constraint firstAttribute="bottom" secondItem="Mrs-BH-qUu" secondAttribute="bottom" id="VgK-QB-qmb"/>
-                <constraint firstItem="Dew-fR-xrv" firstAttribute="leading" secondItem="dtG-iE-UOS" secondAttribute="leading" id="eft-1I-Vnn"/>
-                <constraint firstItem="Dew-fR-xrv" firstAttribute="top" secondItem="dtG-iE-UOS" secondAttribute="top" id="fcd-pN-EZU"/>
-                <constraint firstItem="JtX-BV-li6" firstAttribute="centerX" secondItem="Dew-fR-xrv" secondAttribute="centerX" id="fx7-ux-yjk"/>
-                <constraint firstItem="JtX-BV-li6" firstAttribute="centerY" secondItem="Dew-fR-xrv" secondAttribute="centerY" id="qwx-12-gVI"/>
-                <constraint firstItem="JtX-BV-li6" firstAttribute="height" secondItem="Dew-fR-xrv" secondAttribute="height" multiplier="0.5" id="sCY-yJ-WOY"/>
-            </constraints>
             <viewLayoutGuide key="safeArea" id="s3P-zQ-clE"/>
+            <constraints>
+                <constraint firstAttribute="bottom" secondItem="Fcf-iI-1o7" secondAttribute="bottom" constant="2" id="JDQ-OD-89B"/>
+                <constraint firstItem="Fcf-iI-1o7" firstAttribute="leading" secondItem="dtG-iE-UOS" secondAttribute="leading" constant="2" id="fF2-kK-kJk"/>
+                <constraint firstItem="Fcf-iI-1o7" firstAttribute="top" secondItem="dtG-iE-UOS" secondAttribute="top" constant="2" id="pPz-gN-f5e"/>
+                <constraint firstAttribute="trailing" secondItem="Fcf-iI-1o7" secondAttribute="trailing" constant="2" id="ykZ-kl-Msu"/>
+            </constraints>
             <size key="customSize" width="100" height="127"/>
             <connections>
                 <outlet property="contentImageView" destination="Dew-fR-xrv" id="dXN-NB-5yh"/>
                 <outlet property="iconImageView" destination="JtX-BV-li6" id="oAG-Gj-VBK"/>
+                <outlet property="pickerImage" destination="R8L-m1-mLL" id="eF3-dh-Jh5"/>
+                <outlet property="pickerShadow" destination="Fcf-iI-1o7" id="KN2-RR-kRh"/>
                 <outlet property="titleLabel" destination="Mrs-BH-qUu" id="8gE-Xm-fqJ"/>
             </connections>
-            <point key="canvasLocation" x="-282" y="128"/>
+            <point key="canvasLocation" x="-451.19999999999999" y="115.14242878560721"/>
         </collectionViewCell>
     </objects>
     <resources>
         <image name="visit_content_not_active" width="94" height="101"/>
         <image name="visit_icon_no_activ" width="47" height="44"/>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
     </resources>
 </document>
