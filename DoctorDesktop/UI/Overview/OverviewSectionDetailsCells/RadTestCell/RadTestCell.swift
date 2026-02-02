@@ -11,7 +11,8 @@ import UIKit
 class RadTestCell: UITableViewCell {
   var presenter: RadTestCellPresenter!
 
-  @IBOutlet weak var serviceName: UILabel!
+    @IBOutlet weak var pickerName: UIView!
+    @IBOutlet weak var serviceName: UILabel!
   @IBOutlet weak var status: UILabel!
   @IBOutlet weak var result: UILabel!
   @IBOutlet weak var date: UILabel!
@@ -23,6 +24,7 @@ class RadTestCell: UITableViewCell {
     self.status.text = ""
     self.result.text = ""
     self.date.text = ""
+    pickerName.layer.cornerRadius = 5
   }
 }
 

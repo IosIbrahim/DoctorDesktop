@@ -113,8 +113,8 @@ extension OverviewCollectionViewController: UICollectionViewDelegateFlowLayout {
     if collectionView == historyCollectionView {
       return CGSize(width: (historyCollectionView.bounds.width / 4) - 10, height: 45)
     } else {
-      return CGSize(width: (summaryCollectionView.bounds.width / 3) - 10,
-                    height: (summaryCollectionView.bounds.width / 3) - 10)
+      return CGSize(width: (summaryCollectionView.bounds.width / 4) - 10,
+                    height: (summaryCollectionView.bounds.width / 4))
     }
   }
 }

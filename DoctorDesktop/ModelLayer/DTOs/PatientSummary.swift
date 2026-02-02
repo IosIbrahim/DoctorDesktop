@@ -35,6 +35,46 @@ struct PatientSummary {
   let vitalSigns: [VitalSign]?
 }
 
+struct PatientResponseModel:Codable {
+    let root:PatientRootModel?
+    enum CodingKeys: String, CodingKey {
+        case root = "Root"
+    }
+}
+struct PatientRootModel:Codable {
+    let patient:PatientModel?
+    let types:PresscTypeModel?
+    enum CodingKeys: String, CodingKey {
+        case patient = "PATIENT"
+        case types = "PRESC_TYPE"
+    }
+}
+
+struct PatientModel:Codable {
+    let root:String?
+    enum CodingKeys: String, CodingKey {
+        case root = "REQ_DATA"
+    }
+}
+
+struct PresscTypeModel:Codable {
+    let types:[PresscTypeRowModel]?
+    enum CodingKeys: String, CodingKey {
+        case types = "PRESC_TYPE_ROW"
+    }
+}
+
+struct PresscTypeRowModel:Codable {
+    let id:String?
+    let nameEn:String?
+    let nameAr:String?
+    enum CodingKeys: String, CodingKey {
+        case id = "ID"
+        case nameEn = "NAME_EN"
+        case nameAr = "NAME_AR"
+    }
+}
+
 struct AllergyFindingComplaintHistory: Decodable {
   let englishDescription: String?
   let arabicDescription: String?
@@ -155,10 +195,13 @@ struct OperationCatherEndoscopy: Decodable {
   }
 }
 
+
 struct Rad: Decodable {
   let accessNumber: String
-  let requestDate: Date
+  let requestDate: String
   let id: String
+  let reqId:String
+  let imgActive:String
   let arabicName: String
   let englishName: String
   let englishStatus: String
@@ -170,12 +213,14 @@ struct Rad: Decodable {
     case accessNumber = "ACCESSION_NO"
     case requestDate = "REQ_DATE"
     case id = "SERVICE_ID"
+    case reqId = "REQ_ID"
     case arabicName = "SRV_AR_NAME"
     case englishName = "SRV_EN_NAME"
     case englishStatus = "SERV_STATUS_NAME_EN"
     case arabicStatus = "SERV_STATUS_NAME_AR"
     case arabicEndResult = "END_RESULT_NAME_AR"
     case englishEndResult = "END_RESULT_NAME_EN"
+    case imgActive = "PACS_IMG_ACTIVATE"
   }
 }
 

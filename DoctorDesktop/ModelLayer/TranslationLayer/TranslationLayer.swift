@@ -243,20 +243,12 @@ extension TranslationLayerImpl {
 
 extension TranslationLayerImpl{
     func getMedictionsDTOsFromJson(_ data: Data) -> medictions {
-        
-        
-        
-        
         guard let json = String(data: data, encoding: .utf8), json.contains("VISIT_MEDICATIONS_ROW") else { return []
-            
-            
         }
         let keyPath = "Root.PATIENT.PATIENT_ROW.VISIT_MEDICATIONS.VISIT_MEDICATIONS_ROW"
         guard let Medications = try? medictions (data: data, keyPath: keyPath) else {
             if let medication = try? Medication (data: data, keyPath: keyPath) {
                 return [medication]
-                print("sadasdasdasdasd")
-                print([medication])
             } else {
                 
                 return []
@@ -265,6 +257,21 @@ extension TranslationLayerImpl{
         return Medications
     }
     
+    
+    func getRadsFromJson(_ data: Data) -> [Rad] {
+        guard let json = String(data: data, encoding: .utf8), json.contains("VISIT_MEDICATIONS_ROW") else { return []
+        }
+        let keyPath = "Root.PATIENT.PATIENT_ROW.VISIT_MEDICATIONS.VISIT_MEDICATIONS_ROW"
+        guard let rads = try? [Rad] (data: data, keyPath: keyPath) else {
+            if let rad = try? Rad (data: data, keyPath: keyPath) {
+                return [rad]
+            } else {
+                
+                return []
+            }
+        }
+        return rads
+    }
 }
 
 extension TranslationLayerImpl {
@@ -280,26 +287,7 @@ extension TranslationLayerImpl {
         } catch let error as NSError {
             print("Failed to load: \(error.localizedDescription)")
         }
-        
-        //  let com =  try! Complaint(data: data, keyPath: "Root.PATIENT.PATIENT_ROW.COMPLAINS.COMPLAINS_ROW")
-        
-        
-        //    Complaint
-        
-        //    print(d)
-        
-//        let components21 = try? Complaint (data: data, keyPath: "Root.PATIENT.PATIENT_ROW.COMPLAINS.COMPLAINS_ROW")
-//
-//        
-//        print(components21)
-        
-        print("Root.PATIENT.PATIENT_ROW.COMPLAINS.COMPLAINS_ROW")
-        //  print(outpatientPatients)
-        
-        
-//        print(getMedictionsDTOsFromJson(data))
-        
-        
+
         let complaints = try! [Complaint].decode(data, keyPath: "Root.PATIENT.PATIENT_ROW.COMPLAINS.COMPLAINS_ROW",jsonDecoder:jsonDecoder)
         print("com")
         print(complaints)
@@ -312,7 +300,6 @@ extension TranslationLayerImpl {
         let allergies = try! [Allergy].decode(data, keyPath: "Root.PATIENT.PATIENT_ROW.ALLERGY.ALLERGY_ROW")
         print(allergies)
         let medications = getMedictionsDTOsFromJson(data)
-        //     let medications = try? Complaint (data: data, keyPath: "Root.PATIENT.PATIENT_ROW.COMPLAINS.COMPLAINS_ROW")
         print(medications)
         let scorings = try! [Scoring].decode(data, keyPath: "Root.PATIENT.PATIENT_ROW.SCORING.SCORING_ROW")
         print(scorings)

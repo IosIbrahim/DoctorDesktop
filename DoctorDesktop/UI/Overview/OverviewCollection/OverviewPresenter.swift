@@ -143,7 +143,7 @@ class OverviewPresenterImpl: OverviewPresenter {
     patientSummaryCounts.append(patientSummary?.nurseRemarks?.count ?? 0)
     patientSummaryCounts.append(patientSummary?.medications?.count ?? 0)
     patientSummaryCounts.append(patientSummary?.diagnosis?.count ?? 0)
-    patientSummaryCounts.append(patientSummary?.allergies?.count ?? 0)
+  //  patientSummaryCounts.append(patientSummary?.allergies?.count ?? 0)
     patientSummaryCounts.append(patientSummary?.labs?.count ?? 0)
     patientSummaryCounts.append(patientSummary?.rads?.count ?? 0)
     patientSummaryCounts.append(patientSummary?.scorings?.count ?? 0)

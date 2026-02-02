@@ -24,7 +24,8 @@ class RadTestCellPresenterImpl: RadTestCellPresenter {
   var date: String {
     let dateFormatter = DateFormatter()
     dateFormatter.dateFormat = "dd/MM/yyy"
-    return dateFormatter.string(from: radTest.requestDate)
+//    return dateFormatter.string(from: radTest.requestDate)
+      return radTest.requestDate.components(separatedBy: .whitespaces).first ?? ""
   }
 
   init(with radTest: Rad) {

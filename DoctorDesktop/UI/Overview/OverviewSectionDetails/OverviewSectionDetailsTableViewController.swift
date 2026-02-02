@@ -29,7 +29,7 @@ class OverviewSectionDetailsViewController: UIViewController {
 
   struct Constant {
     static let headerHeight: CGFloat = 40
-    static let rowHeight: CGFloat = 50
+    static let rowHeight: CGFloat = 80
   }
 
   override func viewDidLoad() {
@@ -95,8 +95,10 @@ extension OverviewSectionDetailsViewController: UITableViewDataSource {
     case .medication: return presenter.patientSummary.medications?.count ?? 0
     case .diagnosis: return presenter.patientSummary.diagnosis?.count ?? 0
     //case .allergies: return presenter.patientSummary.allergies?.count ?? 0
-    case .labExamination: return presenter.patientSummary.labs?.count ?? 0
-    case .radTest: return presenter.patientSummary.rads?.count ?? 0
+    case .labExamination:
+        return presenter.patientSummary.labs?.count ?? 0
+    case .radTest:
+        return presenter.patientSummary.rads?.count ?? 0
     case .scoring: return presenter.patientSummary.scorings?.count ?? 0
     case .finding: return presenter.patientSummary.findings?.count ?? 0
     case .complaints: return presenter.patientSummary.complaints?.count ?? 0
@@ -119,7 +121,8 @@ extension OverviewSectionDetailsViewController: UITableViewDataSource {
     case .finding: return allergyFindingComplaintHistoryCellMaker(tableView, indexPath, presenter.patientSummary.findings![indexPath.row])
     case .complaints:  return allergyFindingComplaintHistoryCellMaker(tableView, indexPath, presenter.patientSummary.findings![indexPath.row])
     case .history: return allergyFindingComplaintHistoryCellMaker(tableView, indexPath, presenter.patientSummary.history![indexPath.row])
-    case .labExamination: break
+    case .labExamination:
+        break
     case .radTest:
       let radTestCell = radTestCellMaker(tableView, indexPath, presenter.patientSummary.rads![indexPath.row])
       radTestCell.packsHistory.tag = indexPath.row
@@ -146,7 +149,8 @@ extension OverviewSectionDetailsViewController: UITableViewDelegate {
     case .diagnosis: return DiagnosisCell.dequeueHeader(from: tableView)
     case .finding, .complaints, .history: return AllergyFindingComplaintHistoryCell.dequeueHeader(from: tableView)
     case .labExamination: break
-    case .radTest: return RadTestCell.dequeueHeader(from: tableView)
+  //  case .radTest: return RadTestCell.dequeueHeader(from: tableView)
+    case .radTest: return nil
     case .scoring: return ScoringCell.dequeueHeader(from: tableView)
     case .operation, .catheterization, .endoscopy: return OperationCatheterizationEndoscopyCell.dequeueHeader(from: tableView)
     //case .clinicServices: return ClinicServiceCell.dequeueHeader(from: tableView)
@@ -156,6 +160,9 @@ extension OverviewSectionDetailsViewController: UITableViewDelegate {
   }
 
   func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+      if presenter.overviewSection == .radTest ||   presenter.overviewSection == .labExamination {
+          return .zero
+      }
     return OverviewSectionDetailsViewController.Constant.headerHeight
   }
 
