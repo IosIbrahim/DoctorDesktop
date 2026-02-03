@@ -100,10 +100,9 @@ extension OverviewCollectionViewController: UICollectionViewDelegate {
         self.summaryCollectionView.reloadData()
       }
     } else {
-      guard let overviewSection = OverviewSection(rawValue: indexPath.row), let patientSummary = presenter.patientSummary else { return }
-      navigationCoordinator?.next(arguments: ["overviewSection": overviewSection,
-                                              "patientSummary": patientSummary,
-                                              "user": presenter.user])
+      guard let overviewSection = OverviewSection(rawValue: indexPath.row) else { return }
+        presenter.getArguments(overviewSection)
+        navigationCoordinator?.next(arguments: presenter.arguments)
     }
   }
 }

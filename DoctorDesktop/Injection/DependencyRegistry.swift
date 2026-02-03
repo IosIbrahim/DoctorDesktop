@@ -15,7 +15,7 @@ protocol DependencyRegistry {
   func makeOrderServiceList(with patient: Patient, serviceCategory: ServiceCategory, templateType: TemplateType, generalParams: GeneralParams, user: User) -> OrderServiceList
   func makeOrderCheckoutList(with serviceDetails: ServicesDetails, templateType: TemplateType, user: User, labOrderServiceListPresenter: OrderServiceListPresenter?, patient: Patient, requestDoctor: String) -> OrderCheckoutList
   func makeOverviewCollectionViewController(with patient: Patient, user: User) -> OverviewCollectionViewController
-  func makeOverviewSectionDetailsViewController(overviewSection: OverviewSection, patientSummary: PatientSummary, user: User) -> OverviewSectionDetailsViewController
+    func makeOverviewSectionDetailsViewController(overviewSection: OverviewSection, patientSummary: PatientSummary, user: User,pat:Patient) -> OverviewSectionDetailsViewController
   func makeWebViewerViewController(url: URL) -> WebViewerViewController
   func makeEmergencyTriageViewController(with patient: EmergencyPatient, user: User) -> EmergencyTriageViewController
 
@@ -428,8 +428,8 @@ extension DependencyRegistryImpl {
     }
   }
 
-  func makeOverviewSectionDetailsViewController(overviewSection: OverviewSection, patientSummary: PatientSummary, user: User) -> OverviewSectionDetailsViewController {
-    return container.resolve(OverviewSectionDetailsViewController.self, arguments: overviewSection, patientSummary, user)!
+    func makeOverviewSectionDetailsViewController(overviewSection: OverviewSection, patientSummary: PatientSummary, user: User,pat:Patient) -> OverviewSectionDetailsViewController {
+        return container.resolve(OverviewSectionDetailsViewController.self, arguments: overviewSection, patientSummary, user)!
   }
   func makeVitalSignCell(for tableView: UITableView, at indexPath: IndexPath, vitalSign: VitalSign) -> VitalSignCell {
     let presenter = container.resolve(VitalSignCellPresenter.self, argument: vitalSign)!

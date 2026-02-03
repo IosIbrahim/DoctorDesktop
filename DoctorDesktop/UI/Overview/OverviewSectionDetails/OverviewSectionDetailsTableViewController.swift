@@ -9,13 +9,12 @@
 import UIKit
 
 class OverviewSectionDetailsViewController: UIViewController {
-  @IBOutlet weak var tableView: UITableView!
-
+    @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var plusButton: UIButton!
     
     
     
-    var presenter: OverviewSectionDetailsPresenter!
+  var presenter: OverviewSectionDetailsPresenter!
   private weak var navigationCoordinator: NavigationCoordinator?
   private var vitalSignCellMaker: DependencyRegistry.VitalSignCellMaker!
   private var medicationCellMaker: DependencyRegistry.MedicationCellMaker!
@@ -31,7 +30,8 @@ class OverviewSectionDetailsViewController: UIViewController {
     static let headerHeight: CGFloat = 40
     static let rowHeight: CGFloat = 80
   }
-
+    var patient:Patient!
+    
   override func viewDidLoad() {
     super.viewDidLoad()
     plusButton.layer.cornerRadius = 25
@@ -56,9 +56,26 @@ class OverviewSectionDetailsViewController: UIViewController {
     
     @IBAction func addOntap(_ sender: Any) {
       //  navigationController?.pushViewController(patientlis, animated: <#T##Bool#>)
-        let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        let vc = storyboard.instantiateViewController(withIdentifier: "prescriptionListVC")
-        navigationController?.pushViewController(vc, animated: true)
+       // let storyboard = UIStoryboard(name: "Main", bundle: nil)
+      //  let vc = storyboard.instantiateViewController(withIdentifier: "prescriptionListVC")
+     //   navigationController?.pushViewController(vc, animated: true)
+        navigationCoordinator?.setNavigationStatus(.atPatientList)
+        var template = TemplateType.labOrder
+        if presenter.overviewSection == .labExamination {
+            let args = ["viewType":"order",
+                        "templateType":template,
+                        "patient":patient,
+                        "user":presenter.user] as [String : Any]
+            navigationCoordinator?.next(arguments: args)
+        }else if presenter.overviewSection == .radTest {
+            template = .radOrder
+            let args = ["viewType":"order",
+                        "patient":patient,
+                        "templateType":template,
+                        "user":presenter.user] as [String : Any]
+            navigationCoordinator?.next(arguments: args)
+        }
+        
     }
     
 
@@ -94,7 +111,6 @@ extension OverviewSectionDetailsViewController: UITableViewDataSource {
     case .progressNotes: return presenter.patientSummary.nurseRemarks?.count ?? 0
     case .medication: return presenter.patientSummary.medications?.count ?? 0
     case .diagnosis: return presenter.patientSummary.diagnosis?.count ?? 0
-    //case .allergies: return presenter.patientSummary.allergies?.count ?? 0
     case .labExamination:
         return presenter.patientSummary.labs?.count ?? 0
     case .radTest:
@@ -106,7 +122,6 @@ extension OverviewSectionDetailsViewController: UITableViewDataSource {
     case .operation: return presenter.patientSummary.operations?.count ?? 0
     case .catheterization: return presenter.patientSummary.catheters?.count ?? 0
     case .endoscopy: return presenter.patientSummary.endoscopies?.count ?? 0
-    //case .clinicServices: return presenter.patientSummary.clinicServices?.count ?? 0
     case .dietary: return presenter.patientSummary.dietaries?.count ?? 0
     }
   }

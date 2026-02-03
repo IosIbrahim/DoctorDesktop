@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="24506" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24504"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" id="gTV-IL-0wX" customClass="InnerServiceCell" customModule="DoctorDesktop" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="275" height="114"/>
+            <autoresizingMask key="autoresizingMask"/>
+            <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
+                <rect key="frame" x="0.0" y="0.0" width="275" height="114"/>
+                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                <subviews>
+                    <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="hyZ-sZ-ElK">
+                        <rect key="frame" x="5" y="5" width="265" height="104"/>
+                        <subviews>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="kfr-3R-AJd" customClass="ServicePicker" customModule="DoctorDesktop" customModuleProvider="target">
+                                <rect key="frame" x="0.0" y="0.0" width="265" height="104"/>
+                                <subviews>
+                                    <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Tt5-HO-JAi">
+                                        <rect key="frame" x="8" y="5" width="249" height="94"/>
+                                        <subviews>
+                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="FVs-fi-3Ro">
+                                                <rect key="frame" x="0.0" y="0.0" width="45" height="94"/>
+                                                <constraints>
+                                                    <constraint firstAttribute="width" constant="45" id="pPb-wq-xc4"/>
+                                                </constraints>
+                                                <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                                <state key="normal" image="rightIconn"/>
+                                            </button>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="uNd-g0-h6H">
+                                                <rect key="frame" x="45" y="0.0" width="204" height="94"/>
+                                                <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
+                                                <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                <nil key="highlightedColor"/>
+                                            </label>
+                                        </subviews>
+                                    </stackView>
+                                </subviews>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                <constraints>
+                                    <constraint firstItem="Tt5-HO-JAi" firstAttribute="top" secondItem="kfr-3R-AJd" secondAttribute="top" constant="5" id="B1w-xg-sDJ"/>
+                                    <constraint firstAttribute="bottom" secondItem="Tt5-HO-JAi" secondAttribute="bottom" constant="5" id="C9n-Qa-mKO"/>
+                                    <constraint firstAttribute="trailing" secondItem="Tt5-HO-JAi" secondAttribute="trailing" constant="8" id="OJk-2Q-ZlG"/>
+                                    <constraint firstItem="Tt5-HO-JAi" firstAttribute="leading" secondItem="kfr-3R-AJd" secondAttribute="leading" constant="8" id="Tae-2D-tyc"/>
+                                </constraints>
+                            </view>
+                        </subviews>
+                    </stackView>
+                </subviews>
+            </view>
+            <viewLayoutGuide key="safeArea" id="ZTg-uK-7eu"/>
+            <constraints>
+                <constraint firstAttribute="bottom" secondItem="hyZ-sZ-ElK" secondAttribute="bottom" constant="5" id="14L-eq-ahi"/>
+                <constraint firstItem="hyZ-sZ-ElK" firstAttribute="leading" secondItem="gTV-IL-0wX" secondAttribute="leading" constant="5" id="4cD-Qb-PwB"/>
+                <constraint firstAttribute="trailing" secondItem="hyZ-sZ-ElK" secondAttribute="trailing" constant="5" id="jbI-hm-aGV"/>
+                <constraint firstItem="hyZ-sZ-ElK" firstAttribute="top" secondItem="gTV-IL-0wX" secondAttribute="top" constant="5" id="vbJ-Zc-HF3"/>
+            </constraints>
+            <size key="customSize" width="275" height="114"/>
+            <connections>
+                <outlet property="btnSelected" destination="FVs-fi-3Ro" id="ipi-4X-wUu"/>
+                <outlet property="lblService" destination="uNd-g0-h6H" id="RJp-OY-lPo"/>
+            </connections>
+            <point key="canvasLocation" x="101.5267175572519" y="108.45070422535211"/>
+        </collectionViewCell>
+    </objects>
+    <resources>
+        <image name="rightIconn" width="225" height="225"/>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+    </resources>
+</document>

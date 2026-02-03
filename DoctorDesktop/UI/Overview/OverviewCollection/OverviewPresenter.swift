@@ -100,6 +100,7 @@ protocol OverviewPresenter {
   var currentVisitIds: [String] { get }
   var currentDoctorVisitsIds: [String] { get }
   var currentSpecialityVisitsIds: [String] { get }
+    var arguments: Dictionary<String, Any> { get }
 
   var patientHistoryActiveIconImages: [UIImage] { get }
   var patientHistoryNotActiveIconImages: [UIImage] { get }
@@ -110,6 +111,7 @@ protocol OverviewPresenter {
   var user: User { get }
 
   func getPatientHistory(finished: @escaping EmptyBlock)
+    func getArguments(_ overView:OverviewSection)
   func getPatientSummary(filtrationType: PatientHistoryFiltrationType, finished: @escaping EmptyBlock)
 }
 
@@ -117,6 +119,7 @@ class OverviewPresenterImpl: OverviewPresenter {
   private var modelLayer: ModelLayer
   let patient: Patient
   let user: User
+    var arguments:Dictionary<String, Any>
   var patientHistory: PatientHistory?
   var patientSummary: PatientSummary?
 
@@ -124,6 +127,7 @@ class OverviewPresenterImpl: OverviewPresenter {
     self.modelLayer = modelLayer
     self.patient = patient
     self.user = user
+      self.arguments = .init()
   }
 
   var patientHistoryActiveIconImages = [#imageLiteral(resourceName: "visit_icon"), #imageLiteral(resourceName: "allvisit"), #imageLiteral(resourceName: "lab"), #imageLiteral(resourceName: "dr_icon")]
@@ -208,7 +212,12 @@ class OverviewPresenterImpl: OverviewPresenter {
       finished()
     }
   }
-
+    func getArguments(_ overView: OverviewSection)  {
+        arguments =  ["overviewSection": overView,
+                "patientSummary": patientSummary ?? [],
+                "patient":patient,
+                "user": user]
+    }
   func getPatientSummary(filtrationType: PatientHistoryFiltrationType, finished: @escaping EmptyBlock) {
     var params = [
       "COMPUTER_NAME": "iOS",

@@ -36,7 +36,7 @@ class OrderServiceListPresenterImpl: OrderServiceListPresenter {
   let generalParams: GeneralParams
   var servicesDetails: ServicesDetails?
   
-  var services: [Service] { return serviceCategory.services }
+  var services: [Service] { return serviceCategory.services ?? [] }
   var categoryName: String { return serviceCategory.name }
   var categoryImage: UIImage {
     guard let typeText = serviceCategory.type, let type = ServiceCategoryType(rawValue: typeText) else { return #imageLiteral(resourceName: "body_fluid") }

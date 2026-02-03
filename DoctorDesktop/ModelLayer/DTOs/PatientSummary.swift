@@ -256,26 +256,28 @@ struct Dietary: Decodable {
   }
 }
 
+
 struct Lab: Decodable {
   let serviceCategoryArabicName: String
   let serviceCategoryEnglishName: String
-  let notSeenCount: String
-  let abnormalCount: String
-  let panicCount: String
-  let normalCount: String
-  let pendingCount: String
+  let statusAr: String
+  let statusEn: String
+  let reqId: String
+  let id: String
+  let branchId: String
+  let reqDate:String
   let labServices: [LabService]?
 
   enum CodingKeys: String, CodingKey {
-    case serviceCategoryArabicName = "SRV_AR_NAME"
-    case serviceCategoryEnglishName = "SRV_EN_NAME"
-    case notSeenCount = "NOTSEEN_COUNT"
-    case abnormalCount = "ABNORMAL_COUNT"
-    case panicCount = "PANIC_COUNT"
-    case normalCount = "NORMAL_COUNT"
-    case pendingCount = "PENDING_COUNT"
-    case labServices = "LAB_SERVICES"
-    case labServicesRow = "LAB_SERVICES_ROW"
+    case serviceCategoryArabicName = "SERVICE_NAME_AR"
+    case serviceCategoryEnglishName = "SERVICE_NAME_EN"
+    case statusAr = "STATUS_NAME_AR"
+    case statusEn = "STATUS_NAME_EN"
+    case reqId = "REQ_ID"
+    case id = "SERVICE_ID"
+    case branchId = "BRANCHID"
+    case reqDate = "REQ_DATE"
+    case labServices = "SUSPECTED_INFECTION"
   }
 
   struct LabService: Decodable {
@@ -308,27 +310,30 @@ extension Lab {
     let container = try decoder.container(keyedBy: CodingKeys.self)
     let serviceCategoryArabicName = try container.decode(String.self, forKey: .serviceCategoryArabicName)
     let serviceCategoryEnglishName = try container.decode(String.self, forKey: .serviceCategoryEnglishName)
-    let notSeenCount = try container.decode(String.self, forKey: .notSeenCount)
-    let abnormalCount = try container.decode(String.self, forKey: .abnormalCount)
-    let panicCount = try container.decode(String.self, forKey: .panicCount)
-    let normalCount = try container.decode(String.self, forKey: .normalCount)
-    let pendingCount = try container.decode(String.self, forKey: .pendingCount)
+    let statusAr = try container.decode(String.self, forKey: .statusAr)
+    let statusEn = try container.decode(String.self, forKey: .statusEn)
+    let reqId = try container.decode(String.self, forKey: .reqId)
+    let id = try container.decode(String.self, forKey: .id)
+    let branch = try container.decode(String.self, forKey: .branchId)
+    let date = try container.decode(String.self, forKey: .reqDate)
+//    do {
+//        let json =  try JSONSerialization.jsonObject(with: container, options: []) as? [String: Any]
+//    } catch {
+//        print(error.localizedDescription)
+//     }
     var labServices: [LabService]?
     if let servicesContainer = try? container.nestedContainer(keyedBy: CodingKeys.self, forKey: .labServices) {
-      if let labService = try? servicesContainer.decode(LabService.self, forKey: .labServicesRow) {
+      if let labService = try? servicesContainer.decode(LabService.self, forKey: .labServices) {
         labServices = [labService]
-      } else if let tempLabServices = try? servicesContainer.decode([LabService].self, forKey: .labServicesRow) {
+      } else if let tempLabServices = try? servicesContainer.decode([LabService].self, forKey: .labServices) {
         labServices = tempLabServices
       }
     }
     self.init(serviceCategoryArabicName: serviceCategoryArabicName,
               serviceCategoryEnglishName: serviceCategoryEnglishName,
-              notSeenCount: notSeenCount,
-              abnormalCount: abnormalCount,
-              panicCount: panicCount,
-              normalCount: normalCount,
-              pendingCount: pendingCount,
-              labServices: labServices)
+              statusAr: statusAr, statusEn: statusEn,
+              reqId: reqId, id: id, branchId: branch,
+              reqDate: date, labServices: labServices)
   }
 }
 

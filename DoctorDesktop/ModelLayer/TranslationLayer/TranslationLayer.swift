@@ -188,7 +188,8 @@ extension TranslationLayerImpl {
 extension TranslationLayerImpl {
     func getTemplateDTOFromJson(_ data: Data) -> Template? {
         let serviceTemplates = (try? [GeneralObejct].decode(data, keyPath: "Root.STP_SERVICE_TEMPLATE.STP_SERVICE_TEMPLATE_ROW")) ?? [GeneralObejct]()
-        let serviceCategories = try! [ServiceCategory].decode(data, keyPath: "Root.PARENT_SERVICE.PARENT_SERVICE_ROW") //?? [ServiceCategory]()
+//        let serviceCategories = try! [ServiceCategory].decode(data, keyPath: "Root.PARENT_SERVICE.PARENT_SERVICE_ROW") //?? [ServiceCategory]()
+        let serviceCategories = getServices(data)
         let generalParams = (try! GeneralParams(data: data, keyPath: "Root.GENERAL_PARMS.GENERAL_PARMS_ROW"))
         let frequency = (try? [GeneralObejct].decode(data, keyPath: "Root.MPFREQUENCY.MPFREQUENCY_ROW")) ?? [GeneralObejct]()
         let labIntervalUnits = (try? [GeneralObejct].decode(data, keyPath: "Root.LAB_INTERV_UNIT.LAB_INTERV_UNIT_ROW")) ?? [GeneralObejct]()
@@ -203,6 +204,55 @@ extension TranslationLayerImpl {
                         verbalOrderTypes: verbalOrderTypes,
                         readBack: readBack)
     }
+    
+    func getServices(_ data:Data) -> [ServiceCategory] {
+        var services = [ServiceCategory]()
+        do {
+            let json =  try JSONSerialization.jsonObject(with: data, options: []) as? [String:AnyObject]
+            let root = json?["Root"] as! [String : AnyObject]
+            let parentJson = root["PARENT_SERVICE"] as! [String : AnyObject]
+            let parentJsonRow = parentJson["PARENT_SERVICE_ROW"] as! [[String:AnyObject]]
+            for dic in parentJsonRow {
+               // let serviceCat = ServiceCategor
+                
+                if let row = dic["DETAIL_SERVICE"] as? [String:AnyObject] {
+                    let service = self.setServiceModelModel(row)
+                    var cat =  ServiceCategory(id: "", arabicName: "", englishName: "", type: "", templateId: "", typeArabicTitle: "", typeEnglishTitle: "", services: [])
+                    cat = cat.setModel(dic , services: [service])
+                    services.append(cat)
+                }else if let rows = dic["DETAIL_SERVICE"] as? [[String:AnyObject]] {
+                    var serviceArr = [Service]()
+                    for rowDic in rows {
+                        let service = self.setServiceModelModel(rowDic)
+                        serviceArr.append(service)
+                    }
+                    var cat =  try ServiceCategory(data: .init())
+                    cat = cat.setModel(dic , services: serviceArr)
+                    services.append(cat)
+                }
+            }
+            } catch let error as NSError {
+                print(error)
+         }
+        return services
+    }
+    
+    
+    func setServiceModelModel(_ dic:[String:AnyObject])-> Service {
+       //  let jsonData = try! JSONSerialization.data(withJSONObject: dic, options: .prettyPrinted)
+        var sercive = Service(id: "", arabicName: "", englishName: "", radPosition: "", serviceLevel: "", notUrgent: "", prepareArabicInstructions: "", prepareEnglishInstructions: "", childIds: "")
+        sercive.id = dic["SERVICE_ID"] as? String ?? ""
+        sercive.arabicName = dic["SERV_NAME_AR"] as? String ?? ""
+        sercive.englishName = dic["SERV_NAME_EN"] as? String ?? ""
+        sercive.radPosition = dic["RAD_POSITION"] as? String ?? ""
+        sercive.serviceLevel = dic["SERV_SEC_LEV"] as? String ?? ""
+        sercive.notUrgent = dic["NOT_URGENT"] as? String ?? ""
+        sercive.prepareArabicInstructions = dic["PREPARE_NAME_AR"] as? String ?? ""
+        sercive.prepareEnglishInstructions = dic["PREPARE_NAME_EN"] as? String ?? ""
+        sercive.childIds = dic["CHILD_SERVICE_ID"] as? String ?? ""
+        return sercive
+    }
+    
 }
 
 extension TranslationLayerImpl {

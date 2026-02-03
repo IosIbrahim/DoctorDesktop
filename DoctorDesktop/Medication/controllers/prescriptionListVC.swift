@@ -16,23 +16,17 @@ class prescriptionListVC: UIViewController {
     var precrilist = [precrition]()
     
     @IBOutlet weak var precritionTableView: UITableView!
-    let params = ["USER_ID":"khabeer","BRANCH_ID":"1","PROCESS_ID":"99086","OBJECT_ID":"4157"]
     override func viewDidLoad() {
-        
-
         precritionTableView.delegate = self
         precritionTableView.dataSource = self
-        
-        print()
-        
+        let params = ["USER_ID":"khabeer","BRANCH_ID":"1","PROCESS_ID":"99086","OBJECT_ID":"4157"]
         apis.getPrescriptionDate(params: params) { data in
-            
-//            print(data)
             self.precrilist = data
             print(self.precrilist.count)
             self.precritionTableView.reloadData()
 
         }
+        
     }
     
     

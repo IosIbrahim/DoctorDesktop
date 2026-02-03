@@ -22,15 +22,23 @@ enum ServiceCategoryType: String {
   
   var image: UIImage {
     switch self {
-    case .bodyFluid: return #imageLiteral(resourceName: "body_fluid")
-    case .chemistry: return #imageLiteral(resourceName: "chemistry")
-    case .coagulation: return #imageLiteral(resourceName: "coagulation")
-    case .drugAbuse: return #imageLiteral(resourceName: "drug_abuse")
-    case .hematology: return #imageLiteral(resourceName: "hematology")
-    case .hormones: return #imageLiteral(resourceName: "hormones")
-    case .microbiology: return #imageLiteral(resourceName: "microbiology")
-    case .semens: return #imageLiteral(resourceName: "semens")
-    case .vitamins: return #imageLiteral(resourceName: "vitamins")
+    case .bodyFluid: return UIImage(named: "body_fluid")!
+    case .chemistry: return UIImage(named: "chemistry")!
+    case .coagulation: return UIImage(named: "coagulation")!
+    case .drugAbuse: return UIImage(named: "drug_abuse")!
+    case .hematology: return UIImage(named: "hematology")!
+    case .hormones: return UIImage(named: "hormones")!
+    case .microbiology: return UIImage(named: "microbiology")!
+    case .semens: return UIImage(named: "semens")!
+    case .vitamins: return UIImage(named: "vitamins")!
+
+  //  case .coagulation: return #imageLiteral(resourceName: "coagulation")
+  //  case .drugAbuse: return #imageLiteral(resourceName: "drug_abuse")
+  //  case .hematology: return #imageLiteral(resourceName: "hematology")
+   // case .hormones: return #imageLiteral(resourceName: "hormones")
+  //  case .microbiology: return #imageLiteral(resourceName: "microbiology")
+  //  case .semens: return #imageLiteral(resourceName: "semens")
+  //  case .vitamins: return #imageLiteral(resourceName: "vitamins")
     }
   }
   

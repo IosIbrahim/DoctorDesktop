@@ -20,6 +20,10 @@
 		0EC28D0723364347004C4890 /* prescriptionDeatilsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EC28D0623364347004C4890 /* prescriptionDeatilsModel.swift */; };
 		0EC54F3F233B764C00DF9B58 /* editVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EC54F3E233B764C00DF9B58 /* editVC.swift */; };
 		0EC54F41233B767200DF9B58 /* editCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EC54F40233B767200DF9B58 /* editCell.swift */; };
+		0FC00F682F32426300223775 /* NewOrderCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FC00F662F32426300223775 /* NewOrderCell.swift */; };
+		0FC00F692F32426300223775 /* NewOrderCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0FC00F672F32426300223775 /* NewOrderCell.xib */; };
+		0FC00F6D2F32491300223775 /* InnerServiceCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FC00F6B2F32491300223775 /* InnerServiceCell.swift */; };
+		0FC00F6E2F32491300223775 /* InnerServiceCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0FC00F6C2F32491300223775 /* InnerServiceCell.xib */; };
 		3608D4BB2088793400310D60 /* PediatricsScorePopUpCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3608D4B82088793300310D60 /* PediatricsScorePopUpCell.swift */; };
 		3608D4BC2088793400310D60 /* PediatricsScorePopUpCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3608D4B92088793300310D60 /* PediatricsScorePopUpCell.xib */; };
 		3608D4BD2088793400310D60 /* PediatricsScorePopUpCellPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3608D4BA2088793300310D60 /* PediatricsScorePopUpCellPresenter.swift */; };
@@ -225,6 +229,10 @@
 		0EC28D0623364347004C4890 /* prescriptionDeatilsModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = prescriptionDeatilsModel.swift; sourceTree = "<group>"; };
 		0EC54F3E233B764C00DF9B58 /* editVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = editVC.swift; sourceTree = "<group>"; };
 		0EC54F40233B767200DF9B58 /* editCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = editCell.swift; sourceTree = "<group>"; };
+		0FC00F662F32426300223775 /* NewOrderCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewOrderCell.swift; sourceTree = "<group>"; };
+		0FC00F672F32426300223775 /* NewOrderCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = NewOrderCell.xib; sourceTree = "<group>"; };
+		0FC00F6B2F32491300223775 /* InnerServiceCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InnerServiceCell.swift; sourceTree = "<group>"; };
+		0FC00F6C2F32491300223775 /* InnerServiceCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = InnerServiceCell.xib; sourceTree = "<group>"; };
 		3608D4B82088793300310D60 /* PediatricsScorePopUpCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PediatricsScorePopUpCell.swift; sourceTree = "<group>"; };
 		3608D4B92088793300310D60 /* PediatricsScorePopUpCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PediatricsScorePopUpCell.xib; sourceTree = "<group>"; };
 		3608D4BA2088793300310D60 /* PediatricsScorePopUpCellPresenter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PediatricsScorePopUpCellPresenter.swift; sourceTree = "<group>"; };
@@ -473,6 +481,24 @@
 			path = networkAPi;
 			sourceTree = "<group>";
 		};
+		0FC00F652F32422C00223775 /* NewOrderCell */ = {
+			isa = PBXGroup;
+			children = (
+				0FC00F662F32426300223775 /* NewOrderCell.swift */,
+				0FC00F672F32426300223775 /* NewOrderCell.xib */,
+			);
+			path = NewOrderCell;
+			sourceTree = "<group>";
+		};
+		0FC00F6A2F3248F100223775 /* InnerServiceCell */ = {
+			isa = PBXGroup;
+			children = (
+				0FC00F6B2F32491300223775 /* InnerServiceCell.swift */,
+				0FC00F6C2F32491300223775 /* InnerServiceCell.xib */,
+			);
+			path = InnerServiceCell;
+			sourceTree = "<group>";
+		};
 		2ECCD2F9846C22A07F083A7A /* Pods */ = {
 			isa = PBXGroup;
 			children = (
@@ -659,8 +685,8 @@
 			isa = PBXGroup;
 			children = (
 				3637687C2091C5C400CE45D8 /* OperationCatheterizationEndoscopyCellPresenter.swift */,
-				3637687D2091C5C400CE45D8 /* OperationCatheterizationEndoscopyCell.xib */,
 				3637687E2091C5C400CE45D8 /* OperationCatheterizationEndoscopyCell.swift */,
+				3637687D2091C5C400CE45D8 /* OperationCatheterizationEndoscopyCell.xib */,
 			);
 			path = OperationCatheterizationEndoscopyCell;
 			sourceTree = "<group>";
@@ -1114,6 +1140,8 @@
 		36C3257C1FFE3EAD003F8766 /* OrderCell */ = {
 			isa = PBXGroup;
 			children = (
+				0FC00F6A2F3248F100223775 /* InnerServiceCell */,
+				0FC00F652F32422C00223775 /* NewOrderCell */,
 				365C662F200783B800E215C9 /* OrderCellPresenter.swift */,
 				36C325781FFE3EA1003F8766 /* OrderCell.swift */,
 				36C325791FFE3EA1003F8766 /* OrderCell.xib */,
@@ -1296,6 +1324,7 @@
 				363768AA2091C5C400CE45D8 /* OverviewSectionCell.xib in Resources */,
 				36C3257B1FFE3EA1003F8766 /* OrderCell.xib in Resources */,
 				363D1F9C208F48E900CF163D /* operation.svg in Resources */,
+				0FC00F6E2F32491300223775 /* InnerServiceCell.xib in Resources */,
 				368604D92017AEC4004A6D0B /* Roboto-Black.ttf in Resources */,
 				363768932091C5C400CE45D8 /* ClinicServiceCell.xib in Resources */,
 				368604E02017AEC4004A6D0B /* Roboto-Medium.ttf in Resources */,
@@ -1307,6 +1336,7 @@
 				366D86382087E97A008B16BF /* EmergencyTriageView.xib in Resources */,
 				3608D4BC2088793400310D60 /* PediatricsScorePopUpCell.xib in Resources */,
 				36F6BD4E1FEFEE3F00F0CEED /* EmergencyCell.xib in Resources */,
+				0FC00F692F32426300223775 /* NewOrderCell.xib in Resources */,
 				363768A52091C5C400CE45D8 /* OperationCatheterizationEndoscopyCell.xib in Resources */,
 				3656DD07274BC6D9008DC057 /* ChatCell.xib in Resources */,
 				363768892091C5C400CE45D8 /* PatientHistoryFiltrationCell.xib in Resources */,
@@ -1464,6 +1494,7 @@
 				3658CB7B1FE855C6004EBEA8 /* OutpatientCell.swift in Sources */,
 				3660ADD4200CB3CD0089ADEF /* OrderServiceListPresenter.swift in Sources */,
 				3691B19D20165F3A00544BA4 /* OrderCheckoutCell.swift in Sources */,
+				0FC00F682F32426300223775 /* NewOrderCell.swift in Sources */,
 				0E1EE2612338D38500E9CF3C /* searchCell.swift in Sources */,
 				363768942091C5C400CE45D8 /* ClinicServiceCellPresenter.swift in Sources */,
 				3637689C2091C5C400CE45D8 /* ScoringCellPresenter.swift in Sources */,
@@ -1564,6 +1595,7 @@
 				36A33C1A1FE31FE6007A9E55 /* UnitsPopup.swift in Sources */,
 				36883F1220710A5500A53AE7 /* WebViewerPresenter.swift in Sources */,
 				366D86332087E97A008B16BF /* DiagnosisCategoryPopUpCell.swift in Sources */,
+				0FC00F6D2F32491300223775 /* InnerServiceCell.swift in Sources */,
 				36393CA120894E85008410FD /* ClinicalInfoPopup.swift in Sources */,
 				365C6630200783B800E215C9 /* OrderCellPresenter.swift in Sources */,
 				363768982091C5C400CE45D8 /* VitalSignCellPresenter.swift in Sources */,

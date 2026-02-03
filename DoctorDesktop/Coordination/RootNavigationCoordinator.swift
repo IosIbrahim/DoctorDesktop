@@ -10,6 +10,7 @@ import UIKit
 
 protocol NavigationCoordinator: class {
   func next(arguments: Dictionary<String, Any>?)
+    func setNavigationStatus(_ status:NavigationState)
   func movingBack()
 }
 
@@ -55,12 +56,12 @@ class RootNavigationCoordinatorImpl: NavigationCoordinator {
     case .atWebViewer: navState = .atOverviewSectionDetails
     }
   }
-  
+    
+    func setNavigationStatus(_ status:NavigationState) {
+        self.navState = status
+    }
+    
   func next(arguments: Dictionary<String, Any>?) {
-    
-   print(arguments)
-    
-    
     switch navState {
     case .atLogin: showComponentCollection(arguments: arguments)
     case .atComponentCollection: showPatientList(arguments: arguments)
@@ -171,7 +172,6 @@ class RootNavigationCoordinatorImpl: NavigationCoordinator {
     guard let patient = arguments?["patient"] as? Patient,
       let user = arguments?["user"] as? User else { return }
     let overviewCollectionViewController = registry.makeOverviewCollectionViewController(with: patient, user: user)
-    //rootViewController.navigationController?.present(overviewCollectionViewController, animated: true, completion: nil)
     rootViewController.navigationController?.pushViewController(overviewCollectionViewController, animated: true)
     navState = .atOverviewCollection
   }
@@ -179,8 +179,10 @@ class RootNavigationCoordinatorImpl: NavigationCoordinator {
   func showOverviewSectionDetails(arguments: Dictionary<String, Any>?) {
     guard let overviewSection = arguments?["overviewSection"] as? OverviewSection,
       let patientSummary = arguments?["patientSummary"] as? PatientSummary,
+      let patient = arguments?["patient"] as? Patient,
       let user = arguments?["user"] as? User else { return }
-    let overviewSectionDetailsViewController = registry.makeOverviewSectionDetailsViewController(overviewSection: overviewSection, patientSummary: patientSummary, user: user)
+      let overviewSectionDetailsViewController = registry.makeOverviewSectionDetailsViewController(overviewSection: overviewSection, patientSummary: patientSummary, user: user,pat:patient)
+      overviewSectionDetailsViewController.patient = patient
     rootViewController.navigationController?.pushViewController(overviewSectionDetailsViewController, animated: true)
     navState = .atOverviewSectionDetails
   }
