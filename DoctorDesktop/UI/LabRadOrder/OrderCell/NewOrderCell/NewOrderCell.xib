@@ -22,16 +22,18 @@
                         <rect key="frame" x="5" y="5" width="380" height="168"/>
                         <subviews>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="WN4-Sh-EoS" customClass="OrderPicker" customModule="DoctorDesktop" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="0.0" width="380" height="48"/>
+                                <rect key="frame" x="0.0" y="0.0" width="380" height="50"/>
                                 <subviews>
-                                    <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="3cc-H9-m4d">
-                                        <rect key="frame" x="8" y="5" width="364" height="38"/>
+                                    <stackView opaque="NO" contentMode="scaleToFill" spacing="5" translatesAutoresizingMaskIntoConstraints="NO" id="3cc-H9-m4d">
+                                        <rect key="frame" x="8" y="5" width="364" height="40"/>
                                         <subviews>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="47x-aa-yO2">
-                                                <rect key="frame" x="0.0" y="0.0" width="45" height="38"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="35" height="40"/>
+                                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                 <constraints>
-                                                    <constraint firstAttribute="width" constant="45" id="LNl-rb-6O3"/>
+                                                    <constraint firstAttribute="width" constant="35" id="LNl-rb-6O3"/>
                                                 </constraints>
+                                                <color key="tintColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                 <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
                                                 <state key="normal" image="rightIconn"/>
                                                 <connections>
@@ -39,13 +41,13 @@
                                                 </connections>
                                             </button>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="4S7-PD-bNv">
-                                                <rect key="frame" x="45" y="0.0" width="219" height="38"/>
+                                                <rect key="frame" x="40" y="0.0" width="219" height="40"/>
                                                 <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
                                                 <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="LoK-d4-XVq">
-                                                <rect key="frame" x="264" y="0.0" width="100" height="38"/>
+                                                <rect key="frame" x="264" y="0.0" width="100" height="40"/>
                                                 <constraints>
                                                     <constraint firstAttribute="width" constant="100" id="a7D-dO-RQl"/>
                                                 </constraints>
@@ -66,15 +68,13 @@
                                     <constraint firstAttribute="bottom" secondItem="3cc-H9-m4d" secondAttribute="bottom" constant="5" id="1G4-sz-6Xg"/>
                                     <constraint firstItem="3cc-H9-m4d" firstAttribute="leading" secondItem="WN4-Sh-EoS" secondAttribute="leading" constant="8" id="Sy3-Ov-t0r"/>
                                     <constraint firstItem="3cc-H9-m4d" firstAttribute="top" secondItem="WN4-Sh-EoS" secondAttribute="top" constant="5" id="twr-gI-1ki"/>
+                                    <constraint firstAttribute="height" constant="50" id="uRm-ql-CH4"/>
                                     <constraint firstAttribute="trailing" secondItem="3cc-H9-m4d" secondAttribute="trailing" constant="8" id="wb9-1i-Ezj"/>
                                 </constraints>
                             </view>
                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" showsHorizontalScrollIndicator="NO" showsVerticalScrollIndicator="NO" dataMode="none" translatesAutoresizingMaskIntoConstraints="NO" id="ddX-5M-W3o">
-                                <rect key="frame" x="0.0" y="48" width="380" height="120"/>
+                                <rect key="frame" x="0.0" y="50" width="380" height="118"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="120" id="pCu-3S-6vZ"/>
-                                </constraints>
                                 <collectionViewFlowLayout key="collectionViewLayout" scrollDirection="horizontal" minimumLineSpacing="10" minimumInteritemSpacing="10" id="62g-RY-2fE">
                                     <size key="itemSize" width="128" height="128"/>
                                     <size key="headerReferenceSize" width="0.0" height="0.0"/>

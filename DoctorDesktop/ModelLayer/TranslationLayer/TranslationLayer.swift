@@ -218,13 +218,13 @@ extension TranslationLayerImpl {
                 if let row = dic["DETAIL_SERVICE"] as? [String:AnyObject] {
                     let service = self.setServiceModelModel(row)
                     var cat =  ServiceCategory(id: "", arabicName: "", englishName: "", type: "", templateId: "", typeArabicTitle: "", typeEnglishTitle: "", services: [])
-                    cat = cat.setModel(dic , services: [service])
+                    cat = cat.setModel(dic , services: service)
                     services.append(cat)
                 }else if let rows = dic["DETAIL_SERVICE"] as? [[String:AnyObject]] {
                     var serviceArr = [Service]()
                     for rowDic in rows {
                         let service = self.setServiceModelModel(rowDic)
-                        serviceArr.append(service)
+                        serviceArr.append(contentsOf: service)
                     }
                     var cat =  try ServiceCategory(data: .init())
                     cat = cat.setModel(dic , services: serviceArr)
@@ -238,19 +238,36 @@ extension TranslationLayerImpl {
     }
     
     
-    func setServiceModelModel(_ dic:[String:AnyObject])-> Service {
+    func setServiceModelModel(_ dic:[String:AnyObject])-> [Service] {
        //  let jsonData = try! JSONSerialization.data(withJSONObject: dic, options: .prettyPrinted)
         var sercive = Service(id: "", arabicName: "", englishName: "", radPosition: "", serviceLevel: "", notUrgent: "", prepareArabicInstructions: "", prepareEnglishInstructions: "", childIds: "")
-        sercive.id = dic["SERVICE_ID"] as? String ?? ""
-        sercive.arabicName = dic["SERV_NAME_AR"] as? String ?? ""
-        sercive.englishName = dic["SERV_NAME_EN"] as? String ?? ""
-        sercive.radPosition = dic["RAD_POSITION"] as? String ?? ""
-        sercive.serviceLevel = dic["SERV_SEC_LEV"] as? String ?? ""
-        sercive.notUrgent = dic["NOT_URGENT"] as? String ?? ""
-        sercive.prepareArabicInstructions = dic["PREPARE_NAME_AR"] as? String ?? ""
-        sercive.prepareEnglishInstructions = dic["PREPARE_NAME_EN"] as? String ?? ""
-        sercive.childIds = dic["CHILD_SERVICE_ID"] as? String ?? ""
-        return sercive
+        var serices = [Service]()
+        if let sercieRow = dic["DETAIL_SERVICE_ROW"] as? [String:AnyObject] {
+            sercive.id = sercieRow["SERVICE_ID"] as? String ?? ""
+            sercive.arabicName = sercieRow["SERV_NAME_AR"] as? String ?? ""
+            sercive.englishName = sercieRow["SERV_NAME_EN"] as? String ?? ""
+            sercive.radPosition = sercieRow["RAD_POSITION"] as? String ?? ""
+            sercive.serviceLevel = sercieRow["SERV_SEC_LEV"] as? String ?? ""
+            sercive.notUrgent = sercieRow["NOT_URGENT"] as? String ?? ""
+            sercive.prepareArabicInstructions = sercieRow["PREPARE_NAME_AR"] as? String ?? ""
+            sercive.prepareEnglishInstructions = sercieRow["PREPARE_NAME_EN"] as? String ?? ""
+            sercive.childIds = sercieRow["CHILD_SERVICE_ID"] as? String ?? ""
+            return [sercive]
+        }else if let sercieRow = dic["DETAIL_SERVICE_ROW"] as? [[String:AnyObject]] {
+            for item in sercieRow {
+                sercive.id = item["SERVICE_ID"] as? String ?? ""
+                sercive.arabicName = item["SERV_NAME_AR"] as? String ?? ""
+                sercive.englishName = item["SERV_NAME_EN"] as? String ?? ""
+                sercive.radPosition = item["RAD_POSITION"] as? String ?? ""
+                sercive.serviceLevel = item["SERV_SEC_LEV"] as? String ?? ""
+                sercive.notUrgent = item["NOT_URGENT"] as? String ?? ""
+                sercive.prepareArabicInstructions = item["PREPARE_NAME_AR"] as? String ?? ""
+                sercive.prepareEnglishInstructions = item["PREPARE_NAME_EN"] as? String ?? ""
+                sercive.childIds = item["CHILD_SERVICE_ID"] as? String ?? ""
+                serices.append(sercive)
+            }
+        }
+        return serices
     }
     
 }

@@ -24,23 +24,37 @@
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="kfr-3R-AJd" customClass="ServicePicker" customModule="DoctorDesktop" customModuleProvider="target">
                                 <rect key="frame" x="0.0" y="0.0" width="265" height="104"/>
                                 <subviews>
-                                    <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Tt5-HO-JAi">
+                                    <stackView opaque="NO" contentMode="scaleToFill" spacing="5" translatesAutoresizingMaskIntoConstraints="NO" id="Tt5-HO-JAi">
                                         <rect key="frame" x="8" y="5" width="249" height="94"/>
                                         <subviews>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="FVs-fi-3Ro">
-                                                <rect key="frame" x="0.0" y="0.0" width="45" height="94"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="25" height="94"/>
                                                 <constraints>
-                                                    <constraint firstAttribute="width" constant="45" id="pPb-wq-xc4"/>
+                                                    <constraint firstAttribute="width" constant="25" id="pPb-wq-xc4"/>
                                                 </constraints>
                                                 <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
                                                 <state key="normal" image="rightIconn"/>
+                                                <connections>
+                                                    <action selector="selectOnTap:" destination="gTV-IL-0wX" eventType="touchUpInside" id="80I-9o-5dc"/>
+                                                </connections>
                                             </button>
-                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="uNd-g0-h6H">
-                                                <rect key="frame" x="45" y="0.0" width="204" height="94"/>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="uNd-g0-h6H">
+                                                <rect key="frame" x="30" y="0.0" width="189" height="94"/>
                                                 <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
-                                                <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                <color key="textColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
+                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="8uf-pK-5rb">
+                                                <rect key="frame" x="224" y="0.0" width="25" height="94"/>
+                                                <constraints>
+                                                    <constraint firstAttribute="width" constant="25" id="EXt-lm-YEb"/>
+                                                </constraints>
+                                                <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                                <state key="normal" image="alarm"/>
+                                                <connections>
+                                                    <action selector="hintOnTap:" destination="gTV-IL-0wX" eventType="touchUpInside" id="4ft-Xl-DM8"/>
+                                                </connections>
+                                            </button>
                                         </subviews>
                                     </stackView>
                                 </subviews>
@@ -65,6 +79,7 @@
             </constraints>
             <size key="customSize" width="275" height="114"/>
             <connections>
+                <outlet property="btnHint" destination="8uf-pK-5rb" id="e3q-tb-mEU"/>
                 <outlet property="btnSelected" destination="FVs-fi-3Ro" id="ipi-4X-wUu"/>
                 <outlet property="lblService" destination="uNd-g0-h6H" id="RJp-OY-lPo"/>
             </connections>
@@ -72,6 +87,7 @@
         </collectionViewCell>
     </objects>
     <resources>
+        <image name="alarm" width="16" height="17"/>
         <image name="rightIconn" width="225" height="225"/>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>

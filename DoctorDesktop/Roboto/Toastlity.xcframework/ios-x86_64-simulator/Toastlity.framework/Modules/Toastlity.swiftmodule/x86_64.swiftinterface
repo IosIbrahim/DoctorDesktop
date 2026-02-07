@@ -1,0 +1,39 @@
+// swift-interface-format-version: 1.0
+// swift-compiler-version: Apple Swift version 5.2 (swiftlang-1103.0.32.1 clang-1103.0.32.29)
+// swift-module-flags: -target x86_64-apple-ios11.0-simulator -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -O -module-name Toastlity
+import Swift
+import UIKit.UIColor
+import UIKit.UIFont
+import UIKit
+public struct ToastSettings {
+  public var font: UIKit.UIFont
+  public var backgroundColor: UIKit.UIColor
+  public var textColor: UIKit.UIColor
+  public var mode: Toastlity.DirectionOfAppearse
+  public var autoHide: Swift.Bool
+  public var hidingDuration: Swift.Int
+  public static var `default`: Toastlity.ToastSettings {
+    get
+  }
+}
+public enum DirectionOfAppearse {
+  case top, bottom
+  public static func == (a: Toastlity.DirectionOfAppearse, b: Toastlity.DirectionOfAppearse) -> Swift.Bool
+  public var hashValue: Swift.Int {
+    get
+  }
+  public func hash(into hasher: inout Swift.Hasher)
+}
+@objc @_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers final public class ToastBar : UIKit.UIControl {
+  final public var settings: Toastlity.ToastSettings!
+  final public var didTap: (() -> Swift.Void)?
+  required public init(settings: Toastlity.ToastSettings, in view: UIKit.UIView? = UIApplication.shared.keyWindow?.rootViewController?.view)
+  @available(*, unavailable)
+  @objc override dynamic public init(frame: CoreGraphics.CGRect)
+  @objc override final public func touchesEnded(_ touches: Swift.Set<UIKit.UITouch>, with event: UIKit.UIEvent?)
+  final public func show(with text: Swift.String)
+  final public func hide(_ handler: (() -> Swift.Void)? = .none)
+  @objc deinit
+}
+extension Toastlity.DirectionOfAppearse : Swift.Equatable {}
+extension Toastlity.DirectionOfAppearse : Swift.Hashable {}

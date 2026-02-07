@@ -9,6 +9,7 @@
 import UIKit
 import DropDown
 import SideMenu
+import Toastlity
 import NVActivityIndicatorView
 
 class OrderCollectionViewController: UIViewController, NVActivityIndicatorViewable {
@@ -19,9 +20,11 @@ class OrderCollectionViewController: UIViewController, NVActivityIndicatorViewab
   private var presenter: OrderCollectionPresenter!
   private var orderCellMaker: DependencyRegistry.OrderCellMaker!
   private weak var navigationCoordinator: NavigationCoordinator?
-
+  lazy var toastBar: ToastBar = .init(settings: .agent, in: parent?.view)
+    
   let dropDown = DropDown()
   var selectedTemplateIndex = 0
+    var expandedItemIndex:Int = 200
 
   func configure(with presenter: OrderCollectionPresenter,
                  orderCellMaker: @escaping DependencyRegistry.OrderCellMaker,
@@ -46,7 +49,8 @@ class OrderCollectionViewController: UIViewController, NVActivityIndicatorViewab
     case .labOrder: title = "Lab Order"
     case .radOrder: title = "Rad Order"
     }
-    OrderCell.register(with: collectioView)
+      OrderCell.register(with: collectioView)
+      NewOrderCell.register(with: collectioView)
     dropDownView.layer.cornerRadius = 10
     startAnimating(message: "Load Template...")
     presenter.getTemplate() {
@@ -111,24 +115,60 @@ extension OrderCollectionViewController: UICollectionViewDataSource {
   
   func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
     let labOrderCellPresenter = OrderCellPresenterImpl(withSericeCategory: presenter.template!.servicesCategories[indexPath.row])
-    return OrderCell.dequeue(from: collectionView, for: indexPath, with: labOrderCellPresenter)
+      let cell = NewOrderCell.dequeue(from: collectionView, for: indexPath, with: labOrderCellPresenter)
+      cell.itemIndex = indexPath.row
+      cell.delegate = self
+    return cell
   }
 }
 
 extension OrderCollectionViewController: UICollectionViewDelegateFlowLayout {
   func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-    return CGSize(width: (collectionView.bounds.width / 3) - 15, height: 125)
+      let labOrderCellPresenter = OrderCellPresenterImpl(withSericeCategory: presenter.template!.servicesCategories[indexPath.row])
+      let width = collectionView.bounds.width - 10
+      if labOrderCellPresenter.services.isEmpty {
+          return CGSize(width: (collectionView.bounds.width) - 10, height: 60)
+      }else {
+          if indexPath.row == expandedItemIndex {
+              let hight = CGFloat (labOrderCellPresenter.services.count  * 35 + 60 )
+              return CGSize(width: width, height: hight)
+          }else {
+              return CGSize(width: width, height: 130)
+          }
+      }
   }
 }
 
 extension OrderCollectionViewController: UICollectionViewDelegate {
   func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-    let args = ["patient": presenter.patient,
-                "serviceCategory": self.presenter.template!.servicesCategories[indexPath.row],
-                "templateType": self.presenter.templateType,
-                "generalParams": self.presenter.template!.generalParams,
-                "user": presenter.user] as [String : Any]
-    
-    navigationCoordinator?.next(arguments: args)
+//    let args = ["patient": presenter.patient,
+//                "serviceCategory": self.presenter.template!.servicesCategories[indexPath.row],
+//                "templateType": self.presenter.templateType,
+//                "generalParams": self.presenter.template!.generalParams,
+//                "user": presenter.user] as [String : Any]
+//    
+//    navigationCoordinator?.next(arguments: args)
   }
+}
+
+extension OrderCollectionViewController:ServiceCategorySelectProtocol {
+    func setServiceCategorySelect(_ index:Int,services:[Service]) {
+        let isselect = presenter.template?.servicesCategories[index].isSelect  ?? false
+        presenter.template?.servicesCategories[index].isSelect = !isselect
+        
+    }
+    
+    func showServiceInstruction( _ info:String) {
+        // show info
+        toastBar.show(with: info)
+    }
+    
+    func setExpanded(_ index:Int) {
+        if index != expandedItemIndex {
+            expandedItemIndex = index
+        }else {
+            expandedItemIndex = 200
+        }
+        collectioView.reloadData()
+    }
 }

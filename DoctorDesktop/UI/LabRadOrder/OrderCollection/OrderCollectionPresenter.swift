@@ -13,7 +13,7 @@ typealias TemplateBlock = ((Template?) -> Void)
 protocol OrderCollectionPresenter {
   var user: User { get }
   var templateType: TemplateType { get }
-  var template: Template? { get }
+  var template: Template? { set get }
   var patient: Patient { get }
   func getTemplate(withTemplateId tempId: String?, finished: @escaping EmptyBlock)
 }

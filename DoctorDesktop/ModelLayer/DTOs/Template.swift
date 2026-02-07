@@ -13,13 +13,13 @@ enum TemplateType: Int {
 }
 
 struct Template {
-  let serviceTemplates: [GeneralObejct]
-  let servicesCategories: [ServiceCategory]
-  let generalParams: GeneralParams
-  let frequency: [GeneralObejct]
-  let labIntervalUnits: [GeneralObejct]
-  let verbalOrderTypes: [GeneralObejct]
-  let readBack: [GeneralObejct]
+    var serviceTemplates: [GeneralObejct]
+    var servicesCategories: [ServiceCategory]
+    var generalParams: GeneralParams
+    var frequency: [GeneralObejct]
+    var labIntervalUnits: [GeneralObejct]
+    var verbalOrderTypes: [GeneralObejct]
+    var readBack: [GeneralObejct]
 }
 
 struct GeneralObejct: Decodable {
@@ -63,6 +63,7 @@ struct ServiceCategory: Decodable {
   var templateId:String?
    var typeArabicTitle: String?
    var typeEnglishTitle: String?
+    var isSelect:Bool = false
  var services: [Service]?
   
     var typeTitle: String? {return typeEnglishTitle}
@@ -133,6 +134,7 @@ struct Service: Decodable {
   var prepareArabicInstructions: String?
   var prepareEnglishInstructions: String?
   var childIds:String?
+  var isSelected:Bool = false
     
   var name: String {return englishName}
   var prepareInstructions: String? {return prepareEnglishInstructions}

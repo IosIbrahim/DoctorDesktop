@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 48;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -20,6 +20,8 @@
 		0EC28D0723364347004C4890 /* prescriptionDeatilsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EC28D0623364347004C4890 /* prescriptionDeatilsModel.swift */; };
 		0EC54F3F233B764C00DF9B58 /* editVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EC54F3E233B764C00DF9B58 /* editVC.swift */; };
 		0EC54F41233B767200DF9B58 /* editCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EC54F40233B767200DF9B58 /* editCell.swift */; };
+		0F45AC5D2F36B95300DA1DE7 /* Toastlity.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0F45AC5B2F36B93F00DA1DE7 /* Toastlity.xcframework */; };
+		0F45AC5E2F36B95300DA1DE7 /* Toastlity.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 0F45AC5B2F36B93F00DA1DE7 /* Toastlity.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		0FC00F682F32426300223775 /* NewOrderCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FC00F662F32426300223775 /* NewOrderCell.swift */; };
 		0FC00F692F32426300223775 /* NewOrderCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0FC00F672F32426300223775 /* NewOrderCell.xib */; };
 		0FC00F6D2F32491300223775 /* InnerServiceCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FC00F6B2F32491300223775 /* InnerServiceCell.swift */; };
@@ -214,6 +216,20 @@
 		F1A73B93E409D36BDF031D87 /* Pods_DoctorDesktop.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C9590EB2216C59251F58A578 /* Pods_DoctorDesktop.framework */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		0F45AC5F2F36B95300DA1DE7 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				0F45AC5E2F36B95300DA1DE7 /* Toastlity.xcframework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		00CFC35E4FC1F2FA40F13E78 /* Pods-DoctorDesktop.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DoctorDesktop.release.xcconfig"; path = "Pods/Target Support Files/Pods-DoctorDesktop/Pods-DoctorDesktop.release.xcconfig"; sourceTree = "<group>"; };
 		0E10294F23375B6900653CAB /* dosage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = dosage.swift; sourceTree = "<group>"; };
@@ -229,6 +245,7 @@
 		0EC28D0623364347004C4890 /* prescriptionDeatilsModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = prescriptionDeatilsModel.swift; sourceTree = "<group>"; };
 		0EC54F3E233B764C00DF9B58 /* editVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = editVC.swift; sourceTree = "<group>"; };
 		0EC54F40233B767200DF9B58 /* editCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = editCell.swift; sourceTree = "<group>"; };
+		0F45AC5B2F36B93F00DA1DE7 /* Toastlity.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = Toastlity.xcframework; sourceTree = "<group>"; };
 		0FC00F662F32426300223775 /* NewOrderCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewOrderCell.swift; sourceTree = "<group>"; };
 		0FC00F672F32426300223775 /* NewOrderCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = NewOrderCell.xib; sourceTree = "<group>"; };
 		0FC00F6B2F32491300223775 /* InnerServiceCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InnerServiceCell.swift; sourceTree = "<group>"; };
@@ -432,6 +449,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F1A73B93E409D36BDF031D87 /* Pods_DoctorDesktop.framework in Frameworks */,
+				0F45AC5D2F36B95300DA1DE7 /* Toastlity.xcframework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1046,6 +1064,7 @@
 		368604CA2017AEC3004A6D0B /* Roboto */ = {
 			isa = PBXGroup;
 			children = (
+				0F45AC5B2F36B93F00DA1DE7 /* Toastlity.xcframework */,
 				368604CB2017AEC3004A6D0B /* LICENSE.txt */,
 				368604CC2017AEC3004A6D0B /* Roboto-Black.ttf */,
 				368604CD2017AEC3004A6D0B /* Roboto-BlackItalic.ttf */,
@@ -1257,6 +1276,7 @@
 				46B646A31FD2E44100D8D340 /* Frameworks */,
 				46B646A41FD2E44100D8D340 /* Resources */,
 				A6D46BD359CE15255D74ADE2 /* [CP] Embed Pods Frameworks */,
+				0F45AC5F2F36B95300DA1DE7 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -1750,8 +1770,9 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 11.1;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_ENFORCE_EXCLUSIVE_ACCESS = none;
-				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
@@ -1765,7 +1786,10 @@
 				DEVELOPMENT_TEAM = WZC66X64NZ;
 				INFOPLIST_FILE = DoctorDesktop/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.khabeer-youmeda-group.doctor-desktop";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 4.0;
@@ -1782,7 +1806,10 @@
 				DEVELOPMENT_TEAM = WZC66X64NZ;
 				INFOPLIST_FILE = DoctorDesktop/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.khabeer-youmeda-group.doctor-desktop";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 4.0;

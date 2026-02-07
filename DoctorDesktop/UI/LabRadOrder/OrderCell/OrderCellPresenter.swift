@@ -60,11 +60,14 @@ enum ServiceCategoryType: String {
 
 
 protocol OrderCellPresenter {
-  var title: String { get }
-  var image: UIImage { get }
+    var title: String { get }
+    var image: UIImage { get }
+    var isSelected: Bool { get }
+    var services: [Service] { get }
 }
 
 class OrderCellPresenterImpl: OrderCellPresenter {
+    
   var serviceCategory: ServiceCategory
   
   init(withSericeCategory serviceCategory: ServiceCategory) {
@@ -72,8 +75,29 @@ class OrderCellPresenterImpl: OrderCellPresenter {
   }
   
   var title: String { return serviceCategory.name }
+  var services: [Service] {  return serviceCategory.services ?? []  }
   var image: UIImage {
     guard let typeText = serviceCategory.type, let type = ServiceCategoryType(rawValue: typeText) else { return #imageLiteral(resourceName: "body_fluid") }
     return type.image
   }
+    var isSelected: Bool{  return serviceCategory.isSelect  }
+
+}
+
+
+protocol InnerOrderCellPresenter {
+    var title: String { get }
+    var isSelect: Bool { get }
+    var hint: String { get }
+}
+
+class OrderIneerCellPresenterImpl: InnerOrderCellPresenter {
+  var service: Service
+  init(withSerice service: Service) {
+    self.service = service
+  }
+  
+    var title: String { return service.name }
+    var isSelect: Bool{  return service.isSelected  }
+    var hint: String { return service.prepareInstructions ?? "" }
 }
