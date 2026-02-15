@@ -56,16 +56,17 @@ extension GeneralObejct {
 
 
 struct ServiceCategory: Decodable {
-  var id: String
-  var arabicName: String
- var englishName: String
-  var type: String?
-  var templateId:String?
-   var typeArabicTitle: String?
-   var typeEnglishTitle: String?
+    var id: String
+    var arabicName: String
+    var englishName: String
+    var type: String?
+    var templateId:String?
+    var typeArabicTitle: String?
+    var typeEnglishTitle: String?
     var isSelect:Bool = false
- var services: [Service]?
-  
+    
+    var services: [Service]?
+    
     var typeTitle: String? {return typeEnglishTitle}
     var name: String {return englishName}
 

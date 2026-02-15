@@ -21,8 +21,9 @@ class OrderServiceList: UIViewController, NVActivityIndicatorViewable {
   private var orderServiceCellMaker: DependencyRegistry.OrderServiceCellMaker!
   private weak var navigationCoordinator: NavigationCoordinator?
 
-  var selectedIndices = [IndexPath]()
-  
+   var selectedIndices = [IndexPath]()
+   private var isLoaded:Bool = false
+    
   func configure(with presenter: OrderServiceListPresenter,
                  orderServiceCellMaker: @escaping DependencyRegistry.OrderServiceCellMaker,
                  navigationCoordinator: NavigationCoordinator) {
@@ -53,6 +54,15 @@ class OrderServiceList: UIViewController, NVActivityIndicatorViewable {
     categoryImageCircleView.layer.borderColor = presenter.categoryColor.cgColor
     categoryImageCircleView.layer.cornerRadius = categoryImageCircleView.bounds.height/2
   }
+    
+    override func viewWillAppear(_ animated:Bool) {
+        super.viewWillAppear(animated)
+        if isLoaded {
+            navigationController?.popViewController(animated: true)
+        }else {
+            validateIDS()
+        }
+    }
 }
 
 extension OrderServiceList {
@@ -66,21 +76,26 @@ extension OrderServiceList {
   }
   
   @IBAction func didPressPlusButton() {
-    let servicesIds = selectedIndices.map() { indexPath in
-      presenter.services[indexPath.row].id
-    }
-    startAnimating(message: "Validate Services...")
-    presenter.validateServiceRow(withServicesIds: servicesIds) {
-      self.stopAnimating()
-      let args = ["servicesDetails": self.presenter.servicesDetails ?? [],
-                  "templateType": self.presenter.templateType,
-                  "user": self.presenter.user,
-                  "labOrderServiceListPresenter": self.presenter,
-                  "patient": self.presenter.patient,
-                  "requestDoctor": self.presenter.generalParams.requestDoctor] as [String : Any]
-      self.navigationCoordinator?.next(arguments: args)
-    }
+      validateIDS()
   }
+    
+    private func validateIDS() {
+        let servicesIds = selectedIndices.map() { indexPath in
+          presenter.services[indexPath.row].id
+        }
+        startAnimating(message: "Validate Services...")
+        presenter.validateServiceRow(withServicesIds: servicesIds) {
+          self.stopAnimating()
+          let args = ["servicesDetails": self.presenter.servicesDetails ?? [],
+                      "templateType": self.presenter.templateType,
+                      "user": self.presenter.user,
+                      "labOrderServiceListPresenter": self.presenter,
+                      "patient": self.presenter.patient,
+                      "requestDoctor": self.presenter.generalParams.requestDoctor] as [String : Any]
+            self.isLoaded = true
+          self.navigationCoordinator?.next(arguments: args)
+        }
+    }
 }
 
 extension OrderServiceList: UITableViewDataSource {

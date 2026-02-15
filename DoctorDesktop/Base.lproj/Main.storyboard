@@ -69,7 +69,7 @@
                                     </textField>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="C3t-AS-aWY">
                                         <rect key="frame" x="0.0" y="124" width="300" height="50"/>
-                                        <color key="backgroundColor" red="0.36013889312744141" green="0.71337145566940308" blue="0.84659940004348755" alpha="0.83553617294520544" colorSpace="custom" customColorSpace="sRGB"/>
+                                        <color key="backgroundColor" red="0.36078431372549019" green="0.71372549019607845" blue="0.84705882352941175" alpha="0.83553617294520544" colorSpace="custom" customColorSpace="sRGB"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="50" id="nGs-ur-YTb"/>
                                         </constraints>
@@ -469,28 +469,6 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="view_button" translatesAutoresizingMaskIntoConstraints="NO" id="mfB-40-6yd">
-                                <rect key="frame" x="342" y="84.5" width="25" height="25"/>
-                                <constraints>
-                                    <constraint firstAttribute="width" secondItem="mfB-40-6yd" secondAttribute="height" id="5ON-tO-MJy"/>
-                                    <constraint firstAttribute="width" constant="25" id="SQo-8g-19d"/>
-                                </constraints>
-                            </imageView>
-                            <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="SXn-6d-8BK">
-                                <rect key="frame" x="0.0" y="140" width="375" height="527"/>
-                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
-                                <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="2" minimumInteritemSpacing="2" id="upd-Pc-LSU">
-                                    <size key="itemSize" width="100" height="101"/>
-                                    <size key="headerReferenceSize" width="0.0" height="0.0"/>
-                                    <size key="footerReferenceSize" width="0.0" height="0.0"/>
-                                    <inset key="sectionInset" minX="10" minY="10" maxX="10" maxY="10"/>
-                                </collectionViewFlowLayout>
-                                <cells/>
-                                <connections>
-                                    <outlet property="dataSource" destination="7FO-oG-1lh" id="ZE2-cJ-aGe"/>
-                                    <outlet property="delegate" destination="7FO-oG-1lh" id="72l-qa-ROQ"/>
-                                </connections>
-                            </collectionView>
                             <stackView opaque="NO" contentMode="scaleToFill" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="QNH-D5-5oo">
                                 <rect key="frame" x="8" y="82" width="359" height="50"/>
                                 <subviews>
@@ -527,29 +505,55 @@
                                     <constraint firstItem="TUA-gC-xyF" firstAttribute="trailing" secondItem="QNH-D5-5oo" secondAttribute="trailingMargin" id="A4p-sd-g4W"/>
                                 </constraints>
                             </stackView>
+                            <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="SXn-6d-8BK">
+                                <rect key="frame" x="0.0" y="140" width="375" height="467"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                                <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="2" minimumInteritemSpacing="2" id="upd-Pc-LSU">
+                                    <size key="itemSize" width="100" height="101"/>
+                                    <size key="headerReferenceSize" width="0.0" height="0.0"/>
+                                    <size key="footerReferenceSize" width="0.0" height="0.0"/>
+                                    <inset key="sectionInset" minX="10" minY="10" maxX="10" maxY="10"/>
+                                </collectionViewFlowLayout>
+                                <cells/>
+                                <connections>
+                                    <outlet property="dataSource" destination="7FO-oG-1lh" id="ZE2-cJ-aGe"/>
+                                    <outlet property="delegate" destination="7FO-oG-1lh" id="72l-qa-ROQ"/>
+                                </connections>
+                            </collectionView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ORL-LD-vH7">
+                                <rect key="frame" x="100" y="612" width="175" height="40"/>
+                                <color key="backgroundColor" red="0.36078431372549019" green="0.71372549019607845" blue="0.84705882352941175" alpha="0.8473022876142644" colorSpace="custom" customColorSpace="displayP3"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="40" id="Jxv-fh-t3L"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
+                                <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                <state key="normal" title="Next">
+                                    <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                </state>
+                                <connections>
+                                    <action selector="nextOnTap:" destination="7FO-oG-1lh" eventType="touchUpInside" id="ZdQ-LE-cFJ"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="wPX-kl-DyH"/>
                         <color key="backgroundColor" red="0.94359081980000004" green="0.93746620420000004" blue="0.941044569" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
+                            <constraint firstItem="ORL-LD-vH7" firstAttribute="leading" secondItem="wPX-kl-DyH" secondAttribute="leading" constant="100" id="1dl-z5-cnZ"/>
                             <constraint firstItem="wPX-kl-DyH" firstAttribute="trailing" secondItem="SXn-6d-8BK" secondAttribute="trailing" id="2bG-6s-Xsk"/>
                             <constraint firstItem="SXn-6d-8BK" firstAttribute="leading" secondItem="wPX-kl-DyH" secondAttribute="leading" id="9lX-Qk-VSH"/>
+                            <constraint firstItem="ORL-LD-vH7" firstAttribute="top" secondItem="SXn-6d-8BK" secondAttribute="bottom" constant="5" id="HTh-9a-srl"/>
                             <constraint firstItem="SXn-6d-8BK" firstAttribute="top" secondItem="QNH-D5-5oo" secondAttribute="bottom" constant="8" id="Qr3-eT-IaA"/>
-                            <constraint firstItem="wPX-kl-DyH" firstAttribute="bottom" secondItem="SXn-6d-8BK" secondAttribute="bottom" id="W8C-k4-Akh"/>
-                            <constraint firstItem="wPX-kl-DyH" firstAttribute="trailing" secondItem="mfB-40-6yd" secondAttribute="trailing" constant="8" id="k1h-J0-vhf"/>
-                            <constraint firstItem="mfB-40-6yd" firstAttribute="centerY" secondItem="QNH-D5-5oo" secondAttribute="centerY" id="lrv-mw-A79"/>
-                            <constraint firstItem="mfB-40-6yd" firstAttribute="leading" secondItem="QNH-D5-5oo" secondAttribute="trailing" constant="8" id="mXP-Jf-19Q"/>
+                            <constraint firstItem="wPX-kl-DyH" firstAttribute="bottom" secondItem="ORL-LD-vH7" secondAttribute="bottom" constant="15" id="Y9z-UN-qj1"/>
+                            <constraint firstItem="wPX-kl-DyH" firstAttribute="trailing" secondItem="ORL-LD-vH7" secondAttribute="trailing" constant="100" id="dvY-Lz-lyu"/>
                             <constraint firstItem="wPX-kl-DyH" firstAttribute="trailing" secondItem="QNH-D5-5oo" secondAttribute="trailing" constant="8" id="tSn-bN-ZpN"/>
                             <constraint firstItem="QNH-D5-5oo" firstAttribute="top" secondItem="wPX-kl-DyH" secondAttribute="top" constant="8" id="wqf-5h-yKP"/>
                             <constraint firstItem="QNH-D5-5oo" firstAttribute="leading" secondItem="wPX-kl-DyH" secondAttribute="leading" constant="8" id="xY2-37-ZiY"/>
                         </constraints>
-                        <variation key="default">
-                            <mask key="subviews">
-                                <exclude reference="mfB-40-6yd"/>
-                            </mask>
-                        </variation>
                     </view>
                     <navigationItem key="navigationItem" title="Lab Order" id="Ple-sN-l6T"/>
                     <connections>
+                        <outlet property="btnNext" destination="ORL-LD-vH7" id="iUB-XA-CH4"/>
                         <outlet property="collectioView" destination="SXn-6d-8BK" id="SUm-Hf-jQt"/>
                         <outlet property="dropDownView" destination="TUA-gC-xyF" id="0AC-Yk-Ogf"/>
                         <outlet property="selectionTitleLabel" destination="QE3-bb-pQQ" id="OgF-Yy-LFL"/>
@@ -1351,7 +1355,6 @@
         <image name="rightIconn" width="225" height="225"/>
         <image name="search" width="225" height="225"/>
         <image name="unchecked" width="50" height="50"/>
-        <image name="view_button" width="75" height="47"/>
         <systemColor name="systemGreenColor">
             <color red="0.20392156862745098" green="0.7803921568627451" blue="0.34901960784313724" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>

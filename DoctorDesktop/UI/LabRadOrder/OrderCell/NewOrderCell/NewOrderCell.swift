@@ -44,6 +44,10 @@ class NewOrderCell: UICollectionViewCell {
     
     func setSelect() {
         btnChecked.setImage(UIImage(named: isSelectedServices ? "checked":"unchecked"), for: .normal)
+        for (i,item) in dataSources.enumerated() {
+            dataSources[i].isSelected = isSelectedServices
+            print(item)
+        }
     }
     
     @IBAction func viewAllOnTap(_ sender: Any) {

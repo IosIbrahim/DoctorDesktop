@@ -17,7 +17,8 @@ class OrderCollectionViewController: UIViewController, NVActivityIndicatorViewab
   @IBOutlet weak var dropDownView: UIView!
   @IBOutlet weak var selectionTitleLabel: UILabel!
   
-  private var presenter: OrderCollectionPresenter!
+    @IBOutlet weak var btnNext: UIButton!
+    private var presenter: OrderCollectionPresenter!
   private var orderCellMaker: DependencyRegistry.OrderCellMaker!
   private weak var navigationCoordinator: NavigationCoordinator?
   lazy var toastBar: ToastBar = .init(settings: .agent, in: parent?.view)
@@ -46,13 +47,14 @@ class OrderCollectionViewController: UIViewController, NVActivityIndicatorViewab
 //    self.navigationItem.leftBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "menu_icon"), style: .plain, target: self, action: #selector(didPressMenu))
 
     switch presenter.templateType {
-    case .labOrder: title = "Lab Order"
-    case .radOrder: title = "Rad Order"
+        case .labOrder: title = "Lab Order"
+        case .radOrder: title = "Rad Order"
     }
       OrderCell.register(with: collectioView)
       NewOrderCell.register(with: collectioView)
     dropDownView.layer.cornerRadius = 10
     startAnimating(message: "Load Template...")
+    btnNext.layer.cornerRadius = 10
     presenter.getTemplate() {
       self.setupDropDownMenu(dropDown: self.dropDown)
       self.selectionTitleLabel.text = self.presenter.template?.serviceTemplates.first?.name
@@ -69,6 +71,41 @@ class OrderCollectionViewController: UIViewController, NVActivityIndicatorViewab
   @IBAction func didPressDownArrow(sender: Any) {
     dropDown.show()
   }
+    
+    @IBAction func nextOnTap(_ sender: Any) {
+        if let tem  = presenter.template {
+            if var first = tem.servicesCategories.first {
+                for item in tem.servicesCategories {
+                    if item.isSelect {
+                        first = item
+                        break
+                    }
+                }
+                var servises = [Service]()
+                for item in tem.servicesCategories {
+                    for ser in item.services ?? [] {
+                        if ser.isSelected {
+                            servises.append(ser)
+                        }
+                    }
+                }
+                first.services = servises
+                if !servises.isEmpty {
+                    let args = ["patient": presenter.patient,
+                                "serviceCategory": first,
+                                "templateType": self.presenter.templateType,
+                                "generalParams": tem.generalParams,
+                                "user": presenter.user] as [String : Any]
+                    navigationCoordinator?.next(arguments: args)
+                }else {
+                    toastBar.show(with: "Please Choose Services")
+                }
+            }
+            
+        }
+       
+    }
+    
 }
 
 extension OrderCollectionViewController {
@@ -147,15 +184,24 @@ extension OrderCollectionViewController: UICollectionViewDelegate {
 //                "generalParams": self.presenter.template!.generalParams,
 //                "user": presenter.user] as [String : Any]
 //    
-//    navigationCoordinator?.next(arguments: args)
+   // navigationCoordinator?.next(arguments: args)
   }
 }
 
 extension OrderCollectionViewController:ServiceCategorySelectProtocol {
     func setServiceCategorySelect(_ index:Int,services:[Service]) {
-        let isselect = presenter.template?.servicesCategories[index].isSelect  ?? false
-        presenter.template?.servicesCategories[index].isSelect = !isselect
+        var isServicesSelect = true
+        for item in services {
+            if !item.isSelected {
+                isServicesSelect = false
+                break
+            }
+        }
+        let isselect = isServicesSelect
+        presenter.template?.servicesCategories[index].isSelect = isServicesSelect
+        presenter.template?.servicesCategories[index].services = services
         
+        collectioView.reloadData()
     }
     
     func showServiceInstruction( _ info:String) {
