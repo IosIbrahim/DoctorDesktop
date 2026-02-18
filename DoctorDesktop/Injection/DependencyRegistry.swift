@@ -39,6 +39,8 @@ protocol DependencyRegistry {
   typealias DiagnosisCellMaker = (UITableView, IndexPath, Diagnosis) -> DiagnosisCell
   typealias AllergyFindingComplaintHistoryCellMaker = (UITableView, IndexPath, AllergyFindingComplaintHistory) -> AllergyFindingComplaintHistoryCell
   typealias RadTestCellMaker = (UITableView, IndexPath, Rad) -> RadTestCell
+  typealias LabCellMaker = (UITableView, IndexPath, Lab) -> LabsCell
+
   typealias ScoringCellMaker = (UITableView, IndexPath, Scoring) -> ScoringCell
   typealias OperationCatheterizationEndoscopyCellMaker = (UITableView, IndexPath, OperationCatherEndoscopy) -> OperationCatheterizationEndoscopyCell
   typealias ClinicalServiceCellMaker = (UITableView, IndexPath, ClinicService) -> ClinicServiceCell

@@ -26,6 +26,9 @@
 		0FC00F692F32426300223775 /* NewOrderCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0FC00F672F32426300223775 /* NewOrderCell.xib */; };
 		0FC00F6D2F32491300223775 /* InnerServiceCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FC00F6B2F32491300223775 /* InnerServiceCell.swift */; };
 		0FC00F6E2F32491300223775 /* InnerServiceCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0FC00F6C2F32491300223775 /* InnerServiceCell.xib */; };
+		0FE935D12F44C0E8008CB2B5 /* LabsCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FE935CF2F44C0E8008CB2B5 /* LabsCell.swift */; };
+		0FE935D22F44C0E8008CB2B5 /* LabsCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0FE935D02F44C0E8008CB2B5 /* LabsCell.xib */; };
+		0FE935D42F44C17D008CB2B5 /* LabPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FE935D32F44C172008CB2B5 /* LabPresenter.swift */; };
 		3608D4BB2088793400310D60 /* PediatricsScorePopUpCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3608D4B82088793300310D60 /* PediatricsScorePopUpCell.swift */; };
 		3608D4BC2088793400310D60 /* PediatricsScorePopUpCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3608D4B92088793300310D60 /* PediatricsScorePopUpCell.xib */; };
 		3608D4BD2088793400310D60 /* PediatricsScorePopUpCellPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3608D4BA2088793300310D60 /* PediatricsScorePopUpCellPresenter.swift */; };
@@ -250,6 +253,9 @@
 		0FC00F672F32426300223775 /* NewOrderCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = NewOrderCell.xib; sourceTree = "<group>"; };
 		0FC00F6B2F32491300223775 /* InnerServiceCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InnerServiceCell.swift; sourceTree = "<group>"; };
 		0FC00F6C2F32491300223775 /* InnerServiceCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = InnerServiceCell.xib; sourceTree = "<group>"; };
+		0FE935CF2F44C0E8008CB2B5 /* LabsCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabsCell.swift; sourceTree = "<group>"; };
+		0FE935D02F44C0E8008CB2B5 /* LabsCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = LabsCell.xib; sourceTree = "<group>"; };
+		0FE935D32F44C172008CB2B5 /* LabPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabPresenter.swift; sourceTree = "<group>"; };
 		3608D4B82088793300310D60 /* PediatricsScorePopUpCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PediatricsScorePopUpCell.swift; sourceTree = "<group>"; };
 		3608D4B92088793300310D60 /* PediatricsScorePopUpCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PediatricsScorePopUpCell.xib; sourceTree = "<group>"; };
 		3608D4BA2088793300310D60 /* PediatricsScorePopUpCellPresenter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PediatricsScorePopUpCellPresenter.swift; sourceTree = "<group>"; };
@@ -517,6 +523,16 @@
 			path = InnerServiceCell;
 			sourceTree = "<group>";
 		};
+		0FE935CE2F44C0BD008CB2B5 /* Labs */ = {
+			isa = PBXGroup;
+			children = (
+				0FE935D32F44C172008CB2B5 /* LabPresenter.swift */,
+				0FE935CF2F44C0E8008CB2B5 /* LabsCell.swift */,
+				0FE935D02F44C0E8008CB2B5 /* LabsCell.xib */,
+			);
+			path = Labs;
+			sourceTree = "<group>";
+		};
 		2ECCD2F9846C22A07F083A7A /* Pods */ = {
 			isa = PBXGroup;
 			children = (
@@ -598,6 +614,7 @@
 		363768592091C5C400CE45D8 /* OverviewSectionDetailsCells */ = {
 			isa = PBXGroup;
 			children = (
+				0FE935CE2F44C0BD008CB2B5 /* Labs */,
 				3637685A2091C5C400CE45D8 /* MedicationCell */,
 				3637685E2091C5C400CE45D8 /* RadTestCell */,
 				363768622091C5C400CE45D8 /* ClinicServiceCell */,
@@ -1382,6 +1399,7 @@
 				368604E32017AEC4004A6D0B /* Roboto-Thin.ttf in Resources */,
 				363768992091C5C400CE45D8 /* VitalSignCell.xib in Resources */,
 				368604E12017AEC4004A6D0B /* Roboto-MediumItalic.ttf in Resources */,
+				0FE935D22F44C0E8008CB2B5 /* LabsCell.xib in Resources */,
 				366D86462087E97A008B16BF /* HistorySymptomsPopUpView.xib in Resources */,
 				363D1F9A208F48E900CF163D /* notes.svg in Resources */,
 				368604DE2017AEC4004A6D0B /* Roboto-Light.ttf in Resources */,
@@ -1580,6 +1598,7 @@
 				365A35971FE15ED9002B34D4 /* InpatientCellPresenter.swift in Sources */,
 				0E1029522337956A00653CAB /* precriptionDetailsCell.swift in Sources */,
 				3608D4BD2088793400310D60 /* PediatricsScorePopUpCellPresenter.swift in Sources */,
+				0FE935D12F44C0E8008CB2B5 /* LabsCell.swift in Sources */,
 				363DACF21FDFA64700902A83 /* ComponentCellPresenter.swift in Sources */,
 				36D1AC57202C98B100F120BA /* SwinjectStoryboard+Extensions.swift in Sources */,
 				366D86452087E97A008B16BF /* SymptomCategoryCellPresenter.swift in Sources */,
@@ -1588,6 +1607,7 @@
 				0E206BBD23325E9900E25EFB /* precrition.swift in Sources */,
 				363768A72091C5C400CE45D8 /* OverviewSectionDetailsPresenter.swift in Sources */,
 				0E1EE25F2338CDD100E9CF3C /* searchVC.swift in Sources */,
+				0FE935D42F44C17D008CB2B5 /* LabPresenter.swift in Sources */,
 				363768902091C5C400CE45D8 /* RadTestCellPresenter.swift in Sources */,
 				363768912091C5C400CE45D8 /* RadTestCell.swift in Sources */,
 				366D864A2087E97A008B16BF /* SymptomCell.swift in Sources */,
