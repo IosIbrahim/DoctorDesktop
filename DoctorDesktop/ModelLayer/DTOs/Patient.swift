@@ -79,43 +79,174 @@ struct InpatientPatient: Decodable, Patient {
 }
 
 struct OutpatientPatient: Decodable, Patient {
-  private let nameInEnglish: String
-  private let nameInArabic: String
-  private let nationalityInEnglish: String
-  private let nationalityInArabic: String
-  private let doctorNameInEnglish: String
-  private let doctorNameInArabic: String
-  let serviceStatus: String
-
-  var id: String
-  var genderAge: String
-  var visitId: String
-  var placeId: String
-  var financialAccount: String
-  var flagImageName: String
-  var countyFlag: UIImage?
-    var date:String
-  var name: String { return nameInEnglish }
-  var nationality: String { return nationalityInEnglish }
-
-  var doctorName: String { return doctorNameInEnglish }
+    private let ageDec: String
+    var walkFlag :String?
+    var assistantDocID:String?
+    var btnCategory:String?
+    var cashierFlag:String?
+    var checkPatHasOPD:String?
+    var clinitLetter:String?
+    var clinicNameAr:String?
+    var clinicNameEN:String?
+    private let nameInEnglish: String
+    private let nameInArabic: String
+    var convReq:String?
+    var convConsultionID:String?
+    var convRemark:String?
+    var ctasScore:String?
+    var dischargeFlag:String?
+    var dsiplayMode:String?
+    var doneDoctorId:String?
+    var empNameAr:String?
+    var empNameEn:String?
+    var erFlag:String?
+    var expectedDate:String?
+    var genderAGE: String
+    var genderAgeNameAr:String?
+    var genderAgeNameEn:String?
+    var genderNameAr:String?
+    var genderNameEn:String?
+    var highLightFlag:String?
+    var homeVisitFlag:String?
+    var mappedClinicID:String?
+    var motherPatientID:String?
+    var motherVisitID:String?
+    private let nationalityInEnglish: String
+    private let nationalityInArabic: String
+    var newBornIn:String?
+    var newBornOut:String?
+    var noSpecialConsution:String?
+    var opCallArrivalDate:String?
+    var outNoofPats:String?
+    var overBook:String?
+    var painAssessValue:String?
+    var patFinanCount:String?
+    var patID: String
+    var patMobile:String?
+    var patClinicFlag:String?
+    var patNoteDesc:String?
+    var patStatusNameAr:String?
+    var patStatusNameEn:String?
+    var patImage: String?
+    var placeID:String?
+    var queueMappedID:String?
+    var queueScreenCalled:String?
+    var queSer:String?
+    var queSysSer:String?
+    var recallStatus:String?
+    var resDate:String?
+    var resType:String?
+    var schedSerial:String?
+    var ser:String?
+    var serColor:String?
+    var serviceNameAr:String?
+    var serviceNameEn:String?
+    var serviceTime:String?
+    var serVStatus:String?
+    var serVStatusNameEn:String?
+    var serVStatusNameAr:String?
+    var shiftID:String?
+    var sigQueueID:String?
+    var spec:String?
+    var vip:String?
+    var vipLevel:String?
+    var virology:String?
+    var visitID: String
+    var scores: [ClinicalPatientScore]?
+    var panicLabResults: [ClinicalPatientPanicLabRadResult]?
+    var panicRadResults: [ClinicalPatientPanicLabRadResult]?
+    
+    
+    var id: String { return patID }
+    var genderAge: String { return genderAgeNameEn ?? "" }
+    var visitId: String { return visitID }
+    var placeId: String { return placeID ?? "" }
+    var date: String { return expectedDate ?? ""  }
+    var financialAccount: String { return patFinanCount ?? "" }
+    var flagImageName: String { return patImage ?? "" }
+    var countyFlag: UIImage?
+    var name: String { return nameInEnglish }
+    var nationality: String { return nationalityInEnglish }
+    var age: String { return ageDec }
+    
 
   enum CodingKeys: String, CodingKey {
-    case nameInEnglish = "COMPLETEPATNAME_EN"
-    case nameInArabic = "COMPLETEPATNAME"
-    case nationalityInEnglish = "NAT_NAME_EN"
-    case nationalityInArabic = "NAT_NAME_AR"
-    case doctorNameInEnglish = "EMP_NAME_EN"
-    case doctorNameInArabic = "EMP_NAME_AR"
-    case serviceStatus = "SERVSTATUS"
-
-    case id = "PATIENTID"
-    case genderAge = "GENDER_AGE"
-    case visitId = "VISIT_ID"
-    case placeId = "PLACE_ID"
-    case financialAccount = "PATFINANACCOUNT"
-    case flagImageName = "PIC_PATH"
-    case date = "VISIT_START_DATE"
+      case ageDec = "AGE_DESC"
+      case walkFlag = "APPOINTMENT_WALKIN_FLAG"
+      case assistantDocID = "ASSISTANT_DOCID"
+      case btnCategory = "BUTTON_CATEGORY"
+      case cashierFlag = "CASHIER_FLAG"
+      case checkPatHasOPD = "CHECK_PAT_HAS_OPD_VITAL"
+      case clinitLetter = "CLINIC_LETTER"
+      case clinicNameAr = "CLINIC_NAME_AR"
+      case clinicNameEN = "CLINIC_NAME_EN"
+      case nameInEnglish = "COMPLETEPATNAME_EN"
+      case nameInArabic = "COMPLETEPATNAME"
+      case convReq = "CONV_REQ"
+      case convConsultionID = "CONV_REQ_CONSULTAION_ID"
+      case convRemark = "CONV_REQ_REMARK"
+      case ctasScore = "CTAS_SCORE_VALUE"
+      case dischargeFlag = "DISCHARGE_FLAG"
+      case dsiplayMode = "DISPLAY_MODE"
+      case doneDoctorId = "DONEDOCTORID"
+      case empNameAr = "EMP_NAME_AR"
+      case empNameEn = "EMP_NAME_EN"
+      case erFlag = "ER_BOUNCE_BACK_FLAG"
+      case expectedDate = "EXPECTEDDONEDATE"
+      case genderAGE = "GENDER_AGE"
+      case genderAgeNameAr = "GENDER_AGE_NAME_AR"
+      case genderAgeNameEn = "GENDER_AGE_NAME_EN"
+      case genderNameAr = "GENDER_NAME_AR"
+      case genderNameEn = "GENDER_NAME_EN"
+      case highLightFlag = "HIGHLIGHT_FLAG"
+      case homeVisitFlag = "HOME_VISIT_FLAG"
+      case mappedClinicID = "MAPPED_CLINIC_ID"
+      case motherPatientID = "MOTHER_PATIENTID"
+      case motherVisitID = "MOTHER_VISIT_ID"
+      case nationalityInEnglish = "NAT_NAME_EN"
+      case nationalityInArabic = "NAT_NAME_AR"
+      case newBornIn = "NEW_BORN_IN"
+      case newBornOut = "NEW_BORN_OUT"
+      case noSpecialConsution = "NO_SPECIALITY_CONSULTATION"
+      case opCallArrivalDate = "OP_CALL_ARRIVAL_DATE"
+      case outNoofPats = "OUT_OF_NOOF_PATS"
+      case overBook = "OVER_BOOK"
+      case painAssessValue = "PAIN_ASSESMENT_VALUE"
+      case patFinanCount = "PATFINANACCOUNT"
+      case patID = "PATIENTID"
+      case patMobile = "PATIENT_MOBILE"
+      case patClinicFlag = "PAT_CLINICS_FLAG"
+      case patNoteDesc = "PAT_NOTE_DESC"
+      case patStatusNameAr = "PAT_STATUS_NAME_AR"
+      case patStatusNameEn = "PAT_STATUS_NAME_EN"
+      case patImage = "PIC_PATH"
+      case placeID = "PLACE_ID"
+      case queueMappedID = "QUEUE_MAPPED_SERVICE_POINT_ID"
+      case queueScreenCalled = "QUEUE_SCREEN_CALLED"
+      case queSer = "QUE_SER"
+      case queSysSer = "QUE_SYS_SER"
+      case recallStatus = "RECALL_STATUS"
+      case resDate = "RES_DATE"
+      case resType = "RES_TYPE"
+      case schedSerial = "SCHED_SERIAL"
+      case ser = "SER"
+      case serColor = "SERVICE_COLOR"
+      case serviceNameAr = "SERVICE_NAME_AR"
+      case serviceNameEn = "SERVICE_NAME_EN"
+      case serviceTime = "SERVICE_TIME"
+      case serVStatus = "SERVSTATUS"
+      case serVStatusNameEn = "SERVSTATUS_NAME_EN"
+      case serVStatusNameAr = "SERVSTATUS_NAME_AR"
+      case shiftID = "SHIFT_ID"
+      case sigQueueID = "SIH_QUEUE_ID"
+      case spec = "SPEC"
+      case vip = "VIP"
+      case vipLevel = "VIP_LEVEL"
+      case virology = "VIROLOGY"
+      case visitID = "VISIT_ID"
+      case scores = "PAT_SCORES"
+      case panicLabResults = "PANIC_LAB_RESULTS"
+      case panicRadResults = "PANIC_RAD_RESULTS"
   }
 }
 
@@ -134,7 +265,7 @@ struct EmergencyPatient: Decodable, Patient {
   var genderAge: String
   var visitId: String
   var placeId: String
-    var date:String { return visitStartDate}
+  var date:String { return visitStartDate}
   var financialAccount: String
   var flagImageName: String
   var countyFlag: UIImage?
@@ -164,49 +295,174 @@ struct EmergencyPatient: Decodable, Patient {
 }
 
 struct ClinicalPatient: Decodable, Patient {
-
-  private let nameInEnglish: String
-  private let nameInArabic: String
-  private let nationalityInEnglish: String
-  private let nationalityInArabic: String
-  private let ageInEnglish: String
-  private let ageInArabic: String
-
-  var id: String
-  var genderAge: String
-  var visitId: String
- var date:String
-  var financialAccount: String
-  var flagImageName: String
-  var countyFlag: UIImage?
-  var name: String { return nameInEnglish }
-  var nationality: String { return nationalityInEnglish }
-  var placeId: String { return "" }
-
-  var age: String { return ageInEnglish }
-
-  var scores: [ClinicalPatientScore]?
-  var panicLabResults: [ClinicalPatientPanicLabRadResult]?
-  var panicRadResults: [ClinicalPatientPanicLabRadResult]?
+    private let ageDec: String
+    var walkFlag :String?
+    var assistantDocID:String?
+    var btnCategory:String?
+    var cashierFlag:String?
+    var checkPatHasOPD:String?
+    var clinitLetter:String?
+    var clinicNameAr:String?
+    var clinicNameEN:String?
+    private let nameInEnglish: String
+    private let nameInArabic: String
+    var convReq:String?
+    var convConsultionID:String?
+    var convRemark:String?
+    var ctasScore:String?
+    var dischargeFlag:String?
+    var dsiplayMode:String?
+    var doneDoctorId:String?
+    var empNameAr:String?
+    var empNameEn:String?
+    var erFlag:String?
+    var expectedDate:String?
+    var genderAGE: String
+    var genderAgeNameAr:String?
+    var genderAgeNameEn:String?
+    var genderNameAr:String?
+    var genderNameEn:String?
+    var highLightFlag:String?
+    var homeVisitFlag:String?
+    var mappedClinicID:String?
+    var motherPatientID:String?
+    var motherVisitID:String?
+    private let nationalityInEnglish: String
+    private let nationalityInArabic: String
+    var newBornIn:String?
+    var newBornOut:String?
+    var noSpecialConsution:String?
+    var opCallArrivalDate:String?
+    var outNoofPats:String?
+    var overBook:String?
+    var painAssessValue:String?
+    var patFinanCount:String?
+    var patID: String
+    var patMobile:String?
+    var patClinicFlag:String?
+    var patNoteDesc:String?
+    var patStatusNameAr:String?
+    var patStatusNameEn:String?
+    var patImage: String?
+    var placeID:String?
+    var queueMappedID:String?
+    var queueScreenCalled:String?
+    var queSer:String?
+    var queSysSer:String?
+    var recallStatus:String?
+    var resDate:String?
+    var resType:String?
+    var schedSerial:String?
+    var ser:String?
+    var serColor:String?
+    var serviceNameAr:String?
+    var serviceNameEn:String?
+    var serviceTime:String?
+    var serVStatus:String?
+    var serVStatusNameEn:String?
+    var serVStatusNameAr:String?
+    var shiftID:String?
+    var sigQueueID:String?
+    var spec:String?
+    var vip:String?
+    var vipLevel:String?
+    var virology:String?
+    var visitID: String
+    var scores: [ClinicalPatientScore]?
+    var panicLabResults: [ClinicalPatientPanicLabRadResult]?
+    var panicRadResults: [ClinicalPatientPanicLabRadResult]?
+    
+    
+    var id: String { return patID }
+    var genderAge: String { return genderAgeNameEn ?? "" }
+    var visitId: String { return visitID }
+    var placeId: String { return placeID ?? "" }
+    var date: String { return expectedDate ?? ""  }
+    var financialAccount: String { return patFinanCount ?? "" }
+    var flagImageName: String { return patImage ?? "" }
+    var countyFlag: UIImage?
+    var name: String { return nameInEnglish }
+    var nationality: String { return nationalityInEnglish }
+    var age: String { return ageDec }
+    
 
   enum CodingKeys: String, CodingKey {
-    case nameInEnglish = "COMPLETEPATNAME_EN"
-    case nameInArabic = "COMPLETEPATNAME_AR"
-    case nationalityInEnglish = "NAT_NAME_EN"
-    case nationalityInArabic = "NAT_NAME_AR"
-    case ageInEnglish = "AGE_DESC_ROUND_EN"
-    case ageInArabic = "AGE_DESC_ROUND_AR"
-
-    case id = "PATIENTID"
-    case genderAge = "GENDER_AGE"
-    case visitId = "VISIT_ID"
-    case financialAccount = "PATFINANACCOUNT"
-    case flagImageName = "PIC_PATH"
-
-    case scores = "PAT_SCORES"
-    case panicLabResults = "PANIC_LAB_RESULT"
-    case panicRadResults = "PANIC_RAD_RESULT"
-    case date = "VISIT_START_DATE"
+      case ageDec = "AGE_DESC"
+      case walkFlag = "APPOINTMENT_WALKIN_FLAG"
+      case assistantDocID = "ASSISTANT_DOCID"
+      case btnCategory = "BUTTON_CATEGORY"
+      case cashierFlag = "CASHIER_FLAG"
+      case checkPatHasOPD = "CHECK_PAT_HAS_OPD_VITAL"
+      case clinitLetter = "CLINIC_LETTER"
+      case clinicNameAr = "CLINIC_NAME_AR"
+      case clinicNameEN = "CLINIC_NAME_EN"
+      case nameInEnglish = "COMPLETEPATNAME_EN"
+      case nameInArabic = "COMPLETEPATNAME"
+      case convReq = "CONV_REQ"
+      case convConsultionID = "CONV_REQ_CONSULTAION_ID"
+      case convRemark = "CONV_REQ_REMARK"
+      case ctasScore = "CTAS_SCORE_VALUE"
+      case dischargeFlag = "DISCHARGE_FLAG"
+      case dsiplayMode = "DISPLAY_MODE"
+      case doneDoctorId = "DONEDOCTORID"
+      case empNameAr = "EMP_NAME_AR"
+      case empNameEn = "EMP_NAME_EN"
+      case erFlag = "ER_BOUNCE_BACK_FLAG"
+      case expectedDate = "EXPECTEDDONEDATE"
+      case genderAGE = "GENDER_AGE"
+      case genderAgeNameAr = "GENDER_AGE_NAME_AR"
+      case genderAgeNameEn = "GENDER_AGE_NAME_EN"
+      case genderNameAr = "GENDER_NAME_AR"
+      case genderNameEn = "GENDER_NAME_EN"
+      case highLightFlag = "HIGHLIGHT_FLAG"
+      case homeVisitFlag = "HOME_VISIT_FLAG"
+      case mappedClinicID = "MAPPED_CLINIC_ID"
+      case motherPatientID = "MOTHER_PATIENTID"
+      case motherVisitID = "MOTHER_VISIT_ID"
+      case nationalityInEnglish = "NAT_NAME_EN"
+      case nationalityInArabic = "NAT_NAME_AR"
+      case newBornIn = "NEW_BORN_IN"
+      case newBornOut = "NEW_BORN_OUT"
+      case noSpecialConsution = "NO_SPECIALITY_CONSULTATION"
+      case opCallArrivalDate = "OP_CALL_ARRIVAL_DATE"
+      case outNoofPats = "OUT_OF_NOOF_PATS"
+      case overBook = "OVER_BOOK"
+      case painAssessValue = "PAIN_ASSESMENT_VALUE"
+      case patFinanCount = "PATFINANACCOUNT"
+      case patID = "PATIENTID"
+      case patMobile = "PATIENT_MOBILE"
+      case patClinicFlag = "PAT_CLINICS_FLAG"
+      case patNoteDesc = "PAT_NOTE_DESC"
+      case patStatusNameAr = "PAT_STATUS_NAME_AR"
+      case patStatusNameEn = "PAT_STATUS_NAME_EN"
+      case patImage = "PIC_PATH"
+      case placeID = "PLACE_ID"
+      case queueMappedID = "QUEUE_MAPPED_SERVICE_POINT_ID"
+      case queueScreenCalled = "QUEUE_SCREEN_CALLED"
+      case queSer = "QUE_SER"
+      case queSysSer = "QUE_SYS_SER"
+      case recallStatus = "RECALL_STATUS"
+      case resDate = "RES_DATE"
+      case resType = "RES_TYPE"
+      case schedSerial = "SCHED_SERIAL"
+      case ser = "SER"
+      case serColor = "SERVICE_COLOR"
+      case serviceNameAr = "SERVICE_NAME_AR"
+      case serviceNameEn = "SERVICE_NAME_EN"
+      case serviceTime = "SERVICE_TIME"
+      case serVStatus = "SERVSTATUS"
+      case serVStatusNameEn = "SERVSTATUS_NAME_EN"
+      case serVStatusNameAr = "SERVSTATUS_NAME_AR"
+      case shiftID = "SHIFT_ID"
+      case sigQueueID = "SIH_QUEUE_ID"
+      case spec = "SPEC"
+      case vip = "VIP"
+      case vipLevel = "VIP_LEVEL"
+      case virology = "VIROLOGY"
+      case visitID = "VISIT_ID"
+      case scores = "PAT_SCORES"
+      case panicLabResults = "PANIC_LAB_RESULTS"
+      case panicRadResults = "PANIC_RAD_RESULTS"
   }
 
   enum CodingKeysRows: String, CodingKey {
@@ -216,21 +472,91 @@ struct ClinicalPatient: Decodable, Patient {
   }
 }
 
+
+
 extension ClinicalPatient {
   init(from decoder: Decoder) throws {
-    let container = try decoder.container(keyedBy: CodingKeys.self)
-    let nameInEnglish = try container.decode(String.self, forKey: .nameInEnglish)
-    let nameInArabic = try container.decode(String.self, forKey: .nameInArabic)
-    let nationalityInEnglish = try container.decode(String.self, forKey: .nationalityInEnglish)
-    let nationalityInArabic = try container.decode(String.self, forKey: .nationalityInArabic)
-    let ageInEnglish = try container.decode(String.self, forKey: .ageInEnglish)
-    let ageInArabic = try container.decode(String.self, forKey: .ageInArabic)
-    let id = try container.decode(String.self, forKey: .id)
-    let genderAge = try container.decode(String.self, forKey: .genderAge)
-    let visitId = try container.decode(String.self, forKey: .visitId)
-    let date = try container.decode(String.self, forKey: .date)
-    let financialAccount = try container.decode(String.self, forKey: .financialAccount)
-    let flagImageName = try container.decode(String.self, forKey: .flagImageName)
+      let container = try decoder.container(keyedBy: CodingKeys.self)
+      let ageDec = try container.decode(String.self, forKey: .ageDec)
+      let walkFlag = try container.decode(String.self, forKey: .walkFlag)
+      let assistantDocID = try container.decode(String.self, forKey: .assistantDocID)
+      let btnCategory = try container.decode(String.self, forKey: .btnCategory)
+      let cashierFlag = try container.decode(String.self, forKey: .cashierFlag)
+      let checkPatHasOPD = try container.decode(String.self, forKey: .checkPatHasOPD)
+      let clinitLetter = try container.decode(String.self, forKey: .clinitLetter)
+      let clinicNameAr = try container.decode(String.self, forKey: .clinicNameAr)
+      let clinicNameEN = try container.decode(String.self, forKey: .clinicNameEN)
+      let nameInEnglish = try container.decode(String.self, forKey: .nameInEnglish)
+      let nameInArabic = try container.decode(String.self, forKey: .nameInArabic)
+      
+      let convReq = try container.decode(String.self, forKey: .convReq)
+      let convConsultionID = try container.decode(String.self, forKey: .convConsultionID)
+      let convRemark = try container.decode(String.self, forKey: .convRemark)
+      let ctasScore = try container.decode(String.self, forKey: .ctasScore)
+      let dischargeFlag = try container.decode(String.self, forKey: .dischargeFlag)
+      let dsiplayMode = try container.decode(String.self, forKey: .dsiplayMode)
+      let doneDoctorId = try container.decode(String.self, forKey: .doneDoctorId)
+      let empNameAr = try container.decode(String.self, forKey: .empNameAr)
+      let empNameEn = try container.decode(String.self, forKey: .empNameEn)
+      let erFlag = try container.decode(String.self, forKey: .erFlag)
+      let expectedDate = try container.decode(String.self, forKey: .expectedDate)
+      
+      let genderAGE = try container.decode(String.self, forKey: .genderAGE)
+      let genderAgeNameAr = try container.decode(String.self, forKey: .genderAgeNameAr)
+      let genderAgeNameEn = try container.decode(String.self, forKey: .genderAgeNameEn)
+      let genderNameAr = try container.decode(String.self, forKey: .genderNameAr)
+      let genderNameEn = try container.decode(String.self, forKey: .genderNameEn)
+      let highLightFlag = try container.decode(String.self, forKey: .highLightFlag)
+      let homeVisitFlag = try container.decode(String.self, forKey: .homeVisitFlag)
+      let mappedClinicID = try container.decode(String.self, forKey: .mappedClinicID)
+      let motherPatientID = try container.decode(String.self, forKey: .motherPatientID)
+      let motherVisitID = try container.decode(String.self, forKey: .motherVisitID)
+      let nationalityInEnglish = try container.decode(String.self, forKey: .nationalityInEnglish)
+      
+      let nationalityInArabic = try container.decode(String.self, forKey: .nationalityInArabic)
+      let newBornIn = try container.decode(String.self, forKey: .newBornIn)
+      let newBornOut = try container.decode(String.self, forKey: .newBornOut)
+      let noSpecialConsution = try container.decode(String.self, forKey: .noSpecialConsution)
+      let opCallArrivalDate = try container.decode(String.self, forKey: .opCallArrivalDate)
+      let outNoofPats = try container.decode(String.self, forKey: .outNoofPats)
+      let overBook = try container.decode(String.self, forKey: .overBook)
+      let painAssessValue = try container.decode(String.self, forKey: .painAssessValue)
+      let patFinanCount = try container.decode(String.self, forKey: .patFinanCount)
+      let patID = try container.decode(String.self, forKey: .patID)
+      let patMobile = try container.decode(String.self, forKey: .patMobile)
+      
+      let patClinicFlag = try container.decode(String.self, forKey: .patClinicFlag)
+      let patNoteDesc = try container.decode(String.self, forKey: .patNoteDesc)
+      let patStatusNameAr = try container.decode(String.self, forKey: .patStatusNameAr)
+      let patStatusNameEn = try container.decode(String.self, forKey: .patStatusNameEn)
+      let patImage = try container.decode(String.self, forKey: .patImage)
+      let placeID = try container.decode(String.self, forKey: .placeID)
+      let queueMappedID = try container.decode(String.self, forKey: .queueMappedID)
+      let queueScreenCalled = try container.decode(String.self, forKey: .queueScreenCalled)
+      let queSer = try container.decode(String.self, forKey: .queSer)
+      let queSysSer = try container.decode(String.self, forKey: .queSysSer)
+      let recallStatus = try container.decode(String.self, forKey: .recallStatus)
+      
+      let resDate = try container.decode(String.self, forKey: .resDate)
+      let resType = try container.decode(String.self, forKey: .resType)
+      let schedSerial = try container.decode(String.self, forKey: .schedSerial)
+      let ser = try container.decode(String.self, forKey: .ser)
+      let serColor = try container.decode(String.self, forKey: .serColor)
+      let serviceNameAr = try container.decode(String.self, forKey: .serviceNameAr)
+      let serviceNameEn = try container.decode(String.self, forKey: .serviceNameEn)
+      let serviceTime = try container.decode(String.self, forKey: .serviceTime)
+      let serVStatus = try container.decode(String.self, forKey: .serVStatus)
+      let serVStatusNameEn = try container.decode(String.self, forKey: .serVStatusNameEn)
+      let serVStatusNameAr = try container.decode(String.self, forKey: .serVStatusNameAr)
+      
+      let shiftID = try container.decode(String.self, forKey: .shiftID)
+      let sigQueueID = try container.decode(String.self, forKey: .sigQueueID)
+      let spec = try container.decode(String.self, forKey: .spec)
+      let vip = try container.decode(String.self, forKey: .vip)
+      let vipLevel = try container.decode(String.self, forKey: .vipLevel)
+      let virology = try container.decode(String.self, forKey: .virology)
+      let visitID = try container.decode(String.self, forKey: .visitID)
+      
     var scores: [ClinicalPatientScore]?
     var panicLabResults: [ClinicalPatientPanicLabRadResult]?
     var panicRadResults: [ClinicalPatientPanicLabRadResult]?
@@ -256,12 +582,9 @@ extension ClinicalPatient {
         panicRadResults = tempPanicRadResults
       }
     }
-    self.init(nameInEnglish: nameInEnglish, nameInArabic: nameInArabic,
-              nationalityInEnglish: nationalityInEnglish, nationalityInArabic: nationalityInArabic,
-              ageInEnglish: ageInEnglish, ageInArabic: ageInArabic,
-              id: id, genderAge: genderAge, visitId: visitId, date:date , financialAccount: financialAccount,
-              flagImageName: flagImageName, countyFlag: nil, scores: scores,
-              panicLabResults: panicLabResults, panicRadResults: panicRadResults)
+     
+      self.init(ageDec: ageDec, walkFlag: walkFlag, assistantDocID: assistantDocID, btnCategory: btnCategory, cashierFlag: cashierFlag, checkPatHasOPD: checkPatHasOPD, clinitLetter: clinitLetter, clinicNameAr: clinicNameAr, clinicNameEN: clinicNameEN, nameInEnglish: nameInEnglish, nameInArabic: nameInArabic, convReq: convReq, convConsultionID: convConsultionID, convRemark: convRemark, ctasScore: ctasScore, dischargeFlag: dischargeFlag, dsiplayMode: dsiplayMode, doneDoctorId: doneDoctorId, empNameAr: empNameAr, empNameEn: empNameEn, erFlag: erFlag, expectedDate: expectedDate, genderAGE: genderAGE, genderAgeNameAr: genderAgeNameAr, genderAgeNameEn: genderAgeNameEn, genderNameAr: genderNameAr, genderNameEn: genderNameEn, highLightFlag: highLightFlag, homeVisitFlag: homeVisitFlag, mappedClinicID: mappedClinicID, motherPatientID: motherPatientID, motherVisitID: motherVisitID, nationalityInEnglish: nationalityInEnglish, nationalityInArabic: nationalityInArabic, newBornIn: newBornIn, newBornOut: newBornOut, noSpecialConsution: noSpecialConsution, opCallArrivalDate: opCallArrivalDate, outNoofPats: outNoofPats, overBook: overBook, painAssessValue: painAssessValue, patFinanCount: patFinanCount, patID: patID, patMobile: patMobile, patClinicFlag: patClinicFlag, patNoteDesc: patNoteDesc, patStatusNameAr: patStatusNameAr, patStatusNameEn: patStatusNameEn, patImage: patImage, placeID: placeID, queueMappedID: queueMappedID, queueScreenCalled: queueScreenCalled, queSer: queSer, queSysSer: queSysSer, recallStatus: recallStatus, resDate: resDate, resType: resType, schedSerial: schedSerial, ser: ser, serColor: serColor, serviceNameAr: serviceNameAr, serviceNameEn: serviceNameEn, serviceTime: serviceTime, serVStatus: serVStatus, serVStatusNameEn: serVStatusNameEn, serVStatusNameAr: serVStatusNameAr, shiftID: shiftID, sigQueueID: sigQueueID, spec: spec, vip: vip, vipLevel: vipLevel, virology: virology, visitID: visitID,scores: scores,panicLabResults: panicLabResults,panicRadResults: panicRadResults, countyFlag:nil)
+    
   }
 }
 

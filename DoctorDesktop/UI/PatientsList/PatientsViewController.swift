@@ -367,7 +367,10 @@ extension PatientsViewController: UITableViewDataSource {
     case .inpatient,.nicu, .ICU:
       return self.inpatientCellMaker(tableView, indexPath, self.presenter.inpatientPatients[indexPath.row])
     case .outpatient:
-      return outpatientCellMaker(tableView, indexPath, presenter.outpatientPatients[indexPath.row])
+        let cell = outpatientCellMaker(tableView, indexPath, presenter.outpatientPatients[indexPath.row])
+        cell.selectIndex = indexPath.row
+        cell.delegade = self
+      return cell
     case .emergency:
       let emergencyCellPresenter = self.isTriagedSelected ?
         EmergencyCellPresenterImpl(with: presenter.triagedEmergencyPatients[indexPath.row]) :
@@ -387,16 +390,23 @@ extension PatientsViewController: UITableViewDataSource {
   }
 }
 
+extension PatientsViewController:OutpatientStatus {
+    
+    func changeStatus(_ index:Int) {
+        
+    }
+}
+
 extension PatientsViewController: UITableViewDelegate {
   func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
 //    switch presenter.componentType {
 //    case .inpatient, .ICU , .nicu,.operations: return 110
-//    case .outpatient: return 130
+//    case .outpatient: return 150
 //    case .emergency: return 75
 //    case .clinicalAlert: return 100
-    
-  //  default: return UITableViewAutomaticDimension
-  //  }
+//    
+//    default: return UITableViewAutomaticDimension
+//    }
       return UITableViewAutomaticDimension
   }
   
