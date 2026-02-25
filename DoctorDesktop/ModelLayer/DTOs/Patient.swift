@@ -78,8 +78,24 @@ struct InpatientPatient: Decodable, Patient {
   }
 }
 
+struct MainResponseModel:Codable {
+    let root:String?
+    enum CodingKeys: String, CodingKey {
+        case root = "Root"
+    }
+}
+
+struct MainRootModel:Codable {
+    let clinics:String?
+    enum CodingKeys: String, CodingKey {
+        case clinics = "CLINIC_PATIENTS"
+    }
+}
+
+
+
 struct OutpatientPatient: Decodable, Patient {
-    private let ageDec: String
+    private let ageDec: String?
     var walkFlag :String?
     var assistantDocID:String?
     var btnCategory:String?
@@ -152,9 +168,9 @@ struct OutpatientPatient: Decodable, Patient {
     var vipLevel:String?
     var virology:String?
     var visitID: String
-    var scores: [ClinicalPatientScore]?
-    var panicLabResults: [ClinicalPatientPanicLabRadResult]?
-    var panicRadResults: [ClinicalPatientPanicLabRadResult]?
+//    var scores: [ClinicalPatientScore]?
+//    var panicLabResults: [ClinicalPatientPanicLabRadResult]?
+//    var panicRadResults: [ClinicalPatientPanicLabRadResult]?
     
     
     var id: String { return patID }
@@ -167,7 +183,8 @@ struct OutpatientPatient: Decodable, Patient {
     var countyFlag: UIImage?
     var name: String { return nameInEnglish }
     var nationality: String { return nationalityInEnglish }
-    var age: String { return ageDec }
+    var age: String { return ageDec ?? "" }
+    
     
 
   enum CodingKeys: String, CodingKey {
@@ -244,9 +261,9 @@ struct OutpatientPatient: Decodable, Patient {
       case vipLevel = "VIP_LEVEL"
       case virology = "VIROLOGY"
       case visitID = "VISIT_ID"
-      case scores = "PAT_SCORES"
-      case panicLabResults = "PANIC_LAB_RESULTS"
-      case panicRadResults = "PANIC_RAD_RESULTS"
+//      case scores = "PAT_SCORES"
+//      case panicLabResults = "PANIC_LAB_RESULTS"
+//      case panicRadResults = "PANIC_RAD_RESULTS"
   }
 }
 
@@ -557,33 +574,35 @@ extension ClinicalPatient {
       let virology = try container.decode(String.self, forKey: .virology)
       let visitID = try container.decode(String.self, forKey: .visitID)
       
-    var scores: [ClinicalPatientScore]?
-    var panicLabResults: [ClinicalPatientPanicLabRadResult]?
-    var panicRadResults: [ClinicalPatientPanicLabRadResult]?
+//    var scores: [ClinicalPatientScore]?
+//    var panicLabResults: [ClinicalPatientPanicLabRadResult]?
+//    var panicRadResults: [ClinicalPatientPanicLabRadResult]?
 
-    if let scoresContainer = try? container.nestedContainer(keyedBy: CodingKeysRows.self, forKey: .scores) {
-      if let score = try? scoresContainer.decode(ClinicalPatientScore.self, forKey: .scoresRow) {
-        scores = [score]
-      } else if let tempScores = try? scoresContainer.decode([ClinicalPatientScore].self, forKey: .scoresRow) {
-        scores = tempScores
-      }
-    }
-    if let panicLabResultsContainer = try? container.nestedContainer(keyedBy: CodingKeysRows.self, forKey: .panicLabResults) {
-      if let panicLabResult = try? panicLabResultsContainer.decode(ClinicalPatientPanicLabRadResult.self, forKey: .panicLabResultRow) {
-        panicLabResults = [panicLabResult]
-      } else if let tempPanicLabResults = try? panicLabResultsContainer.decode([ClinicalPatientPanicLabRadResult].self, forKey: .panicLabResultRow) {
-        panicLabResults = tempPanicLabResults
-      }
-    }
-    if let panicRadResultsContainer = try? container.nestedContainer(keyedBy: CodingKeysRows.self, forKey: .panicRadResults) {
-      if let panicRadResult = try? panicRadResultsContainer.decode(ClinicalPatientPanicLabRadResult.self, forKey: .panicRadResultRow) {
-        panicRadResults = [panicRadResult]
-      } else if let tempPanicRadResults = try? panicRadResultsContainer.decode([ClinicalPatientPanicLabRadResult].self, forKey: .panicRadResultRow) {
-        panicRadResults = tempPanicRadResults
-      }
-    }
+//    if let scoresContainer = try? container.nestedContainer(keyedBy: CodingKeysRows.self, forKey: .scores) {
+//      if let score = try? scoresContainer.decode(ClinicalPatientScore.self, forKey: .scoresRow) {
+//        scores = [score]
+//      } else if let tempScores = try? scoresContainer.decode([ClinicalPatientScore].self, forKey: .scoresRow) {
+//        scores = tempScores
+//      }
+//    }
+//    if let panicLabResultsContainer = try? container.nestedContainer(keyedBy: CodingKeysRows.self, forKey: .panicLabResults) {
+//      if let panicLabResult = try? panicLabResultsContainer.decode(ClinicalPatientPanicLabRadResult.self, forKey: .panicLabResultRow) {
+//        panicLabResults = [panicLabResult]
+//      } else if let tempPanicLabResults = try? panicLabResultsContainer.decode([ClinicalPatientPanicLabRadResult].self, forKey: .panicLabResultRow) {
+//        panicLabResults = tempPanicLabResults
+//      }
+//    }
+//    if let panicRadResultsContainer = try? container.nestedContainer(keyedBy: CodingKeysRows.self, forKey: .panicRadResults) {
+//      if let panicRadResult = try? panicRadResultsContainer.decode(ClinicalPatientPanicLabRadResult.self, forKey: .panicRadResultRow) {
+//        panicRadResults = [panicRadResult]
+//      } else if let tempPanicRadResults = try? panicRadResultsContainer.decode([ClinicalPatientPanicLabRadResult].self, forKey: .panicRadResultRow) {
+//        panicRadResults = tempPanicRadResults
+//      }
+//    }
      
-      self.init(ageDec: ageDec, walkFlag: walkFlag, assistantDocID: assistantDocID, btnCategory: btnCategory, cashierFlag: cashierFlag, checkPatHasOPD: checkPatHasOPD, clinitLetter: clinitLetter, clinicNameAr: clinicNameAr, clinicNameEN: clinicNameEN, nameInEnglish: nameInEnglish, nameInArabic: nameInArabic, convReq: convReq, convConsultionID: convConsultionID, convRemark: convRemark, ctasScore: ctasScore, dischargeFlag: dischargeFlag, dsiplayMode: dsiplayMode, doneDoctorId: doneDoctorId, empNameAr: empNameAr, empNameEn: empNameEn, erFlag: erFlag, expectedDate: expectedDate, genderAGE: genderAGE, genderAgeNameAr: genderAgeNameAr, genderAgeNameEn: genderAgeNameEn, genderNameAr: genderNameAr, genderNameEn: genderNameEn, highLightFlag: highLightFlag, homeVisitFlag: homeVisitFlag, mappedClinicID: mappedClinicID, motherPatientID: motherPatientID, motherVisitID: motherVisitID, nationalityInEnglish: nationalityInEnglish, nationalityInArabic: nationalityInArabic, newBornIn: newBornIn, newBornOut: newBornOut, noSpecialConsution: noSpecialConsution, opCallArrivalDate: opCallArrivalDate, outNoofPats: outNoofPats, overBook: overBook, painAssessValue: painAssessValue, patFinanCount: patFinanCount, patID: patID, patMobile: patMobile, patClinicFlag: patClinicFlag, patNoteDesc: patNoteDesc, patStatusNameAr: patStatusNameAr, patStatusNameEn: patStatusNameEn, patImage: patImage, placeID: placeID, queueMappedID: queueMappedID, queueScreenCalled: queueScreenCalled, queSer: queSer, queSysSer: queSysSer, recallStatus: recallStatus, resDate: resDate, resType: resType, schedSerial: schedSerial, ser: ser, serColor: serColor, serviceNameAr: serviceNameAr, serviceNameEn: serviceNameEn, serviceTime: serviceTime, serVStatus: serVStatus, serVStatusNameEn: serVStatusNameEn, serVStatusNameAr: serVStatusNameAr, shiftID: shiftID, sigQueueID: sigQueueID, spec: spec, vip: vip, vipLevel: vipLevel, virology: virology, visitID: visitID,scores: scores,panicLabResults: panicLabResults,panicRadResults: panicRadResults, countyFlag:nil)
+      self.init(ageDec: ageDec, walkFlag: walkFlag, assistantDocID: assistantDocID, btnCategory: btnCategory, cashierFlag: cashierFlag, checkPatHasOPD: checkPatHasOPD, clinitLetter: clinitLetter, clinicNameAr: clinicNameAr, clinicNameEN: clinicNameEN, nameInEnglish: nameInEnglish, nameInArabic: nameInArabic, convReq: convReq, convConsultionID: convConsultionID, convRemark: convRemark, ctasScore: ctasScore, dischargeFlag: dischargeFlag, dsiplayMode: dsiplayMode, doneDoctorId: doneDoctorId, empNameAr: empNameAr, empNameEn: empNameEn, erFlag: erFlag, expectedDate: expectedDate, genderAGE: genderAGE, genderAgeNameAr: genderAgeNameAr, genderAgeNameEn: genderAgeNameEn, genderNameAr: genderNameAr, genderNameEn: genderNameEn, highLightFlag: highLightFlag, homeVisitFlag: homeVisitFlag, mappedClinicID: mappedClinicID, motherPatientID: motherPatientID, motherVisitID: motherVisitID, nationalityInEnglish: nationalityInEnglish, nationalityInArabic: nationalityInArabic, newBornIn: newBornIn, newBornOut: newBornOut, noSpecialConsution: noSpecialConsution, opCallArrivalDate: opCallArrivalDate, outNoofPats: outNoofPats, overBook: overBook, painAssessValue: painAssessValue, patFinanCount: patFinanCount, patID: patID, patMobile: patMobile, patClinicFlag: patClinicFlag, patNoteDesc: patNoteDesc, patStatusNameAr: patStatusNameAr, patStatusNameEn: patStatusNameEn, patImage: patImage, placeID: placeID, queueMappedID: queueMappedID, queueScreenCalled: queueScreenCalled, queSer: queSer, queSysSer: queSysSer, recallStatus: recallStatus, resDate: resDate, resType: resType, schedSerial: schedSerial, ser: ser, serColor: serColor, serviceNameAr: serviceNameAr, serviceNameEn: serviceNameEn, serviceTime: serviceTime, serVStatus: serVStatus, serVStatusNameEn: serVStatusNameEn, serVStatusNameAr: serVStatusNameAr, shiftID: shiftID, sigQueueID: sigQueueID, spec: spec, vip: vip, vipLevel: vipLevel, virology: virology, visitID: visitID,
+                //scores: scores,panicLabResults: panicLabResults,panicRadResults: panicRadResults,
+                countyFlag:nil)
     
   }
 }

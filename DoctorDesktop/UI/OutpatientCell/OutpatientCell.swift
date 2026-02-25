@@ -90,7 +90,47 @@ extension OutpatientCell {
       lblScore.isHidden = true
       lblScoreValue.isHidden = true
       mobile = presenter.patMobile
+      lblgeValue.text = presenter.age
+      setBtnServStatus(presenter.servStatus, time: presenter.time)
+      
   }
+    func setBtnServStatus(_ status:String,time:String) {
+        let endDate = time.ConvertToDate
+        let startDate = Date()
+        let calendar = Calendar.current
+        let dateComponents = calendar.dateComponents([.second], from: startDate, to: endDate)
+
+        if let seconds = dateComponents.second {
+            print("Difference in seconds: \(seconds)")
+            let min = seconds / 60
+            let second =  seconds % 60
+            lblTime.text = "\(min):\(second)"
+            if seconds < 5 {
+                lblTime.isHidden = true
+            }
+        }
+        statusButton.isHidden = false
+        if status == "B" {
+            // المريض وصل ولسه منتظر الدخول اخضر
+            statusButton.setTitle("Arrival", for: .normal)
+            statusButton.backgroundColor = UIColor(red: 37, green: 182, blue: 110, alpha: 1.0)
+            
+        }else if status == "A"{
+            // كده المريض دحل ولسه مخرجش ازرق
+            statusButton.setTitle("Check In", for: .normal)
+            statusButton.backgroundColor = UIColor(red: 28, green: 170, blue: 222, alpha: 1.0)
+
+        }else if status == "S"{
+            // كده المريض خرج احمر
+            statusButton.setTitle("Check Out", for: .normal)
+            statusButton.backgroundColor = UIColor(red: 248, green: 38, blue: 7, alpha: 1.0)
+        }else if status == "D" {
+            statusButton.setTitle("OverView", for: .normal)
+            statusButton.backgroundColor = UIColor(red: 28, green: 170, blue: 222, alpha: 1.0)
+        }else {
+            statusButton.isHidden = true
+        }
+    }
 }
 
 //MARK: - Helper Methods
@@ -168,5 +208,87 @@ extension UIColor {
             blue: CGFloat(rgbValue & 0x0000FF) / 255.0,
             alpha: CGFloat(alpha)
         )
+    }
+}
+
+
+extension String {
+    var ConvertToDate: Date
+    {
+        let dateString = self
+        let spitDate = dateString.components(separatedBy: .whitespaces)
+        print("Splits:\(spitDate)")
+        print("Date:\(dateString)")
+
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
+        if dateFormatter.date(from: dateString) != nil {
+            return dateFormatter.date(from: dateString)!
+        }
+        
+        dateFormatter.dateFormat = "dd/mm/yyyy hh24:mi:ss"
+        if dateFormatter.date(from: dateString) != nil {
+            return dateFormatter.date(from: dateString)!
+        }
+        
+        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SS"
+        if dateFormatter.date(from: dateString) != nil {
+            return dateFormatter.date(from: dateString)!
+        }
+        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SZ"
+        if dateFormatter.date(from: dateString) != nil {
+            return dateFormatter.date(from: dateString)!
+        }
+        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm a"
+        if dateFormatter.date(from: dateString) != nil {
+            return dateFormatter.date(from: dateString)!
+        }
+        
+        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+        if dateFormatter.date(from: dateString) != nil {
+            return dateFormatter.date(from: dateString)!
+        }
+        dateFormatter.dateFormat = "dd/MM/yyyy HH:mm:ss"
+        if dateFormatter.date(from: dateString) != nil {
+            return dateFormatter.date(from: dateString)!
+        }
+        dateFormatter.dateFormat = "dd-MM-yyyy"
+        if dateFormatter.date(from: dateString) != nil {
+            return dateFormatter.date(from: dateString)!
+        }
+        dateFormatter.dateFormat = "MM/dd/yyyy"
+        if dateFormatter.date(from: dateString) != nil {
+            return dateFormatter.date(from: dateString)!
+        }
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        if dateFormatter.date(from: dateString) != nil {
+            return dateFormatter.date(from: dateString)!
+        }
+        
+        dateFormatter.dateFormat = "MMM d yyyy h:mm"
+        if dateFormatter.date(from: dateString) != nil {
+            return dateFormatter.date(from: dateString)!
+        }
+        
+        dateFormatter.dateFormat = "HH:mm:ss"
+        if dateFormatter.date(from: dateString) != nil {
+            return dateFormatter.date(from: dateString)!
+        }
+        dateFormatter.dateFormat = "HH:mm a"
+        if dateFormatter.date(from: dateString) != nil {
+            return dateFormatter.date(from: dateString)!
+        }
+        
+        if dateString == ""
+        {
+            return Date()
+        }
+        if let conDate = dateFormatter.date(from:dateString) {
+            return conDate
+        }else {
+            let spitDate = dateString.components(separatedBy: .whitespaces)
+            print("Splits:\(spitDate)")
+        }
+        return dateFormatter.date(from:dateString) ?? Date()
     }
 }

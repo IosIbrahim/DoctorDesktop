@@ -125,12 +125,42 @@ extension TranslationLayerImpl {
     
     func getOutpatientPatientsDTOsFromJson(_ data: Data) -> OutpatientPatients {
         guard let json = String(data: data, encoding: .utf8), json.contains("CLINIC_PATIENTS_ROW") else { return [] }
+        print(json)
         let keyPath = "Root.CLINIC_PATIENTS.CLINIC_PATIENTS_ROW"
+        
         guard let outpatientPatients = try? OutpatientPatients (data: data, keyPath: keyPath) else {
             if let outpatientPatient = try? OutpatientPatient (data: data, keyPath: keyPath) {
                 return [outpatientPatient]
             } else {
-                return []
+                if let outpatientPatients = try? [OutpatientPatient] (data: data, keyPath: keyPath) {
+                    return outpatientPatients
+                }else {
+                    
+                    let decoder = JSONDecoder()
+                    decoder.keyDecodingStrategy = .useDefaultKeys
+                    do {
+                        let topLevel = try JSONSerialization.jsonObject(with: data, options: JSONSerialization.ReadingOptions.mutableContainers)
+                        guard let nestedJson = (topLevel as AnyObject).value(forKeyPath: keyPath) else { return []
+                        }
+                        let nestedData = try JSONSerialization.data(withJSONObject: nestedJson)
+                        
+                        let result = try decoder.decode(OutpatientPatient.self, from: nestedData)
+                        return [result]
+                    } catch {
+                        do {
+                            let topLevel = try JSONSerialization.jsonObject(with: data, options: JSONSerialization.ReadingOptions.mutableContainers)
+                            guard let nestedJson = (topLevel as AnyObject).value(forKeyPath: keyPath) else { return []
+                            }
+                            let nestedData = try JSONSerialization.data(withJSONObject: nestedJson)
+                            let result = try decoder.decode([OutpatientPatient].self, from: nestedData)
+                            return result
+                        } catch {
+                            print(error)
+                            return []
+                            
+                        }
+                    }
+                }
             }
         }
         return outpatientPatients

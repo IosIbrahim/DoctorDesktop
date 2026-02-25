@@ -22,11 +22,13 @@ protocol OutpatientCellPresenter {
     var gender:String { get }
     var patMobile:String { get }
     var shift:String { get }
+    var servStatus:String { set get }
 
 }
 
 class OutpatientCellPresenterImpl: OutpatientCellPresenter {
     var outpatientPatient: OutpatientPatient
+    var servStatus:String
     
     var genderAgeImage: UIImage? {
       guard let genderAgeType = GenderAgeType(rawValue: outpatientPatient.genderAge) else {
@@ -49,6 +51,7 @@ class OutpatientCellPresenterImpl: OutpatientCellPresenter {
 
     init(with outpatientPatient: OutpatientPatient) {
       self.outpatientPatient = outpatientPatient
+        self.servStatus = outpatientPatient.serVStatus ?? ""
     }
 
 }
