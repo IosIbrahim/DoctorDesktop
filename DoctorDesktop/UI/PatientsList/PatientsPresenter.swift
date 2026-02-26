@@ -67,6 +67,8 @@ protocol PatientsPresenter {
   func getOutpatientPatients(withDate: Date, selectedClinicIndex: Int, finished: @escaping EmptyBlock)
   func getEmergencyPatients(withDate: Date, finished: @escaping EmptyBlock)
   func getOperationPatients(withDate: Date, finished: @escaping EmptyBlock)
+  func changePatientStatus(index: Int, finished: @escaping EmptyBlock)
+
   func getClinicalPatients(date: Date, finished: @escaping EmptyBlock)
   func loadFlagImage(flageImageName: String, finished: @escaping ImageBlock)
 }
@@ -233,6 +235,31 @@ extension PatientsPresenterImpl {
             self.operationPatients = emergencyPatients
             
             finished()
+        }
+    }
+    
+    func changePatientStatus(index: Int, finished: @escaping EmptyBlock) {
+        var model = outpatientPatients[index]
+        if model.serVStatus != "D" {
+            let params = [
+                "BRANCH_ID": user.branch ?? "",
+                "USER_ID": user.userName ?? "",
+                "COMPUTER_NAME": "iOS",
+                "LAN": "0",
+                "SER": model.serVStatus ?? ""
+            ]
+            
+            modelLayer.changePatientStatus(with: params) { _ in
+                if model.serVStatus == "B"{
+                    self.outpatientPatients[index].serVStatus = "A"
+                }else if model.serVStatus == "A"{
+                    self.outpatientPatients[index].serVStatus = "S"
+                }else if model.serVStatus == "S" {
+                    self.outpatientPatients[index].serVStatus = "D"
+                }
+                finished()
+            }
+
         }
     }
 }

@@ -17,6 +17,8 @@ protocol ModelLayer {
   func getInpatientPatients(with params: [String: String], finished: @escaping InpatientPatientsBlock)
   func getOutpatientClinics(with params: [String: String], finished: @escaping OutpatientClinicsBlock)
   func getOutpatientPatients(with params: [String: String], finished: @escaping OutpatientPatientsBlock)
+    func changePatientStatus(with params: [String: String], finished: @escaping OutpatientPatientsBlock)
+
   func getEmergencyPatients(with params: [String: String], finished: @escaping EmergencyPatientsBlock)
     
   func getOperationPatients(with params: [String: String], finished: @escaping ([OperationPatient]) -> Void)
@@ -89,7 +91,15 @@ class ModelLayerImpl: ModelLayer {
       finished(outpatientPatients)
     }
   }
+    
+    func changePatientStatus(with params: [String: String], finished: @escaping OutpatientPatientsBlock) {
+      networkLayer.changePatientStatus(with: params) { data in
+        let outpatientPatients = self.translationLayer.getOutpatientPatientsDTOsFromJson(data)
+        finished(outpatientPatients)
+      }
+    }
   
+    
   func getEmergencyPatients(with params: [String: String], finished: @escaping EmergencyPatientsBlock) {
     networkLayer.getEmergencyPatients(with: params) { data in
       let emergencyPatients = self.translationLayer.getEmergencyPatientsDTOsFromJson(data)

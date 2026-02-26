@@ -31,6 +31,8 @@ protocol NetworkLayer {
     func getOutpatientClinics(with params: [String: String], finished: @escaping DataBlock)
     func getOperationPatients(with params: [String: String], finished: @escaping DataBlock)
   func getOutpatientPatients(with params: [String: String], finished: @escaping DataBlock)
+    func changePatientStatus(with params: [String: String], finished: @escaping DataBlock)
+
   func getClinicalPatients(with params: [String: String], finished: @escaping DataBlock)
   func getTemplate(with params:[String: String], finished: @escaping DataBlock)
   func getEmergencyPatients(with params: [String: String], finished: @escaping DataBlock)
@@ -140,6 +142,25 @@ extension NetworkLayerImpl {
         finished(data)
     }
   }
+    
+    func changePatientStatus(with params: [String: String], finished: @escaping DataBlock) {
+        let serv = params["SER"]
+        var url = AppURLS.ip+"/MobileApi/api/get_outpatients_patients"
+        if serv == "B" {
+            url = AppURLS.ip+"/MobileApi/api/OutpatientController/arrivalResrvation"
+        }else if serv == "A" {
+            url = AppURLS.ip+"/MobileApi/api/OutpatientController/startResrvation"
+        }else if serv == "S"{
+            url = AppURLS.ip+"/MobileApi/api/OutpatientController/performResrvation"
+        }
+      AlamofireAppManager.shared.request(url, parameters: params)
+        .responseJSON { response in
+          guard let data = response.data else { return }
+            print(response.value ?? "")
+          finished(data)
+      }
+    }
+    
 }
 
 extension NetworkLayerImpl {

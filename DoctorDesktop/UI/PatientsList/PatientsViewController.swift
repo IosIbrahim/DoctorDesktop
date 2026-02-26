@@ -391,9 +391,12 @@ extension PatientsViewController: UITableViewDataSource {
 }
 
 extension PatientsViewController:OutpatientStatus {
-    
     func changeStatus(_ index:Int) {
-        
+        presenter.changePatientStatus(index: index) {
+            DispatchQueue.main.async {
+                self.tableView.reloadData()
+            }
+        }
     }
 }
 
