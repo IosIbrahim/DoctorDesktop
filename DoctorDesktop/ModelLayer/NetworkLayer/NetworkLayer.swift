@@ -62,6 +62,8 @@ class NetworkLayerImpl: NetworkLayer {
   func login(with params: [String: String], finished: @escaping DataBlock) {
 
     let url = AppURLS.ip+"/MobileApi/api/Authenticate"
+      print(params)
+      print(url)
     AlamofireAppManager.shared.request(url, method: .post,
                                        parameters: params,
                                        encoding: URLEncoding.httpBody)
@@ -78,7 +80,7 @@ extension NetworkLayerImpl {
   func getPatientsCount(with params: [String: String], finished: @escaping DataBlock) {
     let url = AppURLS.ip+"/MobileApi/api/get_patients_counts"
     print(params)
-      print(url)
+    print(url)
     AlamofireAppManager.shared.request(url, parameters: params)
       .responseJSON { response in
         guard let data = response.data else { return }
@@ -89,7 +91,8 @@ extension NetworkLayerImpl {
   
   func getInpatientUnits(with params: [String: String], finished: @escaping DataBlock) {
     let url = AppURLS.ip+"/MobileApi/api/get_inpatient_units"
-    
+      print(params)
+      print(url)
     AlamofireAppManager.shared.request(url, parameters: params)
       .responseJSON { response in
         guard let data = response.data else { return }
@@ -100,7 +103,8 @@ extension NetworkLayerImpl {
   
   func getInpatientPatients(with params: [String: String], finished: @escaping DataBlock) {
     let url = AppURLS.ip+"/MobileApi/api/get_inpatient_patients"
-    
+      print(params)
+      print(url)
     AlamofireAppManager.shared.request(url, parameters: params)
       .responseJSON { response in
         guard let data = response.data else { return }
@@ -113,7 +117,8 @@ extension NetworkLayerImpl {
 extension NetworkLayerImpl {
   func getOutpatientClinics(with params: [String: String], finished: @escaping DataBlock) {
     let url = AppURLS.ip+"/MobileApi/api/get_outpatients_clinic"
-    
+      print(params)
+      print(url)
     AlamofireAppManager.shared.request(url, parameters: params)
       .responseJSON { response in
         guard let data = response.data else { return }
@@ -124,7 +129,8 @@ extension NetworkLayerImpl {
   
     func getOperationPatients(with params: [String: String], finished: @escaping DataBlock) {
         let url = AppURLS.ip+"/MobileApi/api/get_or_patients"
-        
+        print(params)
+        print(url)
         AlamofireAppManager.shared.request(url, parameters: params)
             .responseJSON { response in
                 guard let data = response.data else { return }
@@ -134,7 +140,8 @@ extension NetworkLayerImpl {
     }
   func getOutpatientPatients(with params: [String: String], finished: @escaping DataBlock) {
     let url = AppURLS.ip+"/MobileApi/api/get_outpatients_patients"
-    
+      print(params)
+      print(url)
     AlamofireAppManager.shared.request(url, parameters: params)
       .responseJSON { response in
         guard let data = response.data else { return }
@@ -153,6 +160,8 @@ extension NetworkLayerImpl {
         }else if serv == "S"{
             url = AppURLS.ip+"/MobileApi/api/OutpatientController/performResrvation"
         }
+        print(params)
+        print(url)
       AlamofireAppManager.shared.request(url, parameters: params)
         .responseJSON { response in
           guard let data = response.data else { return }
@@ -166,7 +175,8 @@ extension NetworkLayerImpl {
 extension NetworkLayerImpl {
   func getEmergencyPatients(with params: [String: String], finished: @escaping DataBlock) {
     let url = AppURLS.ip+"/MobileApi/api/get_er_patients"
-    
+      print(params)
+      print(url)
     AlamofireAppManager.shared.request(url, parameters: params)
       .responseJSON { response in
         guard let data = response.data else { return }
@@ -178,7 +188,8 @@ extension NetworkLayerImpl {
 extension NetworkLayerImpl {
   func getClinicalPatients(with params: [String: String], finished: @escaping DataBlock) {
     let url = AppURLS.ip+"/MobileApi/api/get_critical_result"
-
+      print(params)
+      print(url)
       AF.request(url, parameters: params)
       .responseJSON { response in
         if let theJSONData = try?  JSONSerialization.data(
@@ -198,7 +209,8 @@ extension NetworkLayerImpl {
 extension NetworkLayerImpl {
   func getTemplate(with params:[String: String], finished: @escaping DataBlock) {
     let url = AppURLS.ip+"/MobileApi/api/get_template_data"
-    
+      print(params)
+      print(url)
     AlamofireAppManager.shared.request(url, parameters: params)
       .responseJSON { response in
         guard let data = response.data else { return }
@@ -218,6 +230,8 @@ extension NetworkLayerImpl {
     //let url = """
     //http://197.50.197.107/MobileApi/api/ServiceRowValidate?RcpServices=\(rcpServices)&PatientID=\(patientId)&GetServValidateParms=\(serviceValidation)&GetSessionInfo=\(sessionInfo)
     //"""
+      print(params)
+      print(url)
     AlamofireAppManager.shared.request(url,
                                        method: .post,
                                        parameters: params)
@@ -231,7 +245,8 @@ extension NetworkLayerImpl {
 extension NetworkLayerImpl {
   func getLabServices(with params:[String: String], finished: @escaping DataBlock) {
     let url = AppURLS.ip+"/MobileApi/api/GetServiceLab"
-    
+      print(params)
+      print(url)
     AlamofireAppManager.shared.request(url, parameters: params)
       .responseJSON { response in
         guard let data = response.data else { return }
@@ -246,6 +261,8 @@ extension NetworkLayerImpl {
     let url = AppURLS.ip+"""
     /MobileApi/api/GetServiceRad?RadType=1&ParentServ=0&GetSessionInfo=\(sessionInfo)
     """
+      print(params)
+      print(url)
     AlamofireAppManager.shared.request(url, parameters: params)
       .responseJSON { response in
         guard let data = response.data else { return }
@@ -258,6 +275,8 @@ extension NetworkLayerImpl {
   func saveOrder(with params:[String: String], orderType: TemplateType, finished: @escaping DataBlock) {
     let api = orderType == .labOrder ? "saveLabOrders" : "RadOrderSave"
     let url = AppURLS.ip+"/MobileApi/api/" + api
+      print(params)
+      print(url)
     AlamofireAppManager.shared.request(url,
                                        method: .post,
                                        parameters: params,
@@ -272,6 +291,8 @@ extension NetworkLayerImpl {
 extension NetworkLayerImpl {
   func getPatientHistory(with params:[String: String], finished: @escaping DataBlock) {
     let url = AppURLS.ip+"/MobileApi/api/LoadPatientEpisodes"
+      print(params)
+      print(url)
     AlamofireAppManager.shared.request(url, parameters: params)
       .responseJSON { response in
         guard let data = response.data else { return }
@@ -284,6 +305,8 @@ extension NetworkLayerImpl {
 extension NetworkLayerImpl {
   func getPatientSummary(with params:[String: String], finished: @escaping DataBlock) {
     let url = AppURLS.ip+"/MobileApi/api/GetPatCustomizedSummary"
+      print(params)
+      print(url)
     AlamofireAppManager.shared.request(url, parameters: params)
       .responseJSON { response in
         guard let data = response.data else { return }
@@ -295,6 +318,8 @@ extension NetworkLayerImpl {
 extension NetworkLayerImpl {
   func getPacksURL(with params:[String: String], finished: @escaping DataBlock) {
     let url = AppURLS.ip+"/mobileapi/api/getPacsUrl/"
+      print(params)
+      print(url)
     AlamofireAppManager.shared.request(url, parameters: params)
       .responseJSON { response in
         guard let data = response.data else { return }
@@ -310,6 +335,8 @@ extension NetworkLayerImpl {
 extension NetworkLayerImpl {
   func getTriageInfo(with params: [String: String], finished: @escaping DataBlock) {
     let url = AppURLS.ip+"/MobileApi/api/loadTrige"
+      print(params)
+      print(url)
     AF.request(url, parameters: params)
       .responseJSON { response in
         guard let data = response.data else { return }
@@ -319,6 +346,8 @@ extension NetworkLayerImpl {
 
   func getSymptoms(with params: [String: String], finished: @escaping DataBlock) {
     let url = AppURLS.ip+"/MobileApi/api/cot_child"
+      print(params)
+      print(url)
     AF.request(url, parameters: params)
       .responseJSON { response in
         guard let data = response.data else { return }
@@ -328,6 +357,8 @@ extension NetworkLayerImpl {
 
   func saveTriage(with params:[String: String], finished: @escaping DataBlock) {
     let url = AppURLS.ip+"/MobileApi/api/save_dataTR"
+      print(params)
+      print(url)
     AF.request(url,
                       method: .post,
                       parameters: params,
@@ -343,6 +374,8 @@ extension NetworkLayerImpl {
   func loadFlagImage(with params: [String: String], finished: @escaping DataBlock) {
     guard let flagImagePath = params["flagImageName"] else { return }
     let url = AppURLS.ip+"/primecare/Hospital%20Images/" + flagImagePath
+      print(params)
+      print(url)
     AF.request(url)
       .responseData { response in
         guard let data = response.data else { return }

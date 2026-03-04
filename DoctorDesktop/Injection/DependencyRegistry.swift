@@ -37,7 +37,7 @@ protocol DependencyRegistry {
   typealias VitalSignCellMaker = (UITableView, IndexPath, VitalSign) -> VitalSignCell
   typealias MedicationCellMaker = (UITableView, IndexPath, Medication) -> MedicationCell
   typealias DiagnosisCellMaker = (UITableView, IndexPath, Diagnosis) -> DiagnosisCell
-  typealias AllergyFindingComplaintHistoryCellMaker = (UITableView, IndexPath, AllergyFindingComplaintHistory) -> AllergyFindingComplaintHistoryCell
+  typealias AllergyFindingComplaintHistoryCellMaker = (UITableView, IndexPath, Complaint) -> AllergyFindingComplaintHistoryCell
   typealias RadTestCellMaker = (UITableView, IndexPath, Rad) -> RadTestCell
   typealias LabCellMaker = (UITableView, IndexPath, Lab) -> LabsCell
 
@@ -400,7 +400,7 @@ extension DependencyRegistryImpl {
     }
   }
   func registerAllergyFindingComplaintHistoryCellPresenter() {
-    container.register(AllergyFindingComplaintHistoryCellPresenter.self) { (r, allergyFindingComplaintHistory: AllergyFindingComplaintHistory) in
+    container.register(AllergyFindingComplaintHistoryCellPresenter.self) { (r, allergyFindingComplaintHistory: Complaint) in
       AllergyFindingComplaintHistoryCellPresenterImpl(with: allergyFindingComplaintHistory)
     }
   }
@@ -445,7 +445,7 @@ extension DependencyRegistryImpl {
     let presenter = container.resolve(DiagnosisCellPresenter.self, argument: diagnosis)!
     return DiagnosisCell.dequeue(from: tableView, for: indexPath, with: presenter)
   }
-  func makeAllergyFindingComplaintHistoryCell(for tableView: UITableView, at indexPath: IndexPath, allergy: Allergy) -> AllergyFindingComplaintHistoryCell {
+  func makeAllergyFindingComplaintHistoryCell(for tableView: UITableView, at indexPath: IndexPath, allergy: Complaint) -> AllergyFindingComplaintHistoryCell {
     let presenter = container.resolve(AllergyFindingComplaintHistoryCellPresenter.self, argument: allergy)!
     return AllergyFindingComplaintHistoryCell.dequeue(from: tableView, for: indexPath, with: presenter)
   }

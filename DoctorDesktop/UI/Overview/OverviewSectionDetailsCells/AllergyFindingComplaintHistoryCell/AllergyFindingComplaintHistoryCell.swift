@@ -28,7 +28,7 @@ extension AllergyFindingComplaintHistoryCell {
   func configure(with presenter: AllergyFindingComplaintHistoryCellPresenter) {
     self.presenter = presenter
     self.descriptionLbl.text = presenter.description
-    self.speciality.text = presenter.speciality
+    self.speciality.text = presenter.user
     self.date.text = presenter.date
   }
 }
@@ -63,8 +63,8 @@ extension AllergyFindingComplaintHistoryCell {
 
   public static func dequeueHeader(from tableView: UITableView) -> AllergyFindingComplaintHistoryCell {
     let cell = tableView.dequeueReusableCell(withIdentifier: AllergyFindingComplaintHistoryCell.cellId) as! AllergyFindingComplaintHistoryCell
-    cell.descriptionLbl.text = "Description"
-    cell.speciality.text = "Speciality"
+    cell.descriptionLbl.text = "Complaints"
+    cell.speciality.text = "User"
     cell.date.text = "Date"
     cell.descriptionLbl.textColor = #colorLiteral(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
     cell.speciality.textColor = #colorLiteral(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)

@@ -133,9 +133,9 @@ extension OverviewSectionDetailsViewController: UITableViewDataSource {
     case .medication: return medicationCellMaker(tableView, indexPath, presenter.patientSummary.medications![indexPath.row])
     case .diagnosis: return diagnosisCellMaker(tableView, indexPath, presenter.patientSummary.diagnosis![indexPath.row])
     //case .allergies: return allergyFindingComplaintHistoryCellMaker(tableView, indexPath, presenter.patientSummary.allergies![indexPath.row])
-    case .finding: return allergyFindingComplaintHistoryCellMaker(tableView, indexPath, presenter.patientSummary.findings![indexPath.row])
-    case .complaints:  return allergyFindingComplaintHistoryCellMaker(tableView, indexPath, presenter.patientSummary.findings![indexPath.row])
-    case .history: return allergyFindingComplaintHistoryCellMaker(tableView, indexPath, presenter.patientSummary.history![indexPath.row])
+    case .finding: return allergyFindingComplaintHistoryCellMaker(tableView, indexPath, presenter.patientSummary.complaints![indexPath.row])
+    case .complaints:  return allergyFindingComplaintHistoryCellMaker(tableView, indexPath, presenter.patientSummary.complaints![indexPath.row])
+    case .history: return allergyFindingComplaintHistoryCellMaker(tableView, indexPath, presenter.patientSummary.complaints![indexPath.row])
     case .labExamination:
         let labs = presenter.patientSummary.labs ?? []
         return labCellMaker(tableView,indexPath,labs[indexPath.row])
@@ -176,6 +176,9 @@ extension OverviewSectionDetailsViewController: UITableViewDelegate {
 
   func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
       if presenter.overviewSection == .radTest ||   presenter.overviewSection == .labExamination {
+          return .zero
+      }
+     if presenter.overviewSection == .complaints  {
           return .zero
       }
     return OverviewSectionDetailsViewController.Constant.headerHeight

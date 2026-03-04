@@ -13,7 +13,7 @@ typealias Cather = OperationCatherEndoscopy
 typealias Endoscopy = OperationCatherEndoscopy
 typealias Allergy = AllergyFindingComplaintHistory
 typealias Finding = AllergyFindingComplaintHistory
-typealias Complaint = [AllergyFindingComplaintHistory]
+typealias Complaint = ComplainModel
 typealias History = AllergyFindingComplaintHistory
 
 struct PatientSummary {
@@ -95,6 +95,40 @@ struct AllergyFindingComplaintHistory: Decodable {
   }
 }
 
+struct ComplainModel: Decodable {
+  let id: String?
+  let descEn: String?
+  let transactionDate: String?
+  let userID: String?
+  let userNameAr: String?
+  let userNameEn: String?
+  let visitId: String?
+    let visitStartDate:String?
+    let visitEndDate:String?
+    let visitEmpNameAr:String?
+    let visitEmpNameEn:String?
+    let visitSpecialAr:String?
+    let visitSpecialEn:String?
+
+  enum CodingKeys: String, CodingKey {
+        case id = "COMPLAIN_ID"
+        case descEn = "DESC_EN"
+        case transactionDate = "TRANS_DATE"
+        case userID = "USER_ID"
+        case userNameAr = "USER_NAME_AR"
+        case userNameEn = "USER_NAME_EN"
+        case visitId = "VISIT_ID"
+        case visitStartDate = "VISIT_START_DATE"
+        case visitEndDate = "VISIT_END_DATE"
+      case visitEmpNameAr = "VISIT_EMP_NAME_AR"
+      case visitEmpNameEn = "VISIT_EMP_NAME_EN"
+      case visitSpecialAr = "VISIT_SPECIALITY_NAME_AR"
+      case visitSpecialEn = "VISIT_SPECIALITY_NAME_EN"
+
+  }
+}
+
+
 struct Diagnosis: Decodable {
   let code: String
   let transactionDate: Date
@@ -174,12 +208,12 @@ struct NurseRemark: Decodable {
 }
 
 struct OperationCatherEndoscopy: Decodable {
-  let id: String
-  let arabicName: String
-  let englishName: String
-  let expectedDoneDate: Date
-  let surgeonArabicName: String
-  let surgeonEnglishName: String
+  let id: String?
+  let arabicName: String?
+  let englishName: String?
+  let expectedDoneDate: Date?
+  let surgeonArabicName: String?
+  let surgeonEnglishName: String?
   let anthesiaArabicName: String?
   let anthesiaEnglishName: String?
 

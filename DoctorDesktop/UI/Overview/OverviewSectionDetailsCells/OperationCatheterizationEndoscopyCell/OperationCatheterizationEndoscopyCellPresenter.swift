@@ -19,13 +19,13 @@ protocol OperationCatheterizationEndoscopyCellPresenter {
 class OperationCatheterizationEndoscopyCellPresenterImpl: OperationCatheterizationEndoscopyCellPresenter {
   let operationCatherEndoscopy: OperationCatherEndoscopy
 
-  var serviceName: String { return operationCatherEndoscopy.englishName }
-  var surgeon: String { return operationCatherEndoscopy.surgeonEnglishName }
+  var serviceName: String { return operationCatherEndoscopy.englishName ?? "" }
+  var surgeon: String { return operationCatherEndoscopy.surgeonEnglishName ?? "" }
   var anthesia: String { return operationCatherEndoscopy.anthesiaEnglishName ?? "" }
   var date: String {
     let dateFormatter = DateFormatter()
     dateFormatter.dateFormat = "dd/MM/yyy"
-    return dateFormatter.string(from: operationCatherEndoscopy.expectedDoneDate)
+      return dateFormatter.string(from: operationCatherEndoscopy.expectedDoneDate ?? .init())
   }
 
   init(with operationCatherEndoscopy: OperationCatherEndoscopy) {
