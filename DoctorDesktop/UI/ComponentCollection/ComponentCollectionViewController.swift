@@ -61,11 +61,12 @@ class ComponentCollectionViewController: UIViewController {
     self.navigationItem.setHidesBackButton(true, animated:false)
     
     ComponentCell.register(with: collectionView)
-    
-    presenter.getPatientsCount() {
-      self.isFinishedLoadingCounts = true
-      self.collectionView.reloadData()
-    }
+      presenter.getDoctorPermission {
+          self.presenter.getPatientsCount() {
+            self.isFinishedLoadingCounts = true
+            self.collectionView.reloadData()
+          }
+      }
   }
   
   func getComponentBackgroundColorAndImage(componentType: ComponentType) -> ColorAndImageTuple {
@@ -74,40 +75,43 @@ class ComponentCollectionViewController: UIViewController {
     var image = #imageLiteral(resourceName: "icu")
 
     switch componentType {
+    case .nicu:
+        startColor = #colorLiteral(red: 0.9058823529, green: 0.5882352941, blue: 0.1254901961, alpha: 1)
+        endColor = #colorLiteral(red: 0.8039215686, green: 0.4431372549, blue: 0.1215686275, alpha: 1)
+        startColor = #colorLiteral(red: 0.2117647059, green: 0.6901960784, blue: 0.7333333333, alpha: 1)
+        endColor = #colorLiteral(red: 0.2941176471, green: 0.4901960784, blue: 0.737254902, alpha: 1)
+    case .outpatient:
+    //  image = #imageLiteral(resourceName: "outpatients")
+        image = UIImage(named: "outpatients") ?? .init()
+        startColor = #colorLiteral(red: 0.6274509804, green: 0.4196078431, blue: 0.631372549, alpha: 1)
+        endColor = #colorLiteral(red: 0.537254902, green: 0.3411764706, blue: 0.6274509804, alpha: 1)
     case .inpatient:
-      image = UIImage(named: "inpatients") ?? .init()
-      startColor = #colorLiteral(red: 0.2117647059, green: 0.6901960784, blue: 0.7333333333, alpha: 1)
-      endColor = #colorLiteral(red: 0.2941176471, green: 0.4901960784, blue: 0.737254902, alpha: 1)
+        image = UIImage(named: "inpatients") ?? .init()
+        startColor = #colorLiteral(red: 0.3921568627, green: 0.4980392157, blue: 0.7882352941, alpha: 1)
+        endColor = #colorLiteral(red: 0.1568627451, green: 0.3137254902, blue: 0.5176470588, alpha: 1)
     case .ICU:
-   //   image = #imageLiteral(resourceName: "icu")
       image = UIImage(named: "icu") ?? .init()
       startColor = #colorLiteral(red: 0.9137254902, green: 0.4078431373, blue: 0.6196078431, alpha: 1)
       endColor = #colorLiteral(red: 0.7647058824, green: 0.1764705882, blue: 0.5333333333, alpha: 1)
-    case .outpatient:
-    //  image = #imageLiteral(resourceName: "outpatients")
-      image = UIImage(named: "outpatients") ?? .init()
-      startColor = #colorLiteral(red: 0.6274509804, green: 0.4196078431, blue: 0.631372549, alpha: 1)
-      endColor = #colorLiteral(red: 0.537254902, green: 0.3411764706, blue: 0.6274509804, alpha: 1)
     case .emergency:
    //   image = #imageLiteral(resourceName: "emergency")
       image = UIImage(named: "emergency") ?? .init()
       startColor = #colorLiteral(red: 0.9254901961, green: 0.2901960784, blue: 0.2666666667, alpha: 1)
       endColor = #colorLiteral(red: 0.8588235294, green: 0.1529411765, blue: 0.1098039216, alpha: 1)
     case .operations:
-      startColor = #colorLiteral(red: 0.9058823529, green: 0.5882352941, blue: 0.1254901961, alpha: 1)
-      endColor = #colorLiteral(red: 0.8039215686, green: 0.4431372549, blue: 0.1215686275, alpha: 1)
+        startColor = #colorLiteral(red: 0.9058823529, green: 0.5882352941, blue: 0.1254901961, alpha: 1)
+        endColor = #colorLiteral(red: 0.8039215686, green: 0.4431372549, blue: 0.1215686275, alpha: 1)
+        image = UIImage(named:"ic-operation") ?? .init()
+    case .consultation:
+      startColor = #colorLiteral(red: 0.3490196078, green: 0.7568627451, blue: 0.2901960784, alpha: 1)
+      endColor = #colorLiteral(red: 0.262745098, green: 0.4588235294, blue: 0.2156862745, alpha: 1)
     case .clinicalAlert:
      // image = #imageLiteral(resourceName: "clinical alerts")
       image = UIImage(named: "clinical alerts") ?? .init()
       startColor = #colorLiteral(red: 0.3921568627, green: 0.4980392157, blue: 0.7882352941, alpha: 1)
       endColor = #colorLiteral(red: 0.1568627451, green: 0.3137254902, blue: 0.5176470588, alpha: 1)
-    case .consultation:
-      startColor = #colorLiteral(red: 0.3490196078, green: 0.7568627451, blue: 0.2901960784, alpha: 1)
-      endColor = #colorLiteral(red: 0.262745098, green: 0.4588235294, blue: 0.2156862745, alpha: 1)
-    case .nicu:
-        startColor = #colorLiteral(red: 0.9058823529, green: 0.5882352941, blue: 0.1254901961, alpha: 1)
-        endColor = #colorLiteral(red: 0.8039215686, green: 0.4431372549, blue: 0.1215686275, alpha: 1)
     }
+      
     return ColorAndImageTuple(startColor, endColor, image)
   }
 }

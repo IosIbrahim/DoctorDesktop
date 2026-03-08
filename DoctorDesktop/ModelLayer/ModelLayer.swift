@@ -11,33 +11,34 @@ import Foundation
 typealias PatientCountsBlock = ((PatientCount) -> Void)
 
 protocol ModelLayer {
-  func login(with params: [String: String], finished: @escaping UserAndComponentsBlock)
-  func getPatientsCount(with params: [String: String], finished: @escaping PatientCountsBlock)
-  func getInpatientUnits(with params: [String: String], finished: @escaping InpatientUnitsBlock)
-  func getInpatientPatients(with params: [String: String], finished: @escaping InpatientPatientsBlock)
-  func getOutpatientClinics(with params: [String: String], finished: @escaping OutpatientClinicsBlock)
-  func getOutpatientPatients(with params: [String: String], finished: @escaping OutpatientPatientsBlock)
-    func changePatientStatus(with params: [String: String], finished: @escaping OutpatientPatientsBlock)
-
-  func getEmergencyPatients(with params: [String: String], finished: @escaping EmergencyPatientsBlock)
+    func login(with params: [String: String], finished: @escaping UserAndComponentsBlock)
+    func getPatientsCount(with params: [String: String], finished: @escaping PatientCountsBlock)
+    func getDoctorPermissions(with params: [String: String], finished: @escaping DoctorPermissionsBlock)
+    func getInpatientUnits(with params: [String: String], finished: @escaping InpatientUnitsBlock)
     
-  func getOperationPatients(with params: [String: String], finished: @escaping ([OperationPatient]) -> Void)
-
-  func getClinicalPatients(with params: [String: String], finished: @escaping ([ClinicalPatient]) -> Void)
-  func getTemplate(with params:[String: String], finished: @escaping TemplateBlock)
-  func validateServiceRow(with params:[String: String], finished: @escaping ServicesDetailsBlock)
-  func getLabServices(with params:[String: String], finished: @escaping LabRadServicesBlock)
-  func saveOrder(with params:[String: String], orderType: TemplateType, finished: @escaping MessageBlock)
-  func getPatientHistory(with params:[String: String], finished: @escaping PatientHistoryBlock)
-  func getPatientSummary(with params:[String: String], finished: @escaping PatientSummaryBlock)
-  func getPacksURL(with params:[String: String], finished: @escaping URLBlock)
-
-  func getTriageInfo(with params: [String: String], finished: @escaping TriageDataBlock)
-  func getSymptomCategories(with params: [String: String], finished: @escaping RegularSymptomCategoriesBlock)
-  func getSymptoms(with params: [String: String], finished: @escaping SymptomsBlock)
-
-  func loadFlagImage(with params: [String: String], finished: @escaping DataBlock)
-}
+    func getInpatientPatients(with params: [String: String], finished: @escaping InpatientPatientsBlock)
+    func getOutpatientClinics(with params: [String: String], finished: @escaping OutpatientClinicsBlock)
+    func getOutpatientPatients(with params: [String: String], finished: @escaping OutpatientPatientsBlock)
+    func changePatientStatus(with params: [String: String], finished: @escaping OutpatientPatientsBlock)
+    
+    func getEmergencyPatients(with params: [String: String], finished: @escaping EmergencyPatientsBlock)
+    func getOperationPatients(with params: [String: String], finished: @escaping ([OperationPatient]) -> Void)
+    func getClinicalPatients(with params: [String: String], finished: @escaping ([ClinicalPatient]) -> Void)
+    func getTemplate(with params:[String: String], finished: @escaping TemplateBlock)
+    
+    func validateServiceRow(with params:[String: String], finished: @escaping ServicesDetailsBlock)
+    func getLabServices(with params:[String: String], finished: @escaping LabRadServicesBlock)
+    func saveOrder(with params:[String: String], orderType: TemplateType, finished: @escaping MessageBlock)
+    func getPatientHistory(with params:[String: String], finished: @escaping PatientHistoryBlock)
+    
+    func getPatientSummary(with params:[String: String], finished: @escaping PatientSummaryBlock)
+    func getPacksURL(with params:[String: String], finished: @escaping URLBlock)
+    func getTriageInfo(with params: [String: String], finished: @escaping TriageDataBlock)
+    
+    func getSymptomCategories(with params: [String: String], finished: @escaping RegularSymptomCategoriesBlock)
+    func getSymptoms(with params: [String: String], finished: @escaping SymptomsBlock)
+    func loadFlagImage(with params: [String: String], finished: @escaping DataBlock)
+  }
 
 class ModelLayerImpl: ModelLayer {
   var networkLayer: NetworkLayer
@@ -63,6 +64,13 @@ class ModelLayerImpl: ModelLayer {
       finished(patientCount)
     }
   }
+    
+    func getDoctorPermissions(with params: [String: String], finished: @escaping DoctorPermissionsBlock) {
+      networkLayer.getDoctorPermission(with: params) { data in
+        let models = self.translationLayer.getDoctorPermissionsFromJson(data)
+        finished(models)
+      }
+    }
   
   func getInpatientUnits(with params: [String: String], finished: @escaping InpatientUnitsBlock) {
     networkLayer.getInpatientUnits(with: params) { data in

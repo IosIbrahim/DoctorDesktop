@@ -13,26 +13,24 @@ typealias PatientUnits = [PatientUnit]
 typealias Precritions = [precrition]
 typealias prescriptionDeatilsModels = [prescriptionDeatilsModel]
 //typealias dosageModels = [dosageModel]
-
-
-
 typealias InpatientUnitsBlock = ((PatientUnits) -> Void)
+
 typealias InpatientPatients = [InpatientPatient]
 typealias medictions = [Medication]
-
 typealias InpatientPatientsBlock = ((InpatientPatients) -> Void)
-
-
 typealias OutpatientClinic = PatientUnit
+
+typealias DoctorPermissions = [PermissionModel]
+typealias DoctorPermissionsBlock = ((DoctorPermissions) -> Void)
+
 typealias OutpatientClinics = [OutpatientClinic]
 typealias OutpatientClinicsBlock = ((OutpatientClinics) -> Void)
 typealias OutpatientPatients = [OutpatientPatient]
+
 typealias OutpatientPatientsBlock = ((OutpatientPatients) -> Void)
 typealias ClinicalPatients = [ClinicalPatient]
-
 typealias EmergencyPatients = [EmergencyPatient]
 typealias EmergencyPatientsBlock = ((EmergencyPatients) -> Void)
-
 typealias ImageBlock = ((UIImage) -> Void)
 
 func getGenderAgeImage(genderAgeType: GenderAgeType) -> UIImage {

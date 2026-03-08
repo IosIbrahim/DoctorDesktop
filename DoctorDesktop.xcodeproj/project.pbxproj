@@ -20,6 +20,7 @@
 		0EC28D0723364347004C4890 /* prescriptionDeatilsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EC28D0623364347004C4890 /* prescriptionDeatilsModel.swift */; };
 		0EC54F3F233B764C00DF9B58 /* editVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EC54F3E233B764C00DF9B58 /* editVC.swift */; };
 		0EC54F41233B767200DF9B58 /* editCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EC54F40233B767200DF9B58 /* editCell.swift */; };
+		0F362BD82F5D6EFC00D5F0CF /* PermissionModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F362BD72F5D6EED00D5F0CF /* PermissionModel.swift */; };
 		0F45AC5D2F36B95300DA1DE7 /* Toastlity.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0F45AC5B2F36B93F00DA1DE7 /* Toastlity.xcframework */; };
 		0F45AC5E2F36B95300DA1DE7 /* Toastlity.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 0F45AC5B2F36B93F00DA1DE7 /* Toastlity.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		0FC00F682F32426300223775 /* NewOrderCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FC00F662F32426300223775 /* NewOrderCell.swift */; };
@@ -248,6 +249,7 @@
 		0EC28D0623364347004C4890 /* prescriptionDeatilsModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = prescriptionDeatilsModel.swift; sourceTree = "<group>"; };
 		0EC54F3E233B764C00DF9B58 /* editVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = editVC.swift; sourceTree = "<group>"; };
 		0EC54F40233B767200DF9B58 /* editCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = editCell.swift; sourceTree = "<group>"; };
+		0F362BD72F5D6EED00D5F0CF /* PermissionModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionModel.swift; sourceTree = "<group>"; };
 		0F45AC5B2F36B93F00DA1DE7 /* Toastlity.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = Toastlity.xcframework; sourceTree = "<group>"; };
 		0FC00F662F32426300223775 /* NewOrderCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewOrderCell.swift; sourceTree = "<group>"; };
 		0FC00F672F32426300223775 /* NewOrderCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = NewOrderCell.xib; sourceTree = "<group>"; };
@@ -858,6 +860,7 @@
 		3650EEDE1FDC747C000A349C /* DTOs */ = {
 			isa = PBXGroup;
 			children = (
+				0F362BD72F5D6EED00D5F0CF /* PermissionModel.swift */,
 				4668D6B51FD422E8005AF58D /* User.swift */,
 				3650EEDF1FDD0EF8000A349C /* Component.swift */,
 				36D17A951FDD710700B74679 /* PatientCount.swift */,
@@ -1639,6 +1642,7 @@
 				36393CA120894E85008410FD /* ClinicalInfoPopup.swift in Sources */,
 				365C6630200783B800E215C9 /* OrderCellPresenter.swift in Sources */,
 				363768982091C5C400CE45D8 /* VitalSignCellPresenter.swift in Sources */,
+				0F362BD82F5D6EFC00D5F0CF /* PermissionModel.swift in Sources */,
 				0E10295023375B6900653CAB /* dosage.swift in Sources */,
 				3637689D2091C5C400CE45D8 /* ScoringCell.swift in Sources */,
 				3615BBA42000CE1400A56F9E /* OrderCollectionPresenter.swift in Sources */,

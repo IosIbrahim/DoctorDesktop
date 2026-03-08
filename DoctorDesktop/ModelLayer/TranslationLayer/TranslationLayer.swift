@@ -13,23 +13,28 @@ protocol TranslationLayer {
     func createComponentDTOsFromJsonData(_ data: Data) -> Components
     func createUserDTOFromJsonData(_ data: Data) -> User
     func getCountsFromJson(_ data: Data) -> PatientCount
+    func getDoctorPermissionsFromJson(_ data: Data) -> DoctorPermissions
+    
     func getInpatientUnitDTOsFromJson(_ data: Data) -> PatientUnits
     func getInpatientPatientsDTOsFromJson(_ data: Data) -> InpatientPatients
     func getOutpatientClinicDTOsFromJson(_ data: Data) -> OutpatientClinics
     func getOutpatientPatientsDTOsFromJson(_ data: Data) -> OutpatientPatients
+    
     func getEmergencyPatientsDTOsFromJson(_ data: Data) -> EmergencyPatients
     func getClinicalPatientDTOFromJsonData(_ data: Data) -> [ClinicalPatient]
     func getOperationPatientDTOFromJsonData(_ data: Data) -> [OperationPatient]
     func getTemplateDTOFromJson(_ data: Data) -> Template?
+    
     func getServiceDetailsDTOsFromJson(_ data: Data) -> ServicesDetails
     func getLabServiceDTOFromJson(_ data: Data) -> LabRadServices
     func getRadServiceDTOFromJson(_ data: Data) -> LabRadServices
     func getMessageFromLabOrdeSaveResponse(_ data: Data) -> Message
+    
     func getPatientHistoryDTOFromJson(_ data: Data) -> PatientHistory
     func getPatientSummaryDTOFromJson(_ data: Data) -> PatientSummary
     func getPacksURLFromJson(_ data: Data) -> URL?
-    
     func getVitalsDTOsFromJson(_ data: Data) -> UCAFData?
+    
     func getHistorySymptomsDTOsFromJson(_ data:Data) -> HistorySymptomCategories
     func getDiagnosisCategoriesDTOsFromJson(_ data: Data) -> DiagnosisCategories
     func getPainScoresDTOsFromJson(_ data: Data) -> Scores
@@ -58,14 +63,8 @@ class TranslationLayerImpl: TranslationLayer {
     
     func createUserDTOFromJsonData(_ data: Data) -> User {
         let user = try! User (data: data, keyPath: "OUTPARAMS.OUTPARAMS_ROW")
-        
-        
-        
-        
         UserDefaults.standard.set(user.branch, forKey: "branch_id") //setObject
         UserDefaults.standard.set(user.userName, forKey: "userName") //setObject
-
-
         print(user)
         return user
     }
@@ -80,6 +79,17 @@ extension TranslationLayerImpl {
             let emp = try! PatientCount(data: .init())
             return emp
         }
+    }
+    
+    
+    func getDoctorPermissionsFromJson(_ data: Data) -> DoctorPermissions {
+        print(data.toJsonString() ?? "")
+        if let patientCount = try? DoctorPermissions (data: data, keyPath: "Root") {
+            return patientCount
+        }else if let patientCount = try? PermissionModel (data: data, keyPath: "Root") {
+            return [patientCount]
+        }
+        return []
     }
     
     func getInpatientUnitDTOsFromJson(_ data: Data) -> PatientUnits {

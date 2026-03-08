@@ -24,14 +24,16 @@ struct AppURLS {
 }
 
 protocol NetworkLayer {
-  func login(with params: [String: String], finished: @escaping DataBlock)
-  func getPatientsCount(with params: [String: String], finished: @escaping DataBlock)
+    func login(with params: [String: String], finished: @escaping DataBlock)
+    func getPatientsCount(with params: [String: String], finished: @escaping DataBlock)
+    func getDoctorPermission(with params: [String: String], finished: @escaping DataBlock)
+
   func getInpatientUnits(with params: [String: String], finished: @escaping DataBlock)
   func getInpatientPatients(with params: [String: String], finished: @escaping DataBlock)
-    func getOutpatientClinics(with params: [String: String], finished: @escaping DataBlock)
-    func getOperationPatients(with params: [String: String], finished: @escaping DataBlock)
+  func getOutpatientClinics(with params: [String: String], finished: @escaping DataBlock)
+  func getOperationPatients(with params: [String: String], finished: @escaping DataBlock)
   func getOutpatientPatients(with params: [String: String], finished: @escaping DataBlock)
-    func changePatientStatus(with params: [String: String], finished: @escaping DataBlock)
+  func changePatientStatus(with params: [String: String], finished: @escaping DataBlock)
 
   func getClinicalPatients(with params: [String: String], finished: @escaping DataBlock)
   func getTemplate(with params:[String: String], finished: @escaping DataBlock)
@@ -78,7 +80,7 @@ class NetworkLayerImpl: NetworkLayer {
 
 extension NetworkLayerImpl {
   func getPatientsCount(with params: [String: String], finished: @escaping DataBlock) {
-    let url = AppURLS.ip+"/MobileApi/api/get_patients_counts"
+    let url = AppURLS.ip+"/MobileApi/api/WorkFlowController/workflow"
     print(params)
     print(url)
     AlamofireAppManager.shared.request(url, parameters: params)
@@ -88,6 +90,20 @@ extension NetworkLayerImpl {
         finished(data)
     }
   }
+    
+    func getDoctorPermission(with params: [String: String], finished: @escaping DataBlock) {
+      let url = AppURLS.ip+"/MobileApi/api/get_patients_counts"
+      print(params)
+      print(url)
+      AlamofireAppManager.shared.request(url, parameters: params)
+        .responseJSON { response in
+          guard let data = response.data else { return }
+            print(response.value ?? "")
+          finished(data)
+      }
+    }
+    
+    
   
   func getInpatientUnits(with params: [String: String], finished: @escaping DataBlock) {
     let url = AppURLS.ip+"/MobileApi/api/get_inpatient_units"

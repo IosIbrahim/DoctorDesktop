@@ -10,7 +10,11 @@ import UIKit
 
 class ComponentCell: UICollectionViewCell {
   
-  @IBOutlet weak var cellView: UIView!
+    @IBOutlet weak var lblRecieved: UILabel!
+    @IBOutlet weak var lblSend: UILabel!
+    @IBOutlet weak var pickerConsultant: UIView!
+    @IBOutlet weak var pickerMain: UIView!
+    @IBOutlet weak var cellView: UIView!
   @IBOutlet weak var countLabel: UILabel!
   @IBOutlet weak var titleLabel: UILabel!
   @IBOutlet weak var imageView: UIImageView!
@@ -47,6 +51,9 @@ extension ComponentCell {
     self.titleLabel.text = presenter.title
     self.countLabel.text = presenter.count
     self.imageView.image = presenter.image
+      
+      pickerMain.isHidden = presenter.title.lowercased().contains("Consultations".lowercased())
+      pickerConsultant.isHidden = !pickerMain.isHidden
   }
 }
 

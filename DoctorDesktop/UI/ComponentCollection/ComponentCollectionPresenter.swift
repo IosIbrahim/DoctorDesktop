@@ -9,24 +9,27 @@
 import Foundation
 
 typealias EmptyBlock = (() -> Void)
+var userNamePermission:String = ""
+var UserBranchPermission:String = ""
 
 protocol ComponentCollectionPresenter {
-  var user: User { get }
-  var components: Components { get }
-  func getPatientsCount(finished: @escaping EmptyBlock)
+    var user: User { get }
+    var components: Components { get }
+    func getPatientsCount(finished: @escaping EmptyBlock)
+    func getDoctorPermission(finished: @escaping EmptyBlock)
 }
 
 class ComponentCollectionPresenterImpl: ComponentCollectionPresenter {
-  private var modelLayer: ModelLayer
-
-  var user: User
-  var components: Components
+    private var modelLayer: ModelLayer
+    var user: User
+    var components: Components
+    var permissions: DoctorPermissions = []
 
   init(modelLayer: ModelLayer, components: Components, user: User) {
-    self.modelLayer = modelLayer
-    self.components = components
-    self.user = user
-    
+      self.modelLayer = modelLayer
+      self.components = components
+      self.user = user
+      self.permissions = []
     print("com")
   }
 }
@@ -43,7 +46,8 @@ extension ComponentCollectionPresenterImpl {
     
     let formatter = DateFormatter()
     formatter.dateFormat = "dd/MM/yyyy HH:mm:ss"
-    
+      userNamePermission = user.userName ?? ""
+      UserBranchPermission = user.branch ?? ""
     let params = [
       "BRANCH_ID": user.branch ?? "",
       "USER_ID": user.userName ?? "",
@@ -83,16 +87,29 @@ extension ComponentCollectionPresenterImpl {
 //              component.patientsCount = patientCounts.inpatientNICU
           }
             component.type = componentType
-
-            
-            
-//            print(component.type)
         }
       }
       finished()
     }
     
   }
+
+    func getDoctorPermission(finished: @escaping EmptyBlock) {
+      let params = [
+        "BRANCH_ID": user.branch ?? "",
+        "USER_ID": user.userName ?? "",
+        "PROCESS_ID":"289980",
+        "OBJECT_ID": "6528",
+        "PROCESS_INFO_CODE": "",
+        "CAT_ID": "",
+        "DEFAULTGROUP": "DR"
+      ]
+      modelLayer.getDoctorPermissions(with: params) { models in
+          self.permissions = models
+          finished()
+      }
+      
+    }
 }
 
 
