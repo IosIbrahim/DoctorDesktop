@@ -62,21 +62,36 @@ class TranslationLayerImpl: TranslationLayer {
     }
     
     func createUserDTOFromJsonData(_ data: Data) -> User {
-        let user = try! User (data: data, keyPath: "OUTPARAMS.OUTPARAMS_ROW")
-        UserDefaults.standard.set(user.branch, forKey: "branch_id") //setObject
-        UserDefaults.standard.set(user.userName, forKey: "userName") //setObject
-        print(user)
-        return user
+        let user = try? User (data: data, keyPath: "OUTPARAMS.OUTPARAMS_ROW")
+        if let branch = user?.branch {
+            UserDefaults.standard.set(branch, forKey: "branch_id") //setObject
+        }
+        if let name = user?.userName {
+            UserDefaults.standard.set(name, forKey: "userName") //setObject
+        }
+        return user ?? .init()
     }
 }
 
 extension TranslationLayerImpl {
     func getCountsFromJson(_ data: Data) -> PatientCount {
         print(data.toJsonString() ?? "")
-        if let patientCount = try? PatientCount (data: data, keyPath: "Root.OUT_PARMS.OUT_PARMS_ROW") {
+        
+        if var patientCount = try? PatientCount (data: data, keyPath: "Root.OUT_PARMS.OUT_PARMS_ROW") {
+            if let com = try? DoctorPermissions (data: data, keyPath: "userComponent") {
+                patientCount.permissions = com
+            }
             return patientCount
         }else {
-            let emp = try! PatientCount(data: .init())
+            var emp :PatientCount = .init()
+            if let error = try? ErrorModel(data:data) {
+                if let err = error.error {
+                    emp.error = err
+                }else {
+                    emp.error = "An error has occurred."
+                }
+                
+            }
             return emp
         }
     }

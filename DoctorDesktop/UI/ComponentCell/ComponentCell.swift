@@ -15,9 +15,9 @@ class ComponentCell: UICollectionViewCell {
     @IBOutlet weak var pickerConsultant: UIView!
     @IBOutlet weak var pickerMain: UIView!
     @IBOutlet weak var cellView: UIView!
-  @IBOutlet weak var countLabel: UILabel!
-  @IBOutlet weak var titleLabel: UILabel!
-  @IBOutlet weak var imageView: UIImageView!
+    @IBOutlet weak var countLabel: UILabel!
+    @IBOutlet weak var titleLabel: UILabel!
+    @IBOutlet weak var imageView: UIImageView!
   
   fileprivate var presenter: ComponentCellPresenter!
   
@@ -54,6 +54,12 @@ extension ComponentCell {
       
       pickerMain.isHidden = presenter.title.lowercased().contains("Consultations".lowercased())
       pickerConsultant.isHidden = !pickerMain.isHidden
+      if presenter.title == "Notifications" {
+          self.countLabel.text = "2762"
+          self.imageView.image = UIImage(named: "ic-bell")
+      }else if presenter.title == "Search"{
+          self.countLabel.text = ""
+      }
   }
 }
 

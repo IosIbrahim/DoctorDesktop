@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import Toastlity
 
 typealias ColorAndImageTuple = (startColor: UIColor, endColor: UIColor, image: UIImage)
 
@@ -35,8 +36,9 @@ class ComponentCollectionViewController: UIViewController {
   private var componentCellMaker: DependencyRegistry.ComponentCellMaker!
   private weak var navigationCoordinator: NavigationCoordinator?
 
-  var isFinishedLoadingCounts = false
-  
+    var isFinishedLoadingCounts = false
+    lazy var toastBar: ToastBar = .init(settings: .agent, in: parent?.view)
+
   func configure(with presenter: ComponentCollectionPresenter,
                  componentCellMaker: @escaping DependencyRegistry.ComponentCellMaker,
                  navigationCoordinator: NavigationCoordinator) {
@@ -61,12 +63,15 @@ class ComponentCollectionViewController: UIViewController {
     self.navigationItem.setHidesBackButton(true, animated:false)
     
     ComponentCell.register(with: collectionView)
-      presenter.getDoctorPermission {
+    //  presenter.getDoctorPermission {
           self.presenter.getPatientsCount() {
-            self.isFinishedLoadingCounts = true
-            self.collectionView.reloadData()
+              if !self.presenter.error.isEmpty {
+                  self.toastBar.show(with: self.presenter.error)
+              }
+              self.isFinishedLoadingCounts = true
+              self.collectionView.reloadData()
           }
-      }
+     // }
   }
   
   func getComponentBackgroundColorAndImage(componentType: ComponentType) -> ColorAndImageTuple {
@@ -110,6 +115,14 @@ class ComponentCollectionViewController: UIViewController {
       image = UIImage(named: "clinical alerts") ?? .init()
       startColor = #colorLiteral(red: 0.3921568627, green: 0.4980392157, blue: 0.7882352941, alpha: 1)
       endColor = #colorLiteral(red: 0.1568627451, green: 0.3137254902, blue: 0.5176470588, alpha: 1)
+    case .notifications:
+        startColor = #colorLiteral(red: 0.9058823529, green: 0.5882352941, blue: 0.1254901961, alpha: 1)
+        endColor = #colorLiteral(red: 0.8039215686, green: 0.4431372549, blue: 0.1215686275, alpha: 1)
+        image = UIImage(named:"ic-bell") ?? .init()
+    case .search:
+        image = UIImage(named: "inpatients") ?? .init()
+        startColor = #colorLiteral(red: 0.6274509804, green: 0.4196078431, blue: 0.631372549, alpha: 1)
+        endColor = #colorLiteral(red: 0.537254902, green: 0.3411764706, blue: 0.6274509804, alpha: 1)
     }
       
     return ColorAndImageTuple(startColor, endColor, image)

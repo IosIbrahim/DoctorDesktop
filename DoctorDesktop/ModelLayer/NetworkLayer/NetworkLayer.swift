@@ -80,7 +80,7 @@ class NetworkLayerImpl: NetworkLayer {
 
 extension NetworkLayerImpl {
   func getPatientsCount(with params: [String: String], finished: @escaping DataBlock) {
-    let url = AppURLS.ip+"/MobileApi/api/WorkFlowController/workflow"
+      let url = AppURLS.ip+"/MobileApi/api/get_patients_counts"
     print(params)
     print(url)
     AlamofireAppManager.shared.request(url, parameters: params)
@@ -92,7 +92,7 @@ extension NetworkLayerImpl {
   }
     
     func getDoctorPermission(with params: [String: String], finished: @escaping DataBlock) {
-      let url = AppURLS.ip+"/MobileApi/api/get_patients_counts"
+        let url = AppURLS.ip+"/MobileApi/api/WorkFlowController/workflow"
       print(params)
       print(url)
       AlamofireAppManager.shared.request(url, parameters: params)

@@ -8,33 +8,41 @@
 
 import Foundation
 
+struct ErrorModel: Decodable {
+    var error:String?
+    enum CodingKeys: String, CodingKey {
+      case error = "Message"
+    }
+}
 struct PatientCount: Decodable {
-  let inpatientFloor: String
-  let inpatientCare: String
-  let outpatient: String
-  let emergency: String
-  let emergencyOverstaying: String
-  let operation: String
-  let physiology: String
-  let triage: String
-  let cosultationFromDoctor: String
-  let cosultationToDoctor: String
-  let clinicalAlert: String
-  let doctorRemarks: String
-  let notSeenResults: String
-  let pendingOrders: String
-  let pendingDosages: String
-  let rejectionCount: String
-  let sickLeave: String
-  let dischargeRequest: String
-  let planFollowupChemo: String
-  let planFollowupRad: String
-  let planFollowupRenal: String
-  let notSampledOrder: String
-  let patientVentilator: String
-  let pendingAdverseEvents: String
-  let inpatientNICU: String
-  let ClinicPharmacy: String
+  var inpatientFloor: String = ""
+  var inpatientCare: String = ""
+  var outpatient: String = ""
+  var emergency: String = ""
+  var emergencyOverstaying: String = ""
+  var operation: String = ""
+  var physiology: String = ""
+  var triage: String = ""
+  var cosultationFromDoctor: String = ""
+  var cosultationToDoctor: String = ""
+  var clinicalAlert: String = ""
+  var doctorRemarks: String = ""
+  var notSeenResults: String = ""
+  var pendingOrders: String = ""
+  var pendingDosages: String = ""
+  var rejectionCount: String = ""
+  var sickLeave: String = ""
+  var dischargeRequest: String = ""
+  var planFollowupChemo: String = ""
+  var planFollowupRad: String = ""
+  var planFollowupRenal: String = ""
+  var notSampledOrder: String = ""
+  var patientVentilator: String = ""
+  var pendingAdverseEvents: String = ""
+  var inpatientNICU: String = ""
+  var ClinicPharmacy: String = ""
+    var error:String? = nil
+    var permissions: DoctorPermissions?
 
   enum CodingKeys: String, CodingKey {
     case inpatientFloor = "INPAT_FLOOR"
@@ -63,5 +71,7 @@ struct PatientCount: Decodable {
     case pendingAdverseEvents = "PENDING_ADVERSE_EVENTS"
     case inpatientNICU = "INPAT_NICU_COUNT"
     case ClinicPharmacy = "COUNT_CLINIC_PHARM"
+    case error = "Error"
+      case permissions = "Permissions"
   }
 }

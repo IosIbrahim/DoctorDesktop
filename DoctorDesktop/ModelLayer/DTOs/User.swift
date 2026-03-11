@@ -8,13 +8,13 @@
 import Foundation
 
 struct User: Decodable {
-  private let arabicName: String?
-  private let englishName: String?
+  var arabicName: String?
+  var englishName: String?
 
-  let id: String?
-  let userName: String?
-  let branch: String?
-  let group:String?
+  var id: String?
+  var userName: String?
+  var branch: String?
+  var group:String?
   var name: String? { return englishName }
 
   enum CodingKeys: String, CodingKey {
@@ -25,6 +25,8 @@ struct User: Decodable {
     case branch = "DEFAULTBRANCH"
     case group = "DEFAULTGROUP"
   }
+    
+    
 }
 //{
 //    CASHIER = 1;

@@ -9,13 +9,15 @@
 import UIKit
 import Alamofire
 import Stuff
+import Toastlity
 import NVActivityIndicatorView
 
 class LoginViewController: UIViewController, NVActivityIndicatorViewable {
   
   private var presenter: LoginPresenter!
   private weak var navigationCoordinator: NavigationCoordinator?
-  
+  lazy var toastBar: ToastBar = .init(settings: .agent, in: parent?.view)
+
   @IBOutlet weak var loginView: UIView!
   @IBOutlet weak var passWord: UITextField!
   @IBOutlet weak var loginBtn: UIButton!
@@ -40,16 +42,35 @@ class LoginViewController: UIViewController, NVActivityIndicatorViewable {
   }
   
   @IBAction func loginPress(_ sender: Any) {
-    guard let username = self.userName.text,
-      let password = self.passWord.text else { return }
+      guard let username = self.userName.text else {
+          self.toastBar.show(with: "Please Enter UserName")
+          return
+      }
+      if username.isEmpty {
+          self.toastBar.show(with: "Please Enter UserName")
+          return
+      }
+     guard let password = self.passWord.text else {
+         self.toastBar.show(with: "Please Enter Password")
+         return }
+      if password.isEmpty {
+          self.toastBar.show(with: "Please Enter Password")
+          return
+      }
     startAnimating(message: "Login...")
     let params = ["USER_ID":username, "USERPASSWORD":password]
     presenter.login(with: params) { [weak self] in
       self?.stopAnimating()
-      let args = ["components": self!.presenter.components, "user": self!.presenter.user] as [String : Any]
-        print(self?.presenter.user)
-        
-      self?.navigationCoordinator?.next(arguments: args)
+        if self?.presenter.error != "" {
+            self?.toastBar.show(with: self?.presenter.error ?? "")
+        }else {
+            let args = ["components": self?.presenter.components ?? [],
+                        "user": self?.presenter.user ?? .init()] as [String : Any]
+              print(self?.presenter.user ?? .init())
+              
+            self?.navigationCoordinator?.next(arguments: args)
+        }
+     
     }
   }
   

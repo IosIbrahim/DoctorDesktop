@@ -9,22 +9,24 @@
 import Foundation
 
 enum ComponentType: Int {
-  case inpatient = 68 // 68
-  case outpatient = 69 // 69
-  case emergency = 71
-  case consultation = 576
-  case clinicalAlert = 1020 // 1020  X
-  case ICU = 2284 // 2665 X
-  case operations = 70 // 70 X
-  case nicu = 2260
+    case inpatient = 68 // 68
+    case outpatient = 69 // 69
+    case emergency = 71
+    case consultation = 576
+    case clinicalAlert = 1020 // 1020  X
+    case ICU = 2284 // 2665 X
+    case operations = 70 // 70 X
+    case nicu = 2260
+    case notifications = 1
+    case search = 72
  // case nurseTL = 1478
 }
 
 class Component: Decodable {
-  let id: Int
-  let processInfoCode: Int
+  var id: Int
+  var processInfoCode: Int
   private let arabicName: String
-  private let englishName: String
+  private var englishName: String
   private let shortNameInArabic: String?
   private let shortNameInEnglish: String?
 
@@ -44,4 +46,7 @@ class Component: Decodable {
 
     case mobileFlag = "MOBILE_FLAG"
   }
+    func updateName(_ title:String){
+        self.englishName = title
+    }
 }
