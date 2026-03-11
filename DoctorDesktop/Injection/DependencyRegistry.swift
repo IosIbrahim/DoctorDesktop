@@ -8,7 +8,7 @@ protocol DependencyRegistry {
 
   func makeRootNavigationCoordinator(rootViewController: UIViewController) -> NavigationCoordinator
   func makeComponentCollectionViewController(with components: Components, user: User) -> ComponentCollectionViewController
-  func makePatientsViewController(with componentType: ComponentType, user: User) -> PatientsViewController
+    func makePatientsViewController(with componentType: ComponentType, user: User,permission:PermissionModel) -> PatientsViewController
   func makePatientOverviewViewController(with patient: Patient, user: User) -> PatientOverviewViewController
   func makeUnitsPopup(with title: String, patientUnits: PatientUnits) -> UnitsPopup
   func makeOrderCollectionViewController(with patient: Patient, templateType: TemplateType, user: User) -> OrderCollectionViewController
@@ -88,9 +88,9 @@ class DependencyRegistryImpl: DependencyRegistry {
     container.register(ComponentCellPresenter.self) { (_, component: Component, colorAndImage: ColorAndImageTuple) in
       ComponentCellPresenterImpl(withComponent: component, colorAndImage: colorAndImage)
     }
-    container.register(PatientsPresenter.self) { (r, componentType: ComponentType, user: User) in
+      container.register(PatientsPresenter.self) { (r, componentType: ComponentType, user: User,permission:PermissionModel) in
         
-      PatientsPresenterImpl(modelLayer: r.resolve(ModelLayer.self)!, componentType: componentType, user: user)
+      PatientsPresenterImpl(modelLayer: r.resolve(ModelLayer.self)!, componentType: componentType, user: user,  permission: permission)
     }
     container.register(InpatientCellPresenter.self) { (r, inpatientPatient: InpatientPatient) in
       InpatientCellPresenterImpl(with: inpatientPatient)
@@ -164,8 +164,8 @@ class DependencyRegistryImpl: DependencyRegistry {
       return vc
     }
     
-    container.register(PatientsViewController.self) { (r, componentType: ComponentType, user: User) in
-      let presenter = r.resolve(PatientsPresenter.self, arguments: componentType, user)!
+      container.register(PatientsViewController.self) { (r, componentType: ComponentType, user: User,permisssion:PermissionModel) in
+      let presenter = r.resolve(PatientsPresenter.self, arguments: componentType, user,permisssion)!
       let vc = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "PatientsViewController") as! PatientsViewController
       vc.configure(with: presenter,
                    inpatientCellMaker: self.makeInpatientCell,
@@ -242,8 +242,8 @@ class DependencyRegistryImpl: DependencyRegistry {
     return ComponentCell.dequeue(from: collectionView, for: indexPath, with: presenter)
   }
   
-  func makePatientsViewController(with componentType: ComponentType, user: User) -> PatientsViewController {
-    return container.resolve(PatientsViewController.self, arguments: componentType, user)!
+    func makePatientsViewController(with componentType: ComponentType, user: User,permission:PermissionModel) -> PatientsViewController {
+    return container.resolve(PatientsViewController.self, arguments: componentType, user,permission)!
   }
   
   func makeInpatientCell(for tableView: UITableView, at indexPath: IndexPath, inpatientPatient: InpatientPatient) -> InpatientCell {

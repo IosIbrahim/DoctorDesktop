@@ -164,10 +164,11 @@ extension ComponentCollectionViewController: UICollectionViewDelegateFlowLayout 
 
 extension ComponentCollectionViewController: UICollectionViewDelegate {
   func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-    guard let componentType = presenter.components[indexPath.row].type else { return }
-    
+    guard var componentType = presenter.components[indexPath.row].type else { return }
+    let permission = presenter.permissions[indexPath.row]
+
     print(componentType)
-    let args = ["componentType": componentType, "user": presenter.user] as [String : Any]
+      let args = ["componentType": componentType, "user": presenter.user,"permission":permission] as [String : Any]
     navigationCoordinator?.next(arguments: args)
   }
 }

@@ -15,6 +15,7 @@ var UserBranchPermission:String = ""
 protocol ComponentCollectionPresenter {
     var user: User { get }
     var components: Components { get }
+    var permissions: DoctorPermissions { get }
     var error: String { get }
     func getPatientsCount(finished: @escaping EmptyBlock)
     func getDoctorPermission(finished: @escaping EmptyBlock)
@@ -69,6 +70,7 @@ extension ComponentCollectionPresenterImpl {
 //      BRANCH_ID=1&COMPUTER_NAME=pc&GROUP_ID=DR&oauth_consumer_key=&oauth_nonce=815851173&oauth_signature_method=HMAC-SHA1&oauth_timestamp=1773061126&oauth_version=1.0&SELECTED_DATE_STR_FORMATED=09%2F03%2F2026+14%3A58%3A46&USER_ID=KHABEER&USER_OPEN_FLAG=D&oauth_signature=cuAJZj8Jn6Sy6A9aDuUOqaXZ0ZE=
       
     modelLayer.getPatientsCount(with: params) { patientCounts in
+        self.permissions = patientCounts.permissions ?? []
         if let err = patientCounts.error {
             self.error = err
         }else {

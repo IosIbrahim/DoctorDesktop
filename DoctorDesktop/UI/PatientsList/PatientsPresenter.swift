@@ -48,6 +48,7 @@ func getGenderAgeImage(genderAgeType: GenderAgeType) -> UIImage {
 protocol PatientsPresenter {
   var user: User { get }
   var componentType: ComponentType { get }
+  var permission:PermissionModel { get }
   var patientUnits: PatientUnits { get }
   var title: String { get }
   
@@ -76,6 +77,7 @@ class PatientsPresenterImpl: PatientsPresenter {
   
   let user: User
   let componentType: ComponentType
+    var permission:PermissionModel
   var patientUnits = PatientUnits()
   var outpatientPatients = OutpatientPatients()
   var inpatientPatients = InpatientPatients()
@@ -87,11 +89,12 @@ class PatientsPresenterImpl: PatientsPresenter {
 
    
     
-  init(modelLayer: ModelLayer, componentType: ComponentType, user: User) {
-    self.modelLayer = modelLayer
-    self.componentType = componentType
-    self.user = user
-    formatter.dateFormat = "dd/MM/yyyy HH:mm:ss"
+    init(modelLayer: ModelLayer, componentType: ComponentType, user: User,permission:PermissionModel) {
+        self.modelLayer = modelLayer
+        self.componentType = componentType
+        self.user = user
+        self.permission = permission
+        formatter.dateFormat = "dd/MM/yyyy HH:mm:ss"
   }
 
   var title: String {

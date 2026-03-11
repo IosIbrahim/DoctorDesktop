@@ -120,8 +120,9 @@ class RootNavigationCoordinatorImpl: NavigationCoordinator {
   
   func showPatientList(arguments: Dictionary<String, Any>?) {
     guard let componentType = arguments?["componentType"] as? ComponentType,
+          let permission = arguments?["permission"] as? PermissionModel,
       let user = arguments?["user"] as? User else { return }
-    let patientsViewController = registry.makePatientsViewController(with: componentType, user: user)
+    let patientsViewController = registry.makePatientsViewController(with: componentType, user: user,permission: permission)
     rootViewController.navigationController?.pushViewController(patientsViewController, animated: true)
     navState = .atPatientList
   }
