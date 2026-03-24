@@ -67,6 +67,17 @@
                                             <outlet property="delegate" destination="mBC-4B-5Ww" id="YZw-Ix-gtc"/>
                                         </connections>
                                     </textField>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="l6h-v8-AAE">
+                                        <rect key="frame" x="263" y="73" width="27" height="40"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="40" id="jcG-EK-jL8"/>
+                                        </constraints>
+                                        <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                        <state key="normal" image="ic-view"/>
+                                        <connections>
+                                            <action selector="showPasswordOntap:" destination="mBC-4B-5Ww" eventType="touchUpInside" id="XvN-Eu-fTw"/>
+                                        </connections>
+                                    </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="C3t-AS-aWY">
                                         <rect key="frame" x="0.0" y="124" width="300" height="50"/>
                                         <color key="backgroundColor" red="0.36078431372549019" green="0.71372549019607845" blue="0.84705882352941175" alpha="0.83553617294520544" colorSpace="custom" customColorSpace="sRGB"/>
@@ -86,6 +97,8 @@
                                 <constraints>
                                     <constraint firstAttribute="height" constant="175" id="373-hc-cqo"/>
                                     <constraint firstItem="C3t-AS-aWY" firstAttribute="top" secondItem="Nca-fU-ITv" secondAttribute="bottom" constant="6" id="CTr-9z-QoI"/>
+                                    <constraint firstAttribute="trailing" secondItem="l6h-v8-AAE" secondAttribute="trailing" constant="10" id="CZ9-UR-YEa"/>
+                                    <constraint firstItem="l6h-v8-AAE" firstAttribute="centerY" secondItem="Nca-fU-ITv" secondAttribute="centerY" id="G6i-Da-zZr"/>
                                     <constraint firstItem="Gun-2v-JSd" firstAttribute="top" secondItem="Cy3-UG-H2c" secondAttribute="top" constant="8" id="Tyt-4J-ssQ"/>
                                     <constraint firstItem="C3t-AS-aWY" firstAttribute="leading" secondItem="Cy3-UG-H2c" secondAttribute="leading" id="c1b-1q-jUK"/>
                                     <constraint firstAttribute="trailing" secondItem="Gun-2v-JSd" secondAttribute="trailing" constant="8" id="cGi-S2-U3b"/>
@@ -1346,6 +1359,7 @@
         <image name="closeIcon" width="512" height="512"/>
         <image name="editIcon" width="225" height="225"/>
         <image name="exchange-arrows" width="512" height="512"/>
+        <image name="ic-view" width="27" height="18"/>
         <image name="loginSreen" width="640" height="1136"/>
         <image name="logo" width="632" height="420"/>
         <image name="menu_icon" width="24" height="24"/>

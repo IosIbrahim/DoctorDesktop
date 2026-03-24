@@ -12,8 +12,6 @@ class OverviewSectionDetailsViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var plusButton: UIButton!
     
-    
-    
   var presenter: OverviewSectionDetailsPresenter!
   private weak var navigationCoordinator: NavigationCoordinator?
   private var vitalSignCellMaker: DependencyRegistry.VitalSignCellMaker!
@@ -129,7 +127,12 @@ extension OverviewSectionDetailsViewController: UITableViewDataSource {
   func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
     switch presenter.overviewSection {
     case .vitalSigns: return vitalSignCellMaker(tableView, indexPath, presenter.patientSummary.vitalSigns![indexPath.row])
-    case .progressNotes: break
+    case .progressNotes:
+        let cell = tableView.dequeueReusableCell(withIdentifier: NotesCell.cellId, for: indexPath) as! NotesCell
+        if let model = presenter.patientSummary.nurseRemarks?[indexPath.row] {
+            cell.drawCell(model)
+        }
+        return cell
     case .medication: return medicationCellMaker(tableView, indexPath, presenter.patientSummary.medications![indexPath.row])
     case .diagnosis: return diagnosisCellMaker(tableView, indexPath, presenter.patientSummary.diagnosis![indexPath.row])
     //case .allergies: return allergyFindingComplaintHistoryCellMaker(tableView, indexPath, presenter.patientSummary.allergies![indexPath.row])

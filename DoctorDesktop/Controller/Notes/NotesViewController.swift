@@ -265,9 +265,15 @@ class NotesViewController: UIViewController {
 
 }
 
+
 struct ListOfDoctorNurseMessages : Mappable {
     var DESC_EN : String = ""
     var EMP_NAME_EN : String = ""
+    var EMP_NAME_AR:String = ""
+    var status:String = ""
+    var date:String = ""
+    var flag:String = ""
+    var showDN:String = ""
     var REPLY :nurseMessage?
     init?(map: Map) {
         
@@ -276,9 +282,12 @@ struct ListOfDoctorNurseMessages : Mappable {
         
         DESC_EN <- map["DESC_EN"]
         REPLY <- map["REPLY"]
-        
         EMP_NAME_EN <- map["EMP_NAME_EN"]
-
+        EMP_NAME_AR <- map["EMP_NAME_AR"]
+        status <- map["PRIORITY_TYPE"]
+        date <- map["TRANSDATE"]
+        flag <- map["USER_OPEN_FLAG"]
+        showDN <- map["USER_OPEN_FLAG"]
     }
     
 }

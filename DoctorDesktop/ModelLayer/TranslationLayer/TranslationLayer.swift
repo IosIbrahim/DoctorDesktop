@@ -412,16 +412,19 @@ extension TranslationLayerImpl {
         print(String(data: data, encoding: .utf8) ?? "")
         var complaints = try? [Complaint].decode(data, keyPath: "Root.PATIENT.PATIENT_ROW.COMPLAINS.COMPLAINS_ROW",jsonDecoder:jsonDecoder)
         print("com")
-        let topLevel = try? JSONSerialization.jsonObject(with: data, options: JSONSerialization.ReadingOptions.mutableContainers)
-          if let nestedJson = (topLevel as AnyObject).value(forKeyPath: "Root.PATIENT.PATIENT_ROW.COMPLAINS.COMPLAINS_ROW") {
-              let nestedData = try? JSONSerialization.data(withJSONObject: nestedJson)
-              print("nestedData:",String(data: nestedData ?? .init(), encoding: .utf8) ?? "")
-              let model = try? jsonDecoder.decode([Complaint].self, from: nestedData ?? .init())
-              print(model ?? [])
-              if complaints?.isEmpty ?? false {
-                  complaints = model ?? []
+        if complaints?.isEmpty == true {
+            let topLevel = try? JSONSerialization.jsonObject(with: data, options: JSONSerialization.ReadingOptions.mutableContainers)
+              if let nestedJson = (topLevel as AnyObject).value(forKeyPath: "Root.PATIENT.PATIENT_ROW.COMPLAINS.COMPLAINS_ROW") {
+                  let nestedData = try? JSONSerialization.data(withJSONObject: nestedJson)
+                  print("nestedData:",String(data: nestedData ?? .init(), encoding: .utf8) ?? "")
+                  let model = try? jsonDecoder.decode([Complaint].self, from: nestedData ?? .init())
+                  print(model ?? [])
+                  if complaints?.isEmpty ?? false {
+                      complaints = model ?? []
+                  }
               }
-          }
+        }
+
         let findings = try? [Finding].decode(data, keyPath: "Root.PATIENT.PATIENT_ROW.FINDINGS.FINDINGS_ROW", jsonDecoder: jsonDecoder)
         let diagnosis = try? [Diagnosis].decode(data, keyPath: "Root.PATIENT.PATIENT_ROW.DIAGNOSIS.DIAGNOSIS_ROW", jsonDecoder: jsonDecoder)
         let history = try? [History].decode(data, keyPath: "Root.PATIENT.PATIENT_ROW.HISTORY.HISTORY_ROW", jsonDecoder: jsonDecoder)
@@ -431,18 +434,17 @@ extension TranslationLayerImpl {
         let nurseRemarks = try? [NurseRemark].decode(data, keyPath: "Root.PATIENT.PATIENT_ROW.NURSE_REMARKS.NURSE_REMARKS_ROW")
         var operations = try? [Operation].decode(data, keyPath: "Root.PATIENT.PATIENT_ROW.OPERATION.OPERATION_ROW", jsonDecoder: jsonDecoder)
         
-          if let nestedJson = (topLevel as AnyObject).value(forKeyPath: "Root.PATIENT.PATIENT_ROW.OPERATION.OPERATION_ROW") {
-              let nestedData = try? JSONSerialization.data(withJSONObject: nestedJson)
-              print("nestedData:",String(data: nestedData ?? .init(), encoding: .utf8) ?? "")
-              if let models = try? jsonDecoder.decode([Operation].self, from: nestedData ?? .init()) {
-                  operations = models
-              }
-              
-              if let model = try? jsonDecoder.decode(Operation.self, from: nestedData ?? .init()) {
-                  operations = [model]
-              }
-              
-          }
+//          if let nestedJson = (data as AnyObject).value(forKeyPath: "Root.PATIENT.PATIENT_ROW.OPERATION.OPERATION_ROW") {
+//              let nestedData = try? JSONSerialization.data(withJSONObject: nestedJson)
+//              print("nestedData:",String(data: nestedData ?? .init(), encoding: .utf8) ?? "")
+//              if let models = try? jsonDecoder.decode([Operation].self, from: nestedData ?? .init()) {
+//                  operations = models
+//              }
+//              if let model = try? jsonDecoder.decode(Operation.self, from: nestedData ?? .init()) {
+//                  operations = [model]
+//              }
+//              
+//          }
         let catheters = try! [Cather].decode(data, keyPath: "Root.PATIENT.PATIENT_ROW.CATHETER.CATHETER_ROW", jsonDecoder: jsonDecoder)
         
         let endoscopies = try! [Endoscopy].decode(data, keyPath: "Root.PATIENT.PATIENT_ROW.ENDOSCOPY.ENDOSCOPY_ROW", jsonDecoder: jsonDecoder)

@@ -108,26 +108,31 @@ protocol OverviewPresenter {
   var patientHistoryNotActiveContentImage: UIImage { get }
   var patientHistoryTitles: [String] { get }
 
-  var user: User { get }
+    var user: User { get }
+    var permisions: PermissionModel { get }
+   func getPatientHistory(finished: @escaping EmptyBlock)
+   func getPermissions(finished: @escaping EmptyBlock)
 
-  func getPatientHistory(finished: @escaping EmptyBlock)
     func getArguments(_ overView:OverviewSection)
-  func getPatientSummary(filtrationType: PatientHistoryFiltrationType, finished: @escaping EmptyBlock)
+    func getPatientSummary(filtrationType: PatientHistoryFiltrationType, finished: @escaping EmptyBlock)
 }
 
 class OverviewPresenterImpl: OverviewPresenter {
-  private var modelLayer: ModelLayer
-  let patient: Patient
-  let user: User
+    private var modelLayer: ModelLayer
+    let patient: Patient
+    let user: User
+    let permisions:PermissionModel
     var arguments:Dictionary<String, Any>
-  var patientHistory: PatientHistory?
-  var patientSummary: PatientSummary?
+    var patientHistory: PatientHistory?
+    var patientSummary: PatientSummary?
+    var permisionsDataSource = DoctorPermissions()
 
-  init(modelLayer: ModelLayer, patient: Patient, user: User) {
-    self.modelLayer = modelLayer
-    self.patient = patient
-    self.user = user
-      self.arguments = .init()
+    init(modelLayer: ModelLayer, patient: Patient, user: User,permision:PermissionModel) {
+        self.modelLayer = modelLayer
+        self.patient = patient
+        self.permisions = permision
+        self.user = user
+        self.arguments = .init()
   }
 
   var patientHistoryActiveIconImages = [#imageLiteral(resourceName: "visit_icon"), #imageLiteral(resourceName: "allvisit"), #imageLiteral(resourceName: "lab"), #imageLiteral(resourceName: "dr_icon")]
@@ -209,14 +214,40 @@ class OverviewPresenterImpl: OverviewPresenter {
     ]
     modelLayer.getPatientHistory(with: params) { patientHistory in
       self.patientHistory = patientHistory
+      self.getPermissions(finished: finished)
       finished()
     }
   }
+    
+    func getPermissions(finished: @escaping EmptyBlock) {
+        let params = [
+          "BRANCH_ID": user.branch ?? "",
+          "USER_ID": user.userName ?? "",
+          "PROCESS_ID":"\(permisions.id ?? 0)",
+          "OBJECT_ID":"\(permisions.objectId ?? 0)",
+          "PROCESS_INFO_CODE": "\(permisions.processInfoCode ?? 0)",
+          "CAT_ID": "",
+          "DEFAULTGROUP": "DR"
+        ]
+        
+        modelLayer.getDoctorPermissions(with: params) { permisions in
+            self.permisionsDataSource = permisions
+            self.checKPermisions(finished: finished)
+            finished()
+        }
+    }
+    
+    
+    private func checKPermisions(finished: @escaping EmptyBlock) {
+        
+    }
+    
     func getArguments(_ overView: OverviewSection)  {
         arguments =  ["overviewSection": overView,
-                "patientSummary": patientSummary ?? [],
-                "patient":patient,
-                "user": user]
+                      "patientSummary": patientSummary ?? [],
+                      "patient":patient,
+                      "permission":permisions,
+                      "user": user]
     }
   func getPatientSummary(filtrationType: PatientHistoryFiltrationType, finished: @escaping EmptyBlock) {
     var params = [

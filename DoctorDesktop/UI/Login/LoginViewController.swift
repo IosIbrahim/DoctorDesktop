@@ -41,6 +41,11 @@ class LoginViewController: UIViewController, NVActivityIndicatorViewable {
     self.navigationCoordinator = navigationCoordinator
   }
   
+    @IBAction func showPasswordOntap(_ sender: Any) {
+        passWord.isSecureTextEntry = !passWord.isSecureTextEntry
+    }
+    
+    
   @IBAction func loginPress(_ sender: Any) {
       guard let username = self.userName.text else {
           self.toastBar.show(with: "Please Enter UserName")

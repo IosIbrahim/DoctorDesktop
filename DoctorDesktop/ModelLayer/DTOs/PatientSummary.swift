@@ -183,27 +183,38 @@ struct Scoring: Decodable {
   }
 }
 
-struct NurseRemark: Decodable {
-  let doctorArabicName: String?
-  let doctorEnglishName: String?
-  let nurseArabicName: String?
-  let nurseEnglishName: String?
-  let doctorTransactionDate: String?
-  let nurseTransactionDate: String?
-  let arabicDescription: String?
-  let englishDescription: String?
-  let nurseNotes: String?
+//REPLY = "";
+//"SHOW_D_N" = 3;
+//TRANSDATE = "17/03/2026 11:05 am";
+//"USER_OPEN_FLAG" = D;
 
+struct NurseRemark: Decodable {
+    let doctorArabicName: String?
+    let doctorEnglishName: String?
+    let nurseArabicName: String?
+    let nurseEnglishName: String?
+    let doctorTransactionDate: String?
+    let nurseTransactionDate: String?
+    let arabicDescription: String?
+    let englishDescription: String?
+    let nurseNotes: String?
+    let status:Int?
+    let showDN:Int?
+    let flag:String?
+    
   enum CodingKeys: String, CodingKey {
-    case doctorArabicName = "EMP_NAME_AR"
-    case doctorEnglishName = "EMP_NAME_EN"
-    case nurseArabicName = "N_EMP_NAME_AR"
-    case nurseEnglishName = "N_EMP_NAME_EN"
-    case doctorTransactionDate = "TRANSDATE"
-    case nurseTransactionDate = "N_TRANSDATE"
-    case arabicDescription = "DESC_AR"
-    case englishDescription = "DESC_EN"
-    case nurseNotes = "NURSE_NOTES"
+      case doctorArabicName = "EMP_NAME_AR"
+      case doctorEnglishName = "EMP_NAME_EN"
+      case nurseArabicName = "N_EMP_NAME_AR"
+      case nurseEnglishName = "N_EMP_NAME_EN"
+      case doctorTransactionDate = "TRANSDATE"
+      case nurseTransactionDate = "N_TRANSDATE"
+      case arabicDescription = "DESC_AR"
+      case englishDescription = "DESC_EN"
+      case nurseNotes = "NURSE_NOTES"
+      case status = "PRIORITY_TYPE"
+      case showDN = "SHOW_D_N"
+      case flag = "USER_OPEN_FLAG"
   }
 }
 

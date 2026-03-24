@@ -169,10 +169,11 @@ extension PatientsViewController {
   }
 
   fileprivate func showUnitsPopupDialog() {
-    let unitsPopup = unitsPopupMaker(presenter.title, self.presenter.patientUnits)
-    unitsPopup.delegate = self
-    self.present(unitsPopup, animated: true, completion: nil)
-    UIApplication.shared.isStatusBarHidden = true
+      let unitsPopup = unitsPopupMaker(presenter.title, self.presenter.patientUnits)
+      unitsPopup.delegate = self
+      unitsPopup.modalPresentationStyle = .fullScreen
+      self.present(unitsPopup, animated: true, completion: nil)
+   //   UIApplication.shared.isStatusBarHidden = true
   }
   
   fileprivate func showDatePopupDialog() {
@@ -420,6 +421,7 @@ extension PatientsViewController: UITableViewDelegate {
         self.initializePatientOverviewSideMenu(patient: presenter.outpatientPatients[indexPath.row])
         let args = ["viewType":"overview",
                     "patient":presenter.outpatientPatients[indexPath.row],
+                    "permission":presenter.permission,
                     "user":presenter.user] as [String : Any]
         
         print(presenter.outpatientPatients[indexPath.row].id)
@@ -440,6 +442,7 @@ extension PatientsViewController: UITableViewDelegate {
       //present(SideMenuManager.default.menuLeftNavigationController!, animated: true, completion: nil)
       let args = ["viewType":"overview",
                   "patient":presenter.inpatientPatients[indexPath.row],
+                  "permission":presenter.permission,
                   "user":presenter.user] as [String : Any]
       navigationCoordinator?.next(arguments: args)
     case .emergency:
@@ -452,6 +455,7 @@ extension PatientsViewController: UITableViewDelegate {
         self.initializePatientOverviewSideMenu(patient: self.presenter.notTriagedEmergencyPatients[indexPath.row])
         args["patient"] = presenter.notTriagedEmergencyPatients[indexPath.row]
       }
+        args["permission"] = presenter.permission
       navigationCoordinator?.next(arguments: args)
       //present(SideMenuManager.default.menuLeftNavigationController!, animated: true, completion: nil)
     case .clinicalAlert:

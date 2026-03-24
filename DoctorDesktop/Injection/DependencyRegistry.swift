@@ -14,7 +14,7 @@ protocol DependencyRegistry {
   func makeOrderCollectionViewController(with patient: Patient, templateType: TemplateType, user: User) -> OrderCollectionViewController
   func makeOrderServiceList(with patient: Patient, serviceCategory: ServiceCategory, templateType: TemplateType, generalParams: GeneralParams, user: User) -> OrderServiceList
   func makeOrderCheckoutList(with serviceDetails: ServicesDetails, templateType: TemplateType, user: User, labOrderServiceListPresenter: OrderServiceListPresenter?, patient: Patient, requestDoctor: String) -> OrderCheckoutList
-  func makeOverviewCollectionViewController(with patient: Patient, user: User) -> OverviewCollectionViewController
+    func makeOverviewCollectionViewController(with patient: Patient, user: User,permision:PermissionModel) -> OverviewCollectionViewController
     func makeOverviewSectionDetailsViewController(overviewSection: OverviewSection, patientSummary: PatientSummary, user: User,pat:Patient) -> OverviewSectionDetailsViewController
   func makeWebViewerViewController(url: URL) -> WebViewerViewController
   func makeEmergencyTriageViewController(with patient: EmergencyPatient, user: User) -> EmergencyTriageViewController
@@ -315,8 +315,8 @@ class DependencyRegistryImpl: DependencyRegistry {
 
 extension DependencyRegistryImpl {
   func registerOverviewCollectionViewController() {
-    container.register(OverviewCollectionViewController.self) { (r, patient: Patient, user: User) in
-      let presenter = r.resolve(OverviewPresenter.self, arguments: patient, user)!
+      container.register(OverviewCollectionViewController.self) { (r, patient: Patient, user: User,permision:PermissionModel) in
+      let presenter = r.resolve(OverviewPresenter.self, arguments: patient, user,permision)!
       //NOTE: We don't have access to the constructor for this VC so we are using method injection
       let vc = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "OverviewCollectionViewController") as! OverviewCollectionViewController
       vc.configure(with: presenter,
@@ -328,8 +328,8 @@ extension DependencyRegistryImpl {
   }
 
   func registerOverviewPresenter() {
-    container.register(OverviewPresenter.self) { (r, patient: Patient, user: User) in
-      OverviewPresenterImpl(modelLayer: r.resolve(ModelLayer.self)!, patient: patient, user: user)
+      container.register(OverviewPresenter.self) { (r, patient: Patient,user: User,permision:PermissionModel) in
+      OverviewPresenterImpl(modelLayer: r.resolve(ModelLayer.self)!,patient: patient, user: user,permision: permision)
     }
   }
 
@@ -345,8 +345,8 @@ extension DependencyRegistryImpl {
     }
   }
 
-  func makeOverviewCollectionViewController(with patient: Patient, user: User) -> OverviewCollectionViewController {
-    return container.resolve(OverviewCollectionViewController.self, arguments: patient, user)!
+    func makeOverviewCollectionViewController(with patient: Patient, user: User,permision:PermissionModel) -> OverviewCollectionViewController {
+    return container.resolve(OverviewCollectionViewController.self, arguments: patient, user,permision)!
   }
 
   func makeOverViewSectionCell(for collectionView: UICollectionView, at indexPath: IndexPath, sectionImageName: String, sectionTitle: String, sectionColor: UIColor, counter: Int) -> OverviewSectionCell {

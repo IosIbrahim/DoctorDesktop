@@ -170,11 +170,12 @@ class RootNavigationCoordinatorImpl: NavigationCoordinator {
   }
 
   func showOverviewCollection(arguments: Dictionary<String, Any>?) {
-    guard let patient = arguments?["patient"] as? Patient,
-      let user = arguments?["user"] as? User else { return }
-    let overviewCollectionViewController = registry.makeOverviewCollectionViewController(with: patient, user: user)
-    rootViewController.navigationController?.pushViewController(overviewCollectionViewController, animated: true)
-    navState = .atOverviewCollection
+      guard let patient = arguments?["patient"] as? Patient,
+          let permision = arguments?["permission"] as? PermissionModel,
+          let user = arguments?["user"] as? User else { return }
+      let overviewCollectionViewController = registry.makeOverviewCollectionViewController(with: patient, user: user,permision: permision)
+      rootViewController.navigationController?.pushViewController(overviewCollectionViewController, animated: true)
+      navState = .atOverviewCollection
   }
 
   func showOverviewSectionDetails(arguments: Dictionary<String, Any>?) {
