@@ -27,6 +27,7 @@ protocol InpatientCellPresenter {
   var bedNumberName: String { get }
   var flagImageName: String { get }
    var age:String {  get }
+    var highLight:String { get }
 }
 
 class InpatientCellPresenterImpl: InpatientCellPresenter {
@@ -45,6 +46,7 @@ class InpatientCellPresenterImpl: InpatientCellPresenter {
   var bedNumberName: String { return inpatientPatient.bedNumber }
   var age:String { return inpatientPatient.age }
   var flagImageName: String { return inpatientPatient.flagImageName }
+    var highLight: String {  return inpatientPatient.highLightFlag ?? "" }
 
   init(with inpatientPatient: InpatientPatient) {
     self.inpatientPatient = inpatientPatient

@@ -25,6 +25,10 @@
 		0F36CE3D2F69514E00C3D3ED /* NotesCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F36CE3A2F69514E00C3D3ED /* NotesCell.swift */; };
 		0F45AC5D2F36B95300DA1DE7 /* Toastlity.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0F45AC5B2F36B93F00DA1DE7 /* Toastlity.xcframework */; };
 		0F45AC5E2F36B95300DA1DE7 /* Toastlity.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 0F45AC5B2F36B93F00DA1DE7 /* Toastlity.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		0F49D3FD2F75585100E357FF /* HelpController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F49D3FB2F75585100E357FF /* HelpController.swift */; };
+		0F49D3FE2F75585100E357FF /* HelpController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0F49D3FC2F75585100E357FF /* HelpController.xib */; };
+		0F49D4022F755FAF00E357FF /* HelpCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F49D4002F755FAF00E357FF /* HelpCell.swift */; };
+		0F49D4032F755FAF00E357FF /* HelpCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0F49D4012F755FAF00E357FF /* HelpCell.xib */; };
 		0FC00F682F32426300223775 /* NewOrderCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FC00F662F32426300223775 /* NewOrderCell.swift */; };
 		0FC00F692F32426300223775 /* NewOrderCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0FC00F672F32426300223775 /* NewOrderCell.xib */; };
 		0FC00F6D2F32491300223775 /* InnerServiceCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FC00F6B2F32491300223775 /* InnerServiceCell.swift */; };
@@ -255,6 +259,10 @@
 		0F36CE3A2F69514E00C3D3ED /* NotesCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotesCell.swift; sourceTree = "<group>"; };
 		0F36CE3B2F69514E00C3D3ED /* NotesCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = NotesCell.xib; sourceTree = "<group>"; };
 		0F45AC5B2F36B93F00DA1DE7 /* Toastlity.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = Toastlity.xcframework; sourceTree = "<group>"; };
+		0F49D3FB2F75585100E357FF /* HelpController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpController.swift; sourceTree = "<group>"; };
+		0F49D3FC2F75585100E357FF /* HelpController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = HelpController.xib; sourceTree = "<group>"; };
+		0F49D4002F755FAF00E357FF /* HelpCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpCell.swift; sourceTree = "<group>"; };
+		0F49D4012F755FAF00E357FF /* HelpCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = HelpCell.xib; sourceTree = "<group>"; };
 		0FC00F662F32426300223775 /* NewOrderCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewOrderCell.swift; sourceTree = "<group>"; };
 		0FC00F672F32426300223775 /* NewOrderCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = NewOrderCell.xib; sourceTree = "<group>"; };
 		0FC00F6B2F32491300223775 /* InnerServiceCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InnerServiceCell.swift; sourceTree = "<group>"; };
@@ -520,6 +528,25 @@
 			path = Notes;
 			sourceTree = "<group>";
 		};
+		0F49D3FA2F75581F00E357FF /* HelpController */ = {
+			isa = PBXGroup;
+			children = (
+				0F49D3FF2F755F9000E357FF /* HelpCell */,
+				0F49D3FB2F75585100E357FF /* HelpController.swift */,
+				0F49D3FC2F75585100E357FF /* HelpController.xib */,
+			);
+			path = HelpController;
+			sourceTree = "<group>";
+		};
+		0F49D3FF2F755F9000E357FF /* HelpCell */ = {
+			isa = PBXGroup;
+			children = (
+				0F49D4002F755FAF00E357FF /* HelpCell.swift */,
+				0F49D4012F755FAF00E357FF /* HelpCell.xib */,
+			);
+			path = HelpCell;
+			sourceTree = "<group>";
+		};
 		0FC00F652F32422C00223775 /* NewOrderCell */ = {
 			isa = PBXGroup;
 			children = (
@@ -745,6 +772,7 @@
 		3637687F2091C5C400CE45D8 /* OverviewSectionDetails */ = {
 			isa = PBXGroup;
 			children = (
+				0F49D3FA2F75581F00E357FF /* HelpController */,
 				363768802091C5C400CE45D8 /* OverviewSectionDetailsPresenter.swift */,
 				363768812091C5C400CE45D8 /* OverviewSectionDetailsTableViewController.swift */,
 			);
@@ -1382,10 +1410,12 @@
 				368604D92017AEC4004A6D0B /* Roboto-Black.ttf in Resources */,
 				363768932091C5C400CE45D8 /* ClinicServiceCell.xib in Resources */,
 				368604E02017AEC4004A6D0B /* Roboto-Medium.ttf in Resources */,
+				0F49D4032F755FAF00E357FF /* HelpCell.xib in Resources */,
 				36883F1620710AA600A53AE7 /* WebViewerViewController.xib in Resources */,
 				363768952091C5C400CE45D8 /* FindingComplaintHistoryCell.xib in Resources */,
 				3658CB7C1FE855C6004EBEA8 /* OutpatientCell.xib in Resources */,
 				368604E22017AEC4004A6D0B /* Roboto-Regular.ttf in Resources */,
+				0F49D3FE2F75585100E357FF /* HelpController.xib in Resources */,
 				363D1FA0208F48FD00CF163D /* lab.svg in Resources */,
 				366D86382087E97A008B16BF /* EmergencyTriageView.xib in Resources */,
 				3608D4BC2088793400310D60 /* PediatricsScorePopUpCell.xib in Resources */,
@@ -1580,6 +1610,7 @@
 				363768972091C5C400CE45D8 /* AllergyFindingComplaintHistoryCellPresenter.swift in Sources */,
 				3637689F2091C5C400CE45D8 /* DietaryCell.swift in Sources */,
 				46B646AA1FD2E44100D8D340 /* AppDelegate.swift in Sources */,
+				0F49D3FD2F75585100E357FF /* HelpController.swift in Sources */,
 				36C3257A1FFE3EA1003F8766 /* OrderCell.swift in Sources */,
 				363768AD2091C5C400CE45D8 /* OverviewPresenter.swift in Sources */,
 				3608D4BB2088793400310D60 /* PediatricsScorePopUpCell.swift in Sources */,
@@ -1638,6 +1669,7 @@
 				0E206BB42332595100E25EFB /* prescriptionListVC.swift in Sources */,
 				3656DD09274BC7DF008DC057 /* NotesViewController+TableView.swift in Sources */,
 				363768A82091C5C400CE45D8 /* OverviewSectionDetailsTableViewController.swift in Sources */,
+				0F49D4022F755FAF00E357FF /* HelpCell.swift in Sources */,
 				3615BBA22000CE0400A56F9E /* OrderCollectionViewController.swift in Sources */,
 				3643438C1FE98A83002C1FF0 /* UnitsPopupCell.swift in Sources */,
 				0E206BBB23325BD900E25EFB /* apis.swift in Sources */,
@@ -1823,7 +1855,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = WZC66X64NZ;
 				INFOPLIST_FILE = DoctorDesktop/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
@@ -1848,7 +1880,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = WZC66X64NZ;
 				INFOPLIST_FILE = DoctorDesktop/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;

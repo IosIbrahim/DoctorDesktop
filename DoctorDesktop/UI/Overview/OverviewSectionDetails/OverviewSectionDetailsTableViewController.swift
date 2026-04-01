@@ -9,6 +9,11 @@
 import UIKit
 
 class OverviewSectionDetailsViewController: UIViewController {
+    @IBOutlet weak var txfNote: UITextField!
+    @IBOutlet weak var stkAddNote: UIStackView!
+    @IBOutlet weak var lblReplyDes: UILabel!
+    @IBOutlet weak var lblUser: UILabel!
+    @IBOutlet weak var stkReply: UIStackView!
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var plusButton: UIButton!
     
@@ -45,6 +50,14 @@ class OverviewSectionDetailsViewController: UIViewController {
     DietaryCell.register(with: tableView)
     LabsCell.register(with: tableView)
     OperationCatheterizationEndoscopyCell.register(with: tableView)
+      plusButton.isHidden = true
+      stkAddNote.isHidden = true
+      stkReply.isHidden = true
+      if presenter.overviewSection == .labExamination ||  presenter.overviewSection == .radTest {
+          plusButton.isHidden = false
+      }else if presenter.overviewSection == .progressNotes {
+          stkAddNote.isHidden = false
+      }
   }
 
   override func viewWillDisappear(_ animated: Bool) {
@@ -53,6 +66,26 @@ class OverviewSectionDetailsViewController: UIViewController {
       navigationCoordinator?.movingBack()
     }
   }
+    
+    @IBAction func addNoteOnTap(_ sender: Any) {
+        // add new note or reply to note
+    }
+    
+    @IBAction func sufferOnTap(_ sender: Any) {
+        // help popup
+        openHelpScreen(["dd","sdsd","asdsd"])
+    }
+    
+    @IBAction func statusNoteOnTap(_ sender: Any) {
+        // status popup
+        openHelpScreen([])
+    }
+    
+    func openHelpScreen(_ dataSources:[String]) {
+        let vc = HelpController()
+        vc.dataSources = dataSources
+        present(vc, animated: true)
+    }
     
     @IBAction func addOntap(_ sender: Any) {
       //  navigationController?.pushViewController(patientlis, animated: <#T##Bool#>)

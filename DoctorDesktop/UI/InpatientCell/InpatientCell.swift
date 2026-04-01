@@ -43,6 +43,9 @@ extension InpatientCell {
     bedNumberLabel.adjustsFontSizeToFitWidth = true
     genderAgeImageView.image = presenter.genderAgeImage
     lblAge.text = presenter.age
+      if presenter.highLight == "1" {
+          cellView.backgroundColor = UIColor.fromHex(hex: "#fedce1", alpha: 1.0)
+      }
 //    let url = URL(string: AppURLS.ip+AppURLS.imageApi+presenter.flagImageName)
 //    patientCountryFlagImage.kf.setImage(with: url)
   }

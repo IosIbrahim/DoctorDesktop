@@ -30,9 +30,10 @@ class LoginViewController: UIViewController, NVActivityIndicatorViewable {
     self.loginView.layer.borderColor = #colorLiteral(red: 0.8039215803, green: 0.8039215803, blue: 0.8039215803, alpha: 1)
     self.loginView.layer.borderWidth = 1
     self.loginBtn.layer.cornerRadius = 20
-    
-    userName.text = "KHABEER"
-    passWord.text = "920250270"
+      #if DEBUG
+      userName.text = "KHABEER"
+      passWord.text = "920250270"
+      #endif
   }
   
   func configure(with presenter: LoginPresenter,

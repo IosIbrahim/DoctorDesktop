@@ -44,7 +44,7 @@ struct InpatientPatient: Decodable, Patient {
   var countyFlag: UIImage?
   var name: String { return nameInEnglish }
   var nationality: String { return nationalityInEnglish }
-
+  var highLightFlag:String?
   var age: String { return ageInEnglish}
   var doctorName: String { return doctorNameInEnglish }
   var bedNumber: String { return bedNumberInEnglish }
@@ -67,7 +67,7 @@ struct InpatientPatient: Decodable, Patient {
     case doctorNameInArabic = "EMP_NAME_AR"
     case bedNumberInEnglish = "BED_DESC_EN"
     case bedNumberInArabic = "BED_DESC_AR"
-
+    case highLightFlag = "HIGHLIGHT_FLAG"
     case id = "PATIENTID"
     case genderAge = "GENDER_AGE"
     case visitId = "VISIT_ID"
