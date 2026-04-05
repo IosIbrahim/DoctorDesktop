@@ -33,6 +33,7 @@ struct PatientSummary {
   let dietaries: [Dietary]?
   let labs: [Lab]?
   let vitalSigns: [VitalSign]?
+    var message:String?
 }
 
 struct PatientResponseModel:Codable {
@@ -453,4 +454,12 @@ extension VitalSign {
               id: id,
               details: vitalSignDetails)
   }
+    
+    init(data:Data) {
+        
+        self.init(arabicName: "",
+                  englishName: "",
+                  id: "",
+                  details: [])
+    }
 }

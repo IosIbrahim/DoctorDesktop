@@ -9,15 +9,17 @@
 import Foundation
 
 struct PatientHistory: Decodable {
-  let patientVisits: [PatientVisit]
-  let currentSpeciality: GeneralObejct
-  let currentDoctor: GeneralObejct
+    let patientVisits: [PatientVisit]
+    let currentSpeciality: GeneralObejct
+    let currentDoctor: GeneralObejct
+    var error:String?
 
   enum CodingKeys: String, CodingKey {
-    case patientVisits = "VISIT"
-    case visitId = "VISIT_ID"
-    case currentSpeciality = "CURRENT_SPECIALITY"
-    case currentDoctor = "CURRENT_DOCTOR"
+      case patientVisits = "VISIT"
+      case visitId = "VISIT_ID"
+      case currentSpeciality = "CURRENT_SPECIALITY"
+      case currentDoctor = "CURRENT_DOCTOR"
+      case error
   }
 
   enum CodingKeysRows: String, CodingKey {

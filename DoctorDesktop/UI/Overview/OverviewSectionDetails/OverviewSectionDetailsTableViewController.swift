@@ -17,17 +17,17 @@ class OverviewSectionDetailsViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var plusButton: UIButton!
     
-  var presenter: OverviewSectionDetailsPresenter!
-  private weak var navigationCoordinator: NavigationCoordinator?
-  private var vitalSignCellMaker: DependencyRegistry.VitalSignCellMaker!
-  private var medicationCellMaker: DependencyRegistry.MedicationCellMaker!
-  private var diagnosisCellMaker: DependencyRegistry.DiagnosisCellMaker!
-  private var allergyFindingComplaintHistoryCellMaker: DependencyRegistry.AllergyFindingComplaintHistoryCellMaker!
-  private var radTestCellMaker: DependencyRegistry.RadTestCellMaker!
-  private var scoringCellMaker: DependencyRegistry.ScoringCellMaker!
-  private var operationCatherEndoscopyCellMaker: DependencyRegistry.OperationCatheterizationEndoscopyCellMaker!
-  private var clinicalServiceCellMaker: DependencyRegistry.ClinicalServiceCellMaker!
-  private var dietaryCellMaker: DependencyRegistry.DietaryCellMaker!
+    var presenter: OverviewSectionDetailsPresenter!
+    private weak var navigationCoordinator: NavigationCoordinator?
+    private var vitalSignCellMaker: DependencyRegistry.VitalSignCellMaker!
+    private var medicationCellMaker: DependencyRegistry.MedicationCellMaker!
+    private var diagnosisCellMaker: DependencyRegistry.DiagnosisCellMaker!
+    private var allergyFindingComplaintHistoryCellMaker: DependencyRegistry.AllergyFindingComplaintHistoryCellMaker!
+    private var radTestCellMaker: DependencyRegistry.RadTestCellMaker!
+    private var scoringCellMaker: DependencyRegistry.ScoringCellMaker!
+    private var operationCatherEndoscopyCellMaker: DependencyRegistry.OperationCatheterizationEndoscopyCellMaker!
+    private var clinicalServiceCellMaker: DependencyRegistry.ClinicalServiceCellMaker!
+    private var dietaryCellMaker: DependencyRegistry.DietaryCellMaker!
     private var labCellMaker: DependencyRegistry.LabCellMaker!
 
   struct Constant {
@@ -59,7 +59,9 @@ class OverviewSectionDetailsViewController: UIViewController {
           stkAddNote.isHidden = false
       }
   }
-
+    
+    
+    
   override func viewWillDisappear(_ animated: Bool) {
     super.viewWillDisappear(true)
     if isMovingFromParentViewController {
@@ -224,6 +226,7 @@ extension OverviewSectionDetailsViewController: UITableViewDelegate {
     switch presenter.overviewSection {
     case .medication, .diagnosis, .scoring, /*.allergies,*/ .finding, .complaints, .history,
          .operation, .catheterization, .endoscopy: return UITableViewAutomaticDimension
+    case .vitalSigns:return UITableViewAutomaticDimension
     default: return OverviewSectionDetailsViewController.Constant.rowHeight
     }
   }

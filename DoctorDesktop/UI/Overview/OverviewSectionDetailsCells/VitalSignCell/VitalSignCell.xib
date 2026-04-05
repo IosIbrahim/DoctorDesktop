@@ -22,32 +22,38 @@
                 <rect key="frame" x="0.0" y="0.0" width="320" height="50"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
-                    <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" spacing="5" translatesAutoresizingMaskIntoConstraints="NO" id="yOV-qQ-NzY">
+                    <stackView opaque="NO" contentMode="scaleToFill" spacing="5" translatesAutoresizingMaskIntoConstraints="NO" id="yOV-qQ-NzY">
                         <rect key="frame" x="4" y="0.0" width="312" height="50"/>
                         <subviews>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Vital Sign" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Xa4-Yx-2W5">
-                                <rect key="frame" x="0.0" y="0.0" width="74.5" height="50"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Vital Sign" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Xa4-Yx-2W5">
+                                <rect key="frame" x="0.0" y="0.0" width="51.5" height="50"/>
                                 <fontDescription key="fontDescription" name="Roboto-Medium" family="Roboto" pointSize="12"/>
                                 <color key="textColor" red="0.25882352941176467" green="0.57427352666854858" blue="0.80438315868377686" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="center" lineBreakMode="wordWrap" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="uEP-c7-9oK">
-                                <rect key="frame" x="79.5" y="0.0" width="74" height="50"/>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="ic-progress" translatesAutoresizingMaskIntoConstraints="NO" id="f4E-DR-Vbz">
+                                <rect key="frame" x="56.5" y="0.0" width="30" height="50"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="30" id="gCy-PW-OMh"/>
+                                </constraints>
+                            </imageView>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="249" textAlignment="center" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="uEP-c7-9oK">
+                                <rect key="frame" x="91.5" y="0.0" width="74.5" height="50"/>
                                 <string key="text">Current 
 Result</string>
                                 <fontDescription key="fontDescription" name="Roboto-Medium" family="Roboto" pointSize="12"/>
                                 <color key="textColor" red="0.42348524928092957" green="0.42355185747146606" blue="0.42347615957260132" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="center" lineBreakMode="wordWrap" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="D5g-PR-hVn">
-                                <rect key="frame" x="158.5" y="0.0" width="74.5" height="50"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" verticalHuggingPriority="251" textAlignment="center" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="D5g-PR-hVn">
+                                <rect key="frame" x="171" y="0.0" width="62" height="50"/>
                                 <string key="text">Previous
 Result 1</string>
                                 <fontDescription key="fontDescription" name="Roboto-Medium" family="Roboto" pointSize="12"/>
                                 <color key="textColor" red="0.42348524928092957" green="0.42355185747146606" blue="0.42347615957260132" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="center" lineBreakMode="wordWrap" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="kcK-YH-cSh">
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="248" verticalHuggingPriority="248" horizontalCompressionResistancePriority="748" verticalCompressionResistancePriority="748" textAlignment="center" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="kcK-YH-cSh">
                                 <rect key="frame" x="238" y="0.0" width="74" height="50"/>
                                 <string key="text">Previous
 Result 2</string>
@@ -73,10 +79,14 @@ Result 2</string>
             <connections>
                 <outlet property="currentResult" destination="uEP-c7-9oK" id="J5S-8j-Xkb"/>
                 <outlet property="firstPreviousResult" destination="D5g-PR-hVn" id="u1a-NI-e5H"/>
+                <outlet property="imgProgress" destination="f4E-DR-Vbz" id="eku-TE-rfn"/>
                 <outlet property="secondPreviousResult" destination="kcK-YH-cSh" id="2fc-ea-uTc"/>
                 <outlet property="title" destination="Xa4-Yx-2W5" id="TJG-Jo-wqs"/>
             </connections>
             <point key="canvasLocation" x="46.399999999999999" y="88.15592203898052"/>
         </tableViewCell>
     </objects>
+    <resources>
+        <image name="ic-progress" width="64" height="64"/>
+    </resources>
 </document>

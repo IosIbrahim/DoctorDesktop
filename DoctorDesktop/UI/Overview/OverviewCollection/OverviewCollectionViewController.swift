@@ -8,16 +8,18 @@
 
 import UIKit
 import SideMenu
+import Toastlity
 import NVActivityIndicatorView
 
 class OverviewCollectionViewController: UIViewController, NVActivityIndicatorViewable {
-  @IBOutlet weak var historyCollectionView: UICollectionView!
-  @IBOutlet weak var summaryCollectionView: UICollectionView!
-
-  private var presenter: OverviewPresenter!
-  private weak var navigationCoordinator: NavigationCoordinator?
-  private var patientHistoryFiltrationCellMaker: DependencyRegistry.PatientHistoryFiltrationCellMaker!
-  private var overviewSectionCellMaker: DependencyRegistry.OverviewSectionCellMaker!
+    @IBOutlet weak var historyCollectionView: UICollectionView!
+    @IBOutlet weak var summaryCollectionView: UICollectionView!
+    lazy var toastBar: ToastBar = .init(settings: .agent, in: parent?.view)
+    
+    private var presenter: OverviewPresenter!
+    private weak var navigationCoordinator: NavigationCoordinator?
+    private var patientHistoryFiltrationCellMaker: DependencyRegistry.PatientHistoryFiltrationCellMaker!
+    private var overviewSectionCellMaker: DependencyRegistry.OverviewSectionCellMaker!
 
   func configure(with presenter: OverviewPresenter,
                  patientHistoryFiltrationCellMaker: @escaping DependencyRegistry.PatientHistoryFiltrationCellMaker,
@@ -42,11 +44,7 @@ class OverviewCollectionViewController: UIViewController, NVActivityIndicatorVie
     OverviewSectionCell.register(with: summaryCollectionView)
     historyCollectionView.allowsMultipleSelection = false
     startAnimating(message: "Loading...")
-    presenter.getPatientHistory {
-      self.historyCollectionView.reloadSections(IndexSet(integer: 0))
-      self.historyCollectionView.selectItem(at: IndexPath(item: 0, section: 0), animated: false, scrollPosition: [.centeredHorizontally])
-      self.collectionView(self.historyCollectionView, didSelectItemAt : IndexPath(item: 0, section: 0))
-    }
+   
   }
 
   @IBAction func didPressMenu(_ sender: Any) {
@@ -57,6 +55,15 @@ class OverviewCollectionViewController: UIViewController, NVActivityIndicatorVie
       }
  //     present(SideMenuManager.default.menuRightNavigationController! , animated: true, completion: nil)
   }
+    
+    override func viewWillAppear(_ animated: Bool) {
+      super.viewWillAppear(true)
+        presenter.getPatientHistory {
+          self.historyCollectionView.reloadSections(IndexSet(integer: 0))
+          self.historyCollectionView.selectItem(at: IndexPath(item: 0, section: 0), animated: false, scrollPosition: [.centeredHorizontally])
+          self.collectionView(self.historyCollectionView, didSelectItemAt : IndexPath(item: 0, section: 0))
+        }
+    }
 }
 
 extension OverviewCollectionViewController: UICollectionViewDataSource {
@@ -96,6 +103,9 @@ extension OverviewCollectionViewController: UICollectionViewDelegate {
       }
       startAnimating(message: "Loading...")
       presenter.getPatientSummary(filtrationType: filtrationType) {
+          if let msg = self.presenter.patientSummary?.message {
+              self.toastBar.show(with: msg)
+          }
         self.stopAnimating()
         self.summaryCollectionView.reloadData()
       }

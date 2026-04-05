@@ -11,7 +11,8 @@ import UIKit
 class VitalSignCell: UITableViewCell {
   var presenter: VitalSignCellPresenter!
 
-  @IBOutlet weak var title: UILabel!
+    @IBOutlet weak var imgProgress: UIImageView!
+    @IBOutlet weak var title: UILabel!
   @IBOutlet weak var currentResult: UILabel!
   @IBOutlet weak var firstPreviousResult: UILabel!
   @IBOutlet weak var secondPreviousResult: UILabel!
@@ -21,10 +22,12 @@ class VitalSignCell: UITableViewCell {
   }
 
   override func prepareForReuse() {
+      
     self.title.text = ""
     self.currentResult.text = ""
     self.firstPreviousResult.text = ""
     self.secondPreviousResult.text = ""
+      
   }
 }
 
@@ -73,6 +76,7 @@ extension VitalSignCell {
     cell.currentResult.text = "Result"
     cell.firstPreviousResult.text = "Previous"
     cell.secondPreviousResult.text = "Previous"
+    cell.imgProgress.isHidden = true
     cell.title.textColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 1)
     cell.currentResult.textColor = #colorLiteral(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
     cell.firstPreviousResult.textColor = #colorLiteral(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)

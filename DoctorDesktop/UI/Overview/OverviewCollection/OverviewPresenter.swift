@@ -126,6 +126,7 @@ class OverviewPresenterImpl: OverviewPresenter {
     var patientHistory: PatientHistory?
     var patientSummary: PatientSummary?
     var permisionsDataSource = DoctorPermissions()
+    private var count: Int = 0
 
     init(modelLayer: ModelLayer, patient: Patient, user: User,permision:PermissionModel) {
         self.modelLayer = modelLayer
@@ -213,8 +214,16 @@ class OverviewPresenterImpl: OverviewPresenter {
       "VISIT_ID": patient.visitId
     ]
     modelLayer.getPatientHistory(with: params) { patientHistory in
-      self.patientHistory = patientHistory
-      self.getPermissions(finished: finished)
+        if let err = patientHistory.error {
+            print(err)
+            self.count += 1
+            if self.count <= 3 {
+                self.getPatientHistory(finished: finished)
+            }
+        }else {
+            self.patientHistory = patientHistory
+            self.getPermissions(finished: finished)
+        }
       finished()
     }
   }
@@ -266,7 +275,7 @@ class OverviewPresenterImpl: OverviewPresenter {
     default: break
     }
     modelLayer.getPatientSummary(with: params) { patientSummary in
-      self.patientSummary = patientSummary
+        self.patientSummary = patientSummary
       finished()
     }
   }

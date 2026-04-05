@@ -357,7 +357,10 @@ extension TranslationLayerImpl {
 
 extension TranslationLayerImpl {
     func getPatientHistoryDTOFromJson(_ data: Data) -> PatientHistory {
-        let patientHistory = try! PatientHistory(data: data, keyPath: "Root")
+        var patientHistory = try! PatientHistory(data: data, keyPath: "Root")
+        if let message = try? String(data: data, keyPath: "message") {
+            patientHistory.error = message
+        }
         return patientHistory
     }
 }
@@ -398,11 +401,12 @@ extension TranslationLayerImpl{
 
 extension TranslationLayerImpl {
     func getPatientSummaryDTOFromJson(_ data: Data) -> PatientSummary {
+        var message:String?
         do {
             // make sure this JSON is in the format we expect
             if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
                 // try to read out a string array
-                
+                message = json["message"] as? String
                 print(json)
                 
             }
@@ -414,7 +418,7 @@ extension TranslationLayerImpl {
         print("com")
         if complaints?.isEmpty == true {
             let topLevel = try? JSONSerialization.jsonObject(with: data, options: JSONSerialization.ReadingOptions.mutableContainers)
-              if let nestedJson = (topLevel as AnyObject).value(forKeyPath: "Root.PATIENT.PATIENT_ROW.COMPLAINS.COMPLAINS_ROW") {
+              if let nestedJson = (topLevel as? AnyObject)?.value(forKeyPath: "Root.PATIENT.PATIENT_ROW.COMPLAINS.COMPLAINS_ROW") {
                   let nestedData = try? JSONSerialization.data(withJSONObject: nestedJson)
                   print("nestedData:",String(data: nestedData ?? .init(), encoding: .utf8) ?? "")
                   let model = try? jsonDecoder.decode([Complaint].self, from: nestedData ?? .init())
@@ -458,7 +462,19 @@ extension TranslationLayerImpl {
         let labsTest = try? [Lab].decode(data, keyPath: "Root.PATIENT.PATIENT_ROW.LAB.LAB_ROW.PENDING_LAB_ORDERS.PENDING_LAB_ORDERS_ROW")
         
         //    let labfinal = labs //== nil ? labsTest : labs
-        let vitalSigns = try! [VitalSign].decode(data, keyPath: "Root.PATIENT.PATIENT_ROW.VITAL_SIGNS.VITAL_SIGNS_ROW.DETAILS.DETAILS_ROW", jsonDecoder: jsonDecoder)
+        var vitalSigns = try! [VitalSign].decode(data, keyPath: "Root.PATIENT.PATIENT_ROW.VITAL_SIGNS.VITAL_SIGNS_ROW.DETAILS.DETAILS_ROW", jsonDecoder: jsonDecoder)
+    //    let vitalSigns = try! [VitalSign].decode(data, keyPath: "Root.PATIENT.PATIENT_ROW.VITAL_SIGNS.VITAL_SIGNS_ROW", jsonDecoder: jsonDecoder)
+        
+            let topLevel = try? JSONSerialization.jsonObject(with: data, options: JSONSerialization.ReadingOptions.mutableContainers)
+              if let nestedJson = (topLevel as? AnyObject)?.value(forKeyPath: "Root.PATIENT.PATIENT_ROW.VITAL_SIGNS.VITAL_SIGNS_ROW.DETAILS.DETAILS_ROW") {
+                  let nestedData = try? JSONSerialization.data(withJSONObject: nestedJson)
+                  print("nestedData:",String(data: nestedData ?? .init(), encoding: .utf8) ?? "")
+                  let models = try? jsonDecoder.decode([VitalSign].self, from: nestedData ?? .init())
+                  print(models ?? [])
+                  vitalSigns = models ?? []
+                  
+              }
+
         return PatientSummary(complaints: complaints,
                               findings: findings,
                               diagnosis: diagnosis,
@@ -474,7 +490,8 @@ extension TranslationLayerImpl {
                               clinicServices: clinicServices,
                               dietaries: dietaries,
                               labs: labsTest!,
-                              vitalSigns: vitalSigns)
+                              vitalSigns: vitalSigns,
+                              message: message)
     }
 }
 
