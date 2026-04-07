@@ -45,7 +45,9 @@ extension ComponentCollectionPresenterImpl {
     components.forEach ({ component in
       processInfoCode += "\(component.processInfoCode),"
     })
-    processInfoCode.removeLast()
+      if !processInfoCode.isEmpty {
+          processInfoCode.removeLast()
+      }
     
     let formatter = DateFormatter()
     formatter.dateFormat = "dd/MM/yyyy HH:mm:ss"

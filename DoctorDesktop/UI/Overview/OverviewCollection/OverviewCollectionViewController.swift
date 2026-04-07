@@ -17,6 +17,7 @@ class OverviewCollectionViewController: UIViewController, NVActivityIndicatorVie
     lazy var toastBar: ToastBar = .init(settings: .agent, in: parent?.view)
     
     private var presenter: OverviewPresenter!
+    private var selectIndex:Int = .zero
     private weak var navigationCoordinator: NavigationCoordinator?
     private var patientHistoryFiltrationCellMaker: DependencyRegistry.PatientHistoryFiltrationCellMaker!
     private var overviewSectionCellMaker: DependencyRegistry.OverviewSectionCellMaker!
@@ -81,7 +82,9 @@ extension OverviewCollectionViewController: UICollectionViewDataSource {
       case 3: patientType = .currentDoctor(presenter.patientHistoryTitles[indexPath.row])
       default: break
       }
-      return patientHistoryFiltrationCellMaker(collectionView, indexPath, patientType)
+        let cell = patientHistoryFiltrationCellMaker(collectionView, indexPath, patientType)
+        cell.selectItem(indexPath.row == selectIndex)
+      return cell
     } else {
       guard let overviewSection = OverviewSection(rawValue: indexPath.row) else { return UICollectionViewCell() }
       return overviewSectionCellMaker(collectionView, indexPath, overviewSection.imageName, overviewSection.title, overviewSection.color, presenter.patientSummaryCounts[indexPath.row])
@@ -101,6 +104,8 @@ extension OverviewCollectionViewController: UICollectionViewDelegate {
       case 3: filtrationType = .currentDoctor("")
       default: break
       }
+        selectIndex = indexPath.row
+        historyCollectionView.reloadData()
       startAnimating(message: "Loading...")
       presenter.getPatientSummary(filtrationType: filtrationType) {
           if let msg = self.presenter.patientSummary?.message {

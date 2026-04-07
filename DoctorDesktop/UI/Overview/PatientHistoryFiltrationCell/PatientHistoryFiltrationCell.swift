@@ -21,6 +21,12 @@ class PatientHistoryFiltrationCell: UICollectionViewCell {
     super.awakeFromNib()
       pickerShadow.makeShadow(color: .lightGray, alpha: 0.2, radius: 8)
   }
+    
+    func selectItem(_ select:Bool) {
+        let blue = UIColor.fromHex(hex: "#4292CD", alpha: 1.0)
+        pickerShadow.backgroundColor = select ? blue:.white
+        pickerShadow.layer.cornerRadius = 8
+    }
 }
 
 //MARK: - Configure

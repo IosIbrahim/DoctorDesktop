@@ -23,7 +23,7 @@ class OverviewSectionCell: UICollectionViewCell {
     self.counterView.layer.cornerRadius = self.counterLabel.bounds.width/2
     self.counterView.layer.borderWidth = 1
     self.counterView.layer.borderColor = #colorLiteral(red: 0.8039215803, green: 0.8039215803, blue: 0.8039215803, alpha: 1)
-    self.sectionView.layer.cornerRadius = sectionView.bounds.width/2
+    self.sectionView.layer.cornerRadius = 7
   }
 
   override func prepareForReuse() {
