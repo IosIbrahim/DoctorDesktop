@@ -99,11 +99,11 @@ extension NetworkLayerImpl {
         let url = AppURLS.ip+"/MobileApi/api/WorkFlowController/workflow"
       print(params)
       print(url)
-//        var headers: HTTPHeaders?
-//        if let token = UserDefaults.standard.string(forKey: "auth_token") {
-//            headers = .init([HTTPHeader(name: "Authorization", value: "Bearer \(token)")])
-//        }
-      AlamofireAppManager.shared.request(url, parameters: params)
+        var headers: HTTPHeaders?
+        if let token = UserDefaults.standard.string(forKey: "auth_token") {
+            headers = .init([HTTPHeader(name: "Authorization", value: "Bearer \(token)")])
+        }
+      AlamofireAppManager.shared.request(url, parameters: params,headers: headers)
         .responseJSON { response in
           guard let data = response.data else { return }
             print(response.value ?? "")

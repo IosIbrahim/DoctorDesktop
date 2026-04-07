@@ -141,9 +141,9 @@ class OverviewPresenterImpl: OverviewPresenter {
   var patientHistoryActiveContentImages = [#imageLiteral(resourceName: "visit_content"), #imageLiteral(resourceName: "visit_content"), #imageLiteral(resourceName: "lab_content_actvie"), #imageLiteral(resourceName: "dr_content_active")]
   var patientHistoryNotActiveContentImage = #imageLiteral(resourceName: "visit_content_not_active")
   var patientHistoryTitles: [String] {
-    return ["Current Visit", "All Visits",
-     patientHistory?.currentSpeciality.name ?? "",
-     patientHistory?.currentDoctor.name ?? ""]
+    return ["Current Visit","All Visits",patientHistory?.currentSpeciality.name ?? "","DR/ Admin Istr"]
+     //   patientHistory?.currentDoctor.name ?? "",
+        
   }
 
 
@@ -276,6 +276,17 @@ class OverviewPresenterImpl: OverviewPresenter {
     }
     modelLayer.getPatientSummary(with: params) { patientSummary in
         self.patientSummary = patientSummary
+        if let err = patientSummary.message {
+            print(err)
+            self.count += 1
+            if self.count <= 3 {
+                self.getPatientSummary(filtrationType: filtrationType, finished: finished)
+            }
+        }else {
+            if self.permisionsDataSource.isEmpty {
+                self.getPermissions(finished: finished)
+            }
+        }
       finished()
     }
   }
