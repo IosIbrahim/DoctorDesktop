@@ -76,39 +76,39 @@ extension ComponentCollectionPresenterImpl {
         if let err = patientCounts.error {
             self.error = err
         }else {
-            for component in self.components {
+            for (i,component) in self.components.enumerated() {
               
               print(component.processInfoCode)
                 if component.type == .notifications {
-                    component.patientsCount = "2762"
-                    component.updateName("Notifications")
+                    self.components[i].patientsCount = "2762"
+                    self.components[i].updateName("Notifications")
 
                 }else if let componentType = ComponentType(rawValue: component.processInfoCode) {
                 switch(componentType) {
                 case .inpatient:
-                  component.patientsCount = patientCounts.inpatientFloor
+                    self.components[i].patientsCount = patientCounts.inpatientFloor
                 case .ICU:
-                  component.patientsCount = patientCounts.inpatientCare
+                    self.components[i].patientsCount = patientCounts.inpatientCare
                 case .outpatient:
                   print("asfafadsfa")
-                  component.patientsCount = patientCounts.outpatient
+                    self.components[i].patientsCount = patientCounts.outpatient
                   print(processInfoCode)
                   print(component.patientsCount)
                 case .emergency:
-                  component.patientsCount = patientCounts.emergency
+                    self.components[i].patientsCount = patientCounts.emergency
                 case .operations:
-                  component.patientsCount = patientCounts.operation
+                    self.components[i].patientsCount = patientCounts.operation
                 case .clinicalAlert:
-                  component.patientsCount = patientCounts.clinicalAlert
+                    self.components[i].patientsCount = patientCounts.clinicalAlert
                 case .consultation:
-                  component.patientsCount = patientCounts.cosultationFromDoctor
+                    self.components[i].patientsCount = patientCounts.cosultationFromDoctor
                 case .nicu:
-                    component.patientsCount = patientCounts.inpatientNICU
+                    self.components[i].patientsCount = patientCounts.inpatientNICU
                 case .search:
-                    component.patientsCount = ""
+                    self.components[i].patientsCount = ""
                 default: break
                 }
-                  component.type = componentType
+                    self.components[i].type = componentType
               }
             }
 

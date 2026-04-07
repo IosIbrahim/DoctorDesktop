@@ -69,6 +69,17 @@ class TranslationLayerImpl: TranslationLayer {
         if let name = user?.userName {
             UserDefaults.standard.set(name, forKey: "userName") //setObject
         }
+        do {
+            // make sure this JSON is in the format we expect
+            if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
+                // try to read out a string array
+                let token = json["token"] as? String
+                UserDefaults.standard.set(token ?? "", forKey: "auth_token") //setObject
+                print(json)
+            }
+        } catch let error as NSError {
+            print("Failed to load: \(error.localizedDescription)")
+        }
         return user ?? .init()
     }
 }

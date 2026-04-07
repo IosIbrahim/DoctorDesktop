@@ -83,7 +83,11 @@ extension NetworkLayerImpl {
       let url = AppURLS.ip+"/MobileApi/api/get_patients_counts"
     print(params)
     print(url)
-    AlamofireAppManager.shared.request(url, parameters: params)
+      var headers: HTTPHeaders?
+      if let token = UserDefaults.standard.string(forKey: "auth_token") {
+          headers = .init([HTTPHeader(name: "Authorization", value: "Bearer \(token)")])
+      }
+    AlamofireAppManager.shared.request(url, parameters: params,headers: headers)
       .responseJSON { response in
         guard let data = response.data else { return }
           print(response.value ?? "")
@@ -95,6 +99,10 @@ extension NetworkLayerImpl {
         let url = AppURLS.ip+"/MobileApi/api/WorkFlowController/workflow"
       print(params)
       print(url)
+//        var headers: HTTPHeaders?
+//        if let token = UserDefaults.standard.string(forKey: "auth_token") {
+//            headers = .init([HTTPHeader(name: "Authorization", value: "Bearer \(token)")])
+//        }
       AlamofireAppManager.shared.request(url, parameters: params)
         .responseJSON { response in
           guard let data = response.data else { return }
@@ -109,7 +117,11 @@ extension NetworkLayerImpl {
     let url = AppURLS.ip+"/MobileApi/api/get_inpatient_units"
       print(params)
       print(url)
-    AlamofireAppManager.shared.request(url, parameters: params)
+      var headers: HTTPHeaders?
+      if let token = UserDefaults.standard.string(forKey: "auth_token") {
+          headers = .init([HTTPHeader(name: "Authorization", value: "Bearer \(token)")])
+      }
+    AlamofireAppManager.shared.request(url, parameters: params,headers: headers)
       .responseJSON { response in
         guard let data = response.data else { return }
           print(response.value ?? "")
@@ -121,7 +133,11 @@ extension NetworkLayerImpl {
     let url = AppURLS.ip+"/MobileApi/api/get_inpatient_patients"
       print(params)
       print(url)
-    AlamofireAppManager.shared.request(url, parameters: params)
+      var headers: HTTPHeaders?
+      if let token = UserDefaults.standard.string(forKey: "auth_token") {
+          headers = .init([HTTPHeader(name: "Authorization", value: "Bearer \(token)")])
+      }
+    AlamofireAppManager.shared.request(url, parameters: params,headers: headers)
       .responseJSON { response in
         guard let data = response.data else { return }
           print(response.value ?? "")
@@ -135,7 +151,11 @@ extension NetworkLayerImpl {
     let url = AppURLS.ip+"/MobileApi/api/get_outpatients_clinic"
       print(params)
       print(url)
-    AlamofireAppManager.shared.request(url, parameters: params)
+      var headers: HTTPHeaders?
+      if let token = UserDefaults.standard.string(forKey: "auth_token") {
+          headers = .init([HTTPHeader(name: "Authorization", value: "Bearer \(token)")])
+      }
+    AlamofireAppManager.shared.request(url, parameters: params,headers: headers)
       .responseJSON { response in
         guard let data = response.data else { return }
           print(response.value ?? "")
@@ -147,18 +167,27 @@ extension NetworkLayerImpl {
         let url = AppURLS.ip+"/MobileApi/api/get_or_patients"
         print(params)
         print(url)
-        AlamofireAppManager.shared.request(url, parameters: params)
+        var headers: HTTPHeaders?
+        if let token = UserDefaults.standard.string(forKey: "auth_token") {
+            headers = .init([HTTPHeader(name: "Authorization", value: "Bearer \(token)")])
+        }
+        AlamofireAppManager.shared.request(url, parameters: params,headers: headers)
             .responseJSON { response in
                 guard let data = response.data else { return }
                 print(response.value ?? "")
                 finished(data)
         }
     }
+    
   func getOutpatientPatients(with params: [String: String], finished: @escaping DataBlock) {
     let url = AppURLS.ip+"/MobileApi/api/get_outpatients_patients"
       print(params)
       print(url)
-    AlamofireAppManager.shared.request(url, parameters: params)
+      var headers: HTTPHeaders?
+      if let token = UserDefaults.standard.string(forKey: "auth_token") {
+          headers = .init([HTTPHeader(name: "Authorization", value: "Bearer \(token)")])
+      }
+    AlamofireAppManager.shared.request(url, parameters: params,headers: headers)
       .responseJSON { response in
         guard let data = response.data else { return }
           print(response.value ?? "")
@@ -178,7 +207,11 @@ extension NetworkLayerImpl {
         }
         print(params)
         print(url)
-      AlamofireAppManager.shared.request(url, parameters: params)
+        var headers: HTTPHeaders?
+        if let token = UserDefaults.standard.string(forKey: "auth_token") {
+            headers = .init([HTTPHeader(name: "Authorization", value: "Bearer \(token)")])
+        }
+      AlamofireAppManager.shared.request(url, parameters: params,headers: headers)
         .responseJSON { response in
           guard let data = response.data else { return }
             print(response.value ?? "")
@@ -193,7 +226,11 @@ extension NetworkLayerImpl {
     let url = AppURLS.ip+"/MobileApi/api/get_er_patients"
       print(params)
       print(url)
-    AlamofireAppManager.shared.request(url, parameters: params)
+      var headers: HTTPHeaders?
+      if let token = UserDefaults.standard.string(forKey: "auth_token") {
+          headers = .init([HTTPHeader(name: "Authorization", value: "Bearer \(token)")])
+      }
+    AlamofireAppManager.shared.request(url, parameters: params,headers: headers)
       .responseJSON { response in
         guard let data = response.data else { return }
         finished(data)
@@ -206,7 +243,11 @@ extension NetworkLayerImpl {
     let url = AppURLS.ip+"/MobileApi/api/get_critical_result"
       print(params)
       print(url)
-      AF.request(url, parameters: params)
+      var headers: HTTPHeaders?
+      if let token = UserDefaults.standard.string(forKey: "auth_token") {
+          headers = .init([HTTPHeader(name: "Authorization", value: "Bearer \(token)")])
+      }
+      AF.request(url, parameters: params,headers: headers)
       .responseJSON { response in
         if let theJSONData = try?  JSONSerialization.data(
             withJSONObject: (((response.value as! [String:Any])["Root"] as! [String:Any])["PATIENT"] as! [String:Any])["PATIENT_ROW"]!,
@@ -227,7 +268,11 @@ extension NetworkLayerImpl {
     let url = AppURLS.ip+"/MobileApi/api/get_template_data"
       print(params)
       print(url)
-    AlamofireAppManager.shared.request(url, parameters: params)
+      var headers: HTTPHeaders?
+      if let token = UserDefaults.standard.string(forKey: "auth_token") {
+          headers = .init([HTTPHeader(name: "Authorization", value: "Bearer \(token)")])
+      }
+    AlamofireAppManager.shared.request(url, parameters: params,headers: headers)
       .responseJSON { response in
         guard let data = response.data else { return }
         finished(data)
@@ -248,9 +293,13 @@ extension NetworkLayerImpl {
     //"""
       print(params)
       print(url)
+      var headers: HTTPHeaders?
+      if let token = UserDefaults.standard.string(forKey: "auth_token") {
+          headers = .init([HTTPHeader(name: "Authorization", value: "Bearer \(token)")])
+      }
     AlamofireAppManager.shared.request(url,
                                        method: .post,
-                                       parameters: params)
+                                       parameters: params,headers: headers)
       .responseJSON { response in
         guard let data = response.data else { return }
         finished(data)
@@ -263,7 +312,11 @@ extension NetworkLayerImpl {
     let url = AppURLS.ip+"/MobileApi/api/GetServiceLab"
       print(params)
       print(url)
-    AlamofireAppManager.shared.request(url, parameters: params)
+      var headers: HTTPHeaders?
+      if let token = UserDefaults.standard.string(forKey: "auth_token") {
+          headers = .init([HTTPHeader(name: "Authorization", value: "Bearer \(token)")])
+      }
+    AlamofireAppManager.shared.request(url, parameters: params,headers: headers)
       .responseJSON { response in
         guard let data = response.data else { return }
         finished(data)
@@ -279,7 +332,11 @@ extension NetworkLayerImpl {
     """
       print(params)
       print(url)
-    AlamofireAppManager.shared.request(url, parameters: params)
+      var headers: HTTPHeaders?
+      if let token = UserDefaults.standard.string(forKey: "auth_token") {
+          headers = .init([HTTPHeader(name: "Authorization", value: "Bearer \(token)")])
+      }
+    AlamofireAppManager.shared.request(url, parameters: params,headers: headers)
       .responseJSON { response in
         guard let data = response.data else { return }
         finished(data)
@@ -293,10 +350,14 @@ extension NetworkLayerImpl {
     let url = AppURLS.ip+"/MobileApi/api/" + api
       print(params)
       print(url)
+      var headers: HTTPHeaders?
+      if let token = UserDefaults.standard.string(forKey: "auth_token") {
+          headers = .init([HTTPHeader(name: "Authorization", value: "Bearer \(token)")])
+      }
     AlamofireAppManager.shared.request(url,
                                        method: .post,
                                        parameters: params,
-                                       encoding: JSONEncoding.default)
+                                       headers: headers)
       .responseJSON { response in
         guard let data = response.data else { return }
         finished(data)
@@ -309,7 +370,11 @@ extension NetworkLayerImpl {
     let url = AppURLS.ip+"/MobileApi/api/LoadPatientEpisodes"
       print(params)
       print(url)
-    AlamofireAppManager.shared.request(url, parameters: params)
+      var headers: HTTPHeaders?
+      if let token = UserDefaults.standard.string(forKey: "auth_token") {
+          headers = .init([HTTPHeader(name: "Authorization", value: "Bearer \(token)")])
+      }
+    AlamofireAppManager.shared.request(url, parameters: params,headers: headers)
       .responseJSON { response in
         guard let data = response.data else { return }
         print(response.value ?? "")
@@ -323,7 +388,11 @@ extension NetworkLayerImpl {
     let url = AppURLS.ip+"/MobileApi/api/GetPatCustomizedSummary"
       print(params)
       print(url)
-    AlamofireAppManager.shared.request(url, parameters: params)
+      var headers: HTTPHeaders?
+      if let token = UserDefaults.standard.string(forKey: "auth_token") {
+          headers = .init([HTTPHeader(name: "Authorization", value: "Bearer \(token)")])
+      }
+    AlamofireAppManager.shared.request(url, parameters: params,headers: headers)
       .responseJSON { response in
         guard let data = response.data else { return }
         finished(data)
@@ -336,7 +405,11 @@ extension NetworkLayerImpl {
     let url = AppURLS.ip+"/mobileapi/api/getPacsUrl/"
       print(params)
       print(url)
-    AlamofireAppManager.shared.request(url, parameters: params)
+      var headers: HTTPHeaders?
+      if let token = UserDefaults.standard.string(forKey: "auth_token") {
+          headers = .init([HTTPHeader(name: "Authorization", value: "Bearer \(token)")])
+      }
+    AlamofireAppManager.shared.request(url, parameters: params,headers: headers)
       .responseJSON { response in
         guard let data = response.data else { return }
         finished(data)
@@ -353,7 +426,11 @@ extension NetworkLayerImpl {
     let url = AppURLS.ip+"/MobileApi/api/loadTrige"
       print(params)
       print(url)
-    AF.request(url, parameters: params)
+      var headers: HTTPHeaders?
+      if let token = UserDefaults.standard.string(forKey: "auth_token") {
+          headers = .init([HTTPHeader(name: "Authorization", value: "Bearer \(token)")])
+      }
+    AF.request(url, parameters: params,headers: headers)
       .responseJSON { response in
         guard let data = response.data else { return }
         finished(data)
@@ -364,7 +441,11 @@ extension NetworkLayerImpl {
     let url = AppURLS.ip+"/MobileApi/api/cot_child"
       print(params)
       print(url)
-    AF.request(url, parameters: params)
+      var headers: HTTPHeaders?
+      if let token = UserDefaults.standard.string(forKey: "auth_token") {
+          headers = .init([HTTPHeader(name: "Authorization", value: "Bearer \(token)")])
+      }
+    AF.request(url, parameters: params,headers: headers)
       .responseJSON { response in
         guard let data = response.data else { return }
         finished(data)
@@ -375,10 +456,14 @@ extension NetworkLayerImpl {
     let url = AppURLS.ip+"/MobileApi/api/save_dataTR"
       print(params)
       print(url)
+      var headers: HTTPHeaders?
+      if let token = UserDefaults.standard.string(forKey: "auth_token") {
+          headers = .init([HTTPHeader(name: "Authorization", value: "Bearer \(token)")])
+      }
     AF.request(url,
                       method: .post,
                       parameters: params,
-                      encoding: JSONEncoding.default)
+                      headers: headers)
       .responseJSON { response in
         guard let data = response.data else { return }
         finished(data)
@@ -392,7 +477,11 @@ extension NetworkLayerImpl {
     let url = AppURLS.ip+"/primecare/Hospital%20Images/" + flagImagePath
       print(params)
       print(url)
-    AF.request(url)
+      var headers: HTTPHeaders?
+      if let token = UserDefaults.standard.string(forKey: "auth_token") {
+          headers = .init([HTTPHeader(name: "Authorization", value: "Bearer \(token)")])
+      }
+    AF.request(url,headers: headers)
       .responseData { response in
         guard let data = response.data else { return }
         finished(data)

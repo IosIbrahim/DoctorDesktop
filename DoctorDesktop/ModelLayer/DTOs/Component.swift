@@ -22,13 +22,13 @@ enum ComponentType: Int {
  // case nurseTL = 1478
 }
 
-class Component: Decodable {
+struct Component: Decodable {
   var id: Int
   var processInfoCode: Int
   private let arabicName: String
   private var englishName: String
   private let shortNameInArabic: String?
-  private let shortNameInEnglish: String?
+  private var shortNameInEnglish: String?
 
   var name: String { return englishName }
   var shortName: String? { return shortNameInEnglish }
@@ -46,7 +46,12 @@ class Component: Decodable {
 
     case mobileFlag = "MOBILE_FLAG"
   }
-    func updateName(_ title:String){
-        self.englishName = title
+    mutating func updateName(_ title:String){
+        self.shortNameInEnglish = title
+        if title == "Notifications"{
+            patientsCount = "2762"
+        }
     }
+    
+    
 }

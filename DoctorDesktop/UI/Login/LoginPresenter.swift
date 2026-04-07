@@ -36,28 +36,49 @@ extension LoginPresenterImpl {
     modelLayer.login(with: params) { [weak self] user, components in
         if user.branch != nil {
             self?.user = user
+            self?.components = components
             
-            self?.components = components.filter({ component in
-              if let mobileFlag = component.mobileFlag {
-                  return mobileFlag == 1
-              } else {
-                return false
-              }
-            })
+//            self?.components = components.filter({ component in
+//              if let mobileFlag = component.mobileFlag {
+//                  return mobileFlag == 1
+//              } else {
+//                return false
+//              }
+//            })
             var not:Component?
+            var search:Component?
+
+            var searchFound:Bool = false
             for item in components {
                 if not == nil {
                     not = item
                     not?.updateName("Notifications")
                     not?.patientsCount = ""
                     not?.id = 0
-                    not?.processInfoCode = 0
+                    not?.processInfoCode = 1
+                }else if !searchFound && search == nil {
+                    search = item
+                    search?.updateName("Search")
+                    search?.patientsCount = ""
+                    search?.id = 0
+                    search?.processInfoCode = 72
                 }
+                
                 if item.name == "Search" {
+                    searchFound = true
                     if let new = not {
-                        self?.components .append(new)
+                        self?.components.append(new)
                     }
                     self?.components.append(item)
+                }
+                
+            }
+            if !searchFound {
+                if let first = not {
+                    self?.components.append(first)
+                }
+                if let last = search {
+                    self?.components.append(last)
                 }
             }
         }else {
