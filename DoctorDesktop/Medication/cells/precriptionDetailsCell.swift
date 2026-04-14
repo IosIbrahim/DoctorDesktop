@@ -17,22 +17,13 @@ class precriptionDetailsCell: UITableViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
-        // Initialization code
     }
 
     override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
-
-        // Configure the view for the selected state
     }
 
-    func configureCell(vc : UIViewController , data: ItemsDataRow)
-    {
-        print("from cell")
-        print(data)
-        name.text  = data.itemenname
-        
-        //        name.text = data.
-        
+    func configureCell(vc: UIViewController, data: ItemsDataRow) {
+        name.text = data.itemenname
     }
 }

@@ -9,350 +9,208 @@
 import UIKit
 import Reachability
 import ObjectMapper
-class NotesViewController: UIViewController {
-    @IBOutlet weak var tableView: UITableView!
+import SwiftyBeaver
 
+class NotesViewController: UIViewController {
+
+    @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var textView: UITextField!
     @IBOutlet weak var viewSend: UIView!
     @IBOutlet weak var viewUrgent: UIView!
     @IBOutlet weak var viewMediciese: UIView!
 
-    var messages = [ListOfDoctorNurseMessages]()
-    var NURSE_REMARKS_PRIORITY_List = [NURSE_REMARKS_PRIORITY_ROW]()
-    var NURSE_REMARKS_SHOW_D_N_List = [NURSE_REMARKS_SHOW_D_N]()
+    var messages: [ListOfDoctorNurseMessages] = []
+    var NURSE_REMARKS_PRIORITY_List: [NURSE_REMARKS_PRIORITY_ROW] = []
+    var NURSE_REMARKS_SHOW_D_N_List: [NURSE_REMARKS_SHOW_D_N] = []
 
-    
-    
+    // MARK: - Lifecycle
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
         setupUi()
         callAPI()
-   
-        viewUrgent.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(viewUrgentFunc)))
-        
-        viewMediciese.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(viewMedicieseFunc)))
-        viewSend.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(viewSendFunc)))
+        viewUrgent.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(urgentTapped)))
+        viewMediciese.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(mediciesTopped)))
+        viewSend.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(sendTapped)))
     }
 
-    @objc func viewUrgentFunc(sender : UITapGestureRecognizer) {
-        AppPopUpHandler.instance.initListPopup( container: self, arrayNames: self.NURSE_REMARKS_PRIORITY_List.map{$0.NAME_AR}, title: "اختار نوع الشكوي", type: "complaintTypeList")
-    }
-    
-    @objc func viewMedicieseFunc(sender : UITapGestureRecognizer) {
-        AppPopUpHandler.instance.initListPopup( container: self, arrayNames: self.NURSE_REMARKS_SHOW_D_N_List.map{$0.NAME_AR}, title: "اختار نوع الشكوي", type: "complaintTypeList")
-    }
-    
-    
-    @objc func viewSendFunc(sender : UITapGestureRecognizer) {
-       send()
-        
-    }
-    
-    func callAPI(){
+    // MARK: - Gesture actions
 
-        guard let branch_id: String = UserDefaults.standard.string(forKey: "branch_id")as? String else {
+    @objc func urgentTapped() {
+        AppPopUpHandler.instance.initListPopup(
+            container: self,
+            arrayNames: NURSE_REMARKS_PRIORITY_List.map { $0.NAME_AR },
+            title: "اختار نوع الشكوي",
+            type: "complaintTypeList"
+        )
+    }
 
-            return
-        }
-        guard let user_id: String = UserDefaults.standard.string(forKey: "userName")as? String else {
-            
-            return
-        }
-        guard let visit_id: String = UserDefaults.standard.string(forKey: "visit_id")as? String else {
-            
-            return
-        }
-        
-        guard let patient_id: String =  UserDefaults.standard.string(forKey: "patient_id")  as? String else {
-            
-            return
-        }
-        
-//    http://192.168.1.203/MobileApi/api/MedicalRcordController/DDDocNurseNotesLoad?PATIENT_ID=552             &USER_ID=KHABEER&BRANCH_ID=1&COMPUTER_NAME=ios&USER_OPEN_FLAG=D&TYPE_FLAG=1&Lang=en"
-        let pars = "PATIENT_ID="+"\(patient_id)"+"&USER_ID=\(user_id)" + "&BRANCH_ID=\(branch_id)" + "&COMPUTER_NAME=ios" + "&USER_OPEN_FLAG=D" + "&TYPE_FLAG=1" + "&Lang=en"
-      
-        var urlString = Constants.APIProvider.DDDocNurseNotesLoad+pars
-        urlString =   urlString.addingPercentEncoding( withAllowedCharacters: .urlQueryAllowed)!
+    @objc func mediciesTopped() {
+        AppPopUpHandler.instance.initListPopup(
+            container: self,
+            arrayNames: NURSE_REMARKS_SHOW_D_N_List.map { $0.NAME_AR },
+            title: "اختار نوع الشكوي",
+            type: "complaintTypeList"
+        )
+    }
 
-        
-    
-        
-        WebserviceMananger.sharedInstance.makeCall(method: .get, url: urlString, parameters: nil, vc: self) { (data, error) in
-            
-            if error == nil
-            {
-                 if let root = ((data as! [String: AnyObject])["Root"] as! [String:AnyObject])["DOCTOR_NURSE_REMARKS"] as? [String:AnyObject]
-                {
-                    
-               
-                    
-                    if root["DOCTOR_NURSE_REMARKS_ROW"] is [[String:AnyObject]]
-                    {
-                    
-                    let appoins = root["DOCTOR_NURSE_REMARKS_ROW"] as! [[String: AnyObject]]
-                    for i in appoins
-                    {
-                        print(i)
-                        self.messages.append(ListOfDoctorNurseMessages(JSON: i)!)
-                      
-                        
-                    }
-                    }
-                    else if root["DOCTOR_NURSE_REMARKS_ROW"] is [String:AnyObject]
-                    {
-                        self.messages.append(ListOfDoctorNurseMessages(JSON:root["DOCTOR_NURSE_REMARKS_ROW"] as![String:AnyObject] )!)
-                     
-                    }
-                   
-                     self.tableView.reloadData()
+    @objc func sendTapped() {
+        send()
+    }
+
+    // MARK: - Session params helper
+
+    private func sessionParams() -> (branch_id: String, user_id: String, visit_id: String, patient_id: String)? {
+        guard
+            let branch_id  = UserDefaults.standard.string(forKey: "branch_id"),
+            let user_id    = UserDefaults.standard.string(forKey: "userName"),
+            let visit_id   = UserDefaults.standard.string(forKey: "visit_id"),
+            let patient_id = UserDefaults.standard.string(forKey: "patient_id")
+        else { return nil }
+        return (branch_id, user_id, visit_id, patient_id)
+    }
+
+    // MARK: - API calls
+
+    func callAPI() {
+        guard let s = sessionParams() else { return }
+
+        let query = "PATIENT_ID=\(s.patient_id)&USER_ID=\(s.user_id)&BRANCH_ID=\(s.branch_id)&COMPUTER_NAME=ios&USER_OPEN_FLAG=D&TYPE_FLAG=1&Lang=en"
+        guard let urlString = (Constants.APIProvider.DDDocNurseNotesLoad + query)
+            .addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
+        else { return }
+
+        WebserviceMananger.sharedInstance.makeCall(method: .get, url: urlString, parameters: nil, vc: self) { [weak self] data, error in
+            guard let self = self, error == nil,
+                  let root = (data as? [String: AnyObject])?["Root"] as? [String: AnyObject]
+            else { return }
+
+            self.parseRows(from: root, key: "DOCTOR_NURSE_REMARKS", rowKey: "DOCTOR_NURSE_REMARKS_ROW") { row in
+                if let msg = ListOfDoctorNurseMessages(JSON: row) {
+                    self.messages.append(msg)
                 }
-             
-                else
-                 {
+            }
+            self.tableView.reloadData()
+
+            self.parseRows(from: root, key: "NURSE_REMARKS_PRIORITY", rowKey: "NURSE_REMARKS_PRIORITY_ROW") { row in
+                if let item = NURSE_REMARKS_PRIORITY_ROW(JSON: row) {
+                    self.NURSE_REMARKS_PRIORITY_List.append(item)
                 }
-                
-                
-                if let root = ((data as! [String: AnyObject])["Root"] as! [String:AnyObject])["NURSE_REMARKS_PRIORITY"] as? [String:AnyObject]
-               {
-                   
-              
-                   
-                   if root["NURSE_REMARKS_PRIORITY_ROW"] is [[String:AnyObject]]
-                   {
-                   
-                   let appoins = root["NURSE_REMARKS_PRIORITY_ROW"] as! [[String: AnyObject]]
-                   for i in appoins
-                   {
-                       print(i)
-                       self.NURSE_REMARKS_PRIORITY_List.append(NURSE_REMARKS_PRIORITY_ROW(JSON: i)!)
-                     
-                       
-                   }
-                   }
-                   else if root["NURSE_REMARKS_PRIORITY_ROW"] is [String:AnyObject]
-                   {
-                       self.NURSE_REMARKS_PRIORITY_List.append(NURSE_REMARKS_PRIORITY_ROW(JSON:root["NURSE_REMARKS_PRIORITY_ROW"] as![String:AnyObject] )!)
-                    
-                   }
-                  
-               }
-            
-               else
-                {
-               }
-                
-              
-                
-                if let root = ((data as! [String: AnyObject])["Root"] as! [String:AnyObject])["NURSE_REMARKS_SHOW_D_N"] as? [String:AnyObject]
-               {
-                   
-              
-                   
-                   if root["NURSE_REMARKS_SHOW_D_N_ROW"] is [[String:AnyObject]]
-                   {
-                   
-                   let appoins = root["NURSE_REMARKS_SHOW_D_N_ROW"] as! [[String: AnyObject]]
-                   for i in appoins
-                   {
-                       print(i)
-                       self.NURSE_REMARKS_SHOW_D_N_List.append(NURSE_REMARKS_SHOW_D_N(JSON: i)!)
-                     
-                       
-                   }
-                   }
-                   else if root["NURSE_REMARKS_SHOW_D_N_ROW"] is [String:AnyObject]
-                   {
-                       self.NURSE_REMARKS_SHOW_D_N_List.append(NURSE_REMARKS_SHOW_D_N(JSON:root["NURSE_REMARKS_SHOW_D_N_ROW"] as![String:AnyObject] )!)
-                    
-                   }
-                  
-               }
-            
-               else
-                {
-               }
-                
-                
-                
-                
-                
-                
-               
             }
 
-        }
-    }
-    func sendMessage() {
-        
-        guard let branch_id: String = UserDefaults.standard.string(forKey: "branch_id")as? String else {
-
-            return
-        }
-        guard let user_id: String = UserDefaults.standard.string(forKey: "userName")as? String else {
-            
-            return
-        }
-        guard let visit_id: String = UserDefaults.standard.string(forKey: "visit_id")as? String else {
-            
-            return
-        }
-        
-        guard let patient_id: String =  UserDefaults.standard.string(forKey: "patient_id")  as? String else {
-            
-            return
-        }
-        
-  
-        
-        let pars = ["SI":["BranchID":branch_id,"ComputerName":"android","LanguageID":2,"UserID":user_id],"DD_UC_PARMS":["PATIENT_ID":patient_id,"VISIT_ID":visit_id,"PROCESS_ID":"994","TRACER_PLACE_ID":"98","USER_OPEN_FLAG":"D"],"DOCTOR_NURSE_REMARKS":["BUFFER_STATUS":"1","PRIORITY_TYPE":2,"SHOW_D_N":1,"VISIT_ID":"4","DESC_EN":textView.text ?? ""]]
-                    as! [String : Any]
-        
-      
-        let urlString = Constants.APIProvider.sendMessage
-        let url = URL(string: urlString)
-        let parseUrl = Constants.APIProvider.sendMessage + Constants.getoAuthValue(url: url!, method: "POST")
-        WebserviceMananger.sharedInstance.makeCall(method: .post, url: urlString, parameters: pars, vc: self) { (data, error) in
-            let root = (data as! [String:AnyObject])["Root"] as! [String: AnyObject]
-            if root.keys.contains("OUT_PARMS")
-            {
-                let messageRow = (root["OUT_PARMS"] as! [String: AnyObject])["OUT_PARMS_ROW"] as! [String : AnyObject]
-                
-//                let englishMsg = messageRow["SER"] as! String
-                Utilities.showSuccessAlert(self, messageToDisplay:"Appointment has been cancelled successfuly")
-                
+            self.parseRows(from: root, key: "NURSE_REMARKS_SHOW_D_N", rowKey: "NURSE_REMARKS_SHOW_D_N_ROW") { row in
+                if let item = NURSE_REMARKS_SHOW_D_N(JSON: row) {
+                    self.NURSE_REMARKS_SHOW_D_N_List.append(item)
+                }
             }
         }
     }
-    
-    
+
+    /// Parses a node that can be either a single dict or an array of dicts.
+    private func parseRows(from root: [String: AnyObject],
+                           key: String,
+                           rowKey: String,
+                           handler: ([String: AnyObject]) -> Void) {
+        guard let node = root[key] as? [String: AnyObject] else { return }
+        if let rows = node[rowKey] as? [[String: AnyObject]] {
+            rows.forEach { handler($0) }
+        } else if let row = node[rowKey] as? [String: AnyObject] {
+            handler(row)
+        }
+    }
+
     func send() {
-        guard let branch_id: String = UserDefaults.standard.string(forKey: "branch_id")as? String else {
+        guard let s = sessionParams() else { return }
 
-            return
-        }
-        guard let user_id: String = UserDefaults.standard.string(forKey: "userName")as? String else {
-            
-            return
-        }
-        guard let visit_id: String = UserDefaults.standard.string(forKey: "visit_id")as? String else {
-            
-            return
-        }
-        
-        guard let patient_id: String =  UserDefaults.standard.string(forKey: "patient_id")  as? String else {
-            
-            return
-        }
-        
-        let pars = ["SI":["BranchID":branch_id,"ComputerName":"android","LanguageID":2,"UserID":user_id],"DD_UC_PARMS":["PATIENT_ID":patient_id,"VISIT_ID":visit_id,"PROCESS_ID":"994","TRACER_PLACE_ID":"98","USER_OPEN_FLAG":"D"],"DOCTOR_NURSE_REMARKS":["BUFFER_STATUS":"1","PRIORITY_TYPE":2,"SHOW_D_N":1,"VISIT_ID":"4","DESC_EN":textView.text ?? ""]]
-                    as! [String : Any]
-        
-      
-        let urlString = Constants.APIProvider.sendMessage
-        AppConnectionsHandler.post(url: urlString, params: pars, type: String.self) { (status, model, error) in
+        let params: [String: Any] = [
+            "SI": ["BranchID": s.branch_id, "ComputerName": "android", "LanguageID": 2, "UserID": s.user_id],
+            "DD_UC_PARMS": ["PATIENT_ID": s.patient_id, "VISIT_ID": s.visit_id, "PROCESS_ID": "994", "TRACER_PLACE_ID": "98", "USER_OPEN_FLAG": "D"],
+            "DOCTOR_NURSE_REMARKS": ["BUFFER_STATUS": "1", "PRIORITY_TYPE": 2, "SHOW_D_N": 1, "VISIT_ID": "4", "DESC_EN": textView.text ?? ""]
+        ]
+
+        AppConnectionsHandler.post(url: Constants.APIProvider.sendMessage, params: params, type: String.self) { status, _, error in
             switch status {
-            case .sucess:
-              
-                break
+            case .success:
+                SwiftyBeaver.debug("Note sent successfully")
             case .error:
-              
-                break
+                SwiftyBeaver.error("Failed to send note: \(error ?? "")")
             }
         }
     }
-
 }
 
+// MARK: - Models
 
-struct ListOfDoctorNurseMessages : Mappable {
-    var DESC_EN : String = ""
-    var EMP_NAME_EN : String = ""
-    var EMP_NAME_AR:String = ""
-    var status:String = ""
-    var date:String = ""
-    var flag:String = ""
-    var showDN:String = ""
-    var REPLY :nurseMessage?
-    init?(map: Map) {
-        
-    }
+struct ListOfDoctorNurseMessages: Mappable {
+    var DESC_EN: String = ""
+    var EMP_NAME_EN: String = ""
+    var EMP_NAME_AR: String = ""
+    var status: String = ""
+    var date: String = ""
+    var flag: String = ""
+    var showDN: String = ""
+    var REPLY: nurseMessage?
+
+    init?(map: Map) {}
+
     mutating func mapping(map: Map) {
-        
-        DESC_EN <- map["DESC_EN"]
-        REPLY <- map["REPLY"]
+        DESC_EN     <- map["DESC_EN"]
+        REPLY       <- map["REPLY"]
         EMP_NAME_EN <- map["EMP_NAME_EN"]
         EMP_NAME_AR <- map["EMP_NAME_AR"]
-        status <- map["PRIORITY_TYPE"]
-        date <- map["TRANSDATE"]
-        flag <- map["USER_OPEN_FLAG"]
-        showDN <- map["USER_OPEN_FLAG"]
+        status      <- map["PRIORITY_TYPE"]
+        date        <- map["TRANSDATE"]
+        flag        <- map["USER_OPEN_FLAG"]
+        showDN      <- map["USER_OPEN_FLAG"]
     }
-    
 }
 
+struct nurseMessage: Mappable {
+    var REPLY_ROWOb: REPLY_ROW?
 
-struct nurseMessage : Mappable {
-    var REPLY_ROWOb:REPLY_ROW?
-    init?(map: Map) {
-        
-    }
+    init?(map: Map) {}
+
     mutating func mapping(map: Map) {
         REPLY_ROWOb <- map["REPLY_ROW"]
-  
     }
-    
 }
 
-struct REPLY_ROW : Mappable {
-    var REPLY_DESC : String = ""
-    var USER_ENTER_NAME_EN : String = ""
-    init?(map: Map) {
-        
-    }
+struct REPLY_ROW: Mappable {
+    var REPLY_DESC: String = ""
+    var USER_ENTER_NAME_EN: String = ""
+
+    init?(map: Map) {}
+
     mutating func mapping(map: Map) {
-        REPLY_DESC <- map["REPLY_DESC"]
-        USER_ENTER_NAME_EN <- map["USER_ENTER_NAME_EN"]
-     
+        REPLY_DESC          <- map["REPLY_DESC"]
+        USER_ENTER_NAME_EN  <- map["USER_ENTER_NAME_EN"]
     }
 }
 
+struct NURSE_REMARKS_PRIORITY_ROW: Mappable {
+    var NAME_EN: String = ""
+    var NAME_AR: String = ""
+    var ID: String = ""
 
+    init?(map: Map) {}
 
-
-struct NURSE_REMARKS_PRIORITY_ROW : Mappable {
-    var NAME_EN : String = ""
-    var ID : String = ""
-
-    var NAME_AR : String = ""
-    
-    init?(map: Map) {
-        
-    }
     mutating func mapping(map: Map) {
         NAME_EN <- map["NAME_EN"]
         NAME_AR <- map["NAME_AR"]
-        ID <- map["ID"]
-
+        ID      <- map["ID"]
     }
 }
 
-struct NURSE_REMARKS_SHOW_D_N : Mappable {
-    var NAME_EN : String = ""
-    var ID : String = ""
+struct NURSE_REMARKS_SHOW_D_N: Mappable {
+    var NAME_EN: String = ""
+    var NAME_AR: String = ""
+    var ID: String = ""
 
-    var NAME_AR : String = ""
-    
-    init?(map: Map) {
-        
-    }
+    init?(map: Map) {}
+
     mutating func mapping(map: Map) {
         NAME_EN <- map["NAME_EN"]
         NAME_AR <- map["NAME_AR"]
-        ID <- map["ID"]
-
+        ID      <- map["ID"]
     }
 }
-
-
