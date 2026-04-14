@@ -8,483 +8,206 @@
 
 import Foundation
 import Alamofire
+import SwiftyBeaver
 
 typealias DataBlock = ((Data) -> Void)
 
 struct AppURLS {
-//  static let ip = "http://192.168.1.127/"
-//  static let ip = "http://10.10.10.150"
-    
-    //  static let ip = "http://10.10.10.150"
-
-  static let oldIP =      "http://192.168.1.187"
-  static let ip =      "http://41.33.82.156:29804"
-  static let mobileApi = "MobileApi/api/"
-  static let imageApi = "primecare/Hospital%20Images/"
+    static let ip       = "http://41.33.82.156:29804"
+    static let mobileApi = "MobileApi/api/"
+    static let imageApi  = "primecare/Hospital%20Images/"
 }
+
+// MARK: - Protocol
 
 protocol NetworkLayer {
     func login(with params: [String: String], finished: @escaping DataBlock)
     func getPatientsCount(with params: [String: String], finished: @escaping DataBlock)
     func getDoctorPermission(with params: [String: String], finished: @escaping DataBlock)
-
-  func getInpatientUnits(with params: [String: String], finished: @escaping DataBlock)
-  func getInpatientPatients(with params: [String: String], finished: @escaping DataBlock)
-  func getOutpatientClinics(with params: [String: String], finished: @escaping DataBlock)
-  func getOperationPatients(with params: [String: String], finished: @escaping DataBlock)
-  func getOutpatientPatients(with params: [String: String], finished: @escaping DataBlock)
-  func changePatientStatus(with params: [String: String], finished: @escaping DataBlock)
-
-  func getClinicalPatients(with params: [String: String], finished: @escaping DataBlock)
-  func getTemplate(with params:[String: String], finished: @escaping DataBlock)
-  func getEmergencyPatients(with params: [String: String], finished: @escaping DataBlock)
-  func validateServiceRow(with params:[String: String], finished: @escaping DataBlock)
-  func getLabServices(with params:[String: String], finished: @escaping DataBlock)
-  func getRadServices(with params:[String: String], finished: @escaping DataBlock)
-  func saveOrder(with params:[String: String], orderType: TemplateType, finished: @escaping DataBlock)
-  func getPatientHistory(with params:[String: String], finished: @escaping DataBlock)
-  func getPatientSummary(with params:[String: String], finished: @escaping DataBlock)
-  func getPacksURL(with params:[String: String], finished: @escaping DataBlock)
-  func getTriageInfo(with params: [String: String], finished: @escaping DataBlock)
-  func getSymptoms(with params: [String: String], finished: @escaping DataBlock)
-  func loadFlagImage(with params: [String: String], finished: @escaping DataBlock)
+    func getInpatientUnits(with params: [String: String], finished: @escaping DataBlock)
+    func getInpatientPatients(with params: [String: String], finished: @escaping DataBlock)
+    func getOutpatientClinics(with params: [String: String], finished: @escaping DataBlock)
+    func getOperationPatients(with params: [String: String], finished: @escaping DataBlock)
+    func getOutpatientPatients(with params: [String: String], finished: @escaping DataBlock)
+    func changePatientStatus(with params: [String: String], finished: @escaping DataBlock)
+    func getClinicalPatients(with params: [String: String], finished: @escaping DataBlock)
+    func getTemplate(with params: [String: String], finished: @escaping DataBlock)
+    func getEmergencyPatients(with params: [String: String], finished: @escaping DataBlock)
+    func validateServiceRow(with params: [String: String], finished: @escaping DataBlock)
+    func getLabServices(with params: [String: String], finished: @escaping DataBlock)
+    func getRadServices(with params: [String: String], finished: @escaping DataBlock)
+    func saveOrder(with params: [String: String], orderType: TemplateType, finished: @escaping DataBlock)
+    func getPatientHistory(with params: [String: String], finished: @escaping DataBlock)
+    func getPatientSummary(with params: [String: String], finished: @escaping DataBlock)
+    func getPacksURL(with params: [String: String], finished: @escaping DataBlock)
+    func getTriageInfo(with params: [String: String], finished: @escaping DataBlock)
+    func getSymptoms(with params: [String: String], finished: @escaping DataBlock)
+    func loadFlagImage(with params: [String: String], finished: @escaping DataBlock)
 }
+
+// MARK: - Implementation
 
 class NetworkLayerImpl: NetworkLayer {
-  struct AlamofireAppManager {
-    static let shared: Session = {
-      let configuration = URLSessionConfiguration.default
-      configuration.timeoutIntervalForRequest = 30
-      configuration.timeoutIntervalForResource = 30
-      let sessionManager = Alamofire.Session(configuration: configuration)
-      return sessionManager
+
+    // MARK: Shared Alamofire session
+
+    private static let session: Session = {
+        let config = URLSessionConfiguration.default
+        config.timeoutIntervalForRequest  = 30
+        config.timeoutIntervalForResource = 30
+        return Session(configuration: config)
     }()
-  }
 
-  func login(with params: [String: String], finished: @escaping DataBlock) {
+    // MARK: Private helpers
 
-    let url = AppURLS.ip+"/MobileApi/api/Authenticate"
-      print(params)
-      print(url)
-    AlamofireAppManager.shared.request(url, method: .post,
-                                       parameters: params,
-                                       encoding: URLEncoding.httpBody)
-      .responseJSON { response in
-        print(response)
-        guard let data = response.data else { return }
-        finished(data)
+    private var authHeaders: HTTPHeaders? {
+        guard let token = UserDefaults.standard.string(forKey: "auth_token") else { return nil }
+        return HTTPHeaders([HTTPHeader(name: "Authorization", value: "Bearer \(token)")])
     }
-  }
-  
-}
 
-extension NetworkLayerImpl {
-  func getPatientsCount(with params: [String: String], finished: @escaping DataBlock) {
-      let url = AppURLS.ip+"/MobileApi/api/get_patients_counts"
-    print(params)
-    print(url)
-      var headers: HTTPHeaders?
-      if let token = UserDefaults.standard.string(forKey: "auth_token") {
-          headers = .init([HTTPHeader(name: "Authorization", value: "Bearer \(token)")])
-      }
-    AlamofireAppManager.shared.request(url, parameters: params,headers: headers)
-      .responseJSON { response in
-        guard let data = response.data else { return }
-          print(response.value ?? "")
-        finished(data)
-    }
-  }
-    
-    func getDoctorPermission(with params: [String: String], finished: @escaping DataBlock) {
-        let url = AppURLS.ip+"/MobileApi/api/WorkFlowController/workflow"
-      print(params)
-      print(url)
-        var headers: HTTPHeaders?
-        if let token = UserDefaults.standard.string(forKey: "auth_token") {
-            headers = .init([HTTPHeader(name: "Authorization", value: "Bearer \(token)")])
-        }
-      AlamofireAppManager.shared.request(url, parameters: params,headers: headers)
-        .responseJSON { response in
-          guard let data = response.data else { return }
-            print(response.value ?? "")
-          finished(data)
-      }
-    }
-    
-    
-  
-  func getInpatientUnits(with params: [String: String], finished: @escaping DataBlock) {
-    let url = AppURLS.ip+"/MobileApi/api/get_inpatient_units"
-      print(params)
-      print(url)
-      var headers: HTTPHeaders?
-      if let token = UserDefaults.standard.string(forKey: "auth_token") {
-          headers = .init([HTTPHeader(name: "Authorization", value: "Bearer \(token)")])
-      }
-    AlamofireAppManager.shared.request(url, parameters: params,headers: headers)
-      .responseJSON { response in
-        guard let data = response.data else { return }
-          print(response.value ?? "")
-        finished(data)
-    }
-  }
-  
-  func getInpatientPatients(with params: [String: String], finished: @escaping DataBlock) {
-    let url = AppURLS.ip+"/MobileApi/api/get_inpatient_patients"
-      print(params)
-      print(url)
-      var headers: HTTPHeaders?
-      if let token = UserDefaults.standard.string(forKey: "auth_token") {
-          headers = .init([HTTPHeader(name: "Authorization", value: "Bearer \(token)")])
-      }
-    AlamofireAppManager.shared.request(url, parameters: params,headers: headers)
-      .responseJSON { response in
-        guard let data = response.data else { return }
-          print(response.value ?? "")
-        finished(data)
-    }
-  }
-}
-
-extension NetworkLayerImpl {
-  func getOutpatientClinics(with params: [String: String], finished: @escaping DataBlock) {
-    let url = AppURLS.ip+"/MobileApi/api/get_outpatients_clinic"
-      print(params)
-      print(url)
-      var headers: HTTPHeaders?
-      if let token = UserDefaults.standard.string(forKey: "auth_token") {
-          headers = .init([HTTPHeader(name: "Authorization", value: "Bearer \(token)")])
-      }
-    AlamofireAppManager.shared.request(url, parameters: params,headers: headers)
-      .responseJSON { response in
-        guard let data = response.data else { return }
-          print(response.value ?? "")
-        finished(data)
-    }
-  }
-  
-    func getOperationPatients(with params: [String: String], finished: @escaping DataBlock) {
-        let url = AppURLS.ip+"/MobileApi/api/get_or_patients"
-        print(params)
-        print(url)
-        var headers: HTTPHeaders?
-        if let token = UserDefaults.standard.string(forKey: "auth_token") {
-            headers = .init([HTTPHeader(name: "Authorization", value: "Bearer \(token)")])
-        }
-        AlamofireAppManager.shared.request(url, parameters: params,headers: headers)
+    /// Generic GET request with Bearer auth.
+    private func get(_ url: String,
+                     params: [String: String],
+                     finished: @escaping DataBlock) {
+        SwiftyBeaver.debug("GET \(url) params: \(params)")
+        NetworkLayerImpl.session
+            .request(url, parameters: params, headers: authHeaders)
             .responseJSON { response in
                 guard let data = response.data else { return }
-                print(response.value ?? "")
                 finished(data)
-        }
+            }
     }
-    
-  func getOutpatientPatients(with params: [String: String], finished: @escaping DataBlock) {
-    let url = AppURLS.ip+"/MobileApi/api/get_outpatients_patients"
-      print(params)
-      print(url)
-      var headers: HTTPHeaders?
-      if let token = UserDefaults.standard.string(forKey: "auth_token") {
-          headers = .init([HTTPHeader(name: "Authorization", value: "Bearer \(token)")])
-      }
-    AlamofireAppManager.shared.request(url, parameters: params,headers: headers)
-      .responseJSON { response in
-        guard let data = response.data else { return }
-          print(response.value ?? "")
-        finished(data)
+
+    /// Generic POST request with Bearer auth.
+    private func post(_ url: String,
+                      params: [String: String],
+                      finished: @escaping DataBlock) {
+        SwiftyBeaver.debug("POST \(url) params: \(params)")
+        NetworkLayerImpl.session
+            .request(url, method: .post, parameters: params, headers: authHeaders)
+            .responseJSON { response in
+                guard let data = response.data else { return }
+                finished(data)
+            }
     }
-  }
-    
+
+    // MARK: - NetworkLayer
+
+    func login(with params: [String: String], finished: @escaping DataBlock) {
+        let url = AppURLS.ip + "/MobileApi/api/Authenticate"
+        SwiftyBeaver.debug("POST \(url) params: \(params)")
+        NetworkLayerImpl.session
+            .request(url, method: .post, parameters: params, encoding: URLEncoding.httpBody)
+            .responseJSON { response in
+                guard let data = response.data else { return }
+                finished(data)
+            }
+    }
+
+    func getPatientsCount(with params: [String: String], finished: @escaping DataBlock) {
+        get(AppURLS.ip + "/MobileApi/api/get_patients_counts", params: params, finished: finished)
+    }
+
+    func getDoctorPermission(with params: [String: String], finished: @escaping DataBlock) {
+        get(AppURLS.ip + "/MobileApi/api/WorkFlowController/workflow", params: params, finished: finished)
+    }
+
+    func getInpatientUnits(with params: [String: String], finished: @escaping DataBlock) {
+        get(AppURLS.ip + "/MobileApi/api/get_inpatient_units", params: params, finished: finished)
+    }
+
+    func getInpatientPatients(with params: [String: String], finished: @escaping DataBlock) {
+        get(AppURLS.ip + "/MobileApi/api/get_inpatient_patients", params: params, finished: finished)
+    }
+
+    func getOutpatientClinics(with params: [String: String], finished: @escaping DataBlock) {
+        get(AppURLS.ip + "/MobileApi/api/get_outpatients_clinic", params: params, finished: finished)
+    }
+
+    func getOperationPatients(with params: [String: String], finished: @escaping DataBlock) {
+        get(AppURLS.ip + "/MobileApi/api/get_or_patients", params: params, finished: finished)
+    }
+
+    func getOutpatientPatients(with params: [String: String], finished: @escaping DataBlock) {
+        get(AppURLS.ip + "/MobileApi/api/get_outpatients_patients", params: params, finished: finished)
+    }
+
     func changePatientStatus(with params: [String: String], finished: @escaping DataBlock) {
         let serv = params["SER"]
-        var url = AppURLS.ip+"/MobileApi/api/get_outpatients_patients"
-        if serv == "B" {
-            url = AppURLS.ip+"/MobileApi/api/OutpatientController/arrivalResrvation"
-        }else if serv == "A" {
-            url = AppURLS.ip+"/MobileApi/api/OutpatientController/startResrvation"
-        }else if serv == "S"{
-            url = AppURLS.ip+"/MobileApi/api/OutpatientController/performResrvation"
+        let url: String
+        switch serv {
+        case "B": url = AppURLS.ip + "/MobileApi/api/OutpatientController/arrivalResrvation"
+        case "A": url = AppURLS.ip + "/MobileApi/api/OutpatientController/startResrvation"
+        case "S": url = AppURLS.ip + "/MobileApi/api/OutpatientController/performResrvation"
+        default:  url = AppURLS.ip + "/MobileApi/api/get_outpatients_patients"
         }
-        print(params)
-        print(url)
-        var headers: HTTPHeaders?
-        if let token = UserDefaults.standard.string(forKey: "auth_token") {
-            headers = .init([HTTPHeader(name: "Authorization", value: "Bearer \(token)")])
-        }
-      AlamofireAppManager.shared.request(url, parameters: params,headers: headers)
-        .responseJSON { response in
-          guard let data = response.data else { return }
-            print(response.value ?? "")
-          finished(data)
-      }
+        get(url, params: params, finished: finished)
     }
-    
-}
 
-extension NetworkLayerImpl {
-  func getEmergencyPatients(with params: [String: String], finished: @escaping DataBlock) {
-    let url = AppURLS.ip+"/MobileApi/api/get_er_patients"
-      print(params)
-      print(url)
-      var headers: HTTPHeaders?
-      if let token = UserDefaults.standard.string(forKey: "auth_token") {
-          headers = .init([HTTPHeader(name: "Authorization", value: "Bearer \(token)")])
-      }
-    AlamofireAppManager.shared.request(url, parameters: params,headers: headers)
-      .responseJSON { response in
-        guard let data = response.data else { return }
-        finished(data)
+    func getEmergencyPatients(with params: [String: String], finished: @escaping DataBlock) {
+        get(AppURLS.ip + "/MobileApi/api/get_er_patients", params: params, finished: finished)
     }
-  }
-}
 
-extension NetworkLayerImpl {
-  func getClinicalPatients(with params: [String: String], finished: @escaping DataBlock) {
-    let url = AppURLS.ip+"/MobileApi/api/get_critical_result"
-      print(params)
-      print(url)
-      var headers: HTTPHeaders?
-      if let token = UserDefaults.standard.string(forKey: "auth_token") {
-          headers = .init([HTTPHeader(name: "Authorization", value: "Bearer \(token)")])
-      }
-      AF.request(url, parameters: params,headers: headers)
-      .responseJSON { response in
-        if let theJSONData = try?  JSONSerialization.data(
-            withJSONObject: (((response.value as! [String:Any])["Root"] as! [String:Any])["PATIENT"] as! [String:Any])["PATIENT_ROW"]!,
-            options: .prettyPrinted
-            ),
-            let theJSONText = String(data: theJSONData,
-                                     encoding: String.Encoding.ascii) {
-            print("JSON string = \n\(theJSONText)")
-        }
-        guard let data = response.data else { return }
-        finished(data)
+    func getClinicalPatients(with params: [String: String], finished: @escaping DataBlock) {
+        get(AppURLS.ip + "/MobileApi/api/get_critical_result", params: params, finished: finished)
     }
-  }
-}
 
-extension NetworkLayerImpl {
-  func getTemplate(with params:[String: String], finished: @escaping DataBlock) {
-    let url = AppURLS.ip+"/MobileApi/api/get_template_data"
-      print(params)
-      print(url)
-      var headers: HTTPHeaders?
-      if let token = UserDefaults.standard.string(forKey: "auth_token") {
-          headers = .init([HTTPHeader(name: "Authorization", value: "Bearer \(token)")])
-      }
-    AlamofireAppManager.shared.request(url, parameters: params,headers: headers)
-      .responseJSON { response in
-        guard let data = response.data else { return }
-        finished(data)
+    func getTemplate(with params: [String: String], finished: @escaping DataBlock) {
+        get(AppURLS.ip + "/MobileApi/api/get_template_data", params: params, finished: finished)
     }
-  }
-}
 
-extension NetworkLayerImpl {
-  func validateServiceRow(with params:[String: String], finished: @escaping DataBlock) {
-    //guard let rcpServices = params["RcpServices"],
-      //let patientId = params["PatientID"],
-      //let serviceValidation = params["GetServValidateParms"],
-      //let sessionInfo = params["GetSessionInfo"] else { return }
-    let url = AppURLS.ip+"/MobileApi/api/ServiceRowValidate"
-
-    //let url = """
-    //http://197.50.197.107/MobileApi/api/ServiceRowValidate?RcpServices=\(rcpServices)&PatientID=\(patientId)&GetServValidateParms=\(serviceValidation)&GetSessionInfo=\(sessionInfo)
-    //"""
-      print(params)
-      print(url)
-      var headers: HTTPHeaders?
-      if let token = UserDefaults.standard.string(forKey: "auth_token") {
-          headers = .init([HTTPHeader(name: "Authorization", value: "Bearer \(token)")])
-      }
-    AlamofireAppManager.shared.request(url,
-                                       method: .post,
-                                       parameters: params,headers: headers)
-      .responseJSON { response in
-        guard let data = response.data else { return }
-        finished(data)
+    func validateServiceRow(with params: [String: String], finished: @escaping DataBlock) {
+        post(AppURLS.ip + "/MobileApi/api/ServiceRowValidate", params: params, finished: finished)
     }
-  }
-}
 
-extension NetworkLayerImpl {
-  func getLabServices(with params:[String: String], finished: @escaping DataBlock) {
-    let url = AppURLS.ip+"/MobileApi/api/GetServiceLab"
-      print(params)
-      print(url)
-      var headers: HTTPHeaders?
-      if let token = UserDefaults.standard.string(forKey: "auth_token") {
-          headers = .init([HTTPHeader(name: "Authorization", value: "Bearer \(token)")])
-      }
-    AlamofireAppManager.shared.request(url, parameters: params,headers: headers)
-      .responseJSON { response in
-        guard let data = response.data else { return }
-        finished(data)
+    func getLabServices(with params: [String: String], finished: @escaping DataBlock) {
+        get(AppURLS.ip + "/MobileApi/api/GetServiceLab", params: params, finished: finished)
     }
-  }
-}
 
-extension NetworkLayerImpl {
-  func getRadServices(with params:[String: String], finished: @escaping DataBlock) {
-    guard let sessionInfo = params["GetSessionInfo"] else { return }
-    let url = AppURLS.ip+"""
-    /MobileApi/api/GetServiceRad?RadType=1&ParentServ=0&GetSessionInfo=\(sessionInfo)
-    """
-      print(params)
-      print(url)
-      var headers: HTTPHeaders?
-      if let token = UserDefaults.standard.string(forKey: "auth_token") {
-          headers = .init([HTTPHeader(name: "Authorization", value: "Bearer \(token)")])
-      }
-    AlamofireAppManager.shared.request(url, parameters: params,headers: headers)
-      .responseJSON { response in
-        guard let data = response.data else { return }
-        finished(data)
+    func getRadServices(with params: [String: String], finished: @escaping DataBlock) {
+        guard let sessionInfo = params["GetSessionInfo"] else { return }
+        let url = AppURLS.ip + "/MobileApi/api/GetServiceRad?RadType=1&ParentServ=0&GetSessionInfo=\(sessionInfo)"
+        get(url, params: params, finished: finished)
     }
-  }
-}
 
-extension NetworkLayerImpl {
-  func saveOrder(with params:[String: String], orderType: TemplateType, finished: @escaping DataBlock) {
-    let api = orderType == .labOrder ? "saveLabOrders" : "RadOrderSave"
-    let url = AppURLS.ip+"/MobileApi/api/" + api
-      print(params)
-      print(url)
-      var headers: HTTPHeaders?
-      if let token = UserDefaults.standard.string(forKey: "auth_token") {
-          headers = .init([HTTPHeader(name: "Authorization", value: "Bearer \(token)")])
-      }
-    AlamofireAppManager.shared.request(url,
-                                       method: .post,
-                                       parameters: params,
-                                       headers: headers)
-      .responseJSON { response in
-        guard let data = response.data else { return }
-        finished(data)
+    func saveOrder(with params: [String: String], orderType: TemplateType, finished: @escaping DataBlock) {
+        let api = orderType == .labOrder ? "saveLabOrders" : "RadOrderSave"
+        post(AppURLS.ip + "/MobileApi/api/" + api, params: params, finished: finished)
     }
-  }
-}
 
-extension NetworkLayerImpl {
-  func getPatientHistory(with params:[String: String], finished: @escaping DataBlock) {
-    let url = AppURLS.ip+"/MobileApi/api/LoadPatientEpisodes"
-      print(params)
-      print(url)
-      var headers: HTTPHeaders?
-      if let token = UserDefaults.standard.string(forKey: "auth_token") {
-          headers = .init([HTTPHeader(name: "Authorization", value: "Bearer \(token)")])
-      }
-    AlamofireAppManager.shared.request(url, parameters: params,headers: headers)
-      .responseJSON { response in
-        guard let data = response.data else { return }
-        print(response.value ?? "")
-        finished(data)
+    func getPatientHistory(with params: [String: String], finished: @escaping DataBlock) {
+        get(AppURLS.ip + "/MobileApi/api/LoadPatientEpisodes", params: params, finished: finished)
     }
-  }
-}
 
-extension NetworkLayerImpl {
-  func getPatientSummary(with params:[String: String], finished: @escaping DataBlock) {
-    let url = AppURLS.ip+"/MobileApi/api/GetPatCustomizedSummary"
-      print(params)
-      print(url)
-      var headers: HTTPHeaders?
-      if let token = UserDefaults.standard.string(forKey: "auth_token") {
-          headers = .init([HTTPHeader(name: "Authorization", value: "Bearer \(token)")])
-      }
-    AlamofireAppManager.shared.request(url, parameters: params,headers: headers)
-      .responseJSON { response in
-        guard let data = response.data else { return }
-        finished(data)
+    func getPatientSummary(with params: [String: String], finished: @escaping DataBlock) {
+        get(AppURLS.ip + "/MobileApi/api/GetPatCustomizedSummary", params: params, finished: finished)
     }
-  }
-}
 
-extension NetworkLayerImpl {
-  func getPacksURL(with params:[String: String], finished: @escaping DataBlock) {
-    let url = AppURLS.ip+"/mobileapi/api/getPacsUrl/"
-      print(params)
-      print(url)
-      var headers: HTTPHeaders?
-      if let token = UserDefaults.standard.string(forKey: "auth_token") {
-          headers = .init([HTTPHeader(name: "Authorization", value: "Bearer \(token)")])
-      }
-    AlamofireAppManager.shared.request(url, parameters: params,headers: headers)
-      .responseJSON { response in
-        guard let data = response.data else { return }
-        finished(data)
-        
-        
-        print(response)
-        
+    func getPacksURL(with params: [String: String], finished: @escaping DataBlock) {
+        get(AppURLS.ip + "/mobileapi/api/getPacsUrl/", params: params, finished: finished)
     }
-  }
-}
 
-extension NetworkLayerImpl {
-  func getTriageInfo(with params: [String: String], finished: @escaping DataBlock) {
-    let url = AppURLS.ip+"/MobileApi/api/loadTrige"
-      print(params)
-      print(url)
-      var headers: HTTPHeaders?
-      if let token = UserDefaults.standard.string(forKey: "auth_token") {
-          headers = .init([HTTPHeader(name: "Authorization", value: "Bearer \(token)")])
-      }
-    AF.request(url, parameters: params,headers: headers)
-      .responseJSON { response in
-        guard let data = response.data else { return }
-        finished(data)
+    func getTriageInfo(with params: [String: String], finished: @escaping DataBlock) {
+        get(AppURLS.ip + "/MobileApi/api/loadTrige", params: params, finished: finished)
     }
-  }
 
-  func getSymptoms(with params: [String: String], finished: @escaping DataBlock) {
-    let url = AppURLS.ip+"/MobileApi/api/cot_child"
-      print(params)
-      print(url)
-      var headers: HTTPHeaders?
-      if let token = UserDefaults.standard.string(forKey: "auth_token") {
-          headers = .init([HTTPHeader(name: "Authorization", value: "Bearer \(token)")])
-      }
-    AF.request(url, parameters: params,headers: headers)
-      .responseJSON { response in
-        guard let data = response.data else { return }
-        finished(data)
+    func getSymptoms(with params: [String: String], finished: @escaping DataBlock) {
+        get(AppURLS.ip + "/MobileApi/api/cot_child", params: params, finished: finished)
     }
-  }
 
-  func saveTriage(with params:[String: String], finished: @escaping DataBlock) {
-    let url = AppURLS.ip+"/MobileApi/api/save_dataTR"
-      print(params)
-      print(url)
-      var headers: HTTPHeaders?
-      if let token = UserDefaults.standard.string(forKey: "auth_token") {
-          headers = .init([HTTPHeader(name: "Authorization", value: "Bearer \(token)")])
-      }
-    AF.request(url,
-                      method: .post,
-                      parameters: params,
-                      headers: headers)
-      .responseJSON { response in
-        guard let data = response.data else { return }
-        finished(data)
+    func saveTriage(with params: [String: String], finished: @escaping DataBlock) {
+        post(AppURLS.ip + "/MobileApi/api/save_dataTR", params: params, finished: finished)
     }
-  }
-}
 
-extension NetworkLayerImpl {
-  func loadFlagImage(with params: [String: String], finished: @escaping DataBlock) {
-    guard let flagImagePath = params["flagImageName"] else { return }
-    let url = AppURLS.ip+"/primecare/Hospital%20Images/" + flagImagePath
-      print(params)
-      print(url)
-      var headers: HTTPHeaders?
-      if let token = UserDefaults.standard.string(forKey: "auth_token") {
-          headers = .init([HTTPHeader(name: "Authorization", value: "Bearer \(token)")])
-      }
-    AF.request(url,headers: headers)
-      .responseData { response in
-        guard let data = response.data else { return }
-        finished(data)
-      }
-  }
+    func loadFlagImage(with params: [String: String], finished: @escaping DataBlock) {
+        guard let flagImagePath = params["flagImageName"] else { return }
+        let url = AppURLS.ip + "/primecare/Hospital%20Images/" + flagImagePath
+        SwiftyBeaver.debug("GET \(url)")
+        NetworkLayerImpl.session
+            .request(url, headers: authHeaders)
+            .responseData { response in
+                guard let data = response.data else { return }
+                finished(data)
+            }
+    }
 }

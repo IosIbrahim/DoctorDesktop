@@ -20,6 +20,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
   func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
     initSwiftyBeaver()
+    UIViewController.enableScreenLogging()
     IQKeyboardManager.shared.enable = true
     return true
   }
@@ -34,16 +35,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     console.levelString.error = "❤️ ERROR"
 
     let file = FileDestination()  // log to default swiftybeaver.log file
-    let cloud = SBPlatformDestination(appID: "qbPGWx", appSecret: "axvwdvhxktbveIcnwktPOkkjvqO83T5l", encryptionKey: "earHjozmfs4uoiv9j0vsb6hhzpkpj4gf") // to cloud
 
     // use custom format and set console output to short time, log level & message
     console.format = "$DHH:mm:ss$d $L $M"
-    // or use this for JSON output: console.format = "$J"
 
-    // add the destinations to SwiftyBeaver
     log.addDestination(console)
     log.addDestination(file)
-    log.addDestination(cloud)
   }
 }
 
