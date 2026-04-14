@@ -500,7 +500,7 @@ extension TranslationLayerImpl {
                               rads: rads,
                               clinicServices: clinicServices,
                               dietaries: dietaries,
-                              labs: labsTest!,
+                              labs: labsTest ?? [],
                               vitalSigns: vitalSigns,
                               message: message)
     }

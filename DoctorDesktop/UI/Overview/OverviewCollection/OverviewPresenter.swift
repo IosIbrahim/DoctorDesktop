@@ -246,7 +246,6 @@ class OverviewPresenterImpl: OverviewPresenter {
         }
     }
     
-    
     private func checKPermisions(finished: @escaping EmptyBlock) {
         
     }
@@ -258,6 +257,7 @@ class OverviewPresenterImpl: OverviewPresenter {
                       "permission":permisions,
                       "user": user]
     }
+    
   func getPatientSummary(filtrationType: PatientHistoryFiltrationType, finished: @escaping EmptyBlock) {
     var params = [
       "COMPUTER_NAME": "iOS",

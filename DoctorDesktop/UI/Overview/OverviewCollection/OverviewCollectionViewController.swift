@@ -117,6 +117,7 @@ extension OverviewCollectionViewController: UICollectionViewDelegate {
     } else {
       guard let overviewSection = OverviewSection(rawValue: indexPath.row) else { return }
         presenter.getArguments(overviewSection)
+        navigationCoordinator?.setNavigationStatus(.atOverviewCollection)
         navigationCoordinator?.next(arguments: presenter.arguments)
     }
   }
