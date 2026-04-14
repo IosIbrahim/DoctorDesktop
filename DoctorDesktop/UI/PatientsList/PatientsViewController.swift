@@ -123,7 +123,7 @@ class PatientsViewController: UIViewController, NVActivityIndicatorViewable {
   
     override func viewWillAppear(_ animated: Bool) {
       super.viewWillAppear(true)
-        navigationCoordinator?.setNavigationStatus(.atComponentCollection)
+        navigationCoordinator?.setNavigationStatus(.atPatientList)
     }
 
     
