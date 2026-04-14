@@ -121,6 +121,12 @@ class PatientsViewController: UIViewController, NVActivityIndicatorViewable {
     }
   }
   
+    override func viewWillAppear(_ animated: Bool) {
+      super.viewWillAppear(true)
+        navigationCoordinator?.setNavigationStatus(.atComponentCollection)
+    }
+
+    
   @IBAction func didPressDownArrow(sender: Any) {
     dropDown.show()
   }
