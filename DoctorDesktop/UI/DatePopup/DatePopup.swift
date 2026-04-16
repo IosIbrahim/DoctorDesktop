@@ -14,6 +14,7 @@ class DatePopup: UIViewController {
     let datePicker: UIDatePicker = {
         let picker = UIDatePicker()
         picker.datePickerMode = .date
+        picker.date = Date()          // always open on the current month
         picker.tintColor = UIColor(red: 0.26, green: 0.57, blue: 0.80, alpha: 1)
         if #available(iOS 13.4, *) {
             picker.preferredDatePickerStyle = .wheels
