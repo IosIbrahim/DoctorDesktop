@@ -12,7 +12,7 @@ import SwiftyBeaver
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
-  
+
   var window: UIWindow?
   static var dependencyRegistry: DependencyRegistry!
   static var navigationCoordinator: NavigationCoordinator!
@@ -20,7 +20,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
   func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
     initSwiftyBeaver()
-    UIViewController.enableScreenLogging()
+    AppDelegate.enableScreenLogging()
     IQKeyboardManager.shared.enable = true
     return true
   }
@@ -41,6 +41,28 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     log.addDestination(console)
     log.addDestination(file)
+  }
+
+  // MARK: - Screen Logging (method swizzling)
+
+  private static let _swizzleOnce: Void = {
+    let original = #selector(UIViewController.viewDidAppear(_:))
+    let swizzled = #selector(UIViewController.logged_viewDidAppear(_:))
+    guard
+      let originalMethod = class_getInstanceMethod(UIViewController.self, original),
+      let swizzledMethod  = class_getInstanceMethod(UIViewController.self, swizzled)
+    else { return }
+    method_exchangeImplementations(originalMethod, swizzledMethod)
+  }()
+
+  static func enableScreenLogging() { _ = _swizzleOnce }
+}
+
+// MARK: - UIViewController screen name logging
+private extension UIViewController {
+  @objc func logged_viewDidAppear(_ animated: Bool) {
+    logged_viewDidAppear(animated)
+    SwiftyBeaver.debug("📱 Screen: \(String(describing: type(of: self)))")
   }
 }
 

@@ -6,6 +6,7 @@
 import Foundation
 import Alamofire
 import SwiftyJSON
+import SwiftyBeaver
 import MOLH
 
 public enum ResponseStatus {

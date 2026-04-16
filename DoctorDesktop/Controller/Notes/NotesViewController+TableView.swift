@@ -32,7 +32,7 @@ extension NotesViewController: UITableViewDelegate, UITableViewDataSource {
         tableView.delegate        = self
         tableView.dataSource      = self
         tableView.estimatedRowHeight = 44.0
-        tableView.rowHeight       = UITableView.automaticDimension
+        tableView.rowHeight       = UITableViewAutomaticDimension
         tableView.reloadData()
     }
 }

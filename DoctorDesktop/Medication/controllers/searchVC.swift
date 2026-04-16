@@ -40,7 +40,7 @@ class searchVC: UIViewController, NVActivityIndicatorViewable {
         updateSelectionButton()
         tableViewSearch.delegate        = self
         tableViewSearch.dataSource      = self
-        tableViewSearch.rowHeight       = UITableView.automaticDimension
+        tableViewSearch.rowHeight       = UITableViewAutomaticDimension
         tableViewSearch.estimatedRowHeight = 60
         searchTextField.addTarget(self, action: #selector(textFieldDidChange(_:)), for: .editingChanged)
         loadData()

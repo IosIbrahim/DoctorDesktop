@@ -22,16 +22,16 @@ class WebserviceMananger: NSObject {
             .responseJSON { response in
 
                 guard let httpResponse = response.response else {
-                    Utilities.showAlert(message: "Couldn't connect to server")
+                    Utilities.showAlert(messageToDisplay: "Couldn't connect to server")
                     return
                 }
 
                 switch httpResponse.statusCode {
                 case 500:
-                    Utilities.showAlert(message: "Couldn't connect to server")
+                    Utilities.showAlert(messageToDisplay: "Couldn't connect to server")
                     return
                 case 404:
-                    Utilities.showAlert(message: "Couldn't connect to the server. Please try again.")
+                    Utilities.showAlert(messageToDisplay: "Couldn't connect to the server. Please try again.")
                     return
                 default:
                     break
@@ -46,7 +46,7 @@ class WebserviceMananger: NSObject {
                     } else if let string = value as? String {
                         completionHandler(["result": string] as AnyObject, nil)
                     } else {
-                        Utilities.showAlert(message: "Unexpected response format")
+                        Utilities.showAlert(messageToDisplay: "Unexpected response format")
                     }
 
                 case .failure(let error):
@@ -76,13 +76,13 @@ class WebserviceMananger: NSObject {
                 switch response.result {
                 case .success(let value):
                     guard let data = value as? [String: AnyObject] else {
-                        Utilities.showAlert(message: "Unexpected response format")
+                        Utilities.showAlert(messageToDisplay: "Unexpected response format")
                         return
                     }
                     if let key = data["key"] as? Bool, key {
                         completionHandler(value as AnyObject, nil)
                     } else {
-                        Utilities.showAlert(message: "API Error \(data.description)")
+                        Utilities.showAlert(messageToDisplay: "API Error \(data.description)")
                     }
 
                 case .failure(let error):
