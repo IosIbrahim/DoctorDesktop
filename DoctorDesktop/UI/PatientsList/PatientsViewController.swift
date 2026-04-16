@@ -259,11 +259,6 @@ extension PatientsViewController {
     case .outpatient:
       presenter.getOutpatientClinics(withDate: selectedDate) {
         self.setupDropDownMenu(dropDown: self.dropDown)
-        // Skip the UnitsPopup — auto-select the first clinic so patients
-        // load directly on this screen. User can switch via the dropdown.
-        if !self.presenter.patientUnits.isEmpty {
-          self.didSelectPatientUnit(atIndex: 0)
-        }
       }
     case .operations:
         presenter.getOperationPatients(withDate: selectedDate) {
@@ -333,14 +328,18 @@ extension PatientsViewController {
     guard selectedUnitIndex != index else { return }
     selectionTitleLabel.text = self.presenter.patientUnits[index].name
     self.selectedUnitIndex = index
-    
-    if presenter.patientUnits[index].patientsCount == "0" {
-      self.countView.isHidden = true
+
+    // Update the count badge (display only — never block loading)
+    let count = presenter.patientUnits[index].patientsCount
+    if count == "0" {
+      countView.isHidden = true
     } else {
-      self.countView.isHidden = false
-      self.countLabel.text = self.presenter.patientUnits[index].patientsCount
-      getPatientsDetails(withSelectedUnitIndex: index)
+      countView.isHidden = false
+      countLabel.text = count
     }
+
+    // Always fetch patients regardless of cached count
+    getPatientsDetails(withSelectedUnitIndex: index)
   }
   
   fileprivate func didSelectDate(date: Date) {
