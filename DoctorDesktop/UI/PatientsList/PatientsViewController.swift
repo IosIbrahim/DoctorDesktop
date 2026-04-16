@@ -258,8 +258,12 @@ extension PatientsViewController {
       }
     case .outpatient:
       presenter.getOutpatientClinics(withDate: selectedDate) {
-        self.showUnitsPopupDialog()
         self.setupDropDownMenu(dropDown: self.dropDown)
+        // Skip the UnitsPopup — auto-select the first clinic so patients
+        // load directly on this screen. User can switch via the dropdown.
+        if !self.presenter.patientUnits.isEmpty {
+          self.didSelectPatientUnit(atIndex: 0)
+        }
       }
     case .operations:
         presenter.getOperationPatients(withDate: selectedDate) {
