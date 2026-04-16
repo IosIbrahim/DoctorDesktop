@@ -175,11 +175,9 @@ extension PatientsViewController {
   }
 
   fileprivate func showUnitsPopupDialog() {
-      let unitsPopup = unitsPopupMaker(presenter.title, self.presenter.patientUnits)
-      unitsPopup.delegate = self
-      unitsPopup.modalPresentationStyle = .fullScreen
-      self.present(unitsPopup, animated: true, completion: nil)
-   //   UIApplication.shared.isStatusBarHidden = true
+    let unitsPopup = unitsPopupMaker(presenter.title, self.presenter.patientUnits)
+    unitsPopup.delegate = self
+    navigationController?.pushViewController(unitsPopup, animated: true)
   }
   
   fileprivate func showDatePopupDialog() {
@@ -215,15 +213,8 @@ extension PatientsViewController {
     dropDown.cellNib = UINib(nibName: "UnitsDropDrownCell", bundle: nil)
     dropDown.customCellConfiguration = { (index: Index, item: String, cell: DropDownCell) -> Void in
       guard let cell = cell as? UnitsPopupCell else { return }
-      
-      // Setup your custom UI components
-//      cell.countLabel.text = self.presenter.patientUnits[index].patientsCount
-        
-//        print(self.presenter.patientUnits[index])
-        
-//      if self.presenter.patientUnits[index].patientsCount == "0" {
-//        cell.countView.isHidden = true
-//      }
+      let presenter = UnitsPopupCellPresenterImpl(with: self.presenter.patientUnits[index])
+      cell.configure(with: presenter)
     }
     /*** END - IMPORTANT PART FOR CUSTOM CELLS ***/
     
@@ -480,9 +471,7 @@ extension PatientsViewController: UITableViewDelegate {
 
 extension PatientsViewController: UnitsPopupDelegate {
   func unitsPopup(_ unitsPopup: UnitsPopup, didSelectUnitAt index: Int) {
-    self.dismiss(animated: true) {
-      self.didSelectPatientUnit(atIndex: index)
-    }
-    UIApplication.shared.isStatusBarHidden = false
+    navigationController?.popViewController(animated: true)
+    didSelectPatientUnit(atIndex: index)
   }
 }
