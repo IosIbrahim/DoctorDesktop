@@ -14,7 +14,7 @@ final class PatientHeaderView: UIView {
 
     // MARK: - Constants
 
-    static let preferredHeight: CGFloat = 195
+    static let preferredHeight: CGFloat = 212
 
     // MARK: - Background
 
@@ -170,6 +170,23 @@ final class PatientHeaderView: UIView {
         l.translatesAutoresizingMaskIntoConstraints = false
         return l
     }()
+    private let roomIconView: UIImageView = {
+        let iv = UIImageView()
+        if #available(iOS 13.0, *) { iv.image = UIImage(systemName: "bed.double.fill") }
+        iv.tintColor = UIColor.white.withAlphaComponent(0.60)
+        iv.contentMode = .scaleAspectFit
+        iv.translatesAutoresizingMaskIntoConstraints = false
+        return iv
+    }()
+    private let roomLabel: UILabel = {
+        let l = UILabel()
+        l.font = .systemFont(ofSize: 11, weight: .regular)
+        l.textColor = UIColor.white.withAlphaComponent(0.80)
+        l.numberOfLines = 1
+        l.translatesAutoresizingMaskIntoConstraints = false
+        return l
+    }()
+
     private let insuranceIconView: UIImageView = {
         let iv = UIImageView()
         if #available(iOS 13.0, *) { iv.image = UIImage(systemName: "creditcard.fill") }
@@ -289,6 +306,21 @@ final class PatientHeaderView: UIView {
         // Insurance
         let contract = (detail.contractNameEn ?? "").trimmingCharacters(in: .whitespaces)
         if !contract.isEmpty { updateInsurance(contract) }
+
+        // Room / Unit
+        let unit = (detail.unitNameEn ?? "").trimmingCharacters(in: .whitespaces)
+        let room = (detail.roomNameEn ?? "").trimmingCharacters(in: .whitespaces)
+        let roomText: String
+        if !unit.isEmpty && !room.isEmpty { roomText = "\(unit) - \(room)" }
+        else if !unit.isEmpty             { roomText = unit }
+        else if !room.isEmpty             { roomText = room }
+        else                              { roomText = "" }
+        roomLabel.text   = roomText.isEmpty ? "—" : roomText
+        roomIconView.isHidden = false
+
+        // Civil ID — update ID chip with the national identity number
+        let civilId = (detail.identTypeValue ?? "").trimmingCharacters(in: .whitespaces)
+        if !civilId.isEmpty { setChipText(idChip, civilId) }
     }
 
     func updateSpecialty(_ text: String) {
@@ -514,11 +546,16 @@ final class PatientHeaderView: UIView {
         [ageChip, dateChip, specialtyChip]
             .forEach { chipsStack.addArrangedSubview($0) }
 
+        // Room hidden until VisitDetail loads
+        roomLabel.text    = "—"
+        roomIconView.isHidden = false
+
         // Subviews
         [avatarContainer, nameLabel,
          infoRowStack, medicalRowStack,
          dividerTop, chipsStack, dividerBottom,
          doctorIconView, doctorLabel,
+         roomIconView, roomLabel,
          insuranceIconView, insuranceLabel
         ].forEach { addSubview($0) }
 
@@ -579,9 +616,18 @@ final class PatientHeaderView: UIView {
             doctorLabel.centerYAnchor.constraint(equalTo: doctorIconView.centerYAnchor),
             doctorLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
 
+            // Room
+            roomIconView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
+            roomIconView.topAnchor.constraint(equalTo: doctorIconView.bottomAnchor, constant: 5),
+            roomIconView.widthAnchor.constraint(equalToConstant: 13),
+            roomIconView.heightAnchor.constraint(equalToConstant: 13),
+            roomLabel.leadingAnchor.constraint(equalTo: roomIconView.trailingAnchor, constant: 5),
+            roomLabel.centerYAnchor.constraint(equalTo: roomIconView.centerYAnchor),
+            roomLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
+
             // Insurance
             insuranceIconView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
-            insuranceIconView.topAnchor.constraint(equalTo: doctorIconView.bottomAnchor, constant: 5),
+            insuranceIconView.topAnchor.constraint(equalTo: roomIconView.bottomAnchor, constant: 5),
             insuranceIconView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -8),
             insuranceIconView.widthAnchor.constraint(equalToConstant: 13),
             insuranceIconView.heightAnchor.constraint(equalToConstant: 13),

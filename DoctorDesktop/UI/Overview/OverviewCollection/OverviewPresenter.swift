@@ -16,7 +16,6 @@ enum OverviewSection: Int {
   case progressNotes
   case medication
   case diagnosis
-  //case allergies
   case labExamination
   case radTest
   case scoring
@@ -26,71 +25,82 @@ enum OverviewSection: Int {
   case operation
   case catheterization
   case endoscopy
-  //case clinicServices
   case dietary
+  case pathology         // 14
+  case operationRequest  // 15
+  case bloodBank         // 16
+  case medicalReport     // 17
 
   var title: String {
     switch self {
-    case .vitalSigns: return "Vital Signs"
-    case .progressNotes: return "Progress Notes"
-    case .medication: return "Medication"
-    case .diagnosis: return "Diagnosis"
-    //case .allergies: return "Allergies"
-    case .labExamination: return "Lab Examination"
-    case .radTest: return "Rad Test"
-    case .scoring: return "Scoring"
-    case .finding: return "Finding"
-    case .complaints: return "Complaints"
-    case .history: return "History"
-    case .operation: return "Operation"
-    case .catheterization: return "Catheterization"
-    case .endoscopy: return "Endoscopy"
-    //case .clinicServices: return "Clinic Services"
-    case .dietary: return "Dietary"
+    case .vitalSigns:       return "Vital Signs"
+    case .progressNotes:    return "Progress Notes"
+    case .medication:       return "Medication"
+    case .diagnosis:        return "Diagnosis"
+    case .labExamination:   return "Lab Examination"
+    case .radTest:          return "Rad Test"
+    case .scoring:          return "Scoring"
+    case .finding:          return "Finding"
+    case .complaints:       return "Complaints"
+    case .history:          return "History"
+    case .operation:        return "Operation"
+    case .catheterization:  return "Catheterization"
+    case .endoscopy:        return "Endoscopy"
+    case .dietary:          return "Dietary"
+    case .pathology:        return "Pathology"
+    case .operationRequest: return "Operation Request"
+    case .bloodBank:        return "Blood Bank"
+    case .medicalReport:    return "Medical Report"
     }
   }
 
   var imageName: String {
     switch self {
-    case .vitalSigns: return "vital"
-    case .progressNotes: return "notes"
-    case .medication: return "medication"
-    case .diagnosis: return "diagnosis"
-    //case .allergies: ""
-    case .labExamination: return "lab"
-    case .radTest: return "rad"
-    case .scoring: return "scoring"
-    case .finding: return "examination"
-    case .complaints: return "examination"
-    case .history: return "history"
-    case .operation: return "operation"
-    case .catheterization: return "catheterization"
-    case .endoscopy: return "endoscopy"
-    //case .clinicServices: return ""
-    case .dietary: return "diatery"
+    case .vitalSigns:       return "vital"
+    case .progressNotes:    return "notes"
+    case .medication:       return "medication"
+    case .diagnosis:        return "diagnosis"
+    case .labExamination:   return "lab"
+    case .radTest:          return "rad"
+    case .scoring:          return "scoring"
+    case .finding:          return "examination"
+    case .complaints:       return "examination"
+    case .history:          return "history"
+    case .operation:        return "operation"
+    case .catheterization:  return "catheterization"
+    case .endoscopy:        return "endoscopy"
+    case .dietary:          return "diatery"
+    case .pathology:        return "hematology"
+    case .operationRequest: return "operations"
+    case .bloodBank:        return "blood"
+    case .medicalReport:    return "ic-progress"
     }
   }
 
   var color: UIColor {
     switch self {
-    case .vitalSigns: return #colorLiteral(red: 0.3411764706, green: 0.6588235294, blue: 0.8196078431, alpha: 1)
-    case .progressNotes: return #colorLiteral(red: 0.3411764706, green: 0.6588235294, blue: 0.8196078431, alpha: 1)
-    case .medication: return #colorLiteral(red: 0.4941176471, green: 0.4549019608, blue: 0.8352941176, alpha: 1)
-    case .diagnosis: return #colorLiteral(red: 0.5019607843, green: 0.7294117647, blue: 0.09411764706, alpha: 1)
-    case .labExamination: return #colorLiteral(red: 0.003921568627, green: 0.2901960784, blue: 0.4117647059, alpha: 1)
-    case .radTest: return #colorLiteral(red: 0.8705882353, green: 0.231372549, blue: 0.2980392157, alpha: 1)
-    case .scoring: return #colorLiteral(red: 0.5019607843, green: 0.7294117647, blue: 0.09411764706, alpha: 1)
-    case .finding: return #colorLiteral(red: 0.5019607843, green: 0.7294117647, blue: 0.09411764706, alpha: 1)
-    case .complaints: return #colorLiteral(red: 0.5019607843, green: 0.7294117647, blue: 0.09411764706, alpha: 1)
-    case .history: return #colorLiteral(red: 0.003921568627, green: 0.2901960784, blue: 0.4117647059, alpha: 1)
-    case .operation: return #colorLiteral(red: 0.3294117647, green: 0.7490196078, blue: 0.5137254902, alpha: 1)
-    case .catheterization: return #colorLiteral(red: 0.3294117647, green: 0.7490196078, blue: 0.5137254902, alpha: 1)
-    case .endoscopy: return #colorLiteral(red: 0.5019607843, green: 0.7294117647, blue: 0.09411764706, alpha: 1)
-    case .dietary: return #colorLiteral(red: 0.5019607843, green: 0.7294117647, blue: 0.09411764706, alpha: 1)
+    case .vitalSigns:       return #colorLiteral(red: 0.3411764706, green: 0.6588235294, blue: 0.8196078431, alpha: 1)
+    case .progressNotes:    return #colorLiteral(red: 0.3411764706, green: 0.6588235294, blue: 0.8196078431, alpha: 1)
+    case .medication:       return #colorLiteral(red: 0.4941176471, green: 0.4549019608, blue: 0.8352941176, alpha: 1)
+    case .diagnosis:        return #colorLiteral(red: 0.5019607843, green: 0.7294117647, blue: 0.09411764706, alpha: 1)
+    case .labExamination:   return #colorLiteral(red: 0.003921568627, green: 0.2901960784, blue: 0.4117647059, alpha: 1)
+    case .radTest:          return #colorLiteral(red: 0.8705882353, green: 0.231372549, blue: 0.2980392157, alpha: 1)
+    case .scoring:          return #colorLiteral(red: 0.5019607843, green: 0.7294117647, blue: 0.09411764706, alpha: 1)
+    case .finding:          return #colorLiteral(red: 0.5019607843, green: 0.7294117647, blue: 0.09411764706, alpha: 1)
+    case .complaints:       return #colorLiteral(red: 0.5019607843, green: 0.7294117647, blue: 0.09411764706, alpha: 1)
+    case .history:          return #colorLiteral(red: 0.003921568627, green: 0.2901960784, blue: 0.4117647059, alpha: 1)
+    case .operation:        return #colorLiteral(red: 0.3294117647, green: 0.7490196078, blue: 0.5137254902, alpha: 1)
+    case .catheterization:  return #colorLiteral(red: 0.3294117647, green: 0.7490196078, blue: 0.5137254902, alpha: 1)
+    case .endoscopy:        return #colorLiteral(red: 0.5019607843, green: 0.7294117647, blue: 0.09411764706, alpha: 1)
+    case .dietary:          return #colorLiteral(red: 0.5019607843, green: 0.7294117647, blue: 0.09411764706, alpha: 1)
+    case .pathology:        return #colorLiteral(red: 0.5568627451, green: 0.2666666667, blue: 0.6784313725, alpha: 1)
+    case .operationRequest: return #colorLiteral(red: 0.7411764706, green: 0.2235294118, blue: 0.2235294118, alpha: 1)
+    case .bloodBank:        return #colorLiteral(red: 0.8, green: 0.1098039216, blue: 0.1098039216, alpha: 1)
+    case .medicalReport:    return #colorLiteral(red: 0.1764705882, green: 0.4980392157, blue: 0.7568627451, alpha: 1)
     }
   }
 
-  static var count: Int { return OverviewSection.dietary.rawValue + 1 }
+  static var count: Int { return OverviewSection.medicalReport.rawValue + 1 }
 }
 
 protocol OverviewPresenter {
@@ -151,8 +161,7 @@ class OverviewPresenterImpl: OverviewPresenter {
   }
 
 
-  // IMPORTANT: order here must match OverviewSection raw values exactly (0…13).
-  // clinicServices is commented out of OverviewSection so it must NOT appear here.
+  // IMPORTANT: order must match OverviewSection raw values exactly (0…17).
   var patientSummaryCounts: [Int] {
     return [
       patientSummary?.vitalSigns?.count    ?? 0,  // 0  vitalSigns
@@ -169,6 +178,10 @@ class OverviewPresenterImpl: OverviewPresenter {
       patientSummary?.catheters?.count     ?? 0,  // 11 catheterization
       patientSummary?.endoscopies?.count   ?? 0,  // 12 endoscopy
       patientSummary?.dietaries?.count     ?? 0,  // 13 dietary
+      0,                                          // 14 pathology        (API mapping TBD)
+      0,                                          // 15 operationRequest (API mapping TBD)
+      0,                                          // 16 bloodBank        (API mapping TBD)
+      0,                                          // 17 medicalReport    (API mapping TBD)
     ]
   }
 
