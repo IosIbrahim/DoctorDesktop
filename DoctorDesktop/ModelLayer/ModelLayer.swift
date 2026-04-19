@@ -38,6 +38,7 @@ protocol ModelLayer {
     func getSymptomCategories(with params: [String: String], finished: @escaping RegularSymptomCategoriesBlock)
     func getSymptoms(with params: [String: String], finished: @escaping SymptomsBlock)
     func loadFlagImage(with params: [String: String], finished: @escaping DataBlock)
+    func getVisitsDetail(with params: [String: String], finished: @escaping VisitDetailBlock)
   }
 
 class ModelLayerImpl: ModelLayer {
@@ -231,6 +232,15 @@ extension ModelLayerImpl {
   func loadFlagImage(with params: [String: String], finished: @escaping DataBlock) {
     networkLayer.loadFlagImage(with: params) { data in
       finished(data)
+    }
+  }
+}
+
+extension ModelLayerImpl {
+  func getVisitsDetail(with params: [String: String], finished: @escaping VisitDetailBlock) {
+    networkLayer.getVisitsDetail(with: params) { data in
+      let visitDetail = self.translationLayer.getVisitDetailDTOFromJson(data)
+      finished(visitDetail)
     }
   }
 }

@@ -40,6 +40,7 @@ protocol TranslationLayer {
     func getPainScoresDTOsFromJson(_ data: Data) -> Scores
     func getSymptomCategoriesDTOsFromJson(_ data: Data) -> RegularSymptomCategories
     func getSymptomsDTOsFromJson(_ data: Data) -> Symptoms
+    func getVisitDetailDTOFromJson(_ data: Data) -> VisitDetail?
 }
 
 class TranslationLayerImpl: TranslationLayer {
@@ -582,6 +583,12 @@ extension TranslationLayerImpl {
             }
         }
         return symptoms
+    }
+
+    // get visit detail (blood type, phone, allergy, etc.)
+    func getVisitDetailDTOFromJson(_ data: Data) -> VisitDetail? {
+        let keyPath = "Root.PV.PV_R"
+        return try? VisitDetail(data: data, keyPath: keyPath)
     }
 }
 

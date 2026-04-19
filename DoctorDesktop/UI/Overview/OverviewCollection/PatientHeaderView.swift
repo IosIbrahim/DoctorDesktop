@@ -66,6 +66,9 @@ final class PatientHeaderView: UIView {
     // ID chip (creditcard icon + id text)
     private let idChip      = PatientHeaderView.makeInfoChip(sfSymbol: "creditcard.fill")
 
+    // Blood type chip (drop.fill icon + blood type text)
+    private let bloodChip = PatientHeaderView.makeInfoChip(sfSymbol: "drop.fill")
+
     // Phone chip — chip container wrapping a UIButton so the whole chip is tappable
     private let phoneChipContainer: UIView = {
         let v = UIView()
@@ -211,6 +214,20 @@ final class PatientHeaderView: UIView {
         // ── ID chip ──────────────────────────────────────────────────────
         setChipText(idChip, patient.id.trimmingCharacters(in: .whitespaces))
 
+        // ── Blood type chip ──────────────────────────────────────────────
+        let blood = patient.bloodType.trimmingCharacters(in: .whitespaces)
+        if blood.isEmpty {
+            bloodChip.isHidden = true
+        } else {
+            bloodChip.isHidden = false
+            setChipText(bloodChip, blood)
+            // Red tint for the blood drop icon
+            if #available(iOS 13.0, *) {
+                (bloodChip.subviews.first?.subviews.first as? UIImageView)?.tintColor =
+                    UIColor(red: 1.0, green: 0.35, blue: 0.35, alpha: 1)
+            }
+        }
+
         // ── Phone chip (tappable) ────────────────────────────────────────
         let phone: String
         if let op = patient as? OutpatientPatient { phone = op.patMobile ?? "" }
@@ -247,6 +264,32 @@ final class PatientHeaderView: UIView {
         else                                           { cachedDoctorName = "" }
         cachedInsurance = ""   // will be set by updateInsurance() after history loads
         refreshDoctorLabel()
+    }
+
+    /// Called after `getVisitsDetail` — updates blood type, phone, allergy from the rich API.
+    func updateFromVisitDetail(_ detail: VisitDetail) {
+        // Blood type
+        let blood = (detail.bloodTypeEn ?? detail.bloodTypeAr ?? "").trimmingCharacters(in: .whitespaces)
+        if blood.isEmpty {
+            bloodChip.isHidden = true
+        } else {
+            bloodChip.isHidden = false
+            setChipText(bloodChip, blood)
+        }
+
+        // Phone — use visit detail phone if patient didn't have one (inpatient)
+        if phoneChipContainer.isHidden {
+            let tel = (detail.patientTel ?? "").trimmingCharacters(in: .whitespaces)
+            if !tel.isEmpty {
+                phoneNumber = tel
+                phoneChipContainer.isHidden = false
+                configurePhoneButton(tel)
+            }
+        }
+
+        // Insurance from visit detail (overrides placeholder)
+        let contract = (detail.contractNameEn ?? "").trimmingCharacters(in: .whitespaces)
+        if !contract.isEmpty { updateInsurance(contract) }
     }
 
     /// Called after `getPatientHistory` completes — fills the specialty chip.
@@ -394,8 +437,8 @@ final class PatientHeaderView: UIView {
             natRow.trailingAnchor.constraint(equalTo: natChipContainer.trailingAnchor, constant: -8),
         ])
 
-        // ── Info row: ID chip | Phone chip | Nat chip ─────────────────────
-        [idChip, phoneChipContainer, natChipContainer]
+        // ── Info row: ID chip | Blood chip | Phone chip | Nat chip ──────────
+        [idChip, bloodChip, phoneChipContainer, natChipContainer]
             .forEach { infoRowStack.addArrangedSubview($0) }
 
         // ── Chips row ────────────────────────────────────────────────────

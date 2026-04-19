@@ -100,7 +100,15 @@ class OverviewCollectionViewController: UIViewController, NVActivityIndicatorVie
     
     override func viewWillAppear(_ animated: Bool) {
       super.viewWillAppear(true)
-        presenter.getPatientHistory {
+
+      // Load visit detail (blood type, phone, allergy, etc.)
+      presenter.getVisitsDetail {
+        if let detail = self.presenter.visitDetail {
+          self.patientHeaderView.updateFromVisitDetail(detail)
+        }
+      }
+
+      presenter.getPatientHistory {
           let history = self.presenter.patientHistory
 
           // Specialty chip

@@ -137,6 +137,7 @@
 		3660ADD6200CBE3F0089ADEF /* OrderServiceCellPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3660ADD5200CBE3F0089ADEF /* OrderServiceCellPresenter.swift */; };
 		366350C5201A646E0072C049 /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = 366350C4201A646E0072C049 /* Message.swift */; };
 		366C28B220407FA400FA4E3A /* PatientSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 366C28B120407FA400FA4E3A /* PatientSummary.swift */; };
+		0F1A2B3C4D5E6F7A8B9C0D1E /* VisitDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F1A2B3C4D5E6F7A8B9C0D1F /* VisitDetail.swift */; };
 		366D85FA2087E76C008B16BF /* EmergencyTriage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 366D85F92087E76C008B16BF /* EmergencyTriage.swift */; };
 		366D85FC2087E77E008B16BF /* Patient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 366D85FB2087E77E008B16BF /* Patient.swift */; };
 		366D86322087E97A008B16BF /* DiagnosisCategoryPopUpCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 366D86102087E97A008B16BF /* DiagnosisCategoryPopUpCell.xib */; };
@@ -372,6 +373,7 @@
 		3660ADD5200CBE3F0089ADEF /* OrderServiceCellPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrderServiceCellPresenter.swift; sourceTree = "<group>"; };
 		366350C4201A646E0072C049 /* Message.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Message.swift; sourceTree = "<group>"; };
 		366C28B120407FA400FA4E3A /* PatientSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PatientSummary.swift; sourceTree = "<group>"; };
+		0F1A2B3C4D5E6F7A8B9C0D1F /* VisitDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisitDetail.swift; sourceTree = "<group>"; };
 		366D85F92087E76C008B16BF /* EmergencyTriage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmergencyTriage.swift; sourceTree = "<group>"; };
 		366D85FB2087E77E008B16BF /* Patient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Patient.swift; sourceTree = "<group>"; };
 		366D86102087E97A008B16BF /* DiagnosisCategoryPopUpCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = DiagnosisCategoryPopUpCell.xib; sourceTree = "<group>"; };
@@ -915,6 +917,7 @@
 				366350C4201A646E0072C049 /* Message.swift */,
 				36A9006F2037231400748406 /* OverviewSection.swift */,
 				366C28B120407FA400FA4E3A /* PatientSummary.swift */,
+				0F1A2B3C4D5E6F7A8B9C0D1F /* VisitDetail.swift */,
 				366D85F92087E76C008B16BF /* EmergencyTriage.swift */,
 				AD3239F922C791F00088E176 /* OperationPatient.swift */,
 				0E206BBC23325E9900E25EFB /* precrition.swift */,
@@ -1712,6 +1715,7 @@
 				3656DD01274BC3A1008DC057 /* NotesViewController.swift in Sources */,
 				366D863F2087E97A008B16BF /* PediatricsScorePopUpPresenter.swift in Sources */,
 				366C28B220407FA400FA4E3A /* PatientSummary.swift in Sources */,
+				0F1A2B3C4D5E6F7A8B9C0D1E /* VisitDetail.swift in Sources */,
 				3650EEDB1FDC691F000A349C /* TranslationLayer.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

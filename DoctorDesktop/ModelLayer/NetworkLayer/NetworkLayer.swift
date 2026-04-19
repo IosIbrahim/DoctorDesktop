@@ -43,6 +43,7 @@ protocol NetworkLayer {
     func getTriageInfo(with params: [String: String], finished: @escaping DataBlock)
     func getSymptoms(with params: [String: String], finished: @escaping DataBlock)
     func loadFlagImage(with params: [String: String], finished: @escaping DataBlock)
+    func getVisitsDetail(with params: [String: String], finished: @escaping DataBlock)
 }
 
 // MARK: - Implementation
@@ -241,5 +242,10 @@ class NetworkLayerImpl: NetworkLayer {
                 guard let data = response.data else { return }
                 finished(data)
             }
+    }
+
+    func getVisitsDetail(with params: [String: String], finished: @escaping DataBlock) {
+        get(AppURLS.ip + "/MobileApi/api/PatientController/GetVisitsDetail",
+            params: params, finished: finished)
     }
 }

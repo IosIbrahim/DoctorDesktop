@@ -94,8 +94,10 @@ enum OverviewSection: Int {
 }
 
 protocol OverviewPresenter {
+  var patient: Patient { get }
   var patientHistory: PatientHistory? { get }
   var patientSummary: PatientSummary? { get }
+  var visitDetail: VisitDetail? { get }
   var patientSummaryCounts: [Int] { get }
   var currentVisitIds: [String] { get }
   var currentDoctorVisitsIds: [String] { get }
@@ -112,6 +114,7 @@ protocol OverviewPresenter {
     var permisions: PermissionModel { get }
    func getPatientHistory(finished: @escaping EmptyBlock)
    func getPermissions(finished: @escaping EmptyBlock)
+   func getVisitsDetail(finished: @escaping EmptyBlock)
 
     func getArguments(_ overView:OverviewSection)
     func getPatientSummary(filtrationType: PatientHistoryFiltrationType, finished: @escaping EmptyBlock)
@@ -125,6 +128,7 @@ class OverviewPresenterImpl: OverviewPresenter {
     var arguments:Dictionary<String, Any>
     var patientHistory: PatientHistory?
     var patientSummary: PatientSummary?
+    var visitDetail: VisitDetail?
     var permisionsDataSource = DoctorPermissions()
     private var count: Int = 0
 
@@ -252,8 +256,29 @@ class OverviewPresenterImpl: OverviewPresenter {
   }
     
     private func checKPermisions(finished: @escaping EmptyBlock) {
-        
+
     }
+
+  func getVisitsDetail(finished: @escaping EmptyBlock) {
+    let params: [String: String] = [
+      "COMPUTER_NAME": "iOS",
+      "BRANCH_ID": user.branch ?? "",
+      "USER_ID": user.userName ?? "",
+      "PATIENT_ID": patient.id,
+      "VISIT_ID": patient.visitId
+    ]
+    modelLayer.getVisitsDetail(with: params) { detail in
+      self.visitDetail = detail
+      print("🩸 VisitDetail received:")
+      print("   bloodTypeEn      = \(detail?.bloodTypeEn ?? "nil")")
+      print("   bloodTypeAr      = \(detail?.bloodTypeAr ?? "nil")")
+      print("   patientTel       = \(detail?.patientTel ?? "nil")")
+      print("   contractNameEn   = \(detail?.contractNameEn ?? "nil")")
+      print("   allergyStatusEn  = \(detail?.allergyStatusEn ?? "nil")")
+      print("   genderAgeNameEn  = \(detail?.genderAgeNameEn ?? "nil")")
+      DispatchQueue.main.async { finished() }
+    }
+  }
     
     func getArguments(_ overView: OverviewSection)  {
         arguments =  ["overviewSection": overView,
