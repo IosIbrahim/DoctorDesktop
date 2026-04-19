@@ -51,10 +51,12 @@ struct PatientVisit: Decodable {
   let id: String
   let doctorId: String
   let specialityId: String
+  let contractNameEn: String?   // "Without Insurance", "Insurance Company", etc.
 
   enum CodingKeys: String, CodingKey {
     case id = "VISIT_ID"
     case doctorId = "EMP_ID"
     case specialityId = "SPECIAL_SPEC_ID"
+    case contractNameEn = "CONTRACT_NAME_EN"
   }
 }

@@ -101,9 +101,17 @@ class OverviewCollectionViewController: UIViewController, NVActivityIndicatorVie
     override func viewWillAppear(_ animated: Bool) {
       super.viewWillAppear(true)
         presenter.getPatientHistory {
-          // Update the specialty chip now that patientHistory is loaded
-          let specialtyName = self.presenter.patientHistory?.currentSpeciality.name ?? ""
+          let history = self.presenter.patientHistory
+
+          // Specialty chip
+          let specialtyName = history?.currentSpeciality.name ?? ""
           self.patientHeaderView.updateSpecialty(specialtyName)
+
+          // Insurance — find current visit and read CONTRACT_NAME_EN
+          let contractName = history?.patientVisits
+              .first(where: { $0.id == self.presenter.patient.visitId })?
+              .contractNameEn ?? ""
+          self.patientHeaderView.updateInsurance(contractName)
 
           self.historyCollectionView.reloadSections(IndexSet(integer: 0))
           self.historyCollectionView.selectItem(at: IndexPath(item: 0, section: 0), animated: false, scrollPosition: [.centeredHorizontally])

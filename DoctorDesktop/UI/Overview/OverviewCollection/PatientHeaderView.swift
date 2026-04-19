@@ -241,11 +241,11 @@ final class PatientHeaderView: UIView {
         // ── Specialty chip (placeholder — filled async via updateSpecialty) ──
         setChipText(specialtyChip, specialty ?? "—")
 
-        // ── Doctor + insurance (shown together in the bottom row) ─────────
+        // ── Doctor (insurance filled async via updateInsurance) ───────────
         if      let ip = patient as? InpatientPatient  { cachedDoctorName = ip.doctorName }
         else if let op = patient as? OutpatientPatient { cachedDoctorName = op.empNameEn ?? "" }
         else                                           { cachedDoctorName = "" }
-        cachedInsurance = patient.financialAccount.trimmingCharacters(in: .whitespaces)
+        cachedInsurance = ""   // will be set by updateInsurance() after history loads
         refreshDoctorLabel()
     }
 
@@ -253,6 +253,13 @@ final class PatientHeaderView: UIView {
     func updateSpecialty(_ text: String) {
         cachedSpecialty = text
         setChipText(specialtyChip, text.isEmpty ? "—" : text)
+    }
+
+    /// Called after `getPatientHistory` completes — replaces numeric account
+    /// with the human-readable contract name e.g. "Without Insurance".
+    func updateInsurance(_ text: String) {
+        cachedInsurance = text
+        refreshDoctorLabel()
     }
 
     // MARK: - Private helpers
