@@ -69,6 +69,9 @@ final class PatientHeaderView: UIView {
     // Blood type chip (drop.fill icon + blood type text)
     private let bloodChip = PatientHeaderView.makeInfoChip(sfSymbol: "drop.fill")
 
+    // Allergy chip (exclamationmark.triangle icon + allergy status)
+    private let allergyChip = PatientHeaderView.makeInfoChip(sfSymbol: "exclamationmark.triangle.fill")
+
     // Phone chip — chip container wrapping a UIButton so the whole chip is tappable
     private let phoneChipContainer: UIView = {
         let v = UIView()
@@ -221,11 +224,7 @@ final class PatientHeaderView: UIView {
         } else {
             bloodChip.isHidden = false
             setChipText(bloodChip, blood)
-            // Red tint for the blood drop icon
-            if #available(iOS 13.0, *) {
-                (bloodChip.subviews.first?.subviews.first as? UIImageView)?.tintColor =
-                    UIColor(red: 1.0, green: 0.35, blue: 0.35, alpha: 1)
-            }
+            setChipIconTint(bloodChip, UIColor(red: 1.0, green: 0.25, blue: 0.25, alpha: 1))
         }
 
         // ── Phone chip (tappable) ────────────────────────────────────────
@@ -275,6 +274,17 @@ final class PatientHeaderView: UIView {
         } else {
             bloodChip.isHidden = false
             setChipText(bloodChip, blood)
+            setChipIconTint(bloodChip, UIColor(red: 1.0, green: 0.25, blue: 0.25, alpha: 1))
+        }
+
+        // Allergy
+        let allergy = (detail.allergyStatusEn ?? detail.allergyStatusAr ?? "").trimmingCharacters(in: .whitespaces)
+        if allergy.isEmpty || allergy.lowercased() == "no allergy" {
+            allergyChip.isHidden = true
+        } else {
+            allergyChip.isHidden = false
+            setChipText(allergyChip, allergy)
+            setChipIconTint(allergyChip, UIColor(red: 1.0, green: 0.75, blue: 0.0, alpha: 1)) // amber warning
         }
 
         // Phone — use visit detail phone if patient didn't have one (inpatient)
@@ -341,6 +351,15 @@ final class PatientHeaderView: UIView {
 
     private func setChipText(_ chip: UIView, _ text: String) {
         (chip.viewWithTag(99) as? UILabel)?.text = text
+    }
+
+    private func setChipIconTint(_ chip: UIView, _ color: UIColor) {
+        guard #available(iOS 13.0, *) else { return }
+        // chip → container → row (UIStackView) → first arranged subview (UIImageView)
+        if let row = chip.subviews.first as? UIStackView,
+           let icon = row.arrangedSubviews.first as? UIImageView {
+            icon.tintColor = color
+        }
     }
 
     // MARK: - Factory methods
@@ -437,8 +456,9 @@ final class PatientHeaderView: UIView {
             natRow.trailingAnchor.constraint(equalTo: natChipContainer.trailingAnchor, constant: -8),
         ])
 
-        // ── Info row: ID chip | Blood chip | Phone chip | Nat chip ──────────
-        [idChip, bloodChip, phoneChipContainer, natChipContainer]
+        // ── Info row: ID | Blood | Allergy | Phone | Nat ────────────────────
+        allergyChip.isHidden = true   // shown only when allergy data arrives
+        [idChip, bloodChip, allergyChip, phoneChipContainer, natChipContainer]
             .forEach { infoRowStack.addArrangedSubview($0) }
 
         // ── Chips row ────────────────────────────────────────────────────
