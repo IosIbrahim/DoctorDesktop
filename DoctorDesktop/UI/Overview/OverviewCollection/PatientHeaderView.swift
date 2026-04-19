@@ -51,47 +51,46 @@ final class PatientHeaderView: UIView {
         return l
     }()
 
-    // MARK: - ID / Phone / Nationality row  (below name, inside the ID area)
+    // MARK: - ID / Phone / Nationality chips row
 
     private let infoRowStack: UIStackView = {
         let sv = UIStackView()
         sv.axis = .horizontal
-        sv.spacing = 10
+        sv.spacing = 6
         sv.alignment = .center
-        sv.distribution = .fill
+        sv.distribution = .fillProportionally   // no spacer — chips sit together
         sv.translatesAutoresizingMaskIntoConstraints = false
         return sv
     }()
 
-    // ID item
-    private let idIconView: UIImageView = {
-        let iv = UIImageView()
-        if #available(iOS 13.0, *) { iv.image = UIImage(systemName: "creditcard.fill") }
-        iv.tintColor = UIColor.white.withAlphaComponent(0.75)
-        iv.contentMode = .scaleAspectFit
-        iv.translatesAutoresizingMaskIntoConstraints = false
-        return iv
-    }()
-    private let idLabel: UILabel = {
-        let l = UILabel()
-        l.font = .systemFont(ofSize: 11, weight: .semibold)
-        l.textColor = .white
-        l.translatesAutoresizingMaskIntoConstraints = false
-        return l
-    }()
+    // ID chip (creditcard icon + id text)
+    private let idChip      = PatientHeaderView.makeInfoChip(sfSymbol: "creditcard.fill")
 
-    // Phone item — tappable button
+    // Phone chip — chip container wrapping a UIButton so the whole chip is tappable
+    private let phoneChipContainer: UIView = {
+        let v = UIView()
+        v.backgroundColor = UIColor.white.withAlphaComponent(0.13)
+        v.layer.cornerRadius = 10
+        v.translatesAutoresizingMaskIntoConstraints = false
+        return v
+    }()
     private let phoneButton: UIButton = {
         let b = UIButton(type: .system)
         b.tintColor = .white
         b.setTitleColor(.white, for: .normal)
-        b.titleLabel?.font = .systemFont(ofSize: 11, weight: .semibold)
+        b.titleLabel?.font = .systemFont(ofSize: 11, weight: .medium)
         b.translatesAutoresizingMaskIntoConstraints = false
         return b
     }()
-    private var phoneNumber: String = ""
 
-    // Nationality item
+    // Nationality chip (flag image + nationality text)
+    private let natChipContainer: UIView = {
+        let v = UIView()
+        v.backgroundColor = UIColor.white.withAlphaComponent(0.13)
+        v.layer.cornerRadius = 10
+        v.translatesAutoresizingMaskIntoConstraints = false
+        return v
+    }()
     private let flagView: UIImageView = {
         let iv = UIImageView()
         iv.contentMode = .scaleAspectFill
@@ -102,20 +101,13 @@ final class PatientHeaderView: UIView {
     }()
     private let nationalityLabel: UILabel = {
         let l = UILabel()
-        l.font = .systemFont(ofSize: 11, weight: .semibold)
+        l.font = .systemFont(ofSize: 11, weight: .medium)
         l.textColor = .white
         l.translatesAutoresizingMaskIntoConstraints = false
         return l
     }()
 
-    // Spacer between left items and right nationality
-    private let rowSpacer: UIView = {
-        let v = UIView()
-        v.translatesAutoresizingMaskIntoConstraints = false
-        v.setContentHuggingPriority(.defaultLow, for: .horizontal)
-        v.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
-        return v
-    }()
+    private var phoneNumber: String = ""
 
     // MARK: - Dividers
 
@@ -147,7 +139,6 @@ final class PatientHeaderView: UIView {
         iv.translatesAutoresizingMaskIntoConstraints = false
         return iv
     }()
-    /// Shows "DoctorName\nSpecialty" — specialty appended after async load.
     private let doctorLabel: UILabel = {
         let l = UILabel()
         l.font = .systemFont(ofSize: 11, weight: .medium)
@@ -199,19 +190,22 @@ final class PatientHeaderView: UIView {
         // ── Name ─────────────────────────────────────────────────────────
         nameLabel.text = patient.name
 
-        // ── ID ───────────────────────────────────────────────────────────
-        idLabel.text = patient.id.trimmingCharacters(in: .whitespaces)
+        // ── ID chip ──────────────────────────────────────────────────────
+        setChipText(idChip, patient.id.trimmingCharacters(in: .whitespaces))
 
-        // ── Phone (tappable) ─────────────────────────────────────────────
-        if let op = patient as? OutpatientPatient, let mobile = op.patMobile, !mobile.isEmpty {
-            phoneNumber = mobile
-            configurePhoneButton(mobile)
-            phoneButton.isHidden = false
+        // ── Phone chip (tappable) ────────────────────────────────────────
+        let phone: String
+        if let op = patient as? OutpatientPatient { phone = op.patMobile ?? "" }
+        else                                      { phone = "" }
+        if phone.isEmpty {
+            phoneChipContainer.isHidden = true
         } else {
-            phoneButton.isHidden = true
+            phoneNumber = phone
+            phoneChipContainer.isHidden = false
+            configurePhoneButton(phone)
         }
 
-        // ── Nationality + flag ───────────────────────────────────────────
+        // ── Nationality chip ─────────────────────────────────────────────
         nationalityLabel.text = patient.nationality.isEmpty ? "—" : patient.nationality
         flagView.image        = patient.countyFlag
         flagView.isHidden     = (patient.countyFlag == nil)
@@ -230,14 +224,13 @@ final class PatientHeaderView: UIView {
         let contract = patient.financialAccount.trimmingCharacters(in: .whitespaces)
         setChipText(contractChip, contract.isEmpty ? "—" : contract)
 
-        // ── Doctor row ───────────────────────────────────────────────────
+        // ── Doctor ───────────────────────────────────────────────────────
         if      let ip = patient as? InpatientPatient  { cachedDoctorName = ip.doctorName }
         else if let op = patient as? OutpatientPatient { cachedDoctorName = op.empNameEn ?? "" }
         else                                           { cachedDoctorName = "" }
         updateDoctorLabel(specialty: specialty)
     }
 
-    /// Update specialty text after `getPatientHistory` completes.
     func updateSpecialty(_ text: String) {
         updateDoctorLabel(specialty: text)
     }
@@ -246,11 +239,10 @@ final class PatientHeaderView: UIView {
 
     private func configurePhoneButton(_ number: String) {
         if #available(iOS 13.0, *) {
-            let config = UIImage.SymbolConfiguration(pointSize: 11, weight: .semibold)
-            let icon = UIImage(systemName: "phone.fill", withConfiguration: config)
-            phoneButton.setImage(icon, for: .normal)
-            phoneButton.imageEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 5)
-            phoneButton.contentEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 5)
+            let cfg = UIImage.SymbolConfiguration(pointSize: 11, weight: .medium)
+            phoneButton.setImage(UIImage(systemName: "phone.fill", withConfiguration: cfg), for: .normal)
+            phoneButton.imageEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 4)
+            phoneButton.contentEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 4)
         }
         phoneButton.setTitle(number, for: .normal)
     }
@@ -283,6 +275,8 @@ final class PatientHeaderView: UIView {
     private func setChipText(_ chip: UIView, _ text: String) {
         (chip.viewWithTag(99) as? UILabel)?.text = text
     }
+
+    // MARK: - Factory methods
 
     private static func makeInfoChip(sfSymbol: String) -> UIView {
         let container = UIView()
@@ -344,47 +338,52 @@ final class PatientHeaderView: UIView {
         gradientLayer.endPoint   = CGPoint(x: 1, y: 1)
         layer.insertSublayer(gradientLayer, at: 0)
 
-        // Avatar inner gradient
+        // Avatar gradient
         avatarGradient.startPoint = CGPoint(x: 0, y: 0)
         avatarGradient.endPoint   = CGPoint(x: 1, y: 1)
         avatarContainer.layer.insertSublayer(avatarGradient, at: 0)
         avatarContainer.addSubview(avatarIconView)
 
-        // Phone button action
+        // ── Phone chip: button inside a chip container ────────────────────
         phoneButton.addTarget(self, action: #selector(phoneTapped), for: .touchUpInside)
+        phoneChipContainer.addSubview(phoneButton)
+        NSLayoutConstraint.activate([
+            phoneButton.topAnchor.constraint(equalTo: phoneChipContainer.topAnchor, constant: 5),
+            phoneButton.bottomAnchor.constraint(equalTo: phoneChipContainer.bottomAnchor, constant: -5),
+            phoneButton.leadingAnchor.constraint(equalTo: phoneChipContainer.leadingAnchor, constant: 8),
+            phoneButton.trailingAnchor.constraint(equalTo: phoneChipContainer.trailingAnchor, constant: -8),
+        ])
 
-        // Info row: ID | Phone | (spacer) | Flag | Nationality
-        [makeInlineItem(icon: idIconView, label: idLabel),
-         phoneButton,
-         rowSpacer,
-         flagView,
-         nationalityLabel
-        ].forEach { infoRowStack.addArrangedSubview($0) }
+        // ── Nationality chip: flag + label inside a chip container ────────
+        let natRow = UIStackView(arrangedSubviews: [flagView, nationalityLabel])
+        natRow.axis = .horizontal
+        natRow.spacing = 5
+        natRow.alignment = .center
+        natRow.translatesAutoresizingMaskIntoConstraints = false
+        natChipContainer.addSubview(natRow)
+        NSLayoutConstraint.activate([
+            flagView.widthAnchor.constraint(equalToConstant: 18),
+            flagView.heightAnchor.constraint(equalToConstant: 13),
+            natRow.topAnchor.constraint(equalTo: natChipContainer.topAnchor, constant: 5),
+            natRow.bottomAnchor.constraint(equalTo: natChipContainer.bottomAnchor, constant: -5),
+            natRow.leadingAnchor.constraint(equalTo: natChipContainer.leadingAnchor, constant: 8),
+            natRow.trailingAnchor.constraint(equalTo: natChipContainer.trailingAnchor, constant: -8),
+        ])
 
-        // Chips
+        // ── Info row: ID chip | Phone chip | Nat chip ─────────────────────
+        [idChip, phoneChipContainer, natChipContainer]
+            .forEach { infoRowStack.addArrangedSubview($0) }
+
+        // ── Chips row ────────────────────────────────────────────────────
         [ageChip, dateChip, contractChip].forEach { chipsStack.addArrangedSubview($0) }
 
-        // All top-level subviews
+        // ── Top-level subviews ────────────────────────────────────────────
         [avatarContainer, nameLabel, infoRowStack,
          dividerTop, chipsStack, dividerBottom,
          doctorIconView, doctorLabel
         ].forEach { addSubview($0) }
 
         setupConstraints()
-    }
-
-    /// Wraps an icon + label into a compact horizontal view for the info row.
-    private func makeInlineItem(icon: UIImageView, label: UILabel) -> UIView {
-        let sv = UIStackView(arrangedSubviews: [icon, label])
-        sv.axis = .horizontal
-        sv.spacing = 4
-        sv.alignment = .center
-        sv.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            icon.widthAnchor.constraint(equalToConstant: 12),
-            icon.heightAnchor.constraint(equalToConstant: 12),
-        ])
-        return sv
     }
 
     private func setupConstraints() {
@@ -406,13 +405,11 @@ final class PatientHeaderView: UIView {
             nameLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
             nameLabel.topAnchor.constraint(equalTo: avatarContainer.topAnchor),
 
-            // ── Info row: ID | Phone | Spacer | Flag | Nationality ───────
+            // ── Info row: [ID chip] [Phone chip] [Nat chip] ──────────────
+            // Sits below the name, same left edge as name
             infoRowStack.leadingAnchor.constraint(equalTo: avatarContainer.trailingAnchor, constant: 12),
-            infoRowStack.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
+            infoRowStack.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -16),
             infoRowStack.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 5),
-
-            flagView.widthAnchor.constraint(equalToConstant: 18),
-            flagView.heightAnchor.constraint(equalToConstant: 13),
 
             // ── Divider (top) ───────────────────────────────────────────
             dividerTop.topAnchor.constraint(equalTo: avatarContainer.bottomAnchor, constant: 10),
