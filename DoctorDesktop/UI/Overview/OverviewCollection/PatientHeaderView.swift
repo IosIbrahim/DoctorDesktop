@@ -14,7 +14,7 @@ final class PatientHeaderView: UIView {
 
     // MARK: - Constants
 
-    static let preferredHeight: CGFloat = 170
+    static let preferredHeight: CGFloat = 190
 
     // MARK: - Background
 
@@ -51,28 +51,21 @@ final class PatientHeaderView: UIView {
         return l
     }()
 
-    // MARK: - ID / Phone / Nationality chips row
+    // MARK: - Row 1: ID | Phone | Nationality
 
     private let infoRowStack: UIStackView = {
         let sv = UIStackView()
         sv.axis = .horizontal
         sv.spacing = 6
         sv.alignment = .center
-        sv.distribution = .fillProportionally   // no spacer — chips sit together
+        sv.distribution = .fillProportionally
         sv.translatesAutoresizingMaskIntoConstraints = false
         return sv
     }()
 
-    // ID chip (creditcard icon + id text)
-    private let idChip      = PatientHeaderView.makeInfoChip(sfSymbol: "creditcard.fill")
+    private let idChip = PatientHeaderView.makeInfoChip(sfSymbol: "creditcard.fill")
 
-    // Blood type chip (drop.fill icon + blood type text)
-    private let bloodChip = PatientHeaderView.makeInfoChip(sfSymbol: "drop.fill")
-
-    // Allergy chip (exclamationmark.triangle icon + allergy status)
-    private let allergyChip = PatientHeaderView.makeInfoChip(sfSymbol: "exclamationmark.triangle.fill")
-
-    // Phone chip — chip container wrapping a UIButton so the whole chip is tappable
+    // Phone chip — tappable button inside a chip container
     private let phoneChipContainer: UIView = {
         let v = UIView()
         v.backgroundColor = UIColor.white.withAlphaComponent(0.13)
@@ -89,7 +82,7 @@ final class PatientHeaderView: UIView {
         return b
     }()
 
-    // Nationality chip (flag image + nationality text)
+    // Nationality chip
     private let natChipContainer: UIView = {
         let v = UIView()
         v.backgroundColor = UIColor.white.withAlphaComponent(0.13)
@@ -115,6 +108,21 @@ final class PatientHeaderView: UIView {
 
     private var phoneNumber: String = ""
 
+    // MARK: - Row 2: Blood | Allergy  (always visible)
+
+    private let medicalRowStack: UIStackView = {
+        let sv = UIStackView()
+        sv.axis = .horizontal
+        sv.spacing = 6
+        sv.alignment = .center
+        sv.distribution = .fillProportionally
+        sv.translatesAutoresizingMaskIntoConstraints = false
+        return sv
+    }()
+
+    private let bloodChip   = PatientHeaderView.makeInfoChip(sfSymbol: "drop.fill")
+    private let allergyChip = PatientHeaderView.makeInfoChip(sfSymbol: "exclamationmark.triangle.fill")
+
     // MARK: - Dividers
 
     private let dividerTop    = PatientHeaderView.makeDivider()
@@ -131,11 +139,11 @@ final class PatientHeaderView: UIView {
         sv.translatesAutoresizingMaskIntoConstraints = false
         return sv
     }()
-    private let ageChip      = PatientHeaderView.makeInfoChip(sfSymbol: "person.circle.fill")
-    private let dateChip     = PatientHeaderView.makeInfoChip(sfSymbol: "calendar")
+    private let ageChip       = PatientHeaderView.makeInfoChip(sfSymbol: "person.circle.fill")
+    private let dateChip      = PatientHeaderView.makeInfoChip(sfSymbol: "calendar")
     private let specialtyChip = PatientHeaderView.makeInfoChip(sfSymbol: "cross.case.fill")
 
-    // MARK: - Bottom section  (Doctor row + Insurance row)
+    // MARK: - Bottom section (Doctor + Insurance)
 
     private let doctorIconView: UIImageView = {
         let iv = UIImageView()
@@ -170,9 +178,9 @@ final class PatientHeaderView: UIView {
         return l
     }()
 
-    private var cachedDoctorName: String  = ""
-    private var cachedInsurance: String   = ""   // patient.financialAccount
-    private var cachedSpecialty: String   = ""   // set async after history load
+    private var cachedDoctorName: String = ""
+    private var cachedInsurance: String  = ""
+    private var cachedSpecialty: String  = ""
 
     // MARK: - Init
 
@@ -217,17 +225,7 @@ final class PatientHeaderView: UIView {
         // ── ID chip ──────────────────────────────────────────────────────
         setChipText(idChip, patient.id.trimmingCharacters(in: .whitespaces))
 
-        // ── Blood type chip ──────────────────────────────────────────────
-        let blood = patient.bloodType.trimmingCharacters(in: .whitespaces)
-        if blood.isEmpty {
-            bloodChip.isHidden = true
-        } else {
-            bloodChip.isHidden = false
-            setChipText(bloodChip, blood)
-            setChipIconTint(bloodChip, UIColor(red: 1.0, green: 0.25, blue: 0.25, alpha: 1))
-        }
-
-        // ── Phone chip (tappable) ────────────────────────────────────────
+        // ── Phone chip ───────────────────────────────────────────────────
         let phone: String
         if let op = patient as? OutpatientPatient { phone = op.patMobile ?? "" }
         else                                      { phone = "" }
@@ -244,6 +242,17 @@ final class PatientHeaderView: UIView {
         flagView.image        = patient.countyFlag
         flagView.isHidden     = (patient.countyFlag == nil)
 
+        // ── Blood chip (always visible — fallback until API responds) ────
+        let blood = patient.bloodType.trimmingCharacters(in: .whitespaces)
+        setChipText(bloodChip, blood.isEmpty ? "No Blood Type" : blood)
+        setChipIconTint(bloodChip, blood.isEmpty
+            ? UIColor.white.withAlphaComponent(0.5)
+            : UIColor(red: 1.0, green: 0.25, blue: 0.25, alpha: 1))
+
+        // ── Allergy chip (always visible — fallback until API responds) ──
+        setChipText(allergyChip, "No Known Allergy")
+        setChipIconTint(allergyChip, UIColor.white.withAlphaComponent(0.5))
+
         // ── Age chip ─────────────────────────────────────────────────────
         let age: String
         if      let ip = patient as? InpatientPatient  { age = ip.age }
@@ -254,40 +263,36 @@ final class PatientHeaderView: UIView {
         // ── Date chip ────────────────────────────────────────────────────
         setChipText(dateChip, formatAdmDate(patient.date))
 
-        // ── Specialty chip (placeholder — filled async via updateSpecialty) ──
+        // ── Specialty chip ───────────────────────────────────────────────
         setChipText(specialtyChip, specialty ?? "—")
 
-        // ── Doctor (insurance filled async via updateInsurance) ───────────
+        // ── Doctor / Insurance ───────────────────────────────────────────
         if      let ip = patient as? InpatientPatient  { cachedDoctorName = ip.doctorName }
         else if let op = patient as? OutpatientPatient { cachedDoctorName = op.empNameEn ?? "" }
         else                                           { cachedDoctorName = "" }
-        cachedInsurance = ""   // will be set by updateInsurance() after history loads
+        cachedInsurance = ""
         refreshDoctorLabel()
     }
 
-    /// Called after `getVisitsDetail` — updates blood type, phone, allergy from the rich API.
+    /// Called after `getVisitsDetail` — fills blood, allergy, phone, insurance.
     func updateFromVisitDetail(_ detail: VisitDetail) {
-        // Blood type
+
+        // Blood type — always show, fallback if empty
         let blood = (detail.bloodTypeEn ?? detail.bloodTypeAr ?? "").trimmingCharacters(in: .whitespaces)
-        if blood.isEmpty {
-            bloodChip.isHidden = true
-        } else {
-            bloodChip.isHidden = false
-            setChipText(bloodChip, blood)
-            setChipIconTint(bloodChip, UIColor(red: 1.0, green: 0.25, blue: 0.25, alpha: 1))
-        }
+        setChipText(bloodChip, blood.isEmpty ? "No Blood Type" : blood)
+        setChipIconTint(bloodChip, blood.isEmpty
+            ? UIColor.white.withAlphaComponent(0.5)
+            : UIColor(red: 1.0, green: 0.25, blue: 0.25, alpha: 1))
 
-        // Allergy
+        // Allergy — always show, fallback if none
         let allergy = (detail.allergyStatusEn ?? detail.allergyStatusAr ?? "").trimmingCharacters(in: .whitespaces)
-        if allergy.isEmpty || allergy.lowercased() == "no allergy" {
-            allergyChip.isHidden = true
-        } else {
-            allergyChip.isHidden = false
-            setChipText(allergyChip, allergy)
-            setChipIconTint(allergyChip, UIColor(red: 1.0, green: 0.75, blue: 0.0, alpha: 1)) // amber warning
-        }
+        let hasAllergy = !allergy.isEmpty && allergy.lowercased() != "no allergy"
+        setChipText(allergyChip, hasAllergy ? allergy : "No Known Allergy")
+        setChipIconTint(allergyChip, hasAllergy
+            ? UIColor(red: 1.0, green: 0.75, blue: 0.0, alpha: 1)   // amber = has allergy
+            : UIColor.white.withAlphaComponent(0.5))                  // dim  = no allergy
 
-        // Phone — use visit detail phone if patient didn't have one (inpatient)
+        // Phone — fill if patient list didn't have it (inpatient)
         if phoneChipContainer.isHidden {
             let tel = (detail.patientTel ?? "").trimmingCharacters(in: .whitespaces)
             if !tel.isEmpty {
@@ -297,19 +302,18 @@ final class PatientHeaderView: UIView {
             }
         }
 
-        // Insurance from visit detail (overrides placeholder)
+        // Insurance
         let contract = (detail.contractNameEn ?? "").trimmingCharacters(in: .whitespaces)
         if !contract.isEmpty { updateInsurance(contract) }
     }
 
-    /// Called after `getPatientHistory` completes — fills the specialty chip.
+    /// Called after `getPatientHistory` — fills specialty chip.
     func updateSpecialty(_ text: String) {
         cachedSpecialty = text
         setChipText(specialtyChip, text.isEmpty ? "—" : text)
     }
 
-    /// Called after `getPatientHistory` completes — replaces numeric account
-    /// with the human-readable contract name e.g. "Without Insurance".
+    /// Called after `getPatientHistory` — replaces numeric account with contract name.
     func updateInsurance(_ text: String) {
         cachedInsurance = text
         refreshDoctorLabel()
@@ -355,7 +359,6 @@ final class PatientHeaderView: UIView {
 
     private func setChipIconTint(_ chip: UIView, _ color: UIColor) {
         guard #available(iOS 13.0, *) else { return }
-        // chip → container → row (UIStackView) → first arranged subview (UIImageView)
         if let row = chip.subviews.first as? UIStackView,
            let icon = row.arrangedSubviews.first as? UIImageView {
             icon.tintColor = color
@@ -430,7 +433,7 @@ final class PatientHeaderView: UIView {
         avatarContainer.layer.insertSublayer(avatarGradient, at: 0)
         avatarContainer.addSubview(avatarIconView)
 
-        // ── Phone chip: button inside a chip container ────────────────────
+        // ── Phone chip ───────────────────────────────────────────────────
         phoneButton.addTarget(self, action: #selector(phoneTapped), for: .touchUpInside)
         phoneChipContainer.addSubview(phoneButton)
         NSLayoutConstraint.activate([
@@ -440,7 +443,7 @@ final class PatientHeaderView: UIView {
             phoneButton.trailingAnchor.constraint(equalTo: phoneChipContainer.trailingAnchor, constant: -8),
         ])
 
-        // ── Nationality chip: flag + label inside a chip container ────────
+        // ── Nationality chip ─────────────────────────────────────────────
         let natRow = UIStackView(arrangedSubviews: [flagView, nationalityLabel])
         natRow.axis = .horizontal
         natRow.spacing = 5
@@ -456,16 +459,20 @@ final class PatientHeaderView: UIView {
             natRow.trailingAnchor.constraint(equalTo: natChipContainer.trailingAnchor, constant: -8),
         ])
 
-        // ── Info row: ID | Blood | Allergy | Phone | Nat ────────────────────
-        allergyChip.isHidden = true   // shown only when allergy data arrives
-        [idChip, bloodChip, allergyChip, phoneChipContainer, natChipContainer]
+        // ── Row 1: ID | Phone | Nationality ─────────────────────────────
+        [idChip, phoneChipContainer, natChipContainer]
             .forEach { infoRowStack.addArrangedSubview($0) }
 
-        // ── Chips row ────────────────────────────────────────────────────
+        // ── Row 2: Blood | Allergy (always visible) ──────────────────────
+        [bloodChip, allergyChip]
+            .forEach { medicalRowStack.addArrangedSubview($0) }
+
+        // ── Chips row: Age | Date | Specialty ────────────────────────────
         [ageChip, dateChip, specialtyChip].forEach { chipsStack.addArrangedSubview($0) }
 
         // ── Top-level subviews ────────────────────────────────────────────
-        [avatarContainer, nameLabel, infoRowStack,
+        [avatarContainer, nameLabel,
+         infoRowStack, medicalRowStack,
          dividerTop, chipsStack, dividerBottom,
          doctorIconView, doctorLabel,
          insuranceIconView, insuranceLabel
@@ -493,11 +500,15 @@ final class PatientHeaderView: UIView {
             nameLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
             nameLabel.topAnchor.constraint(equalTo: avatarContainer.topAnchor),
 
-            // ── Info row: [ID chip] [Phone chip] [Nat chip] ──────────────
-            // Sits below the name, same left edge as name
+            // ── Row 1: ID | Phone | Nat ──────────────────────────────────
             infoRowStack.leadingAnchor.constraint(equalTo: avatarContainer.trailingAnchor, constant: 12),
             infoRowStack.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -16),
             infoRowStack.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 5),
+
+            // ── Row 2: Blood | Allergy ───────────────────────────────────
+            medicalRowStack.leadingAnchor.constraint(equalTo: avatarContainer.trailingAnchor, constant: 12),
+            medicalRowStack.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -16),
+            medicalRowStack.topAnchor.constraint(equalTo: infoRowStack.bottomAnchor, constant: 5),
 
             // ── Divider (top) ───────────────────────────────────────────
             dividerTop.topAnchor.constraint(equalTo: avatarContainer.bottomAnchor, constant: 10),
@@ -505,7 +516,7 @@ final class PatientHeaderView: UIView {
             dividerTop.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
             dividerTop.heightAnchor.constraint(equalToConstant: 0.5),
 
-            // ── Chips row  (Age | Adm Date | Contract) ──────────────────
+            // ── Chips row: Age | Date | Specialty ───────────────────────
             chipsStack.topAnchor.constraint(equalTo: dividerTop.bottomAnchor, constant: 8),
             chipsStack.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
             chipsStack.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -16),
