@@ -156,6 +156,7 @@ extension OverviewSectionDetailsViewController: UITableViewDataSource {
     case .catheterization: return presenter.patientSummary.catheters?.count ?? 0
     case .endoscopy: return presenter.patientSummary.endoscopies?.count ?? 0
     case .dietary: return presenter.patientSummary.dietaries?.count ?? 0
+    case .pathology, .operationRequest, .bloodBank, .medicalReport: return 0
     }
   }
 
@@ -189,6 +190,7 @@ extension OverviewSectionDetailsViewController: UITableViewDataSource {
     case .endoscopy: return operationCatherEndoscopyCellMaker(tableView, indexPath, presenter.patientSummary.endoscopies![indexPath.row])
     //case .clinicServices: return clinicalServiceCellMaker(tableView, indexPath, presenter.patientSummary.clinicServices![indexPath.row])
     case .dietary: return dietaryCellMaker(tableView, indexPath, presenter.patientSummary.dietaries![indexPath.row])
+    case .pathology, .operationRequest, .bloodBank, .medicalReport: break
     }
     return UITableViewCell()
   }
@@ -208,6 +210,7 @@ extension OverviewSectionDetailsViewController: UITableViewDelegate {
     case .operation, .catheterization, .endoscopy: return OperationCatheterizationEndoscopyCell.dequeueHeader(from: tableView)
     //case .clinicServices: return ClinicServiceCell.dequeueHeader(from: tableView)
     case .dietary: return DietaryCell.dequeueHeader(from: tableView)
+    case .pathology, .operationRequest, .bloodBank, .medicalReport: break
     }
     return nil
   }
