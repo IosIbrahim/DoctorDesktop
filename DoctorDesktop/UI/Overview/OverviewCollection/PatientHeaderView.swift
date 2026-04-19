@@ -303,19 +303,13 @@ final class PatientHeaderView: UIView {
     // MARK: - Medical chip state helpers
 
     private func applyBloodState(_ value: String?) {
-        if let v = value {
-            setChipText(bloodChip, v)
-            setMedicalChipStyle(
-                bloodChip,
-                iconTint: UIColor(red: 1.0, green: 0.30, blue: 0.30, alpha: 1),
-                bg: UIColor(red: 0.75, green: 0.10, blue: 0.10, alpha: 0.30))
-        } else {
-            setChipText(bloodChip, "No Blood Type")
-            setMedicalChipStyle(
-                bloodChip,
-                iconTint: UIColor.white.withAlphaComponent(0.40),
-                bg: UIColor.white.withAlphaComponent(0.08))
-        }
+        setChipText(bloodChip, value ?? "No Blood Type")
+        setMedicalChipStyle(
+            bloodChip,
+            iconTint: UIColor(red: 1.0, green: 0.25, blue: 0.25, alpha: 1),   // always red
+            bg: value != nil
+                ? UIColor(red: 0.75, green: 0.10, blue: 0.10, alpha: 0.30)
+                : UIColor.white.withAlphaComponent(0.08))
     }
 
     private func applyAllergyState(_ value: String?) {
