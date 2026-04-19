@@ -10,7 +10,7 @@ import Foundation
 
 protocol UnitsPopupPresenter {
   var title: String { get }
-  var patientUnits: PatientUnits { get }
+  var patientUnits: PatientUnits { get set }
 }
 
 class UnitsPopupPresenterImpl: UnitsPopupPresenter {

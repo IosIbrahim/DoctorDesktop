@@ -69,10 +69,18 @@ class NetworkLayerImpl: NetworkLayer {
     private func get(_ url: String,
                      params: [String: String],
                      finished: @escaping DataBlock) {
-        SwiftyBeaver.debug("GET \(url) params: \(params)")
+        APILogger.logRequest(method: "GET", url: url, params: params)
+        let start = Date()
         NetworkLayerImpl.session
             .request(url, parameters: params, headers: authHeaders)
             .responseJSON { response in
+                let duration = Date().timeIntervalSince(start)
+                let code = response.response?.statusCode ?? 0
+                if let error = response.error {
+                    APILogger.logFailure(method: "GET", url: url, error: error.localizedDescription, duration: duration)
+                } else {
+                    APILogger.logResponse(method: "GET", url: url, statusCode: code, data: response.data, duration: duration)
+                }
                 guard let data = response.data else { return }
                 finished(data)
             }
@@ -82,10 +90,18 @@ class NetworkLayerImpl: NetworkLayer {
     private func post(_ url: String,
                       params: [String: String],
                       finished: @escaping DataBlock) {
-        SwiftyBeaver.debug("POST \(url) params: \(params)")
+        APILogger.logRequest(method: "POST", url: url, params: params)
+        let start = Date()
         NetworkLayerImpl.session
             .request(url, method: .post, parameters: params, headers: authHeaders)
             .responseJSON { response in
+                let duration = Date().timeIntervalSince(start)
+                let code = response.response?.statusCode ?? 0
+                if let error = response.error {
+                    APILogger.logFailure(method: "POST", url: url, error: error.localizedDescription, duration: duration)
+                } else {
+                    APILogger.logResponse(method: "POST", url: url, statusCode: code, data: response.data, duration: duration)
+                }
                 guard let data = response.data else { return }
                 finished(data)
             }
@@ -95,10 +111,18 @@ class NetworkLayerImpl: NetworkLayer {
 
     func login(with params: [String: String], finished: @escaping DataBlock) {
         let url = AppURLS.ip + "/MobileApi/api/Authenticate"
-        SwiftyBeaver.debug("POST \(url) params: \(params)")
+        APILogger.logRequest(method: "POST", url: url, params: params)
+        let start = Date()
         NetworkLayerImpl.session
             .request(url, method: .post, parameters: params, encoding: URLEncoding.httpBody)
             .responseJSON { response in
+                let duration = Date().timeIntervalSince(start)
+                let code = response.response?.statusCode ?? 0
+                if let error = response.error {
+                    APILogger.logFailure(method: "POST", url: url, error: error.localizedDescription, duration: duration)
+                } else {
+                    APILogger.logResponse(method: "POST", url: url, statusCode: code, data: response.data, duration: duration)
+                }
                 guard let data = response.data else { return }
                 finished(data)
             }
@@ -202,10 +226,18 @@ class NetworkLayerImpl: NetworkLayer {
     func loadFlagImage(with params: [String: String], finished: @escaping DataBlock) {
         guard let flagImagePath = params["flagImageName"] else { return }
         let url = AppURLS.ip + "/primecare/Hospital%20Images/" + flagImagePath
-        SwiftyBeaver.debug("GET \(url)")
+        APILogger.logRequest(method: "GET", url: url)
+        let start = Date()
         NetworkLayerImpl.session
             .request(url, headers: authHeaders)
             .responseData { response in
+                let duration = Date().timeIntervalSince(start)
+                let code = response.response?.statusCode ?? 0
+                if let error = response.error {
+                    APILogger.logFailure(method: "GET", url: url, error: error.localizedDescription, duration: duration)
+                } else {
+                    SwiftyBeaver.debug("✅ \(code)  /primecare/…/\(flagImagePath)  (\(String(format: "%.2fs", duration)))  [image]")
+                }
                 guard let data = response.data else { return }
                 finished(data)
             }

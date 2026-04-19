@@ -16,21 +16,30 @@ class WebserviceMananger: NSObject {
                   vc: UIViewController? = nil,
                   completionHandler: @escaping (AnyObject?, String?) -> Void) {
 
-        SwiftyBeaver.debug("\(method.rawValue) \(url) params: \(String(describing: parameters))")
+        APILogger.logRequest(method: method.rawValue, url: url, params: parameters)
+        let start = Date()
 
         AF.request(url, method: method, parameters: parameters, encoding: JSONEncoding.default)
             .responseJSON { response in
+                let duration = Date().timeIntervalSince(start)
+                let code = response.response?.statusCode ?? 0
 
                 guard let httpResponse = response.response else {
+                    APILogger.logFailure(method: method.rawValue, url: url,
+                                        error: "Couldn't connect to server", duration: duration)
                     Utilities.showAlert(messageToDisplay: "Couldn't connect to server")
                     return
                 }
 
                 switch httpResponse.statusCode {
                 case 500:
+                    APILogger.logHTTPError(method: method.rawValue, url: url, statusCode: 500,
+                                          message: "Internal Server Error", duration: duration)
                     Utilities.showAlert(messageToDisplay: "Couldn't connect to server")
                     return
                 case 404:
+                    APILogger.logHTTPError(method: method.rawValue, url: url, statusCode: 404,
+                                          message: "Not Found", duration: duration)
                     Utilities.showAlert(messageToDisplay: "Couldn't connect to the server. Please try again.")
                     return
                 default:
@@ -39,6 +48,8 @@ class WebserviceMananger: NSObject {
 
                 switch response.result {
                 case .success(let value):
+                    APILogger.logResponse(method: method.rawValue, url: url, statusCode: code,
+                                         data: response.data, duration: duration)
                     if let data = value as? [String: AnyObject] {
                         completionHandler(data as AnyObject, nil)
                     } else if let data = value as? [[String: AnyObject]] {
@@ -50,7 +61,8 @@ class WebserviceMananger: NSObject {
                     }
 
                 case .failure(let error):
-                    SwiftyBeaver.error("Request failed: \(error.localizedDescription)")
+                    APILogger.logFailure(method: method.rawValue, url: url,
+                                        error: error.localizedDescription, duration: duration)
                     completionHandler(nil, error.localizedDescription)
                 }
             }
@@ -65,7 +77,8 @@ class WebserviceMananger: NSObject {
                   headers: [String: String],
                   completionHandler: @escaping (AnyObject?, String?) -> Void) {
 
-        SwiftyBeaver.debug("\(method.rawValue) \(urlString)")
+        APILogger.logRequest(method: method.rawValue, url: urlString, params: parameters)
+        let start = Date()
 
         AF.request(urlString,
                    method: method,
@@ -73,8 +86,12 @@ class WebserviceMananger: NSObject {
                    encoding: JSONEncoding.default,
                    headers: HTTPHeaders(headers))
             .responseJSON { response in
+                let duration = Date().timeIntervalSince(start)
+                let code = response.response?.statusCode ?? 0
                 switch response.result {
                 case .success(let value):
+                    APILogger.logResponse(method: method.rawValue, url: urlString, statusCode: code,
+                                         data: response.data, duration: duration)
                     guard let data = value as? [String: AnyObject] else {
                         Utilities.showAlert(messageToDisplay: "Unexpected response format")
                         return
@@ -86,7 +103,8 @@ class WebserviceMananger: NSObject {
                     }
 
                 case .failure(let error):
-                    SwiftyBeaver.error("Request failed: \(error.localizedDescription)")
+                    APILogger.logFailure(method: method.rawValue, url: urlString,
+                                        error: error.localizedDescription, duration: duration)
                     completionHandler(nil, error.localizedDescription)
                 }
             }
@@ -101,7 +119,8 @@ class WebserviceMananger: NSObject {
                       headers: [String: String],
                       completionHandler: @escaping (AnyObject?, NSError?, Int) -> Void) {
 
-        SwiftyBeaver.debug("\(method.rawValue) \(urlString)")
+        APILogger.logRequest(method: method.rawValue, url: urlString)
+        let start = Date()
 
         AF.request(urlString,
                    method: method,
@@ -109,12 +128,16 @@ class WebserviceMananger: NSObject {
                    encoding: parameters,
                    headers: HTTPHeaders(headers))
             .responseJSON { response in
+                let duration = Date().timeIntervalSince(start)
                 let statusCode = response.response?.statusCode ?? 0
                 switch response.result {
                 case .success(let value):
+                    APILogger.logResponse(method: method.rawValue, url: urlString, statusCode: statusCode,
+                                         data: response.data, duration: duration)
                     completionHandler(value as AnyObject, nil, statusCode)
                 case .failure(let error):
-                    SwiftyBeaver.error("Request failed: \(error.localizedDescription)")
+                    APILogger.logFailure(method: method.rawValue, url: urlString,
+                                        error: error.localizedDescription, duration: duration)
                     completionHandler(nil, error as NSError, statusCode)
                 }
             }

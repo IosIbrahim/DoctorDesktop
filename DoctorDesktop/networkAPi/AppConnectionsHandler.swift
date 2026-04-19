@@ -50,7 +50,6 @@ class AppConnectionsHandler {
         do {
             let jsonData = try JSONSerialization.data(withJSONObject: parameters, options: [])
             request.httpBody = jsonData
-            SwiftyBeaver.debug("POST body: \(String(data: jsonData, encoding: .utf8) ?? "")")
         } catch {
             SwiftyBeaver.error("Failed to serialize request body: \(error)")
         }
@@ -69,10 +68,18 @@ class AppConnectionsHandler {
 
         var fullURL = url + setParamsInUrl(params ?? [:])
         guard let safeURL = fullURL.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else { return }
-        SwiftyBeaver.debug("GET \(safeURL)")
+        APILogger.logRequest(method: "GET", url: safeURL, params: params)
+        let start = Date()
 
         AF.request(safeURL, method: .get, encoding: JSONEncoding.default, headers: buildHeaders(headers))
             .responseJSON { response in
+                let duration = Date().timeIntervalSince(start)
+                let code = response.response?.statusCode ?? 0
+                if let error = response.error {
+                    APILogger.logFailure(method: "GET", url: safeURL, error: error.localizedDescription, duration: duration)
+                } else {
+                    APILogger.logResponse(method: "GET", url: safeURL, statusCode: code, data: response.data, duration: duration)
+                }
                 let result = handlerResponse(response: response, type: T.self)
                 completion?(result.0, result.1, result.0 == .success ? "\(flag)" : result.2)
             }
@@ -85,10 +92,18 @@ class AppConnectionsHandler {
                                    flag: Int = 0,
                                    completion: ((ResponseStatus, Decodable?, String?) -> Void)?) {
         guard checkConnection() else { return }
-        SwiftyBeaver.debug("POST \(url) params: \(String(describing: params))")
+        APILogger.logRequest(method: "POST", url: url, params: params)
+        let start = Date()
 
         AF.request(url, method: .post, parameters: params, encoding: JSONEncoding.default, headers: buildHeaders(headers))
             .responseJSON { response in
+                let duration = Date().timeIntervalSince(start)
+                let code = response.response?.statusCode ?? 0
+                if let error = response.error {
+                    APILogger.logFailure(method: "POST", url: url, error: error.localizedDescription, duration: duration)
+                } else {
+                    APILogger.logResponse(method: "POST", url: url, statusCode: code, data: response.data, duration: duration)
+                }
                 let result = handlerResponse(response: response, type: T.self)
                 completion?(result.0, result.1, result.0 == .success ? "\(flag)" : result.2)
             }
@@ -101,10 +116,18 @@ class AppConnectionsHandler {
                                   flag: Int = 0,
                                   completion: ((ResponseStatus, Decodable?, String?) -> Void)?) {
         guard checkConnection() else { return }
-        SwiftyBeaver.debug("RAW POST \(url)")
+        APILogger.logRequest(method: "POST", url: url, params: params)
+        let start = Date()
 
         let request = buildRequest(url: url, parameters: params, headers: headers)
         AF.request(request).responseJSON { response in
+            let duration = Date().timeIntervalSince(start)
+            let code = response.response?.statusCode ?? 0
+            if let error = response.error {
+                APILogger.logFailure(method: "POST", url: url, error: error.localizedDescription, duration: duration)
+            } else {
+                APILogger.logResponse(method: "POST", url: url, statusCode: code, data: response.data, duration: duration)
+            }
             let result = handlerResponse(response: response, type: T.self)
             completion?(result.0, result.1, result.0 == .success ? "\(flag)" : result.2)
         }
@@ -174,7 +197,7 @@ class AppConnectionsHandler {
             let model = try JSONDecoder().decode(T.self, from: jsonData)
             return (.success, model, nil)
         } catch {
-            SwiftyBeaver.error("Decoding error: \(error)")
+            SwiftyBeaver.error("⚠️ DECODE \(T.self)\n       Error  │ \(error)")
             return (.error, nil, "Error in parsing response")
         }
     }
@@ -212,5 +235,87 @@ class AppConnectionsHandler {
 
     static func handleJSONArray(dic: [[String: Any]]) -> [[String: Any]] {
         return dic.map { handleJSON(dicc: $0) }
+    }
+}
+
+// MARK: - APILogger
+// Centralised, structured API logging used by all network layers.
+
+struct APILogger {
+
+    static func logRequest(method: String, url: String, params: Any? = nil) {
+        let path = shortPath(url)
+        var message = "🌐 \(method.uppercased())  \(path)"
+        if let params = params, !isEmpty(params) {
+            message += "\n       Params │ \(formatted(params))"
+        }
+        SwiftyBeaver.debug(message)
+    }
+
+    static func logResponse(method: String, url: String, statusCode: Int, data: Data?, duration: TimeInterval) {
+        let path = shortPath(url)
+        let time = String(format: "%.2fs", duration)
+        var message = "✅ \(statusCode)  \(path)  (\(time))"
+        if let data = data, !data.isEmpty {
+            message += "\n       Body   │ \(prettyData(data))"
+        }
+        SwiftyBeaver.debug(message)
+    }
+
+    static func logFailure(method: String, url: String, error: String, duration: TimeInterval) {
+        let path = shortPath(url)
+        let time = String(format: "%.2fs", duration)
+        SwiftyBeaver.error("❌ FAILED  \(path)  (\(time))\n       Error  │ \(error)")
+    }
+
+    static func logHTTPError(method: String, url: String, statusCode: Int, message: String, duration: TimeInterval) {
+        let path = shortPath(url)
+        let time = String(format: "%.2fs", duration)
+        SwiftyBeaver.error("❌ \(statusCode)  \(path)  (\(time))\n       Error  │ \(message)")
+    }
+
+    static func logDecodeError(url: String, error: Error) {
+        let path = shortPath(url)
+        SwiftyBeaver.error("⚠️ DECODE  \(path)\n       Error  │ \(error.localizedDescription)")
+    }
+
+    // MARK: Private helpers
+
+    private static func shortPath(_ url: String) -> String {
+        guard let u = URL(string: url) else { return url }
+        var path = u.path.isEmpty ? "/" : u.path
+        if let q = u.query { path += "?\(q)" }
+        return path
+    }
+
+    private static func isEmpty(_ params: Any) -> Bool {
+        if let d = params as? [String: Any]    { return d.isEmpty }
+        if let d = params as? [String: String] { return d.isEmpty }
+        return false
+    }
+
+    private static func formatted(_ params: Any) -> String {
+        let sensitive: Set<String> = ["PASSWORD", "password", "pass", "token", "TOKEN"]
+        func mask(_ d: [String: Any]) -> [String: Any] {
+            var c = d; sensitive.forEach { if c[$0] != nil { c[$0] = "***" } }; return c
+        }
+        var obj: Any = params
+        if let d = params as? [String: Any]    { obj = mask(d) }
+        if let d = params as? [String: String] {
+            obj = mask(d.mapValues { $0 as Any })
+        }
+        if let data = try? JSONSerialization.data(withJSONObject: obj, options: [.sortedKeys]),
+           let str = String(data: data, encoding: .utf8) { return str }
+        return "\(params)"
+    }
+
+    private static func prettyData(_ data: Data, cap: Int = 800) -> String {
+        if let json = try? JSONSerialization.jsonObject(with: data),
+           let compact = try? JSONSerialization.data(withJSONObject: json),
+           let str = String(data: compact, encoding: .utf8) {
+            return str.count > cap ? String(str.prefix(cap)) + "… [\(data.count)B]" : str
+        }
+        let raw = String(data: data, encoding: .utf8) ?? "<binary \(data.count)B>"
+        return raw.count > cap ? String(raw.prefix(cap)) + "…" : raw
     }
 }

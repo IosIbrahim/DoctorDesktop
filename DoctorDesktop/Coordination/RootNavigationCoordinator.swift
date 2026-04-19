@@ -123,7 +123,10 @@ class RootNavigationCoordinatorImpl: NavigationCoordinator {
           let permission = arguments?["permission"] as? PermissionModel,
       let user = arguments?["user"] as? User else { return }
     let patientsViewController = registry.makePatientsViewController(with: componentType, user: user,permission: permission)
-    rootViewController.navigationController?.pushViewController(patientsViewController, animated: true)
+    // For types that immediately push UnitsPopup, push PatientsViewController silently
+    // so only UnitsPopup slides in and the user never sees the underlying blank screen.
+    let showsUnitsPopup: Bool = [ComponentType.outpatient, .inpatient, .ICU, .nicu].contains(componentType)
+    rootViewController.navigationController?.pushViewController(patientsViewController, animated: !showsUnitsPopup)
     navState = .atPatientList
   }
 

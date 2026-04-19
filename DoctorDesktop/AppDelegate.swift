@@ -62,7 +62,25 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 private extension UIViewController {
   @objc func logged_viewDidAppear(_ animated: Bool) {
     logged_viewDidAppear(animated)
-    SwiftyBeaver.debug("📱 Screen: \(String(describing: type(of: self)))")
+    // Delay slightly so that if another screen is pushed immediately on top
+    // (e.g. PatientsViewController → UnitsPopup), only the final top screen is logged.
+    DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { [weak self] in
+      guard let self = self, self.isTopVisibleScreen else { return }
+      SwiftyBeaver.debug("📱 Screen: \(type(of: self))")
+    }
+  }
+
+  /// Returns true only when this VC is the currently visible top screen.
+  var isTopVisibleScreen: Bool {
+    // Must still be attached to a window
+    guard view.window != nil else { return false }
+    // Nothing presented on top of us
+    guard presentedViewController == nil else { return false }
+    // If inside a navigation controller, must be the top VC
+    if let nav = navigationController {
+      return nav.topViewController === self
+    }
+    return true
   }
 }
 

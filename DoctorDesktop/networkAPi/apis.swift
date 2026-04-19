@@ -9,7 +9,6 @@
 import Alamofire
 import Foundation
 import SwiftyJSON
-import SwiftyBeaver
 
 class apis: NSObject {
 
@@ -27,11 +26,18 @@ class apis: NSObject {
     class func getPrescriptionDate(params: [String: String],
                                    completion: @escaping (_ prescriptions: [precrition]) -> Void) {
         let url = AppURLS.ip + "/MobileApi/api/WorkFlowController/workflow"
-        SwiftyBeaver.debug("GET \(url) params: \(params)")
+        APILogger.logRequest(method: "GET", url: url, params: params)
+        let start = Date()
 
         Session.shared.request(url, parameters: params).responseJSON { response in
+            let duration = Date().timeIntervalSince(start)
+            let code = response.response?.statusCode ?? 0
+            if let error = response.error {
+                APILogger.logFailure(method: "GET", url: url, error: error.localizedDescription, duration: duration)
+                return
+            }
+            APILogger.logResponse(method: "GET", url: url, statusCode: code, data: response.data, duration: duration)
             guard let data = response.data else { return }
-
             if let prescriptions = try? Precritions(data: data, keyPath: "Root") {
                 completion(prescriptions)
             }
@@ -43,15 +49,22 @@ class apis: NSObject {
     class func getPrescriptiondetails(params: [String: Any],
                                       completion: @escaping (_ result: Welcome) -> Void) {
         let url = AppURLS.ip + "/MobileApi/api/StockController/get_speciality_shortlist"
-        SwiftyBeaver.debug("GET \(url) params: \(params)")
+        APILogger.logRequest(method: "GET", url: url, params: params)
+        let start = Date()
 
         Session.shared.request(url, parameters: params).responseJSON { response in
+            let duration = Date().timeIntervalSince(start)
+            let code = response.response?.statusCode ?? 0
+            if let error = response.error {
+                APILogger.logFailure(method: "GET", url: url, error: error.localizedDescription, duration: duration)
+                return
+            }
+            APILogger.logResponse(method: "GET", url: url, statusCode: code, data: response.data, duration: duration)
             guard let data = response.data else { return }
-
             if let model = try? JSONDecoder().decode(Welcome.self, from: data) {
                 completion(model)
             } else {
-                SwiftyBeaver.error("Failed to decode Welcome response")
+                APILogger.logDecodeError(url: url, error: NSError(domain: "Welcome decode failed", code: -1, userInfo: nil))
             }
         }
     }
@@ -61,14 +74,19 @@ class apis: NSObject {
     class func getSearchResultInprecription(params: [String: Any],
                                             completion: @escaping (_ result: searchModel?) -> Void) {
         let url = AppURLS.ip + "/MobileApi/api/StockController/GETDRUGS"
-        SwiftyBeaver.debug("GET \(url) params: \(params)")
+        APILogger.logRequest(method: "GET", url: url, params: params)
+        let start = Date()
 
         Session.shared.request(url, parameters: params).responseJSON { response in
-            guard let data = response.data else {
+            let duration = Date().timeIntervalSince(start)
+            let code = response.response?.statusCode ?? 0
+            if let error = response.error {
+                APILogger.logFailure(method: "GET", url: url, error: error.localizedDescription, duration: duration)
                 completion(nil)
                 return
             }
-
+            APILogger.logResponse(method: "GET", url: url, statusCode: code, data: response.data, duration: duration)
+            guard let data = response.data else { completion(nil); return }
             let result = try? JSONDecoder().decode(searchModel.self, from: data)
             completion(result)
         }
