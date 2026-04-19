@@ -147,25 +147,25 @@ class OverviewPresenterImpl: OverviewPresenter {
   }
 
 
+  // IMPORTANT: order here must match OverviewSection raw values exactly (0…13).
+  // clinicServices is commented out of OverviewSection so it must NOT appear here.
   var patientSummaryCounts: [Int] {
-    var patientSummaryCounts = [Int]()
-    patientSummaryCounts.append(patientSummary?.vitalSigns?.count ?? 0)
-    patientSummaryCounts.append(patientSummary?.nurseRemarks?.count ?? 0)
-    patientSummaryCounts.append(patientSummary?.medications?.count ?? 0)
-    patientSummaryCounts.append(patientSummary?.diagnosis?.count ?? 0)
-  //  patientSummaryCounts.append(patientSummary?.allergies?.count ?? 0)
-    patientSummaryCounts.append(patientSummary?.labs?.count ?? 0)
-    patientSummaryCounts.append(patientSummary?.rads?.count ?? 0)
-    patientSummaryCounts.append(patientSummary?.scorings?.count ?? 0)
-    patientSummaryCounts.append(patientSummary?.findings?.count ?? 0)
-    patientSummaryCounts.append(patientSummary?.complaints?.count ?? 0)
-    patientSummaryCounts.append(patientSummary?.history?.count ?? 0)
-    patientSummaryCounts.append(patientSummary?.operations?.count ?? 0)
-    patientSummaryCounts.append(patientSummary?.catheters?.count ?? 0)
-    patientSummaryCounts.append(patientSummary?.endoscopies?.count ?? 0)
-    patientSummaryCounts.append(patientSummary?.clinicServices?.count ?? 0)
-    patientSummaryCounts.append(patientSummary?.dietaries?.count ?? 0)
-    return patientSummaryCounts
+    return [
+      patientSummary?.vitalSigns?.count    ?? 0,  // 0  vitalSigns
+      patientSummary?.nurseRemarks?.count  ?? 0,  // 1  progressNotes
+      patientSummary?.medications?.count   ?? 0,  // 2  medication
+      patientSummary?.diagnosis?.count     ?? 0,  // 3  diagnosis
+      patientSummary?.labs?.count          ?? 0,  // 4  labExamination
+      patientSummary?.rads?.count          ?? 0,  // 5  radTest
+      patientSummary?.scorings?.count      ?? 0,  // 6  scoring
+      patientSummary?.findings?.count      ?? 0,  // 7  finding
+      patientSummary?.complaints?.count    ?? 0,  // 8  complaints
+      patientSummary?.history?.count       ?? 0,  // 9  history
+      patientSummary?.operations?.count    ?? 0,  // 10 operation
+      patientSummary?.catheters?.count     ?? 0,  // 11 catheterization
+      patientSummary?.endoscopies?.count   ?? 0,  // 12 endoscopy
+      patientSummary?.dietaries?.count     ?? 0,  // 13 dietary
+    ]
   }
 
   var currentVisitIds: [String] {
@@ -214,37 +214,42 @@ class OverviewPresenterImpl: OverviewPresenter {
       "VISIT_ID": patient.visitId
     ]
     modelLayer.getPatientHistory(with: params) { patientHistory in
-        if let err = patientHistory.error {
-            print(err)
-            self.count += 1
-            if self.count <= 3 {
-                self.getPatientHistory(finished: finished)
-            }
-        }else {
-            self.patientHistory = patientHistory
-            self.getPermissions(finished: finished)
+      if let err = patientHistory.error {
+        print(err)
+        self.count += 1
+        if self.count <= 3 {
+          // Retry — the retry chain will call finished() exactly once.
+          self.getPatientHistory(finished: finished)
+          return
         }
-      finished()
+      } else {
+        self.patientHistory = patientHistory
+        // getPermissions will call finished() on main thread when done.
+        self.getPermissions(finished: finished)
+        return
+      }
+      // Reached only when retries are exhausted — fire finished on main thread.
+      DispatchQueue.main.async { finished() }
     }
   }
-    
-    func getPermissions(finished: @escaping EmptyBlock) {
-        let params = [
-          "BRANCH_ID": user.branch ?? "",
-          "USER_ID": user.userName ?? "",
-          "PROCESS_ID":"\(permisions.id ?? 0)",
-          "OBJECT_ID":"\(permisions.objectId ?? 0)",
-          "PROCESS_INFO_CODE": "\(permisions.processInfoCode ?? 0)",
-          "CAT_ID": "",
-          "DEFAULTGROUP": "DR"
-        ]
-        
-        modelLayer.getDoctorPermissions(with: params) { permisions in
-            self.permisionsDataSource = permisions
-            self.checKPermisions(finished: finished)
-            finished()
-        }
+
+  func getPermissions(finished: @escaping EmptyBlock) {
+    let params = [
+      "BRANCH_ID": user.branch ?? "",
+      "USER_ID": user.userName ?? "",
+      "PROCESS_ID": "\(permisions.id ?? 0)",
+      "OBJECT_ID": "\(permisions.objectId ?? 0)",
+      "PROCESS_INFO_CODE": "\(permisions.processInfoCode ?? 0)",
+      "CAT_ID": "",
+      "DEFAULTGROUP": "DR"
+    ]
+    modelLayer.getDoctorPermissions(with: params) { permisions in
+      self.permisionsDataSource = permisions
+      self.checKPermisions(finished: finished)
+      // Always dispatch UI callback to main thread.
+      DispatchQueue.main.async { finished() }
     }
+  }
     
     private func checKPermisions(finished: @escaping EmptyBlock) {
         
@@ -269,25 +274,30 @@ class OverviewPresenterImpl: OverviewPresenter {
       "VISIT_ID": patient.visitId,
     ]
     switch filtrationType {
-    case .currentVisit: params["VISIT_ID_ARRAY"] = currentVisitIds.joined(separator: ",")
+    case .currentVisit:     params["VISIT_ID_ARRAY"] = currentVisitIds.joined(separator: ",")
     case .currentSpeciality: params["VISIT_ID_ARRAY"] = currentSpecialityVisitsIds.joined(separator: ",")
-    case .currentDoctor: params["VISIT_ID_ARRAY"] = currentDoctorVisitsIds.joined(separator: ",")
+    case .currentDoctor:    params["VISIT_ID_ARRAY"] = currentDoctorVisitsIds.joined(separator: ",")
     default: break
     }
     modelLayer.getPatientSummary(with: params) { patientSummary in
-        self.patientSummary = patientSummary
-        if let err = patientSummary.message {
-            print(err)
-            self.count += 1
-            if self.count <= 3 {
-                self.getPatientSummary(filtrationType: filtrationType, finished: finished)
-            }
-        }else {
-            if self.permisionsDataSource.isEmpty {
-                self.getPermissions(finished: finished)
-            }
+      self.patientSummary = patientSummary
+      if let err = patientSummary.message {
+        print(err)
+        self.count += 1
+        if self.count <= 3 {
+          // Retry — don't call finished() yet; the retry will when it succeeds.
+          self.getPatientSummary(filtrationType: filtrationType, finished: finished)
+          return
         }
-      finished()
+      } else {
+        if self.permisionsDataSource.isEmpty {
+          // Permissions fetch will call finished() on main thread when done.
+          self.getPermissions(finished: finished)
+          return
+        }
+      }
+      // Reached when: success (permissions already loaded) OR retries exhausted.
+      DispatchQueue.main.async { finished() }
     }
   }
 }
