@@ -76,7 +76,7 @@ class OverviewCollectionViewController: UIViewController, NVActivityIndicatorVie
     patientHeaderView.configure(patient: presenter.patient)
 
     // Keep the header visually above the collection views
-    view.bringSubviewToFront(patientHeaderView)
+    view.bringSubview(toFront: patientHeaderView)
   }
 
   /// Called by UIKit whenever the safe-area insets change (e.g. on first layout,

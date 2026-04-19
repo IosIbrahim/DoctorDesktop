@@ -84,6 +84,7 @@
 		363768AB2091C5C400CE45D8 /* OverviewSectionCellPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 363768852091C5C400CE45D8 /* OverviewSectionCellPresenter.swift */; };
 		363768AC2091C5C400CE45D8 /* OverviewCollectionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 363768872091C5C400CE45D8 /* OverviewCollectionViewController.swift */; };
 		363768AD2091C5C400CE45D8 /* OverviewPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 363768882091C5C400CE45D8 /* OverviewPresenter.swift */; };
+		519C8271AA69611CACC50198 /* PatientHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AF146219F22A176451A1643 /* PatientHeaderView.swift */; };
 		36393C9F20894E85008410FD /* ClinicalAlertCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 36393C9720894E85008410FD /* ClinicalAlertCell.xib */; };
 		36393CA020894E85008410FD /* ClinicalAlertCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36393C9820894E85008410FD /* ClinicalAlertCell.swift */; };
 		36393CA120894E85008410FD /* ClinicalInfoPopup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36393C9A20894E85008410FD /* ClinicalInfoPopup.swift */; };
@@ -318,6 +319,7 @@
 		363768852091C5C400CE45D8 /* OverviewSectionCellPresenter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OverviewSectionCellPresenter.swift; sourceTree = "<group>"; };
 		363768872091C5C400CE45D8 /* OverviewCollectionViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OverviewCollectionViewController.swift; sourceTree = "<group>"; };
 		363768882091C5C400CE45D8 /* OverviewPresenter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OverviewPresenter.swift; sourceTree = "<group>"; };
+		5AF146219F22A176451A1643 /* PatientHeaderView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PatientHeaderView.swift; sourceTree = "<group>"; };
 		36393C9720894E85008410FD /* ClinicalAlertCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ClinicalAlertCell.xib; sourceTree = "<group>"; };
 		36393C9820894E85008410FD /* ClinicalAlertCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClinicalAlertCell.swift; sourceTree = "<group>"; };
 		36393C9A20894E85008410FD /* ClinicalInfoPopup.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClinicalInfoPopup.swift; sourceTree = "<group>"; };
@@ -794,6 +796,7 @@
 			children = (
 				363768872091C5C400CE45D8 /* OverviewCollectionViewController.swift */,
 				363768882091C5C400CE45D8 /* OverviewPresenter.swift */,
+				5AF146219F22A176451A1643 /* PatientHeaderView.swift */,
 			);
 			path = OverviewCollection;
 			sourceTree = "<group>";
@@ -1607,6 +1610,7 @@
 				3648C588274D36840061C994 /* ListPopupViewControllerExtensions.swift in Sources */,
 				36779681203040620033D8F0 /* RootNavigationCoordinator.swift in Sources */,
 				363768AC2091C5C400CE45D8 /* OverviewCollectionViewController.swift in Sources */,
+				519C8271AA69611CACC50198 /* PatientHeaderView.swift in Sources */,
 				363768972091C5C400CE45D8 /* AllergyFindingComplaintHistoryCellPresenter.swift in Sources */,
 				3637689F2091C5C400CE45D8 /* DietaryCell.swift in Sources */,
 				46B646AA1FD2E44100D8D340 /* AppDelegate.swift in Sources */,
