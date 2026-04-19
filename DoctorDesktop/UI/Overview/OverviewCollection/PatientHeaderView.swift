@@ -114,7 +114,7 @@ final class PatientHeaderView: UIView {
     private let dividerTop    = PatientHeaderView.makeDivider()
     private let dividerBottom = PatientHeaderView.makeDivider()
 
-    // MARK: - Chips row  (Age | Adm Date | Contract)
+    // MARK: - Chips row  (Age | Adm Date | Specialty)
 
     private let chipsStack: UIStackView = {
         let sv = UIStackView()
@@ -127,7 +127,7 @@ final class PatientHeaderView: UIView {
     }()
     private let ageChip      = PatientHeaderView.makeInfoChip(sfSymbol: "person.circle.fill")
     private let dateChip     = PatientHeaderView.makeInfoChip(sfSymbol: "calendar")
-    private let contractChip = PatientHeaderView.makeInfoChip(sfSymbol: "doc.text.fill")
+    private let specialtyChip = PatientHeaderView.makeInfoChip(sfSymbol: "cross.case.fill")
 
     // MARK: - Bottom row  (Doctor + Specialty)
 
@@ -148,7 +148,9 @@ final class PatientHeaderView: UIView {
         return l
     }()
 
-    private var cachedDoctorName: String = ""
+    private var cachedDoctorName: String  = ""
+    private var cachedInsurance: String   = ""   // patient.financialAccount
+    private var cachedSpecialty: String   = ""   // set async after history load
 
     // MARK: - Init
 
@@ -220,19 +222,21 @@ final class PatientHeaderView: UIView {
         // ── Date chip ────────────────────────────────────────────────────
         setChipText(dateChip, formatAdmDate(patient.date))
 
-        // ── Contract chip ────────────────────────────────────────────────
-        let contract = patient.financialAccount.trimmingCharacters(in: .whitespaces)
-        setChipText(contractChip, contract.isEmpty ? "—" : contract)
+        // ── Specialty chip (placeholder — filled async via updateSpecialty) ──
+        setChipText(specialtyChip, specialty ?? "—")
 
-        // ── Doctor ───────────────────────────────────────────────────────
+        // ── Doctor + insurance (shown together in the bottom row) ─────────
         if      let ip = patient as? InpatientPatient  { cachedDoctorName = ip.doctorName }
         else if let op = patient as? OutpatientPatient { cachedDoctorName = op.empNameEn ?? "" }
         else                                           { cachedDoctorName = "" }
-        updateDoctorLabel(specialty: specialty)
+        cachedInsurance = patient.financialAccount.trimmingCharacters(in: .whitespaces)
+        refreshDoctorLabel()
     }
 
+    /// Called after `getPatientHistory` completes — fills the specialty chip.
     func updateSpecialty(_ text: String) {
-        updateDoctorLabel(specialty: text)
+        cachedSpecialty = text
+        setChipText(specialtyChip, text.isEmpty ? "—" : text)
     }
 
     // MARK: - Private helpers
@@ -257,10 +261,11 @@ final class PatientHeaderView: UIView {
         }
     }
 
-    private func updateDoctorLabel(specialty: String?) {
+    /// Rebuilds the doctor label: "Doctor Name\nInsurance"
+    private func refreshDoctorLabel() {
         var text = cachedDoctorName.isEmpty ? "—" : cachedDoctorName
-        if let spec = specialty, !spec.isEmpty, spec != "—" {
-            text += "\n\(spec)"
+        if !cachedInsurance.isEmpty {
+            text += "\n\(cachedInsurance)"
         }
         doctorLabel.text = text
     }
@@ -375,7 +380,7 @@ final class PatientHeaderView: UIView {
             .forEach { infoRowStack.addArrangedSubview($0) }
 
         // ── Chips row ────────────────────────────────────────────────────
-        [ageChip, dateChip, contractChip].forEach { chipsStack.addArrangedSubview($0) }
+        [ageChip, dateChip, specialtyChip].forEach { chipsStack.addArrangedSubview($0) }
 
         // ── Top-level subviews ────────────────────────────────────────────
         [avatarContainer, nameLabel, infoRowStack,
