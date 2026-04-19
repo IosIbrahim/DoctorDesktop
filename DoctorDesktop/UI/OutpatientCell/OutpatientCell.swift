@@ -51,6 +51,7 @@ class OutpatientCell: UITableViewCell {
     patientNationalityLabel.text = ""
     clinicTitleLabel.text = ""
     genderAgeImageView.image = nil
+    statusButton.isUserInteractionEnabled = true  // reset for recycled cells
   }
     
     @IBAction func checkoutOnTap(_ sender: Any) {
@@ -94,40 +95,48 @@ extension OutpatientCell {
       setBtnServStatus(presenter.servStatus, time: presenter.time)
       
   }
-    func setBtnServStatus(_ status:String,time:String) {
+    func setBtnServStatus(_ status: String, time: String) {
         let endDate = time.ConvertToDate
         let startDate = Date()
         let calendar = Calendar.current
         let dateComponents = calendar.dateComponents([.second], from: startDate, to: endDate)
 
         if let seconds = dateComponents.second {
-            print("Difference in seconds: \(seconds)")
             let min = seconds / 60
-            let second =  seconds % 60
+            let second = seconds % 60
             lblTime.text = "\(min):\(second)"
             if seconds < 5 {
                 lblTime.isHidden = true
             }
         }
-        statusButton.isHidden = false
-        if status == "B" {
-            // المريض وصل ولسه منتظر الدخول اخضر
-            statusButton.setTitle("Arrival", for: .normal)
-            statusButton.backgroundColor = UIColor(red: 37, green: 182, blue: 110, alpha: 1.0)
-            
-        }else if status == "A"{
-            // كده المريض دحل ولسه مخرجش ازرق
-            statusButton.setTitle("Check In", for: .normal)
-            statusButton.backgroundColor = UIColor(red: 28, green: 170, blue: 222, alpha: 1.0)
 
-        }else if status == "S"{
-            // كده المريض خرج احمر
+        statusButton.isHidden = false
+        statusButton.setTitleColor(.white, for: .normal)
+        statusButton.titleLabel?.font = UIFont.systemFont(ofSize: 14, weight: .semibold)
+
+        switch status {
+        case "B":
+            // Patient arrived — waiting to enter → Green
+            statusButton.setTitle("Arrival", for: .normal)
+            statusButton.backgroundColor = UIColor(red: 37/255, green: 182/255, blue: 110/255, alpha: 1)
+
+        case "A":
+            // Patient inside, not yet discharged → Blue
+            statusButton.setTitle("Check In", for: .normal)
+            statusButton.backgroundColor = UIColor(red: 28/255, green: 170/255, blue: 222/255, alpha: 1)
+
+        case "S":
+            // Patient checked out — pending confirmation → Red
             statusButton.setTitle("Check Out", for: .normal)
-            statusButton.backgroundColor = UIColor(red: 248, green: 38, blue: 7, alpha: 1.0)
-        }else if status == "D" {
-            statusButton.setTitle("OverView", for: .normal)
-            statusButton.backgroundColor = UIColor(red: 28, green: 170, blue: 222, alpha: 1.0)
-        }else {
+            statusButton.backgroundColor = UIColor(red: 248/255, green: 38/255, blue: 7/255, alpha: 1)
+
+        case "D":
+            // Checkout confirmed → Green with checkmark
+            statusButton.setTitle("✓ Done", for: .normal)
+            statusButton.backgroundColor = UIColor(red: 37/255, green: 182/255, blue: 110/255, alpha: 1)
+            statusButton.isUserInteractionEnabled = false  // no further action
+
+        default:
             statusButton.isHidden = true
         }
     }
