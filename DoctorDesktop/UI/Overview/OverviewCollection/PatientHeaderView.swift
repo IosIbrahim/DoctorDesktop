@@ -129,7 +129,7 @@ final class PatientHeaderView: UIView {
     private let dateChip     = PatientHeaderView.makeInfoChip(sfSymbol: "calendar")
     private let specialtyChip = PatientHeaderView.makeInfoChip(sfSymbol: "cross.case.fill")
 
-    // MARK: - Bottom row  (Doctor + Specialty)
+    // MARK: - Bottom section  (Doctor row + Insurance row)
 
     private let doctorIconView: UIImageView = {
         let iv = UIImageView()
@@ -141,9 +141,25 @@ final class PatientHeaderView: UIView {
     }()
     private let doctorLabel: UILabel = {
         let l = UILabel()
+        l.font = .systemFont(ofSize: 11, weight: .semibold)
+        l.textColor = .white
+        l.numberOfLines = 1
+        l.translatesAutoresizingMaskIntoConstraints = false
+        return l
+    }()
+    private let insuranceIconView: UIImageView = {
+        let iv = UIImageView()
+        if #available(iOS 13.0, *) { iv.image = UIImage(systemName: "creditcard.fill") }
+        iv.tintColor = UIColor.white.withAlphaComponent(0.70)
+        iv.contentMode = .scaleAspectFit
+        iv.translatesAutoresizingMaskIntoConstraints = false
+        return iv
+    }()
+    private let insuranceLabel: UILabel = {
+        let l = UILabel()
         l.font = .systemFont(ofSize: 11, weight: .medium)
         l.textColor = UIColor.white.withAlphaComponent(0.85)
-        l.numberOfLines = 2
+        l.numberOfLines = 1
         l.translatesAutoresizingMaskIntoConstraints = false
         return l
     }()
@@ -261,13 +277,9 @@ final class PatientHeaderView: UIView {
         }
     }
 
-    /// Rebuilds the doctor label: "Doctor Name\nInsurance"
     private func refreshDoctorLabel() {
-        var text = cachedDoctorName.isEmpty ? "—" : cachedDoctorName
-        if !cachedInsurance.isEmpty {
-            text += "\n\(cachedInsurance)"
-        }
-        doctorLabel.text = text
+        doctorLabel.text    = cachedDoctorName.isEmpty ? "—" : cachedDoctorName
+        insuranceLabel.text = cachedInsurance.isEmpty  ? "—" : cachedInsurance
     }
 
     private func formatAdmDate(_ raw: String) -> String {
@@ -385,7 +397,8 @@ final class PatientHeaderView: UIView {
         // ── Top-level subviews ────────────────────────────────────────────
         [avatarContainer, nameLabel, infoRowStack,
          dividerTop, chipsStack, dividerBottom,
-         doctorIconView, doctorLabel
+         doctorIconView, doctorLabel,
+         insuranceIconView, insuranceLabel
         ].forEach { addSubview($0) }
 
         setupConstraints()
@@ -433,18 +446,26 @@ final class PatientHeaderView: UIView {
             dividerBottom.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
             dividerBottom.heightAnchor.constraint(equalToConstant: 0.5),
 
-            // ── Doctor icon ─────────────────────────────────────────────
+            // ── Doctor icon + name ──────────────────────────────────────
             doctorIconView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
-            doctorIconView.topAnchor.constraint(equalTo: dividerBottom.bottomAnchor, constant: 8),
-            doctorIconView.bottomAnchor.constraint(lessThanOrEqualTo: bottomAnchor, constant: -10),
-            doctorIconView.widthAnchor.constraint(equalToConstant: 14),
-            doctorIconView.heightAnchor.constraint(equalToConstant: 14),
+            doctorIconView.topAnchor.constraint(equalTo: dividerBottom.bottomAnchor, constant: 7),
+            doctorIconView.widthAnchor.constraint(equalToConstant: 13),
+            doctorIconView.heightAnchor.constraint(equalToConstant: 13),
 
-            // ── Doctor name + specialty ─────────────────────────────────
             doctorLabel.leadingAnchor.constraint(equalTo: doctorIconView.trailingAnchor, constant: 5),
-            doctorLabel.topAnchor.constraint(equalTo: doctorIconView.topAnchor),
-            doctorLabel.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -10),
+            doctorLabel.centerYAnchor.constraint(equalTo: doctorIconView.centerYAnchor),
             doctorLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
+
+            // ── Insurance icon + label ──────────────────────────────────
+            insuranceIconView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
+            insuranceIconView.topAnchor.constraint(equalTo: doctorIconView.bottomAnchor, constant: 5),
+            insuranceIconView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -8),
+            insuranceIconView.widthAnchor.constraint(equalToConstant: 13),
+            insuranceIconView.heightAnchor.constraint(equalToConstant: 13),
+
+            insuranceLabel.leadingAnchor.constraint(equalTo: insuranceIconView.trailingAnchor, constant: 5),
+            insuranceLabel.centerYAnchor.constraint(equalTo: insuranceIconView.centerYAnchor),
+            insuranceLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
         ])
     }
 }
