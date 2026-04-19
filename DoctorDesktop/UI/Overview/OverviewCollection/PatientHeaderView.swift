@@ -14,7 +14,7 @@ final class PatientHeaderView: UIView {
 
     // MARK: - Constants
 
-    static let preferredHeight: CGFloat = 162
+    static let preferredHeight: CGFloat = 170
 
     // MARK: - Background
 
@@ -24,7 +24,7 @@ final class PatientHeaderView: UIView {
 
     private let avatarContainer: UIView = {
         let v = UIView()
-        v.layer.cornerRadius = 28
+        v.layer.cornerRadius = 26
         v.clipsToBounds = true
         v.translatesAutoresizingMaskIntoConstraints = false
         return v
@@ -38,7 +38,7 @@ final class PatientHeaderView: UIView {
         return iv
     }()
 
-    // MARK: - Name / ID
+    // MARK: - Name
 
     private let nameLabel: UILabel = {
         let l = UILabel()
@@ -50,22 +50,79 @@ final class PatientHeaderView: UIView {
         l.translatesAutoresizingMaskIntoConstraints = false
         return l
     }()
-    private let idBadge: UIView = {
-        let v = UIView()
-        v.backgroundColor = UIColor.white.withAlphaComponent(0.18)
-        v.layer.cornerRadius = 9
-        v.translatesAutoresizingMaskIntoConstraints = false
-        return v
+
+    // MARK: - ID / Phone / Nationality row  (below name, inside the ID area)
+
+    private let infoRowStack: UIStackView = {
+        let sv = UIStackView()
+        sv.axis = .horizontal
+        sv.spacing = 10
+        sv.alignment = .center
+        sv.distribution = .fill
+        sv.translatesAutoresizingMaskIntoConstraints = false
+        return sv
+    }()
+
+    // ID item
+    private let idIconView: UIImageView = {
+        let iv = UIImageView()
+        if #available(iOS 13.0, *) { iv.image = UIImage(systemName: "creditcard.fill") }
+        iv.tintColor = UIColor.white.withAlphaComponent(0.75)
+        iv.contentMode = .scaleAspectFit
+        iv.translatesAutoresizingMaskIntoConstraints = false
+        return iv
     }()
     private let idLabel: UILabel = {
         let l = UILabel()
         l.font = .systemFont(ofSize: 11, weight: .semibold)
-        l.textColor = UIColor.white.withAlphaComponent(0.95)
+        l.textColor = .white
         l.translatesAutoresizingMaskIntoConstraints = false
         return l
     }()
 
-    // MARK: - Info chips  (Age | Adm Date | Contract)
+    // Phone item — tappable button
+    private let phoneButton: UIButton = {
+        let b = UIButton(type: .system)
+        b.tintColor = .white
+        b.setTitleColor(.white, for: .normal)
+        b.titleLabel?.font = .systemFont(ofSize: 11, weight: .semibold)
+        b.translatesAutoresizingMaskIntoConstraints = false
+        return b
+    }()
+    private var phoneNumber: String = ""
+
+    // Nationality item
+    private let flagView: UIImageView = {
+        let iv = UIImageView()
+        iv.contentMode = .scaleAspectFill
+        iv.layer.cornerRadius = 2
+        iv.clipsToBounds = true
+        iv.translatesAutoresizingMaskIntoConstraints = false
+        return iv
+    }()
+    private let nationalityLabel: UILabel = {
+        let l = UILabel()
+        l.font = .systemFont(ofSize: 11, weight: .semibold)
+        l.textColor = .white
+        l.translatesAutoresizingMaskIntoConstraints = false
+        return l
+    }()
+
+    // Spacer between left items and right nationality
+    private let rowSpacer: UIView = {
+        let v = UIView()
+        v.translatesAutoresizingMaskIntoConstraints = false
+        v.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        v.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        return v
+    }()
+
+    // MARK: - Dividers
+
+    private let dividerTop    = PatientHeaderView.makeDivider()
+    private let dividerBottom = PatientHeaderView.makeDivider()
+
+    // MARK: - Chips row  (Age | Adm Date | Contract)
 
     private let chipsStack: UIStackView = {
         let sv = UIStackView()
@@ -80,14 +137,8 @@ final class PatientHeaderView: UIView {
     private let dateChip     = PatientHeaderView.makeInfoChip(sfSymbol: "calendar")
     private let contractChip = PatientHeaderView.makeInfoChip(sfSymbol: "doc.text.fill")
 
-    // MARK: - Dividers
+    // MARK: - Bottom row  (Doctor + Specialty)
 
-    private let dividerTop    = PatientHeaderView.makeDivider()
-    private let dividerBottom = PatientHeaderView.makeDivider()
-
-    // MARK: - Bottom row  (Doctor+Specialty | Phone | Flag+Nationality)
-
-    // Left: doctor + specialty
     private let doctorIconView: UIImageView = {
         let iv = UIImageView()
         if #available(iOS 13.0, *) { iv.image = UIImage(systemName: "stethoscope") }
@@ -96,7 +147,7 @@ final class PatientHeaderView: UIView {
         iv.translatesAutoresizingMaskIntoConstraints = false
         return iv
     }()
-    /// Shows "DoctorName · Specialty" — specialty appended after async load.
+    /// Shows "DoctorName\nSpecialty" — specialty appended after async load.
     private let doctorLabel: UILabel = {
         let l = UILabel()
         l.font = .systemFont(ofSize: 11, weight: .medium)
@@ -106,42 +157,6 @@ final class PatientHeaderView: UIView {
         return l
     }()
 
-    // Middle: phone
-    private let phoneIconView: UIImageView = {
-        let iv = UIImageView()
-        if #available(iOS 13.0, *) { iv.image = UIImage(systemName: "phone.fill") }
-        iv.tintColor = UIColor.white.withAlphaComponent(0.75)
-        iv.contentMode = .scaleAspectFit
-        iv.translatesAutoresizingMaskIntoConstraints = false
-        return iv
-    }()
-    private let phoneLabel: UILabel = {
-        let l = UILabel()
-        l.font = .systemFont(ofSize: 11, weight: .medium)
-        l.textColor = UIColor.white.withAlphaComponent(0.85)
-        l.translatesAutoresizingMaskIntoConstraints = false
-        return l
-    }()
-
-    // Right: flag + nationality
-    private let flagView: UIImageView = {
-        let iv = UIImageView()
-        iv.contentMode = .scaleAspectFill
-        iv.layer.cornerRadius = 3
-        iv.clipsToBounds = true
-        iv.translatesAutoresizingMaskIntoConstraints = false
-        return iv
-    }()
-    private let nationalityLabel: UILabel = {
-        let l = UILabel()
-        l.font = .systemFont(ofSize: 11, weight: .medium)
-        l.textColor = UIColor.white.withAlphaComponent(0.85)
-        l.textAlignment = .right
-        l.translatesAutoresizingMaskIntoConstraints = false
-        return l
-    }()
-
-    // Cached values for specialty update
     private var cachedDoctorName: String = ""
 
     // MARK: - Init
@@ -167,11 +182,9 @@ final class PatientHeaderView: UIView {
 
     // MARK: - Public API
 
-    /// Populate the header from the presenter.  Call in `viewDidLoad`.
-    /// Call `updateSpecialty(_:)` later once patientHistory loads.
     func configure(patient: Patient, specialty: String? = nil) {
 
-        // ── Avatar ──────────────────────────────────────────────────────
+        // ── Avatar colour ────────────────────────────────────────────────
         let gender = patient.genderAge.uppercased()
         let isMale = gender.hasPrefix("M") || gender == "1"
         if #available(iOS 13.0, *) {
@@ -183,9 +196,25 @@ final class PatientHeaderView: UIView {
             : [UIColor(red: 0.76, green: 0.23, blue: 0.55, alpha: 1).cgColor,
                UIColor(red: 0.55, green: 0.10, blue: 0.44, alpha: 1).cgColor]
 
-        // ── Name & ID ────────────────────────────────────────────────────
+        // ── Name ─────────────────────────────────────────────────────────
         nameLabel.text = patient.name
-        idLabel.text   = "ID  \(patient.id.trimmingCharacters(in: .whitespaces))"
+
+        // ── ID ───────────────────────────────────────────────────────────
+        idLabel.text = patient.id.trimmingCharacters(in: .whitespaces)
+
+        // ── Phone (tappable) ─────────────────────────────────────────────
+        if let op = patient as? OutpatientPatient, let mobile = op.patMobile, !mobile.isEmpty {
+            phoneNumber = mobile
+            configurePhoneButton(mobile)
+            phoneButton.isHidden = false
+        } else {
+            phoneButton.isHidden = true
+        }
+
+        // ── Nationality + flag ───────────────────────────────────────────
+        nationalityLabel.text = patient.nationality.isEmpty ? "—" : patient.nationality
+        flagView.image        = patient.countyFlag
+        flagView.isHidden     = (patient.countyFlag == nil)
 
         // ── Age chip ─────────────────────────────────────────────────────
         let age: String
@@ -194,40 +223,47 @@ final class PatientHeaderView: UIView {
         else                                           { age = "" }
         setChipText(ageChip, age.isEmpty ? "—" : age)
 
-        // ── Date chip — show date+time portion ───────────────────────────
-        // patient.date may be "19/04/2026 13:02:43" — keep date + HH:mm only
-        let datePart = formatAdmDate(patient.date)
-        setChipText(dateChip, datePart.isEmpty ? "—" : datePart)
+        // ── Date chip ────────────────────────────────────────────────────
+        setChipText(dateChip, formatAdmDate(patient.date))
 
         // ── Contract chip ────────────────────────────────────────────────
         let contract = patient.financialAccount.trimmingCharacters(in: .whitespaces)
         setChipText(contractChip, contract.isEmpty ? "—" : contract)
 
-        // ── Doctor label (+ specialty added by updateSpecialty) ──────────
+        // ── Doctor row ───────────────────────────────────────────────────
         if      let ip = patient as? InpatientPatient  { cachedDoctorName = ip.doctorName }
         else if let op = patient as? OutpatientPatient { cachedDoctorName = op.empNameEn ?? "" }
         else                                           { cachedDoctorName = "" }
         updateDoctorLabel(specialty: specialty)
-
-        // ── Phone ────────────────────────────────────────────────────────
-        let phone: String
-        if let op = patient as? OutpatientPatient { phone = op.patMobile ?? "" }
-        else                                      { phone = "" }
-        phoneLabel.text   = phone.isEmpty ? "—" : phone
-        phoneIconView.alpha = phone.isEmpty ? 0.4 : 1.0
-
-        // ── Nationality + flag ───────────────────────────────────────────
-        nationalityLabel.text = patient.nationality.isEmpty ? "—" : patient.nationality
-        flagView.image        = patient.countyFlag
-        flagView.isHidden     = (patient.countyFlag == nil)
     }
 
-    /// Call after `getPatientHistory` completes to fill in the specialty.
+    /// Update specialty text after `getPatientHistory` completes.
     func updateSpecialty(_ text: String) {
         updateDoctorLabel(specialty: text)
     }
 
     // MARK: - Private helpers
+
+    private func configurePhoneButton(_ number: String) {
+        if #available(iOS 13.0, *) {
+            let config = UIImage.SymbolConfiguration(pointSize: 11, weight: .semibold)
+            let icon = UIImage(systemName: "phone.fill", withConfiguration: config)
+            phoneButton.setImage(icon, for: .normal)
+            phoneButton.imageEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 5)
+            phoneButton.contentEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 5)
+        }
+        phoneButton.setTitle(number, for: .normal)
+    }
+
+    @objc private func phoneTapped() {
+        guard !phoneNumber.isEmpty,
+              let url = URL(string: "tel://\(phoneNumber)") else { return }
+        if #available(iOS 10, *) {
+            UIApplication.shared.open(url)
+        } else {
+            UIApplication.shared.openURL(url)
+        }
+    }
 
     private func updateDoctorLabel(specialty: String?) {
         var text = cachedDoctorName.isEmpty ? "—" : cachedDoctorName
@@ -238,12 +274,9 @@ final class PatientHeaderView: UIView {
     }
 
     private func formatAdmDate(_ raw: String) -> String {
-        // Input examples: "19/04/2026 13:02:43"  or  "2026-04-19T13:02:43"
-        // Output: "19/04/2026 13:07"
         let parts = raw.components(separatedBy: " ")
         guard parts.count >= 2 else { return parts.first ?? raw }
-        let timeParts = parts[1].components(separatedBy: ":")
-        let hhmm = timeParts.prefix(2).joined(separator: ":")
+        let hhmm = parts[1].components(separatedBy: ":").prefix(2).joined(separator: ":")
         return "\(parts[0]) \(hhmm)"
     }
 
@@ -317,50 +350,69 @@ final class PatientHeaderView: UIView {
         avatarContainer.layer.insertSublayer(avatarGradient, at: 0)
         avatarContainer.addSubview(avatarIconView)
 
-        // ID badge
-        idBadge.addSubview(idLabel)
+        // Phone button action
+        phoneButton.addTarget(self, action: #selector(phoneTapped), for: .touchUpInside)
+
+        // Info row: ID | Phone | (spacer) | Flag | Nationality
+        [makeInlineItem(icon: idIconView, label: idLabel),
+         phoneButton,
+         rowSpacer,
+         flagView,
+         nationalityLabel
+        ].forEach { infoRowStack.addArrangedSubview($0) }
 
         // Chips
         [ageChip, dateChip, contractChip].forEach { chipsStack.addArrangedSubview($0) }
 
         // All top-level subviews
-        [avatarContainer, nameLabel, idBadge,
+        [avatarContainer, nameLabel, infoRowStack,
          dividerTop, chipsStack, dividerBottom,
-         doctorIconView, doctorLabel,
-         phoneIconView, phoneLabel,
-         flagView, nationalityLabel
+         doctorIconView, doctorLabel
         ].forEach { addSubview($0) }
 
         setupConstraints()
     }
 
+    /// Wraps an icon + label into a compact horizontal view for the info row.
+    private func makeInlineItem(icon: UIImageView, label: UILabel) -> UIView {
+        let sv = UIStackView(arrangedSubviews: [icon, label])
+        sv.axis = .horizontal
+        sv.spacing = 4
+        sv.alignment = .center
+        sv.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            icon.widthAnchor.constraint(equalToConstant: 12),
+            icon.heightAnchor.constraint(equalToConstant: 12),
+        ])
+        return sv
+    }
+
     private func setupConstraints() {
         NSLayoutConstraint.activate([
 
-            // ── Avatar (56 × 56) ────────────────────────────────────────
+            // ── Avatar (52 × 52) ────────────────────────────────────────
             avatarContainer.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
-            avatarContainer.topAnchor.constraint(equalTo: topAnchor, constant: 14),
-            avatarContainer.widthAnchor.constraint(equalToConstant: 56),
-            avatarContainer.heightAnchor.constraint(equalToConstant: 56),
+            avatarContainer.topAnchor.constraint(equalTo: topAnchor, constant: 12),
+            avatarContainer.widthAnchor.constraint(equalToConstant: 52),
+            avatarContainer.heightAnchor.constraint(equalToConstant: 52),
 
             avatarIconView.centerXAnchor.constraint(equalTo: avatarContainer.centerXAnchor),
             avatarIconView.centerYAnchor.constraint(equalTo: avatarContainer.centerYAnchor),
-            avatarIconView.widthAnchor.constraint(equalToConstant: 28),
-            avatarIconView.heightAnchor.constraint(equalToConstant: 28),
+            avatarIconView.widthAnchor.constraint(equalToConstant: 26),
+            avatarIconView.heightAnchor.constraint(equalToConstant: 26),
 
             // ── Patient name ────────────────────────────────────────────
             nameLabel.leadingAnchor.constraint(equalTo: avatarContainer.trailingAnchor, constant: 12),
             nameLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
-            nameLabel.topAnchor.constraint(equalTo: avatarContainer.topAnchor, constant: 2),
+            nameLabel.topAnchor.constraint(equalTo: avatarContainer.topAnchor),
 
-            // ── ID badge ────────────────────────────────────────────────
-            idBadge.leadingAnchor.constraint(equalTo: nameLabel.leadingAnchor),
-            idBadge.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 4),
+            // ── Info row: ID | Phone | Spacer | Flag | Nationality ───────
+            infoRowStack.leadingAnchor.constraint(equalTo: avatarContainer.trailingAnchor, constant: 12),
+            infoRowStack.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
+            infoRowStack.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 5),
 
-            idLabel.topAnchor.constraint(equalTo: idBadge.topAnchor, constant: 3),
-            idLabel.bottomAnchor.constraint(equalTo: idBadge.bottomAnchor, constant: -3),
-            idLabel.leadingAnchor.constraint(equalTo: idBadge.leadingAnchor, constant: 8),
-            idLabel.trailingAnchor.constraint(equalTo: idBadge.trailingAnchor, constant: -8),
+            flagView.widthAnchor.constraint(equalToConstant: 18),
+            flagView.heightAnchor.constraint(equalToConstant: 13),
 
             // ── Divider (top) ───────────────────────────────────────────
             dividerTop.topAnchor.constraint(equalTo: avatarContainer.bottomAnchor, constant: 10),
@@ -379,35 +431,18 @@ final class PatientHeaderView: UIView {
             dividerBottom.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
             dividerBottom.heightAnchor.constraint(equalToConstant: 0.5),
 
-            // ── LEFT: Doctor icon + doctor/specialty label ───────────────
+            // ── Doctor icon ─────────────────────────────────────────────
             doctorIconView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
             doctorIconView.topAnchor.constraint(equalTo: dividerBottom.bottomAnchor, constant: 8),
             doctorIconView.bottomAnchor.constraint(lessThanOrEqualTo: bottomAnchor, constant: -10),
             doctorIconView.widthAnchor.constraint(equalToConstant: 14),
             doctorIconView.heightAnchor.constraint(equalToConstant: 14),
 
+            // ── Doctor name + specialty ─────────────────────────────────
             doctorLabel.leadingAnchor.constraint(equalTo: doctorIconView.trailingAnchor, constant: 5),
             doctorLabel.topAnchor.constraint(equalTo: doctorIconView.topAnchor),
             doctorLabel.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -10),
-            doctorLabel.widthAnchor.constraint(lessThanOrEqualTo: widthAnchor, multiplier: 0.38),
-
-            // ── MIDDLE: Phone icon + phone number ───────────────────────
-            phoneIconView.centerXAnchor.constraint(equalTo: centerXAnchor),
-            phoneIconView.centerYAnchor.constraint(equalTo: doctorIconView.centerYAnchor),
-            phoneIconView.widthAnchor.constraint(equalToConstant: 14),
-            phoneIconView.heightAnchor.constraint(equalToConstant: 14),
-
-            phoneLabel.leadingAnchor.constraint(equalTo: phoneIconView.trailingAnchor, constant: 5),
-            phoneLabel.centerYAnchor.constraint(equalTo: phoneIconView.centerYAnchor),
-
-            // ── RIGHT: Flag + nationality ────────────────────────────────
-            nationalityLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
-            nationalityLabel.centerYAnchor.constraint(equalTo: doctorIconView.centerYAnchor),
-
-            flagView.trailingAnchor.constraint(equalTo: nationalityLabel.leadingAnchor, constant: -5),
-            flagView.centerYAnchor.constraint(equalTo: doctorIconView.centerYAnchor),
-            flagView.widthAnchor.constraint(equalToConstant: 20),
-            flagView.heightAnchor.constraint(equalToConstant: 14),
+            doctorLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
         ])
     }
 }
