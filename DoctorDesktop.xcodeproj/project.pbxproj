@@ -148,6 +148,8 @@
 		366D86372087E97A008B16BF /* DiagnosisCategoryPopUp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 366D86162087E97A008B16BF /* DiagnosisCategoryPopUp.swift */; };
 		366D86382087E97A008B16BF /* EmergencyTriageView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 366D86172087E97A008B16BF /* EmergencyTriageView.xib */; };
 		366D863C2087E97A008B16BF /* EmergencyTriagePresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 366D861C2087E97A008B16BF /* EmergencyTriagePresenter.swift */; };
+		AABBCC010000000000000001 /* VitalSignsEntryPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCC010000000000000003 /* VitalSignsEntryPresenter.swift */; };
+		AABBCC010000000000000002 /* VitalSignsEntryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCC010000000000000004 /* VitalSignsEntryViewController.swift */; };
 		366D863D2087E97A008B16BF /* PediatricsScorePopUpView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 366D861E2087E97A008B16BF /* PediatricsScorePopUpView.xib */; };
 		366D863E2087E97A008B16BF /* PediatricsScorePopUp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 366D861F2087E97A008B16BF /* PediatricsScorePopUp.swift */; };
 		366D863F2087E97A008B16BF /* PediatricsScorePopUpPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 366D86202087E97A008B16BF /* PediatricsScorePopUpPresenter.swift */; };
@@ -384,6 +386,8 @@
 		366D86162087E97A008B16BF /* DiagnosisCategoryPopUp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DiagnosisCategoryPopUp.swift; sourceTree = "<group>"; };
 		366D86172087E97A008B16BF /* EmergencyTriageView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = EmergencyTriageView.xib; sourceTree = "<group>"; };
 		366D861C2087E97A008B16BF /* EmergencyTriagePresenter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmergencyTriagePresenter.swift; sourceTree = "<group>"; };
+		AABBCC010000000000000003 /* VitalSignsEntryPresenter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VitalSignsEntryPresenter.swift; sourceTree = "<group>"; };
+		AABBCC010000000000000004 /* VitalSignsEntryViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VitalSignsEntryViewController.swift; sourceTree = "<group>"; };
 		366D861E2087E97A008B16BF /* PediatricsScorePopUpView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PediatricsScorePopUpView.xib; sourceTree = "<group>"; };
 		366D861F2087E97A008B16BF /* PediatricsScorePopUp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PediatricsScorePopUp.swift; sourceTree = "<group>"; };
 		366D86202087E97A008B16BF /* PediatricsScorePopUpPresenter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PediatricsScorePopUpPresenter.swift; sourceTree = "<group>"; };
@@ -1012,6 +1016,15 @@
 			path = EmergencyTriage;
 			sourceTree = "<group>";
 		};
+		AABBCC010000000000000005 /* VitalSignsEntry */ = {
+			isa = PBXGroup;
+			children = (
+				AABBCC010000000000000003 /* VitalSignsEntryPresenter.swift */,
+				AABBCC010000000000000004 /* VitalSignsEntryViewController.swift */,
+			);
+			path = VitalSignsEntry;
+			sourceTree = "<group>";
+		};
 		366D860F2087E97A008B16BF /* DiagnosisCategoryPopUpCell */ = {
 			isa = PBXGroup;
 			children = (
@@ -1201,6 +1214,7 @@
 				368462131FE69F7300284402 /* PatientOverview */,
 				3691B19820165C3B00544BA4 /* LabRadOrder */,
 				366D860E2087E97A008B16BF /* EmergencyTriage */,
+				AABBCC010000000000000005 /* VitalSignsEntry */,
 				363768542091C5C400CE45D8 /* Overview */,
 			);
 			path = UI;
@@ -1688,6 +1702,8 @@
 				3648C58A274D36940061C994 /* ListPopupTableViewCell.swift in Sources */,
 				366D86372087E97A008B16BF /* DiagnosisCategoryPopUp.swift in Sources */,
 				366D863C2087E97A008B16BF /* EmergencyTriagePresenter.swift in Sources */,
+				AABBCC010000000000000001 /* VitalSignsEntryPresenter.swift in Sources */,
+				AABBCC010000000000000002 /* VitalSignsEntryViewController.swift in Sources */,
 				366D863E2087E97A008B16BF /* PediatricsScorePopUp.swift in Sources */,
 				36A33C1A1FE31FE6007A9E55 /* UnitsPopup.swift in Sources */,
 				36883F1220710A5500A53AE7 /* WebViewerPresenter.swift in Sources */,

@@ -18,6 +18,7 @@ protocol DependencyRegistry {
     func makeOverviewSectionDetailsViewController(overviewSection: OverviewSection, patientSummary: PatientSummary, user: User,pat:Patient) -> OverviewSectionDetailsViewController
   func makeWebViewerViewController(url: URL) -> WebViewerViewController
   func makeEmergencyTriageViewController(with patient: EmergencyPatient, user: User) -> EmergencyTriageViewController
+  func makeVitalSignsEntryViewController(with patient: Patient, user: User) -> VitalSignsEntryViewController
 
   typealias rootNavigationCoordinatorMaker = (UIViewController) -> NavigationCoordinator
   typealias ComponentCellMaker = (UICollectionView, IndexPath, Component, ColorAndImageTuple) -> ComponentCell
@@ -151,6 +152,7 @@ class DependencyRegistryImpl: DependencyRegistry {
     registerDietaryCellPresenter()
     registerEmergencyTriagePresenter()
     registerVitalCellPresenter()
+    registerVitalSignsEntryPresenter()
   }
   
   func registerViewControllers() {
@@ -224,6 +226,7 @@ class DependencyRegistryImpl: DependencyRegistry {
     registerOverviewSectionDetailsViewController()
     registerWebViewerViewController()
     registerEmergencyTriageViewController()
+    registerVitalSignsEntryViewController()
   }
   
   //MARK: - Maker Methods
@@ -550,5 +553,27 @@ extension DependencyRegistryImpl {
 
   func makePediatricsScorePopUp(with pediatricsScoreElements: PediatricsScoreElements, selectedScoreChoices: [PediatricsScoreChoice]) -> PediatricsScorePopUp {
     return container.resolve(PediatricsScorePopUp.self, arguments: pediatricsScoreElements, selectedScoreChoices)!
+  }
+}
+
+// MARK: - VitalSignsEntry (code-only Add Vital Signs screen)
+extension DependencyRegistryImpl {
+  func registerVitalSignsEntryPresenter() {
+    container.register(VitalSignsEntryPresenter.self) { (r, patient: Patient, user: User) in
+      VitalSignsEntryPresenterImpl(patient: patient, user: user)
+    }
+  }
+
+  func registerVitalSignsEntryViewController() {
+    container.register(VitalSignsEntryViewController.self) { (r, patient: Patient, user: User) in
+      let presenter = r.resolve(VitalSignsEntryPresenter.self, arguments: patient, user)!
+      let vc = VitalSignsEntryViewController()
+      vc.configure(with: presenter, navigationCoordinator: self.navigationCoordinator)
+      return vc
+    }
+  }
+
+  func makeVitalSignsEntryViewController(with patient: Patient, user: User) -> VitalSignsEntryViewController {
+    return container.resolve(VitalSignsEntryViewController.self, arguments: patient, user)!
   }
 }

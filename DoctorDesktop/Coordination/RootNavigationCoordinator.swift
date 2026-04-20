@@ -147,13 +147,12 @@ class RootNavigationCoordinatorImpl: NavigationCoordinator {
     navState = .atEmergencyTriage
   }
 
-  /// Opens EmergencyTriageViewController from the Overview vital-signs + button.
-  /// Wraps the current Patient in an EmergencyPatient bridge so the existing VC is reused.
+  /// Opens the code-only Add Vital Signs screen from the Overview vital-signs + button.
+  /// Uses the Android-matched VitalSignsEntryViewController (programmatic, not XIB-based).
   func showVitalSignsEntry(arguments: Dictionary<String, Any>?) {
     guard let patient = arguments?["patient"] as? Patient,
           let user    = arguments?["user"]    as? User else { return }
-    let bridged = EmergencyPatient(bridging: patient)
-    let vc = registry.makeEmergencyTriageViewController(with: bridged, user: user)
+    let vc = registry.makeVitalSignsEntryViewController(with: patient, user: user)
     rootViewController.navigationController?.pushViewController(vc, animated: true)
     navState = .atVitalSignsEntry
   }
