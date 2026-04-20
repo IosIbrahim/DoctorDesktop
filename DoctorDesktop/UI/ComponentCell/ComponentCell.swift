@@ -9,7 +9,7 @@
 import UIKit
 
 class ComponentCell: UICollectionViewCell {
-  
+
     @IBOutlet weak var lblRecieved: UILabel!
     @IBOutlet weak var lblSend: UILabel!
     @IBOutlet weak var pickerConsultant: UIView!
@@ -18,17 +18,33 @@ class ComponentCell: UICollectionViewCell {
     @IBOutlet weak var countLabel: UILabel!
     @IBOutlet weak var titleLabel: UILabel!
     @IBOutlet weak var imageView: UIImageView!
-  
+
+  // Reuse a single gradient layer instead of creating a new one on every configure call.
+  private let gradientLayer = CAGradientLayer()
+
   fileprivate var presenter: ComponentCellPresenter!
-  
+
   override func awakeFromNib() {
     super.awakeFromNib()
     self.cellView.layer.cornerRadius = 20
+
+    gradientLayer.startPoint = CGPoint(x: 0.0, y: 0.5)
+    gradientLayer.endPoint   = CGPoint(x: 1.0, y: 0.5)
+    gradientLayer.cornerRadius = 10
+    let bgView = UIView()
+    bgView.layer.addSublayer(gradientLayer)
+    self.backgroundView = bgView
   }
-  
+
+  override func layoutSubviews() {
+    super.layoutSubviews()
+    // Keep the gradient frame in sync with the cell bounds (handles rotation, etc.)
+    gradientLayer.frame = self.bounds
+  }
+
   override func prepareForReuse() {
     super.prepareForReuse()
-    
+
     cellView.backgroundColor = .clear
     countLabel.text = ""
     titleLabel.text = ""
@@ -39,27 +55,25 @@ class ComponentCell: UICollectionViewCell {
 //MARK: - Configure
 extension ComponentCell {
   func configure(with presenter: ComponentCellPresenter) {
-    let layer = CAGradientLayer()
-    layer.frame = self.bounds
-    layer.colors = [presenter.startColor.withAlphaComponent(0.90).cgColor, presenter.endColor.withAlphaComponent(0.90).cgColor]
-    layer.startPoint = CGPoint(x: 0.0, y: 0.5)
-    layer.endPoint = CGPoint(x: 1.0, y: 0.5)
-    layer.cornerRadius = 10
-    self.backgroundView = UIView()
-    self.backgroundView?.layer.addSublayer(layer)
-    
+    // Update the shared gradient layer colors — no allocation needed.
+    gradientLayer.colors = [
+      presenter.startColor.withAlphaComponent(0.90).cgColor,
+      presenter.endColor.withAlphaComponent(0.90).cgColor
+    ]
+
     self.titleLabel.text = presenter.title
     self.countLabel.text = presenter.count
     self.imageView.image = presenter.image
-      
-      pickerMain.isHidden = presenter.title.lowercased().contains("Consultations".lowercased())
-      pickerConsultant.isHidden = !pickerMain.isHidden
-      if presenter.title == "Notifications" {
-          self.countLabel.text = "2762"
-          self.imageView.image = UIImage(named: "ic-bell")
-      }else if presenter.title == "Search"{
-          self.countLabel.text = ""
-      }
+
+    pickerMain.isHidden      = presenter.title.lowercased().contains("consultations")
+    pickerConsultant.isHidden = !pickerMain.isHidden
+
+    if presenter.title == "Notifications" {
+      self.countLabel.text    = "2762"
+      self.imageView.image    = UIImage(named: "ic-bell")
+    } else if presenter.title == "Search" {
+      self.countLabel.text = ""
+    }
   }
 }
 
