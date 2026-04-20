@@ -40,6 +40,7 @@ class OverviewSectionDetailsViewController: UIViewController {
     super.viewDidLoad()
 
     tableView.tableFooterView = UIView()
+    addTableViewHorizontalPadding(12)
     VitalSignCell.register(with: tableView)
     MedicationCell.register(with: tableView)
     DiagnosisCell.register(with: tableView)
@@ -64,6 +65,22 @@ class OverviewSectionDetailsViewController: UIViewController {
     }
 
     styleFAB()
+  }
+
+  // MARK: - Layout helpers
+
+  /// Shrinks the tableView horizontally by updating its storyboard leading/trailing
+  /// constraints, so every cell gets natural side margins without touching any XIB.
+  private func addTableViewHorizontalPadding(_ padding: CGFloat) {
+    for constraint in view.constraints {
+      if constraint.firstItem as? UIView == tableView {
+        if constraint.firstAttribute == .leading  { constraint.constant =  padding }
+        if constraint.firstAttribute == .trailing { constraint.constant = -padding }
+      } else if constraint.secondItem as? UIView == tableView {
+        if constraint.secondAttribute == .leading  { constraint.constant =  padding }
+        if constraint.secondAttribute == .trailing { constraint.constant = -padding }
+      }
+    }
   }
 
   // MARK: - FAB styling
