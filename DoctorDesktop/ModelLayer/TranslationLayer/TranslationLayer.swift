@@ -472,6 +472,11 @@ extension TranslationLayerImpl {
         let labsTest      = decodeArray(Lab.self,        at: "Root.PATIENT.PATIENT_ROW.LAB.LAB_ROW.PENDING_LAB_ORDERS.PENDING_LAB_ORDERS_ROW")
         let vitalSigns    = decodeArray(VitalSign.self,  at: "Root.PATIENT.PATIENT_ROW.VITAL_SIGNS.VITAL_SIGNS_ROW.DETAILS.DETAILS_ROW")
         let medications   = getMedictionsDTOsFromJson(data)
+        // New sections (API typo preserved: OPERTAION_REQUESTS)
+        let pathologies       = decodeArray(OperationCatherEndoscopy.self, at: "Root.PATIENT.PATIENT_ROW.PATHOLOGY.PATHOLOGY_ROW")
+        let operationRequests = decodeArray(OperationCatherEndoscopy.self, at: "Root.PATIENT.PATIENT_ROW.OPERTAION_REQUESTS.OPERTAION_REQUESTS_ROW")
+        let bloodBankItems    = decodeArray(OperationCatherEndoscopy.self, at: "Root.PATIENT.PATIENT_ROW.BLOOD_BANK.BLOOD_BANK_ROW")
+        let medicalReports    = decodeArray(OperationCatherEndoscopy.self, at: "Root.PATIENT.PATIENT_ROW.MEDICAL_REPORTS.MEDICAL_REPORTS_ROW")
 
         return PatientSummary(complaints: complaints,
                               findings: findings,
@@ -489,6 +494,10 @@ extension TranslationLayerImpl {
                               dietaries: dietaries,
                               labs: labsTest,
                               vitalSigns: vitalSigns,
+                              pathologies: pathologies,
+                              operationRequests: operationRequests,
+                              bloodBankItems: bloodBankItems,
+                              medicalReports: medicalReports,
                               message: message)
     }
 }

@@ -178,10 +178,10 @@ class OverviewPresenterImpl: OverviewPresenter {
       patientSummary?.catheters?.count     ?? 0,  // 11 catheterization
       patientSummary?.endoscopies?.count   ?? 0,  // 12 endoscopy
       patientSummary?.dietaries?.count     ?? 0,  // 13 dietary
-      0,                                          // 14 pathology        (API mapping TBD)
-      0,                                          // 15 operationRequest (API mapping TBD)
-      0,                                          // 16 bloodBank        (API mapping TBD)
-      0,                                          // 17 medicalReport    (API mapping TBD)
+      patientSummary?.pathologies?.count      ?? 0,  // 14 pathology
+      patientSummary?.operationRequests?.count ?? 0,  // 15 operationRequest
+      patientSummary?.bloodBankItems?.count    ?? 0,  // 16 bloodBank
+      patientSummary?.medicalReports?.count    ?? 0,  // 17 medicalReport
     ]
   }
 

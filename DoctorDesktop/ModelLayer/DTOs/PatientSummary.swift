@@ -33,7 +33,12 @@ struct PatientSummary {
   let dietaries: [Dietary]?
   let labs: [Lab]?
   let vitalSigns: [VitalSign]?
-    var message:String?
+  // New sections (matching Android app)
+  let pathologies: [OperationCatherEndoscopy]?        // Root.PATIENT.PATIENT_ROW.PATHOLOGY
+  let operationRequests: [OperationCatherEndoscopy]?  // Root.PATIENT.PATIENT_ROW.OPERTAION_REQUESTS (API typo)
+  let bloodBankItems: [OperationCatherEndoscopy]?     // Root.PATIENT.PATIENT_ROW.BLOOD_BANK
+  let medicalReports: [OperationCatherEndoscopy]?     // Root.PATIENT.PATIENT_ROW.MEDICAL_REPORTS
+  var message: String?
 }
 
 struct PatientResponseModel:Codable {

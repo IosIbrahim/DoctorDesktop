@@ -323,6 +323,14 @@ final class PatientHeaderView: UIView {
         if !civilId.isEmpty { setChipText(idChip, civilId) }
     }
 
+    /// Called after `getPatientSummary` — fills allergy chip from ALLERGY_TYPE_NAME_EN.
+    func updateAllergyFromSummary(_ allergyTypeName: String?) {
+        let hasAllergy = allergyTypeName != nil
+            && !allergyTypeName!.isEmpty
+            && allergyTypeName!.lowercased() != "no known allergy"
+        applyAllergyState(hasAllergy ? allergyTypeName : nil)
+    }
+
     func updateSpecialty(_ text: String) {
         setChipText(specialtyChip, text.isEmpty ? "—" : text)
     }

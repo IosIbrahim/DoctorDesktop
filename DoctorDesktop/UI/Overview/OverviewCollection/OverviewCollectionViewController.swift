@@ -172,8 +172,11 @@ extension OverviewCollectionViewController: UICollectionViewDelegate {
           if let msg = self.presenter.patientSummary?.message {
               self.toastBar.show(with: msg)
           }
-        self.stopAnimating()
-        self.summaryCollectionView.reloadData()
+          // Update allergy chip from summary (more reliable than VisitDetail)
+          let allergyName = self.presenter.patientSummary?.allergies?.first?.allergyTypeEnglishName
+          self.patientHeaderView.updateAllergyFromSummary(allergyName)
+          self.stopAnimating()
+          self.summaryCollectionView.reloadData()
       }
     } else {
       guard let overviewSection = OverviewSection(rawValue: indexPath.row) else { return }
