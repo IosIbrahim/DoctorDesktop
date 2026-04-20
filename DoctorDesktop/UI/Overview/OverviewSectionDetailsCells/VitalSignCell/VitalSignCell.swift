@@ -33,12 +33,23 @@ class VitalSignCell: UITableViewCell {
 
 //MARK: - Configure
 extension VitalSignCell {
-  func configure(with presenter: VitalSignCellPresenter) {
+  func configure(with presenter: VitalSignCellPresenter, rowIndex: Int = 0) {
     self.presenter = presenter
-    self.title.text = presenter.vitalSignTitle
-    self.currentResult.text = presenter.currentResult
-    self.firstPreviousResult.text = presenter.firstPreviousResult
+    self.title.text           = presenter.vitalSignTitle
+    self.currentResult.text   = presenter.currentResult
+    self.firstPreviousResult.text  = presenter.firstPreviousResult
     self.secondPreviousResult.text = presenter.secondPreviousResult
+
+    // Alternating row background — matches Android's subtle zebra striping
+    backgroundColor = rowIndex % 2 == 0
+      ? UIColor(white: 1.0, alpha: 1)
+      : UIColor(red: 0.95, green: 0.98, blue: 0.98, alpha: 1)
+
+    // Title teal color — matches Android
+    title.textColor = UIColor(red: 0.24, green: 0.74, blue: 0.64, alpha: 1)
+
+    // Show chart icon only when there's data
+    imgProgress.isHidden = presenter.currentResult.isEmpty
   }
 }
 

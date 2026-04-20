@@ -38,7 +38,6 @@ class OverviewSectionDetailsViewController: UIViewController {
     
   override func viewDidLoad() {
     super.viewDidLoad()
-    plusButton.layer.cornerRadius = 25
 
     tableView.tableFooterView = UIView()
     VitalSignCell.register(with: tableView)
@@ -50,14 +49,38 @@ class OverviewSectionDetailsViewController: UIViewController {
     DietaryCell.register(with: tableView)
     LabsCell.register(with: tableView)
     OperationCatheterizationEndoscopyCell.register(with: tableView)
-      plusButton.isHidden = true
-      stkAddNote.isHidden = true
-      stkReply.isHidden = true
-      if presenter.overviewSection == .labExamination ||  presenter.overviewSection == .radTest {
-          plusButton.isHidden = false
-      }else if presenter.overviewSection == .progressNotes {
-          stkAddNote.isHidden = false
-      }
+
+    plusButton.isHidden = true
+    stkAddNote.isHidden = true
+    stkReply.isHidden = true
+
+    let showPlus = presenter.overviewSection == .vitalSigns
+                || presenter.overviewSection == .labExamination
+                || presenter.overviewSection == .radTest
+    plusButton.isHidden = !showPlus
+
+    if presenter.overviewSection == .progressNotes {
+        stkAddNote.isHidden = false
+    }
+
+    styleFAB()
+  }
+
+  // MARK: - FAB styling
+  private func styleFAB() {
+    plusButton.layer.cornerRadius  = 28
+    plusButton.clipsToBounds       = false
+    plusButton.backgroundColor     = UIColor(red: 0.24, green: 0.74, blue: 0.64, alpha: 1) // teal
+    plusButton.tintColor           = .white
+    plusButton.setTitle("+", for: .normal)
+    plusButton.titleLabel?.font    = UIFont.systemFont(ofSize: 32, weight: .light)
+    plusButton.setTitleColor(.white, for: .normal)
+
+    // Drop shadow
+    plusButton.layer.shadowColor   = UIColor.black.cgColor
+    plusButton.layer.shadowOffset  = CGSize(width: 0, height: 4)
+    plusButton.layer.shadowRadius  = 8
+    plusButton.layer.shadowOpacity = 0.25
   }
     
     

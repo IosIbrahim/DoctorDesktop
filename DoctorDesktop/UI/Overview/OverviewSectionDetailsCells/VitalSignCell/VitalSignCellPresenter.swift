@@ -17,22 +17,38 @@ protocol VitalSignCellPresenter {
 
 class VitalSignCellPresenterImpl: VitalSignCellPresenter {
   let vitalSign: VitalSign
+
+  private static let displayFormatter: DateFormatter = {
+    let f = DateFormatter()
+    f.dateFormat = "dd/MM/yyyy\nHH:mm:ss"
+    return f
+  }()
+
   var vitalSignTitle: String { return vitalSign.englishName }
+
   var currentResult: String {
-    guard let currentResultTitle = vitalSign.details?.first?.itemValue,
-      let currentResultSince = getNumberOfDaysUntilTodayStartingFromDate(vitalSign.details?.first?.itemDateTime) else { return "" }
-    return "\(currentResultTitle)\nSince \(currentResultSince) Days"
+    return formatted(detail: vitalSign.details?[safe: 0])
   }
   var firstPreviousResult: String {
-    guard let firstPreviousResultTitle = vitalSign.details?[safe:1]?.itemValue,
-      let firstPreviousResultSince = getNumberOfDaysUntilTodayStartingFromDate(vitalSign.details?[safe:1]?.itemDateTime) else { return ""}
-    return "\(firstPreviousResultTitle)\nSince \(firstPreviousResultSince) Days"
+    return formatted(detail: vitalSign.details?[safe: 1])
   }
   var secondPreviousResult: String {
-    guard let secondPreviousResultTitle = vitalSign.details?[safe:2]?.itemValue,
-      let secondPreviousResultSince = getNumberOfDaysUntilTodayStartingFromDate(vitalSign.details?[safe:2]?.itemDateTime) else { return ""}
-    return "\(secondPreviousResultTitle)\nSince \(secondPreviousResultSince) Days"
+    return formatted(detail: vitalSign.details?[safe: 2])
   }
+
+  private func formatted(detail: VitalSign.VitalSignDetail?) -> String {
+    guard let d = detail, !d.itemValue.isEmpty else { return "" }
+    let dateStr = VitalSignCellPresenterImpl.displayFormatter.string(from: d.itemDateTime)
+    // Blood Pressure (and any reading with a secondary value) → "120 / 80"
+    let valueStr: String
+    if let other = d.itemValueOther, !other.isEmpty {
+      valueStr = "\(d.itemValue) / \(other)"
+    } else {
+      valueStr = d.itemValue
+    }
+    return "\(valueStr)\n\(dateStr)"
+  }
+
   init(withVitalSign vitalSign: VitalSign) {
     self.vitalSign = vitalSign
   }

@@ -435,7 +435,9 @@ extension DependencyRegistryImpl {
   }
   func makeVitalSignCell(for tableView: UITableView, at indexPath: IndexPath, vitalSign: VitalSign) -> VitalSignCell {
     let presenter = container.resolve(VitalSignCellPresenter.self, argument: vitalSign)!
-    return VitalSignCell.dequeue(from: tableView, for: indexPath, with: presenter)
+    let cell = VitalSignCell.dequeue(from: tableView, for: indexPath, with: presenter)
+    cell.configure(with: presenter, rowIndex: indexPath.row)
+    return cell
   }
   func makeMedicationCell(for tableView: UITableView, at indexPath: IndexPath, medication: Medication) -> MedicationCell {
     let presenter = container.resolve(MedicationCellPresenter.self, argument: medication)!

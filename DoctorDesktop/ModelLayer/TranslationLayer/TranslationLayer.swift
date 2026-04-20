@@ -469,7 +469,32 @@ extension TranslationLayerImpl {
         let rads          = decodeArray(Rad.self,        at: "Root.PATIENT.PATIENT_ROW.RAD.RAD_ROW")
         let clinicServices = decodeArray(ClinicService.self, at: "Root.PATIENT.PATIENT_ROW.CLINIC_SERVICES.CLINIC_SERVICES_ROW")
         let dietaries     = decodeArray(Dietary.self,    at: "Root.PATIENT.PATIENT_ROW.DIETRY.DIETRY_ROW")
-        let labsTest      = decodeArray(Lab.self,        at: "Root.PATIENT.PATIENT_ROW.LAB.LAB_ROW.PENDING_LAB_ORDERS.PENDING_LAB_ORDERS_ROW")
+        // Labs: LAB_ROW is a category wrapper (keys: LAB_CATEGORY, PENDING_LAB_ORDERS).
+        // Actual lab orders live inside PENDING_LAB_ORDERS.PENDING_LAB_ORDERS_ROW.
+        // LAB_ROW can be a single dict (1 category) or an array (multiple categories).
+        var labsTest: [Lab] = []
+        let labRowValue = safeValue(in: topLevel, keyPath: "Root.PATIENT.PATIENT_ROW.LAB.LAB_ROW")
+        let labRows: [[String: Any]] = {
+            if let arr = labRowValue as? [[String: Any]] { return arr }
+            if let dict = labRowValue as? [String: Any] { return [dict] }
+            return []
+        }()
+        for labRow in labRows {
+            guard let pending = labRow["PENDING_LAB_ORDERS"],
+                  JSONSerialization.isValidJSONObject(pending),
+                  let pendingData = try? JSONSerialization.data(withJSONObject: pending),
+                  let pendingTop = try? JSONSerialization.jsonObject(with: pendingData),
+                  let ordersRaw = safeValue(in: pendingTop, keyPath: "PENDING_LAB_ORDERS_ROW"),
+                  JSONSerialization.isValidJSONObject(ordersRaw),
+                  let ordersData = try? JSONSerialization.data(withJSONObject: ordersRaw)
+            else { continue }
+            if let arr = try? jsonDecoder.decode([Lab].self, from: ordersData) {
+                labsTest += arr
+            } else if let one = try? jsonDecoder.decode(Lab.self, from: ordersData) {
+                labsTest.append(one)
+            }
+        }
+
         let vitalSigns    = decodeArray(VitalSign.self,  at: "Root.PATIENT.PATIENT_ROW.VITAL_SIGNS.VITAL_SIGNS_ROW.DETAILS.DETAILS_ROW")
         let medications   = getMedictionsDTOsFromJson(data)
         // New sections (API typo preserved: OPERTAION_REQUESTS)

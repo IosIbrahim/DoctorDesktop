@@ -41,7 +41,7 @@ class NotesCell: UITableViewCell {
         lblUser.text = note.doctorEnglishName
         lblDate.text = note.nurseTransactionDate
         lblNote.text = note.englishDescription
-        if note.status == 1 {
+        if note.status == "1" {
             pickerStatus.backgroundColor = .systemGreen
             lblStatus.textColor = .white
             lblStatus.text = "Normal"

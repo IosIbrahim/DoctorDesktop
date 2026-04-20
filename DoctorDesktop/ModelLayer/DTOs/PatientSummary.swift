@@ -139,7 +139,7 @@ struct Diagnosis: Decodable {
   let code: String
   let transactionDate: Date
   let itemDescription: String
-  let status: String
+  let status: String?
 
   enum CodingKeys: String, CodingKey {
     case code = "CODE"
@@ -204,8 +204,8 @@ struct NurseRemark: Decodable {
     let arabicDescription: String?
     let englishDescription: String?
     let nurseNotes: String?
-    let status:Int?
-    let showDN:Int?
+    let status: String?   // PRIORITY_TYPE — server returns "1","3" etc. as String
+    let showDN: String?   // SHOW_D_N — server returns "1","3" etc. as String
     let flag:String?
     
   enum CodingKeys: String, CodingKey {
@@ -359,14 +359,14 @@ struct Lab: Decodable {
 extension Lab {
   init(from decoder: Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
-    let serviceCategoryArabicName = try container.decode(String.self, forKey: .serviceCategoryArabicName)
-    let serviceCategoryEnglishName = try container.decode(String.self, forKey: .serviceCategoryEnglishName)
-    let statusAr = try container.decode(String.self, forKey: .statusAr)
-    let statusEn = try container.decode(String.self, forKey: .statusEn)
-    let reqId = try container.decode(String.self, forKey: .reqId)
-    let id = try container.decode(String.self, forKey: .id)
-    let branch = try container.decode(String.self, forKey: .branchId)
-    let date = try container.decode(String.self, forKey: .reqDate)
+    let serviceCategoryArabicName = (try? container.decode(String.self, forKey: .serviceCategoryArabicName)) ?? ""
+    let serviceCategoryEnglishName = (try? container.decode(String.self, forKey: .serviceCategoryEnglishName)) ?? ""
+    let statusAr = (try? container.decode(String.self, forKey: .statusAr)) ?? ""
+    let statusEn = (try? container.decode(String.self, forKey: .statusEn)) ?? ""
+    let reqId = (try? container.decode(String.self, forKey: .reqId)) ?? ""
+    let id = (try? container.decode(String.self, forKey: .id)) ?? ""
+    let branch = (try? container.decode(String.self, forKey: .branchId)) ?? ""
+    let date = (try? container.decode(String.self, forKey: .reqDate)) ?? ""
 //    do {
 //        let json =  try JSONSerialization.jsonObject(with: container, options: []) as? [String: Any]
 //    } catch {
@@ -423,18 +423,20 @@ struct VitalSign: Decodable {
 
   struct VitalSignDetail: Decodable {
     let itemValue: String
+    let itemValueOther: String?   // e.g. diastolic for Blood Pressure
     let itemType: String
     let previous: String?
-    let progressValue: String
-    let normalFlag: String
+    let progressValue: String?    // can be null from server
+    let normalFlag: String?       // null for Pulse, R.R, etc. — was crashing decode
     let itemDateTime: Date
     enum CodingKeys: String, CodingKey {
-      case itemValue = "ITEM_VALUE"
-      case itemType = "ITEM_TYPE"
-      case previous = "PREVIOUS_VALUE"
-      case progressValue = "PROGRESS_VAL"
-      case normalFlag = "NORMAL_FLAG"
-      case itemDateTime = "ITEM_DATE_TIME"
+      case itemValue      = "ITEM_VALUE"
+      case itemValueOther = "ITEM_VALUE_OTHER"
+      case itemType       = "ITEM_TYPE"
+      case previous       = "PREVIOUS_VALUE"
+      case progressValue  = "PROGRESS_VAL"
+      case normalFlag     = "NORMAL_FLAG"
+      case itemDateTime   = "ITEM_DATE_TIME"
     }
   }
 }

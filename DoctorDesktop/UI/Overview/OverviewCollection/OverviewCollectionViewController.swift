@@ -148,7 +148,9 @@ extension OverviewCollectionViewController: UICollectionViewDataSource {
       return cell
     } else {
       guard let overviewSection = OverviewSection(rawValue: indexPath.row) else { return UICollectionViewCell() }
-      return overviewSectionCellMaker(collectionView, indexPath, overviewSection.imageName, overviewSection.title, overviewSection.color, presenter.patientSummaryCounts[indexPath.row])
+      // Vital Signs count is not meaningful as a summary number — hide the badge
+      let count = overviewSection == .vitalSigns ? -1 : presenter.patientSummaryCounts[indexPath.row]
+      return overviewSectionCellMaker(collectionView, indexPath, overviewSection.imageName, overviewSection.title, overviewSection.color, count)
     }
   }
 }
