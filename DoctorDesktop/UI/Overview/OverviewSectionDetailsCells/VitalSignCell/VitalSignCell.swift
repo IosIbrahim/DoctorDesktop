@@ -17,9 +17,6 @@ class VitalSignCell: UITableViewCell {
   @IBOutlet weak var firstPreviousResult: UILabel!
   @IBOutlet weak var secondPreviousResult: UILabel!
 
-  // Left accent strip — added programmatically so no XIB change needed
-  private let accentStrip = UIView()
-
   private static let teal   = UIColor(red: 0.22, green: 0.72, blue: 0.62, alpha: 1)
   private static let evenBg = UIColor.white
   private static let oddBg  = UIColor(red: 0.93, green: 0.98, blue: 0.97, alpha: 1)
@@ -27,30 +24,21 @@ class VitalSignCell: UITableViewCell {
   override func awakeFromNib() {
     super.awakeFromNib()
     selectionStyle = .none
-    setupAccentStrip()
     setupFonts()
     setupIcon()
   }
 
   // MARK: - One-time setup
 
-  private func setupAccentStrip() {
-    accentStrip.translatesAutoresizingMaskIntoConstraints = false
-    accentStrip.layer.cornerRadius = 2
-    contentView.addSubview(accentStrip)
-    NSLayoutConstraint.activate([
-      accentStrip.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-      accentStrip.topAnchor.constraint(equalTo: contentView.topAnchor),
-      accentStrip.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
-      accentStrip.widthAnchor.constraint(equalToConstant: 4)
-    ])
-  }
-
   private func setupFonts() {
     title.font                    = UIFont.systemFont(ofSize: 14, weight: .semibold)
     currentResult.numberOfLines   = 0
     firstPreviousResult.numberOfLines  = 0
     secondPreviousResult.numberOfLines = 0
+
+    // Let background fill the full cell width — no default system insets
+    preservesSuperviewLayoutMargins = false
+    layoutMargins = .zero
   }
 
   private func setupIcon() {
@@ -91,11 +79,6 @@ extension VitalSignCell {
     let hasData = !presenter.currentResult.isEmpty
     backgroundColor         = rowIndex % 2 == 0 ? VitalSignCell.evenBg : VitalSignCell.oddBg
     contentView.backgroundColor = backgroundColor
-
-    // Accent strip: teal when has data, light gray when empty
-    accentStrip.backgroundColor = hasData
-      ? VitalSignCell.teal
-      : UIColor(white: 0.82, alpha: 1)
 
     // Chart icon
     imgProgress.isHidden = !hasData
@@ -170,7 +153,6 @@ extension VitalSignCell {
     cell.secondPreviousResult.font  = UIFont.systemFont(ofSize: 13, weight: .semibold)
     cell.secondPreviousResult.textColor = .white
     cell.imgProgress.isHidden     = true
-    cell.accentStrip.isHidden     = true
     cell.backgroundColor          = UIColor(red: 0.28, green: 0.58, blue: 0.62, alpha: 1)
     cell.contentView.backgroundColor = cell.backgroundColor
     return cell
