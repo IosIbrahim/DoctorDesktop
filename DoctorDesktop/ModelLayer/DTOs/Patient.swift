@@ -317,6 +317,27 @@ struct EmergencyPatient: Decodable, Patient {
     case financialAccount = "PATFINANACCOUNT"
     case flagImageName = "PIC_PATH"
   }
+
+  /// Bridge any Patient (e.g. from the Overview screen) into an EmergencyPatient
+  /// so the existing EmergencyTriageViewController can be reused for vital-sign entry.
+  init(bridging patient: Patient) {
+    self.nameInEnglish         = patient.name
+    self.nameInArabic          = patient.name
+    self.nationalityInEnglish  = patient.nationality
+    self.nationalityInArabic   = patient.nationality
+    self.arrivalMethodInEnglish = nil
+    self.arrivalMethodInArabic  = nil
+    self.visitStartDate  = patient.date
+    self.triaged         = "0"
+    self.accuteCondition = nil
+    self.id              = patient.id
+    self.genderAge       = patient.genderAge
+    self.visitId         = patient.visitId
+    self.placeId         = patient.placeId
+    self.financialAccount = patient.financialAccount
+    self.flagImageName   = patient.flagImageName
+    self.countyFlag      = patient.countyFlag
+  }
 }
 
 struct ClinicalPatient: Decodable, Patient {

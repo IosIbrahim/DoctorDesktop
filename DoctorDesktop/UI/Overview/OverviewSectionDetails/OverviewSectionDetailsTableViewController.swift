@@ -130,10 +130,18 @@ class OverviewSectionDetailsViewController: UIViewController {
     }
     
     @IBAction func addOntap(_ sender: Any) {
-      //  navigationController?.pushViewController(patientlis, animated: <#T##Bool#>)
-       // let storyboard = UIStoryboard(name: "Main", bundle: nil)
-      //  let vc = storyboard.instantiateViewController(withIdentifier: "prescriptionListVC")
-     //   navigationController?.pushViewController(vc, animated: true)
+        if presenter.overviewSection == .vitalSigns {
+            // Reuse EmergencyTriageViewController for vital-sign entry
+            navigationCoordinator?.setNavigationStatus(.atOverviewSectionDetails)
+            let args: [String: Any] = [
+                "viewType": "vitalSigns",
+                "patient" : patient,
+                "user"    : presenter.user
+            ]
+            navigationCoordinator?.next(arguments: args)
+            return
+        }
+
         navigationCoordinator?.setNavigationStatus(.atPatientList)
         var template = TemplateType.labOrder
         if presenter.overviewSection == .labExamination {
@@ -142,7 +150,7 @@ class OverviewSectionDetailsViewController: UIViewController {
                         "patient":patient,
                         "user":presenter.user] as [String : Any]
             navigationCoordinator?.next(arguments: args)
-        }else if presenter.overviewSection == .radTest {
+        } else if presenter.overviewSection == .radTest {
             template = .radOrder
             let args = ["viewType":"order",
                         "patient":patient,
@@ -150,7 +158,6 @@ class OverviewSectionDetailsViewController: UIViewController {
                         "user":presenter.user] as [String : Any]
             navigationCoordinator?.next(arguments: args)
         }
-        
     }
     
 

@@ -24,6 +24,7 @@ enum NavigationState {
   atOrderCheckoutList,
   atOverviewCollection,
   atOverviewSectionDetails,
+  atVitalSignsEntry,   // EmergencyTriageVC opened from Overview + button
   atWebViewer
 }
 
@@ -53,6 +54,7 @@ class RootNavigationCoordinatorImpl: NavigationCoordinator {
 
     case .atOverviewCollection: navState = .atPatientList
     case .atOverviewSectionDetails: navState = .atOverviewCollection
+    case .atVitalSignsEntry:        navState = .atOverviewSectionDetails
     case .atWebViewer: navState = .atOverviewSectionDetails
     }
   }
@@ -105,7 +107,13 @@ class RootNavigationCoordinatorImpl: NavigationCoordinator {
       } else {
         showOverviewSectionDetails(arguments: arguments)
       }
-    case .atOverviewSectionDetails: showWebViewer(arguments: arguments)
+    case .atOverviewSectionDetails:
+      if let viewType = arguments?["viewType"] as? String, viewType == "vitalSigns" {
+        showVitalSignsEntry(arguments: arguments)
+      } else {
+        showWebViewer(arguments: arguments)
+      }
+    case .atVitalSignsEntry: break
     case .atWebViewer: break
     }
   }
@@ -137,6 +145,17 @@ class RootNavigationCoordinatorImpl: NavigationCoordinator {
     //rootViewController.navigationController?.present(emergencyTriageViewController, animated: true, completion: nil)
     rootViewController.navigationController?.pushViewController(emergencyTriageViewController, animated: true)
     navState = .atEmergencyTriage
+  }
+
+  /// Opens EmergencyTriageViewController from the Overview vital-signs + button.
+  /// Wraps the current Patient in an EmergencyPatient bridge so the existing VC is reused.
+  func showVitalSignsEntry(arguments: Dictionary<String, Any>?) {
+    guard let patient = arguments?["patient"] as? Patient,
+          let user    = arguments?["user"]    as? User else { return }
+    let bridged = EmergencyPatient(bridging: patient)
+    let vc = registry.makeEmergencyTriageViewController(with: bridged, user: user)
+    rootViewController.navigationController?.pushViewController(vc, animated: true)
+    navState = .atVitalSignsEntry
   }
 
   func showOrderCollection(arguments: Dictionary<String, Any>?) {
