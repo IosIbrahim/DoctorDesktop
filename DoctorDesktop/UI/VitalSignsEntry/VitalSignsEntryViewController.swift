@@ -590,7 +590,7 @@ final class VitalSignsEntryViewController: UIViewController {
   @objc private func didTapSave() {
     view.endEditing(true)
     readValues()
-    let spinner = UIActivityIndicatorView(style: .gray)
+    let spinner = UIActivityIndicatorView(activityIndicatorStyle: .gray)
     spinner.startAnimating()
     spinner.translatesAutoresizingMaskIntoConstraints = false
     view.addSubview(spinner)
