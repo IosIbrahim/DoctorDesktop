@@ -12,24 +12,24 @@ typealias PatientHistoryBlock = (PatientHistory) -> Void
 typealias PatientSummaryBlock = (PatientSummary) -> Void
 
 enum OverviewSection: Int {
-  case vitalSigns = 0
-  case progressNotes
-  case medication
-  case diagnosis
-  case labExamination
-  case radTest
-  case scoring
-  case finding
-  case complaints
-  case history
-  case operation
-  case catheterization
-  case endoscopy
-  case dietary
-  case pathology         // 14
-  case operationRequest  // 15
-  case bloodBank         // 16
-  case medicalReport     // 17
+  case vitalSigns = 0   //  0
+  case progressNotes    //  1
+  case medication       //  2
+  case diagnosis        //  3
+  case labExamination   //  4
+  case radTest          //  5
+  case pathology        //  6  ← matches Android grid position
+  case scoring          //  7
+  case finding          //  8
+  case complaints       //  9
+  case history          // 10
+  case operationRequest // 11  ← matches Android grid position
+  case operation        // 12
+  case catheterization  // 13
+  case endoscopy        // 14
+  case dietary          // 15
+  case bloodBank        // 16
+  case medicalReport    // 17
 
   var title: String {
     switch self {
@@ -39,16 +39,16 @@ enum OverviewSection: Int {
     case .diagnosis:        return "Diagnosis"
     case .labExamination:   return "Lab Examination"
     case .radTest:          return "Rad Test"
+    case .pathology:        return "Pathology"
     case .scoring:          return "Scoring"
     case .finding:          return "Finding"
     case .complaints:       return "Complaints"
     case .history:          return "History"
+    case .operationRequest: return "Operation Request"
     case .operation:        return "Operation"
     case .catheterization:  return "Catheterization"
     case .endoscopy:        return "Endoscopy"
     case .dietary:          return "Dietary"
-    case .pathology:        return "Pathology"
-    case .operationRequest: return "Operation Request"
     case .bloodBank:        return "Blood Bank"
     case .medicalReport:    return "Medical Report"
     }
@@ -62,16 +62,16 @@ enum OverviewSection: Int {
     case .diagnosis:        return "diagnosis"
     case .labExamination:   return "lab"
     case .radTest:          return "rad"
+    case .pathology:        return "hematology"
     case .scoring:          return "scoring"
     case .finding:          return "examination"
     case .complaints:       return "examination"
     case .history:          return "history"
+    case .operationRequest: return "operations"
     case .operation:        return "operation"
     case .catheterization:  return "catheterization"
     case .endoscopy:        return "endoscopy"
     case .dietary:          return "diatery"
-    case .pathology:        return "hematology"
-    case .operationRequest: return "operations"
     case .bloodBank:        return "blood"
     case .medicalReport:    return "ic-progress"
     }
@@ -85,16 +85,16 @@ enum OverviewSection: Int {
     case .diagnosis:        return #colorLiteral(red: 0.5019607843, green: 0.7294117647, blue: 0.09411764706, alpha: 1)
     case .labExamination:   return #colorLiteral(red: 0.003921568627, green: 0.2901960784, blue: 0.4117647059, alpha: 1)
     case .radTest:          return #colorLiteral(red: 0.8705882353, green: 0.231372549, blue: 0.2980392157, alpha: 1)
+    case .pathology:        return #colorLiteral(red: 0.5568627451, green: 0.2666666667, blue: 0.6784313725, alpha: 1)
     case .scoring:          return #colorLiteral(red: 0.5019607843, green: 0.7294117647, blue: 0.09411764706, alpha: 1)
     case .finding:          return #colorLiteral(red: 0.5019607843, green: 0.7294117647, blue: 0.09411764706, alpha: 1)
     case .complaints:       return #colorLiteral(red: 0.5019607843, green: 0.7294117647, blue: 0.09411764706, alpha: 1)
     case .history:          return #colorLiteral(red: 0.003921568627, green: 0.2901960784, blue: 0.4117647059, alpha: 1)
+    case .operationRequest: return #colorLiteral(red: 0.7411764706, green: 0.2235294118, blue: 0.2235294118, alpha: 1)
     case .operation:        return #colorLiteral(red: 0.3294117647, green: 0.7490196078, blue: 0.5137254902, alpha: 1)
     case .catheterization:  return #colorLiteral(red: 0.3294117647, green: 0.7490196078, blue: 0.5137254902, alpha: 1)
     case .endoscopy:        return #colorLiteral(red: 0.5019607843, green: 0.7294117647, blue: 0.09411764706, alpha: 1)
     case .dietary:          return #colorLiteral(red: 0.5019607843, green: 0.7294117647, blue: 0.09411764706, alpha: 1)
-    case .pathology:        return #colorLiteral(red: 0.5568627451, green: 0.2666666667, blue: 0.6784313725, alpha: 1)
-    case .operationRequest: return #colorLiteral(red: 0.7411764706, green: 0.2235294118, blue: 0.2235294118, alpha: 1)
     case .bloodBank:        return #colorLiteral(red: 0.8, green: 0.1098039216, blue: 0.1098039216, alpha: 1)
     case .medicalReport:    return #colorLiteral(red: 0.1764705882, green: 0.4980392157, blue: 0.7568627451, alpha: 1)
     }
@@ -164,36 +164,33 @@ class OverviewPresenterImpl: OverviewPresenter {
   // IMPORTANT: order must match OverviewSection raw values exactly (0…17).
   var patientSummaryCounts: [Int] {
     return [
-      patientSummary?.vitalSigns?.count    ?? 0,  // 0  vitalSigns
-      patientSummary?.nurseRemarks?.count  ?? 0,  // 1  progressNotes
-      patientSummary?.medications?.count   ?? 0,  // 2  medication
-      patientSummary?.diagnosis?.count     ?? 0,  // 3  diagnosis
-      patientSummary?.labs?.count          ?? 0,  // 4  labExamination
-      patientSummary?.rads?.count          ?? 0,  // 5  radTest
-      patientSummary?.scorings?.count      ?? 0,  // 6  scoring
-      patientSummary?.findings?.count      ?? 0,  // 7  finding
-      patientSummary?.complaints?.count    ?? 0,  // 8  complaints
-      patientSummary?.history?.count       ?? 0,  // 9  history
-      patientSummary?.operations?.count    ?? 0,  // 10 operation
-      patientSummary?.catheters?.count     ?? 0,  // 11 catheterization
-      patientSummary?.endoscopies?.count   ?? 0,  // 12 endoscopy
-      patientSummary?.dietaries?.count     ?? 0,  // 13 dietary
-      patientSummary?.pathologies?.count      ?? 0,  // 14 pathology
-      patientSummary?.operationRequests?.count ?? 0,  // 15 operationRequest
-      patientSummary?.bloodBankItems?.count    ?? 0,  // 16 bloodBank
-      patientSummary?.medicalReports?.count    ?? 0,  // 17 medicalReport
+      patientSummary?.vitalSigns?.filter { !($0.details?.isEmpty ?? true) }.count ?? 0,  //  0  vitalSigns
+      patientSummary?.nurseRemarks?.count      ?? 0,  //  1  progressNotes
+      patientSummary?.medications?.count       ?? 0,  //  2  medication
+      patientSummary?.diagnosis?.count         ?? 0,  //  3  diagnosis
+      patientSummary?.labs?.count              ?? 0,  //  4  labExamination
+      patientSummary?.rads?.count              ?? 0,  //  5  radTest
+      patientSummary?.pathologies?.count       ?? 0,  //  6  pathology        ← Android pos 6
+      patientSummary?.scorings?.count          ?? 0,  //  7  scoring
+      patientSummary?.findings?.count          ?? 0,  //  8  finding
+      patientSummary?.complaints?.count        ?? 0,  //  9  complaints
+      patientSummary?.history?.count           ?? 0,  // 10  history
+      patientSummary?.operationRequests?.count ?? 0,  // 11  operationRequest  ← Android pos 11
+      patientSummary?.operations?.count        ?? 0,  // 12  operation
+      patientSummary?.catheters?.count         ?? 0,  // 13  catheterization
+      patientSummary?.endoscopies?.count       ?? 0,  // 14  endoscopy
+      patientSummary?.dietaries?.count         ?? 0,  // 15  dietary
+      patientSummary?.bloodBankItems?.count    ?? 0,  // 16  bloodBank
+      patientSummary?.medicalReports?.count    ?? 0,  // 17  medicalReport
     ]
   }
 
   var currentVisitIds: [String] {
-    var tempCurrentVisitIds = [String]()
+    // Android sends ALL visit IDs in VISIT_ID_ARRAY for the "Current Visit" tab
+    // (including linked visits from the same admission, e.g. ER → Inpatient).
+    // We do the same so Finding / Complaints counts match Android.
     guard let visits = patientHistory?.patientVisits else { return [] }
-    for visit in visits {
-      if visit.id == patient.visitId {
-        tempCurrentVisitIds.append(visit.id)
-      }
-    }
-    return tempCurrentVisitIds
+    return visits.map { $0.id }
   }
 
   var currentDoctorVisitsIds: [String] {
