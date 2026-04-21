@@ -30,6 +30,18 @@ struct VitalSignsEntryValues {
   var patientCase: String?
   var ctasScore: String?
 
+  // Special habits
+  /// nil = not answered, true = has habits, false = no known habits
+  var hasSpecialHabits: Bool? = nil
+  var habitAlcohol: Bool = false
+  var habitSmoker: Bool = false
+  var habitMorphine: Bool = false
+  var habitCannabinoid: Bool = false
+  var habitSubstanceUse: Bool = false
+  var habitShisha: Bool = false
+  var habitVape: Bool = false
+  var habitOther: Bool = false
+
   // Special needs flags
   var isMute: Bool = false
   var isBlind: Bool = false

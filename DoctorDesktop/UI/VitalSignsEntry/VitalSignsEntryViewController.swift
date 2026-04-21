@@ -49,6 +49,12 @@ final class VitalSignsEntryViewController: UIViewController {
   private var patientCaseValueLabel: UILabel!
   private var ctasValueLabel: UILabel!
 
+  // Special-Habits specific
+  private var habitsHasButton: UIButton!
+  private var habitsNoneButton: UIButton!
+  private var habitsOptionsStack: UIStackView!
+  private var habitCheckboxes: [String: UIButton] = [:]
+
   // Root scroll container
   private let scrollView = UIScrollView()
   private let contentStack = UIStackView()
@@ -129,11 +135,7 @@ final class VitalSignsEntryViewController: UIViewController {
       valueBinding: { [weak self] in self?.patientCaseValueLabel = $0 },
       onTap: #selector(didTapPatientCase)
     ))
-    contentStack.addArrangedSubview(makePickerRowCard(
-      title: "CTAS Evidence-based Score",
-      valueBinding: { [weak self] in self?.ctasValueLabel = $0 },
-      onTap: #selector(didTapCTAS)
-    ))
+    contentStack.addArrangedSubview(makeCTASCard())
     contentStack.addArrangedSubview(makeSpecialNeedsCard())
     contentStack.addArrangedSubview(makeVitalsCard())
     contentStack.addArrangedSubview(makeSaveButton())
@@ -234,9 +236,134 @@ final class VitalSignsEntryViewController: UIViewController {
 
   // MARK: - Special Habits
   private func makeSpecialHabitsCard() -> UIView {
-    let field = makePlainTextField(placeholder: "e.g. smoking, alcohol, none…")
-    field.heightAnchor.constraint(equalToConstant: 40).isActive = true
-    return wrapInCard(field, title: "Special Habits")
+    // Radio row: "Has Special Habits"  /  "No Known Special Habits"
+    habitsHasButton  = makeRadioButton(title: "Has Special Habits")
+    habitsNoneButton = makeRadioButton(title: "No Known Special Habits")
+    habitsHasButton.addTarget(self, action: #selector(didTapHabitsHas),  for: .touchUpInside)
+    habitsNoneButton.addTarget(self, action: #selector(didTapHabitsNone), for: .touchUpInside)
+
+    let radioRow = UIStackView(arrangedSubviews: [habitsHasButton, habitsNoneButton])
+    radioRow.axis = .horizontal
+    radioRow.spacing = 12
+    radioRow.distribution = .fillEqually
+
+    // Options list (hidden until "Has Special Habits" is chosen)
+    habitsOptionsStack = UIStackView()
+    habitsOptionsStack.axis = .vertical
+    habitsOptionsStack.spacing = 8
+    habitsOptionsStack.isHidden = true
+
+    let options: [(String, String)] = [
+      ("alcohol",      "Alcohol"),
+      ("smoker",       "Smoker"),
+      ("morphine",     "Morphine"),
+      ("cannabinoid",  "Cannabinoid"),
+      ("substanceUse", "Substance use / Illicit drugs"),
+      ("shisha",       "Shisha"),
+      ("vape",         "Vape"),
+      ("other",        "Other")
+    ]
+    for (key, title) in options {
+      habitsOptionsStack.addArrangedSubview(makeHabitCheckbox(key: key, title: title))
+    }
+
+    let stack = UIStackView(arrangedSubviews: [radioRow, habitsOptionsStack])
+    stack.axis = .vertical
+    stack.spacing = 12
+
+    return wrapInCard(stack, title: "Special Habits")
+  }
+
+  private func makeRadioButton(title: String) -> UIButton {
+    let btn = UIButton(type: .system)
+    btn.setTitle("  " + title, for: .normal)
+    btn.setTitleColor(labelColor, for: .normal)
+    btn.titleLabel?.font = UIFont.systemFont(ofSize: 13, weight: .regular)
+    btn.titleLabel?.adjustsFontSizeToFitWidth = true
+    btn.titleLabel?.minimumScaleFactor = 0.85
+    btn.titleLabel?.lineBreakMode = .byTruncatingTail
+    btn.contentHorizontalAlignment = .left
+    btn.tintColor = teal
+    if #available(iOS 13, *) {
+      btn.setImage(UIImage(systemName: "circle"), for: .normal)
+      btn.setImage(UIImage(systemName: "largecircle.fill.circle"), for: .selected)
+    }
+    btn.heightAnchor.constraint(equalToConstant: 30).isActive = true
+    return btn
+  }
+
+  private func makeHabitCheckbox(key: String, title: String) -> UIButton {
+    let btn = UIButton(type: .system)
+    btn.setTitle("  " + title, for: .normal)
+    btn.setTitleColor(labelColor, for: .normal)
+    btn.titleLabel?.font = UIFont.systemFont(ofSize: 13, weight: .regular)
+    btn.contentHorizontalAlignment = .left
+    btn.tintColor = teal
+    if #available(iOS 13, *) {
+      btn.setImage(UIImage(systemName: "square"), for: .normal)
+      btn.setImage(UIImage(systemName: "checkmark.square.fill"), for: .selected)
+    }
+    btn.accessibilityIdentifier = key
+    btn.addTarget(self, action: #selector(toggleHabitCheckbox(_:)), for: .touchUpInside)
+    btn.heightAnchor.constraint(equalToConstant: 30).isActive = true
+    habitCheckboxes[key] = btn
+    return btn
+  }
+
+  @objc private func didTapHabitsHas() {
+    habitsHasButton.isSelected = true
+    habitsNoneButton.isSelected = false
+    values.hasSpecialHabits = true
+    setHabitsOptions(visible: true)
+  }
+
+  @objc private func didTapHabitsNone() {
+    habitsHasButton.isSelected = false
+    habitsNoneButton.isSelected = true
+    values.hasSpecialHabits = false
+    // Also clear any ticked options so "None" is actually consistent.
+    clearHabitOptions()
+    setHabitsOptions(visible: false)
+  }
+
+  private func setHabitsOptions(visible: Bool) {
+    UIView.animate(withDuration: 0.2) {
+      self.habitsOptionsStack.isHidden = !visible
+      self.habitsOptionsStack.alpha = visible ? 1 : 0
+      self.view.layoutIfNeeded()
+    }
+  }
+
+  private func clearHabitOptions() {
+    for (_, btn) in habitCheckboxes { btn.isSelected = false }
+    values.habitAlcohol = false
+    values.habitSmoker = false
+    values.habitMorphine = false
+    values.habitCannabinoid = false
+    values.habitSubstanceUse = false
+    values.habitShisha = false
+    values.habitVape = false
+    values.habitOther = false
+  }
+
+  @objc private func toggleHabitCheckbox(_ sender: UIButton) {
+    sender.isSelected.toggle()
+    guard let key = sender.accessibilityIdentifier else { return }
+    switch key {
+    case "alcohol":      values.habitAlcohol = sender.isSelected
+    case "smoker":       values.habitSmoker = sender.isSelected
+    case "morphine":     values.habitMorphine = sender.isSelected
+    case "cannabinoid":  values.habitCannabinoid = sender.isSelected
+    case "substanceUse": values.habitSubstanceUse = sender.isSelected
+    case "shisha":       values.habitShisha = sender.isSelected
+    case "vape":         values.habitVape = sender.isSelected
+    case "other":        values.habitOther = sender.isSelected
+    default: break
+    }
+    // Any tick implies "Has Special Habits"
+    if sender.isSelected && values.hasSpecialHabits != true {
+      didTapHabitsHas()
+    }
   }
 
   // MARK: - Pain Scale
@@ -298,6 +425,7 @@ final class VitalSignsEntryViewController: UIViewController {
     s.value = Float(v)
     values.painScale = v
     painValueLabel.text = "\(v)"
+    recomputeCTAS()
   }
 
   // MARK: - Picker-style rows (Patient Case / CTAS)
@@ -345,17 +473,149 @@ final class VitalSignsEntryViewController: UIViewController {
     }
   }
 
-  @objc private func didTapCTAS() {
-    presentSingleChoice(title: "CTAS Score",
-                        options: ["CTAS 1 - Resuscitation",
-                                  "CTAS 2 - Emergent",
-                                  "CTAS 3 - Urgent",
-                                  "CTAS 4 - Less Urgent",
-                                  "CTAS 5 - Non Urgent"]) { [weak self] choice in
-      guard let self = self else { return }
-      self.values.ctasScore = choice
-      self.ctasValueLabel.text = choice
-      self.ctasValueLabel.textColor = self.labelColor
+  // MARK: - CTAS (auto-calculated)
+  /// Read-only card. Value is driven by `recomputeCTAS()` off the current
+  /// vitals + pain scale. Matches the Android auto-calc behaviour.
+  private var ctasBadge: UILabel!
+
+  private func makeCTASCard() -> UIView {
+    let titleLabel = UILabel()
+    titleLabel.text = "CTAS Evidence-based Score"
+    titleLabel.font = UIFont.systemFont(ofSize: 14, weight: .semibold)
+    titleLabel.textColor = labelColor
+
+    let autoHint = UILabel()
+    autoHint.text = "Auto-calculated"
+    autoHint.font = UIFont.systemFont(ofSize: 10, weight: .regular)
+    autoHint.textColor = subColor
+
+    let titleStack = UIStackView(arrangedSubviews: [titleLabel, autoHint])
+    titleStack.axis = .vertical
+    titleStack.spacing = 1
+
+    ctasValueLabel = UILabel()
+    ctasValueLabel.text = "Not yet evaluated"
+    ctasValueLabel.textColor = subColor
+    ctasValueLabel.font = UIFont.systemFont(ofSize: 13, weight: .regular)
+    ctasValueLabel.textAlignment = .right
+    ctasValueLabel.numberOfLines = 0
+
+    ctasBadge = UILabel()
+    ctasBadge.text = "—"
+    ctasBadge.textAlignment = .center
+    ctasBadge.textColor = .white
+    ctasBadge.font = UIFont.systemFont(ofSize: 14, weight: .bold)
+    ctasBadge.backgroundColor = UIColor.gray
+    ctasBadge.layer.cornerRadius = 14
+    ctasBadge.layer.masksToBounds = true
+    ctasBadge.translatesAutoresizingMaskIntoConstraints = false
+    ctasBadge.widthAnchor.constraint(equalToConstant: 28).isActive = true
+    ctasBadge.heightAnchor.constraint(equalToConstant: 28).isActive = true
+
+    let row = UIStackView(arrangedSubviews: [titleStack, ctasValueLabel, ctasBadge])
+    row.axis = .horizontal
+    row.alignment = .center
+    row.spacing = 10
+    return wrapInCard(row, padding: UIEdgeInsets(top: 14, left: 14, bottom: 14, right: 14))
+  }
+
+  /// CTAS auto-calculation. Uses worst-case rules across the entered vitals
+  /// and pain scale. Returns nil until at least one vital is entered so the
+  /// user isn't shown a misleading "CTAS 5" on an empty form.
+  private func computeCTASLevel() -> Int? {
+    // Read current field values (not yet committed to `values` for vitals).
+    func num(_ key: String) -> Double? {
+      guard let t = vitalFields[key]?.text?.trimmingCharacters(in: .whitespaces),
+            !t.isEmpty, let v = Double(t) else { return nil }
+      return v
+    }
+
+    let pulse   = num("pulse")
+    let rr      = num("respiratoryRate")
+    let o2      = num("o2Sat")
+    let temp    = num("temperature")
+    let sys     = num("bpSystolic")
+    let dia     = num("bpDiastolic")
+    let sugar   = num("bloodSugar")
+    let pain    = values.painScale   // 0...10
+
+    // If no input yet, no score.
+    if pulse == nil && rr == nil && o2 == nil && temp == nil &&
+       sys == nil && dia == nil && sugar == nil && pain == 0 {
+      return nil
+    }
+
+    var level = 5  // start at "Non-Urgent" and escalate
+
+    func escalate(to newLevel: Int) { if newLevel < level { level = newLevel } }
+
+    // Level 1 — Resuscitation
+    if let v = o2,    v < 90                      { escalate(to: 1) }
+    if let v = pulse, v < 40 || v > 150           { escalate(to: 1) }
+    if let v = rr,    v < 10 || v > 30            { escalate(to: 1) }
+    if let v = sys,   v < 80                      { escalate(to: 1) }
+
+    // Level 2 — Emergent
+    if let v = o2,    v < 92                      { escalate(to: 2) }
+    if let v = pulse, v < 50 || v > 130           { escalate(to: 2) }
+    if let v = rr,    v < 12 || v > 24            { escalate(to: 2) }
+    if let v = sys,   v < 90 || v > 200           { escalate(to: 2) }
+    if let v = dia,   v > 120                     { escalate(to: 2) }
+    if let v = temp,  v >= 40.0                   { escalate(to: 2) }
+    if let v = sugar, v < 60 || v > 400           { escalate(to: 2) }
+    if pain >= 8                                  { escalate(to: 2) }
+
+    // Level 3 — Urgent
+    if let v = o2,    v < 95                      { escalate(to: 3) }
+    if let v = pulse, v < 60 || v > 110           { escalate(to: 3) }
+    if let v = rr,    v < 14 || v > 20            { escalate(to: 3) }
+    if let v = sys,   v < 100 || v > 160          { escalate(to: 3) }
+    if let v = temp,  v >= 39.0                   { escalate(to: 3) }
+    if let v = sugar, v < 70 || v > 250           { escalate(to: 3) }
+    if pain >= 4 && pain <= 7                     { escalate(to: 3) }
+
+    // Level 4 — Less Urgent
+    if let v = temp,  v >= 38.0                   { escalate(to: 4) }
+    if pain >= 1 && pain <= 3                     { escalate(to: 4) }
+
+    return level
+  }
+
+  private func ctasTitle(forLevel level: Int) -> String {
+    switch level {
+    case 1: return "CTAS 1 — Resuscitation"
+    case 2: return "CTAS 2 — Emergent"
+    case 3: return "CTAS 3 — Urgent"
+    case 4: return "CTAS 4 — Less Urgent"
+    default: return "CTAS 5 — Non-Urgent"
+    }
+  }
+
+  private func ctasColor(forLevel level: Int) -> UIColor {
+    switch level {
+    case 1: return UIColor(red: 0.85, green: 0.20, blue: 0.20, alpha: 1) // red
+    case 2: return UIColor(red: 0.95, green: 0.45, blue: 0.20, alpha: 1) // orange
+    case 3: return UIColor(red: 0.95, green: 0.75, blue: 0.20, alpha: 1) // yellow
+    case 4: return UIColor(red: 0.30, green: 0.60, blue: 0.90, alpha: 1) // blue
+    default: return UIColor(red: 0.30, green: 0.70, blue: 0.45, alpha: 1) // green
+    }
+  }
+
+  @objc private func recomputeCTAS() {
+    guard ctasValueLabel != nil, ctasBadge != nil else { return }
+    if let level = computeCTASLevel() {
+      let title = ctasTitle(forLevel: level)
+      ctasValueLabel.text = title
+      ctasValueLabel.textColor = labelColor
+      ctasBadge.text = "\(level)"
+      ctasBadge.backgroundColor = ctasColor(forLevel: level)
+      values.ctasScore = title
+    } else {
+      ctasValueLabel.text = "Not yet evaluated"
+      ctasValueLabel.textColor = subColor
+      ctasBadge.text = "—"
+      ctasBadge.backgroundColor = UIColor.gray
+      values.ctasScore = nil
     }
   }
 
@@ -567,6 +827,7 @@ final class VitalSignsEntryViewController: UIViewController {
     tf.rightViewMode = .always
     tf.returnKeyType = .done
     tf.delegate = self
+    tf.addTarget(self, action: #selector(vitalFieldChanged(_:)), for: .editingChanged)
     return tf
   }
 
@@ -651,5 +912,13 @@ extension VitalSignsEntryViewController: UITextFieldDelegate {
   func textFieldShouldReturn(_ textField: UITextField) -> Bool {
     textField.resignFirstResponder()
     return true
+  }
+
+  /// Live CTAS recalculation as the user types into any vital field.
+  /// Only the fields CTAS cares about (pulse, rr, o2, sys/dia, temp, sugar)
+  /// actually shift the score, but calling `recomputeCTAS()` unconditionally
+  /// is cheap and keeps the code simple.
+  @objc func vitalFieldChanged(_ tf: UITextField) {
+    recomputeCTAS()
   }
 }
