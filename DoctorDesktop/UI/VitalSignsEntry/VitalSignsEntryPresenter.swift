@@ -27,6 +27,10 @@ protocol VitalSignsEntryPresenter {
   /// Completion is always invoked on the main queue.
   func loadSpecialHabits(completion: @escaping (SpecialHabitsData?) -> Void)
 
+  /// Fetches the patient's visit history from `LoadPatientEpisodes`.
+  /// Returns nil on network / parse failure. Completion always on main queue.
+  func loadPatientHistory(completion: @escaping (PatientHistory?) -> Void)
+
   /// Called when the user taps Save. Currently local-only (matches the
   /// placeholder nature of the Android screen in this codebase). A real
   /// submit would be wired through ModelLayer here.
@@ -145,6 +149,27 @@ final class VitalSignsEntryPresenterImpl: VitalSignsEntryPresenter {
     ]
     modelLayer.loadSpecialHabits(with: params) { habits in
       DispatchQueue.main.async { completion(habits) }
+    }
+  }
+
+  func loadPatientHistory(completion: @escaping (PatientHistory?) -> Void) {
+    // Mirrors OverviewPresenterImpl.getPatientHistory params exactly.
+    let params: [String: String] = [
+      "COMPUTER_NAME": "iOS",
+      "INDEX_FROM":    "0",
+      "INDEX_TO":      "15",
+      "Lang":          "2",
+      "USER_ID":       user.userName ?? user.id ?? "",
+      "BRANCH_ID":     user.branch   ?? "",
+      "PATIENT_ID":    patient.id.trimmingCharacters(in: .whitespacesAndNewlines),
+      "VISIT_ID":      patient.visitId
+    ]
+    modelLayer.getPatientHistory(with: params) { history in
+      DispatchQueue.main.async {
+        // If the server returned an error message, surface nil so the VC can
+        // display a graceful fallback instead of stale / partial data.
+        completion(history.error == nil ? history : nil)
+      }
     }
   }
 

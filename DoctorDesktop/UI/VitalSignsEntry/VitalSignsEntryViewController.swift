@@ -55,6 +55,9 @@ final class VitalSignsEntryViewController: UIViewController {
   private var habitsOptionsStack: UIStackView!
   private var habitCheckboxes: [String: UIButton] = [:]
 
+  // Visit History card — inner stack is repopulated once the API responds
+  private var visitHistoryInnerStack: UIStackView!
+
   // Root scroll container
   private let scrollView = UIScrollView()
   private let contentStack = UIStackView()
@@ -105,6 +108,11 @@ final class VitalSignsEntryViewController: UIViewController {
       spinner.removeFromSuperview()
       guard let self = self else { return }
       if let habits = habits { self.applyLoadedHabits(habits) }
+    }
+
+    presenter.loadPatientHistory { [weak self] history in
+      guard let self = self else { return }
+      self.applyPatientHistory(history)
     }
   }
 
@@ -258,6 +266,7 @@ final class VitalSignsEntryViewController: UIViewController {
   // MARK: - Content
   private func buildContent() {
     contentStack.addArrangedSubview(makePatientHeaderCard())
+    contentStack.addArrangedSubview(makeVisitHistoryCard())
     contentStack.addArrangedSubview(makeSpecialHabitsCard())
     contentStack.addArrangedSubview(makePainScaleCard())
     contentStack.addArrangedSubview(makePickerRowCard(
@@ -317,6 +326,154 @@ final class VitalSignsEntryViewController: UIViewController {
       stack.bottomAnchor.constraint(equalTo: card.bottomAnchor, constant: -padding.bottom)
     ])
     return card
+  }
+
+  // MARK: - Visit History card
+
+  /// Builds the skeleton card with a "Loading…" placeholder. The inner stack
+  /// is repopulated by `applyPatientHistory` once the API responds.
+  private func makeVisitHistoryCard() -> UIView {
+    visitHistoryInnerStack = UIStackView()
+    visitHistoryInnerStack.axis = .vertical
+    visitHistoryInnerStack.spacing = 8
+    visitHistoryInnerStack.alignment = .fill
+
+    let loading = UILabel()
+    loading.text = "Loading visit history…"
+    loading.font = UIFont.systemFont(ofSize: 12, weight: .regular)
+    loading.textColor = subColor
+    visitHistoryInnerStack.addArrangedSubview(loading)
+
+    return wrapInCard(visitHistoryInnerStack, title: "Visit History")
+  }
+
+  private func applyPatientHistory(_ history: PatientHistory?) {
+    guard let stack = visitHistoryInnerStack else { return }
+
+    // Clear placeholder / previous content.
+    stack.arrangedSubviews.forEach { $0.removeFromSuperview() }
+
+    guard let history = history else {
+      let err = UILabel()
+      err.text = "Visit history unavailable"
+      err.font = UIFont.systemFont(ofSize: 12, weight: .regular)
+      err.textColor = subColor
+      stack.addArrangedSubview(err)
+      return
+    }
+
+    // ── Current Doctor & Specialty ─────────────────────────────────────────
+    let docName      = history.currentDoctor.name.isEmpty     ? "—" : history.currentDoctor.name
+    let speciality   = history.currentSpeciality.name.isEmpty ? "—" : history.currentSpeciality.name
+
+    stack.addArrangedSubview(makeHistoryInfoRow(icon: "person.fill",
+                                                label: "Doctor",
+                                                value: docName))
+    stack.addArrangedSubview(makeHistoryInfoRow(icon: "stethoscope",
+                                                label: "Specialty",
+                                                value: speciality))
+
+    // ── Recent visits (max 3, skip cancelled) ─────────────────────────────
+    let recentVisits = history.patientVisits
+      .filter { $0.cancelledVisit != "1" }
+      .prefix(3)
+
+    if recentVisits.isEmpty {
+      let none = UILabel()
+      none.text = "No recent visits"
+      none.font = UIFont.systemFont(ofSize: 12, weight: .regular)
+      none.textColor = subColor
+      stack.addArrangedSubview(none)
+      return
+    }
+
+    // Separator
+    let sep = UIView()
+    sep.backgroundColor = hairline
+    sep.heightAnchor.constraint(equalToConstant: 1 / UIScreen.main.scale).isActive = true
+    stack.addArrangedSubview(sep)
+
+    for visit in recentVisits {
+      stack.addArrangedSubview(makeVisitRow(visit))
+    }
+  }
+
+  /// Icon + label / value pair row used in the Visit History card.
+  private func makeHistoryInfoRow(icon: String, label: String, value: String) -> UIView {
+    let iconView = UIImageView()
+    iconView.tintColor = teal
+    iconView.contentMode = .scaleAspectFit
+    if #available(iOS 13, *) { iconView.image = UIImage(systemName: icon) }
+    iconView.widthAnchor.constraint(equalToConstant: 14).isActive = true
+    iconView.heightAnchor.constraint(equalToConstant: 14).isActive = true
+
+    let labelL = UILabel()
+    labelL.text = label + ":"
+    labelL.font = UIFont.systemFont(ofSize: 12, weight: .medium)
+    labelL.textColor = subColor
+    labelL.setContentHuggingPriority(.required, for: .horizontal)
+    labelL.widthAnchor.constraint(equalToConstant: 72).isActive = true
+
+    let valueL = UILabel()
+    valueL.text = value
+    valueL.font = UIFont.systemFont(ofSize: 12, weight: .regular)
+    valueL.textColor = labelColor
+    valueL.numberOfLines = 1
+    valueL.lineBreakMode = .byTruncatingTail
+
+    let row = UIStackView(arrangedSubviews: [iconView, labelL, valueL])
+    row.axis = .horizontal
+    row.spacing = 6
+    row.alignment = .center
+    return row
+  }
+
+  /// Compact single-line row for one visit entry.
+  private func makeVisitRow(_ visit: PatientVisit) -> UIView {
+    // Badge: "IP" (Inpatient) or "OP" (Outpatient) or "—"
+    let badge = UILabel()
+    badge.text  = visit.isInpatient ? "IP" : "OP"
+    badge.font  = UIFont.systemFont(ofSize: 10, weight: .bold)
+    badge.textColor  = .white
+    badge.textAlignment = .center
+    badge.backgroundColor = visit.isInpatient ? tealDark : teal
+    badge.layer.cornerRadius = 4
+    badge.layer.masksToBounds = true
+    badge.widthAnchor.constraint(equalToConstant: 26).isActive = true
+    badge.heightAnchor.constraint(equalToConstant: 18).isActive = true
+
+    // Date label
+    let dateL = UILabel()
+    // Trim time portion "05/02/2025 05:05 pm" → "05/02/2025"
+    let rawDate = visit.startDate ?? "—"
+    dateL.text = String(rawDate.prefix(10))
+    dateL.font = UIFont.systemFont(ofSize: 11, weight: .regular)
+    dateL.textColor = labelColor
+    dateL.setContentHuggingPriority(.required, for: .horizontal)
+
+    // Clinic or speciality fallback
+    let clinicL = UILabel()
+    clinicL.text = visit.clinicNameEn ?? visit.specialityNameEn ?? visit.docCaseNameEn ?? "—"
+    clinicL.font = UIFont.systemFont(ofSize: 11, weight: .regular)
+    clinicL.textColor = subColor
+    clinicL.numberOfLines = 1
+    clinicL.lineBreakMode = .byTruncatingTail
+
+    // Status pill
+    let statusL = UILabel()
+    let isOpen   = visit.isOpen
+    statusL.text  = isOpen ? "Open" : (visit.endDateEn ?? "Closed")
+    statusL.font  = UIFont.systemFont(ofSize: 10, weight: .semibold)
+    statusL.textColor = isOpen
+      ? UIColor(red: 0.15, green: 0.65, blue: 0.40, alpha: 1)
+      : subColor
+    statusL.setContentHuggingPriority(.required, for: .horizontal)
+
+    let row = UIStackView(arrangedSubviews: [badge, dateL, clinicL, statusL])
+    row.axis = .horizontal
+    row.spacing = 8
+    row.alignment = .center
+    return row
   }
 
   // MARK: - Patient header
