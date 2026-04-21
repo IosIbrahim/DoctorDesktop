@@ -73,34 +73,21 @@ class OverviewSectionDetailsViewController: UIViewController {
   // Stored so frames can be recalculated in viewDidLayoutSubviews.
   private var patientHeaderContainer: UIView?
   private var patientHeaderCard:      UIView?
-  private var patientSectionLabel:    UILabel?
   private var vitalHistoryTitleLabel: UILabel?
 
-  /// Builds the tableHeaderView using **frame-based layout** so the trailing
-  /// margin is always correct regardless of how the tableView constraints are
-  /// configured in the storyboard.
+  /// Builds the tableHeaderView using frame-based layout.
   ///
   /// Layout (top → bottom):
-  ///   14 pt  — top gap
-  ///   20 pt  — section-title label  ("Vital Signs")
-  ///    8 pt  — gap
-  ///   64 pt  — teal patient card    (icon + name + subtitle)
-  ///   14 pt  — gap
-  ///   22 pt  — table-title label    ("Vital Sign History")
-  ///   10 pt  — bottom gap
+  ///   12 pt  — top gap
+  ///   64 pt  — teal patient card  (equal 12 pt left & right margins)
+  ///   10 pt  — gap
+  ///   22 pt  — "Vital Sign History" label
+  ///    6 pt  — bottom gap  (tight, so the column-header row sits close)
   private func insertPatientHeaderCard() {
     let teal = UIColor(red: 0.22, green: 0.72, blue: 0.62, alpha: 1)
 
-    // ── Container ────────────────────────────────────────────────────────
     let container = UIView()
     container.backgroundColor = .clear
-
-    // ── Section title ("Vital Signs") ────────────────────────────────────
-    let sectionLabel = UILabel()
-    sectionLabel.text = presenter.overviewSection.title
-    sectionLabel.font = UIFont.systemFont(ofSize: 15, weight: .bold)
-    sectionLabel.textColor = teal
-    container.addSubview(sectionLabel)
 
     // ── Patient card ─────────────────────────────────────────────────────
     let card = UIView()
@@ -108,7 +95,6 @@ class OverviewSectionDetailsViewController: UIViewController {
     card.layer.cornerRadius = 10
     card.layer.masksToBounds = true
 
-    // Icon
     let icon = UIImageView()
     icon.tintColor = .white
     icon.contentMode = .scaleAspectFit
@@ -120,14 +106,12 @@ class OverviewSectionDetailsViewController: UIViewController {
     icon.heightAnchor.constraint(equalToConstant: 36).isActive = true
     icon.setContentHuggingPriority(.required, for: .horizontal)
 
-    // Name label
     let nameLabel = UILabel()
     nameLabel.text = patient.name.isEmpty ? "-" : patient.name
     nameLabel.font = UIFont.systemFont(ofSize: 17, weight: .bold)
     nameLabel.textColor = .white
     nameLabel.numberOfLines = 1
 
-    // Subtitle: nationality • date
     let nat  = patient.nationality
     let date = patient.date
     let subtitle: String
@@ -144,7 +128,6 @@ class OverviewSectionDetailsViewController: UIViewController {
     textStack.axis = .vertical
     textStack.spacing = 2
 
-    // Row (icon + text) — Auto Layout inside the card only
     let row = UIStackView(arrangedSubviews: [icon, textStack])
     row.axis = .horizontal
     row.spacing = 12
@@ -152,70 +135,63 @@ class OverviewSectionDetailsViewController: UIViewController {
     row.translatesAutoresizingMaskIntoConstraints = false
     card.addSubview(row)
     NSLayoutConstraint.activate([
-      row.topAnchor.constraint(equalTo: card.topAnchor,       constant:  14),
-      row.bottomAnchor.constraint(equalTo: card.bottomAnchor, constant: -14),
-      row.leadingAnchor.constraint(equalTo: card.leadingAnchor,  constant:  14),
+      row.topAnchor.constraint(equalTo: card.topAnchor,        constant:  14),
+      row.bottomAnchor.constraint(equalTo: card.bottomAnchor,  constant: -14),
+      row.leadingAnchor.constraint(equalTo: card.leadingAnchor,   constant:  14),
       row.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -14)
     ])
     container.addSubview(card)
 
-    // ── "Vital Sign History" title above the table ────────────────────────
+    // ── "Vital Sign History" label above the column-header row ───────────
     let historyTitle = UILabel()
     historyTitle.text = "Vital Sign History"
     historyTitle.font = UIFont.systemFont(ofSize: 14, weight: .semibold)
     historyTitle.textColor = UIColor(white: 0.25, alpha: 1)
     container.addSubview(historyTitle)
 
-    // Store references for frame updates
-    patientHeaderContainer  = container
-    patientHeaderCard       = card
-    patientSectionLabel     = sectionLabel
-    vitalHistoryTitleLabel  = historyTitle
+    patientHeaderContainer = container
+    patientHeaderCard      = card
+    vitalHistoryTitleLabel = historyTitle
 
     tableView.tableHeaderView = container
     applyHeaderFrames()
   }
 
-  /// Pure frame-based layout — called from both `insertPatientHeaderCard` and
-  /// `viewDidLayoutSubviews`. Using frames (not Auto Layout) guarantees the
-  /// trailing edge of every element equals leading + width, so there are no
-  /// asymmetric margin surprises.
+  /// Frame-based layout so leading == trailing margin (12 pt each side).
+  ///
+  /// Key fix: use `tableView.bounds.width` (not `view.bounds.width`).
+  /// The tableView is already narrowed by `addTableViewHorizontalPadding`,
+  /// so the container must match the tableView width — not the screen width.
   private func applyHeaderFrames() {
     guard
-      let container  = patientHeaderContainer,
-      let card       = patientHeaderCard,
-      let secLabel   = patientSectionLabel,
-      let histLabel  = vitalHistoryTitleLabel
+      let container = patientHeaderContainer,
+      let card      = patientHeaderCard,
+      let histLabel = vitalHistoryTitleLabel
     else { return }
 
-    // Use the view's width (always reliable) and subtract the horizontal inset
-    let screenW: CGFloat = view.bounds.width > 0 ? view.bounds.width : UIScreen.main.bounds.width
-    let hInset:  CGFloat = 12          // equal left & right margin for card and labels
-    let cardW = screenW - 2 * hInset   // card width — symmetric on both sides
+    // tableView.bounds.width is the source of truth; fall back to screen-24
+    // only on the first call from viewDidLoad (before bounds are resolved).
+    let w: CGFloat = tableView.bounds.width > 0
+                   ? tableView.bounds.width
+                   : UIScreen.main.bounds.width - 24
 
-    // Fixed row heights
-    let secLabelH:  CGFloat = 20
-    let cardH:      CGFloat = 64       // 14 (pad) + 36 (icon) + 14 (pad)
-    let histLabelH: CGFloat = 22
+    let hInset:    CGFloat = 12
+    let cardW      = w - 2 * hInset    // symmetric left = right = 12 pt
+    let cardH:     CGFloat = 64
+    let histH:     CGFloat = 22
+    let topGap:    CGFloat = 12
+    let cardHistGap: CGFloat = 10
+    let bottomGap: CGFloat = 6         // tight — pulls table up
 
-    // Vertical positions
-    let topGap:     CGFloat = 14
-    let secCardGap: CGFloat = 8
-    let cardHistGap:CGFloat = 14
-    let bottomGap:  CGFloat = 10
+    let cardY   = topGap
+    let histY   = cardY + cardH + cardHistGap
+    let totalH  = histY + histH + bottomGap
 
-    let secLabelY  = topGap
-    let cardY      = secLabelY  + secLabelH  + secCardGap
-    let histLabelY = cardY      + cardH      + cardHistGap
-    let totalH     = histLabelY + histLabelH + bottomGap
+    card.frame      = CGRect(x: hInset, y: cardY,  width: cardW, height: cardH)
+    histLabel.frame = CGRect(x: hInset, y: histY,  width: cardW, height: histH)
+    container.frame = CGRect(x: 0,      y: 0,       width: w,    height: totalH)
 
-    secLabel.frame  = CGRect(x: hInset, y: secLabelY,  width: cardW, height: secLabelH)
-    card.frame      = CGRect(x: hInset, y: cardY,      width: cardW, height: cardH)
-    histLabel.frame = CGRect(x: hInset, y: histLabelY, width: cardW, height: histLabelH)
-    container.frame = CGRect(x: 0,      y: 0,          width: screenW, height: totalH)
-
-    // Re-assign only when the height actually changed to avoid scroll glitches
-    if abs(tableView.tableHeaderView?.frame.height ?? 0 - totalH) > 0.5 {
+    if tableView.tableHeaderView?.frame.height != totalH {
       tableView.tableHeaderView = container
     }
   }
