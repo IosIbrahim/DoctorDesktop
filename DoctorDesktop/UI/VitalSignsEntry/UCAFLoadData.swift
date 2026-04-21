@@ -45,8 +45,10 @@ struct UCAFLoadData: Decodable {
   var safetyFlag: String?
 
   // Meta
-  var ser: String?
-  var scoreType: String?
+  var ser: String?              // SER          — record serial, sent back in saveUCAF
+  var schedSerial: String?      // SCHED_SERIAL — appointment/schedule serial (RCP_SERV_SER in save)
+  var hospId: String?           // HOSP_ID      — hospital ID
+  var scoreType: String?        // SCORE_TYPE   — pain score type (e.g. "9")
   var painScoreSer: String?
   var vlsRemarks: String?
 
@@ -77,6 +79,8 @@ struct UCAFLoadData: Decodable {
     case suicideFlag         = "SUICIDE_FLAG"
     case safetyFlag          = "SAFETY_FLAG"
     case ser                 = "SER"
+    case schedSerial         = "SCHED_SERIAL"
+    case hospId              = "HOSP_ID"
     case scoreType           = "SCORE_TYPE"
     case painScoreSer        = "PAIN_SCORE_SER"
     case vlsRemarks          = "VLS_REMARKS"
