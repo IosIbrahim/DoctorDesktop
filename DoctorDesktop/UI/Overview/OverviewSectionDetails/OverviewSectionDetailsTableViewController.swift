@@ -159,9 +159,9 @@ class OverviewSectionDetailsViewController: UIViewController {
 
   /// Frame-based layout so leading == trailing margin (12 pt each side).
   ///
-  /// Key fix: use `tableView.bounds.width` (not `view.bounds.width`).
-  /// The tableView is already narrowed by `addTableViewHorizontalPadding`,
-  /// so the container must match the tableView width — not the screen width.
+  /// Key fix: derive width from `view.bounds.width - 24` (known tableView padding)
+  /// rather than `tableView.bounds.width`, which can be unreliable depending on
+  /// how the storyboard trailing constraint is stored.
   private func applyHeaderFrames() {
     guard
       let container = patientHeaderContainer,
@@ -169,19 +169,20 @@ class OverviewSectionDetailsViewController: UIViewController {
       let histLabel = vitalHistoryTitleLabel
     else { return }
 
-    // tableView.bounds.width is the source of truth; fall back to screen-24
-    // only on the first call from viewDidLoad (before bounds are resolved).
-    let w: CGFloat = tableView.bounds.width > 0
-                   ? tableView.bounds.width
-                   : UIScreen.main.bounds.width - 24
+    // Use view.bounds.width - 24 (the known tableView horizontal padding × 2).
+    // Do NOT use tableView.bounds.width: the storyboard trailing constraint
+    // direction can make it wider than view.bounds.width - 24, causing the card
+    // to overflow the right edge with no visible trailing margin.
+    let tableHPad: CGFloat = 24        // addTableViewHorizontalPadding(12) × 2
+    let w: CGFloat = (view.bounds.width > 0 ? view.bounds.width : UIScreen.main.bounds.width) - tableHPad
 
-    let hInset:    CGFloat = 12
-    let cardW      = w - 2 * hInset    // symmetric left = right = 12 pt
-    let cardH:     CGFloat = 64
-    let histH:     CGFloat = 22
-    let topGap:    CGFloat = 12
-    let cardHistGap: CGFloat = 10
-    let bottomGap: CGFloat = 6         // tight — pulls table up
+    let hInset:      CGFloat = 12
+    let cardW        = w - 2 * hInset  // symmetric left = right = 12 pt
+    let cardH:       CGFloat = 64
+    let histH:       CGFloat = 22
+    let topGap:      CGFloat = 8
+    let cardHistGap: CGFloat = 8
+    let bottomGap:   CGFloat = 0       // flush — pulls table right up
 
     let cardY   = topGap
     let histY   = cardY + cardH + cardHistGap
