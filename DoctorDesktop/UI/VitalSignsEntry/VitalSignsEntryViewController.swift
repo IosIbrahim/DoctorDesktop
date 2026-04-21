@@ -92,18 +92,52 @@ final class VitalSignsEntryViewController: UIViewController {
       spinner.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 8)
     ])
 
+    // Fire both API calls in parallel; apply each result as it arrives.
     presenter.loadInitialData { [weak self] ucaf, ctas in
-      spinner.stopAnimating()
-      spinner.removeFromSuperview()
       guard let self = self else { return }
       if let ucaf = ucaf { self.applyLoadedUcaf(ucaf) }
       self.serverCTAS = ctas
-      if ctas != nil {
-        self.applyServerCTAS()
-      } else {
-        self.recomputeCTAS()
-      }
+      if ctas != nil { self.applyServerCTAS() } else { self.recomputeCTAS() }
     }
+
+    presenter.loadSpecialHabits { [weak self] habits in
+      spinner.stopAnimating()
+      spinner.removeFromSuperview()
+      guard let self = self else { return }
+      if let habits = habits { self.applyLoadedHabits(habits) }
+    }
+  }
+
+  private func applyLoadedHabits(_ d: SpecialHabitsData) {
+    let on: (String?) -> Bool = { ($0 ?? "").trimmingCharacters(in: .whitespaces) == "1" }
+
+    if d.hasHabits {
+      // Select "Has Special Habits" radio and reveal checkboxes
+      habitsHasButton?.isSelected  = true
+      habitsNoneButton?.isSelected = false
+      values.hasSpecialHabits = true
+      habitsOptionsStack?.isHidden = false
+      habitsOptionsStack?.alpha    = 1
+    } else {
+      habitsNoneButton?.isSelected = true
+      habitsHasButton?.isSelected  = false
+      values.hasSpecialHabits = false
+    }
+
+    // Individual habit checkboxes
+    setHabitCheckbox("alcohol",      on: on(d.alcoholFlag),     bind: &values.habitAlcohol)
+    setHabitCheckbox("smoker",       on: on(d.smokerFlag),      bind: &values.habitSmoker)
+    setHabitCheckbox("morphine",     on: on(d.morphineFlag),    bind: &values.habitMorphine)
+    setHabitCheckbox("cannabinoid",  on: on(d.cannabinoidFlag), bind: &values.habitCannabinoid)
+    setHabitCheckbox("substanceUse", on: on(d.drugsFlag),       bind: &values.habitSubstanceUse)
+    setHabitCheckbox("shisha",       on: on(d.shishaFlag),      bind: &values.habitShisha)
+    setHabitCheckbox("vape",         on: on(d.vapeFlag),        bind: &values.habitVape)
+    setHabitCheckbox("other",        on: on(d.otherFlag),       bind: &values.habitOther)
+  }
+
+  private func setHabitCheckbox(_ key: String, on: Bool, bind: inout Bool) {
+    habitCheckboxes[key]?.isSelected = on
+    bind = on
   }
 
   private func applyLoadedUcaf(_ d: UCAFLoadData) {

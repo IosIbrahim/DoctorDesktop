@@ -22,6 +22,11 @@ protocol VitalSignsEntryPresenter {
   /// section. The completion is always invoked on the main queue.
   func loadInitialData(completion: @escaping (UCAFLoadData?, UCAFCTASServer?) -> Void)
 
+  /// Fetches the Special Habits record from `MedicalRecord/loadSpecialHappits`.
+  /// Returns nil when the patient has no habits record at all.
+  /// Completion is always invoked on the main queue.
+  func loadSpecialHabits(completion: @escaping (SpecialHabitsData?) -> Void)
+
   /// Called when the user taps Save. Currently local-only (matches the
   /// placeholder nature of the Android screen in this codebase). A real
   /// submit would be wired through ModelLayer here.
@@ -123,6 +128,23 @@ final class VitalSignsEntryPresenterImpl: VitalSignsEntryPresenter {
       DispatchQueue.main.async {
         completion(ucaf, ctas)
       }
+    }
+  }
+
+  func loadSpecialHabits(completion: @escaping (SpecialHabitsData?) -> Void) {
+    // PROCESS_ID 3909 is the server-side workflow ID for the Special Habits
+    // data-entry process. TRACER_PLACE_ID is the patient's current place/clinic.
+    let params: [String: String] = [
+      "PATIENT_ID":      patient.id.trimmingCharacters(in: .whitespacesAndNewlines),
+      "VISIT_ID":        patient.visitId,
+      "BRANCH_ID":       user.branch   ?? "",
+      "USER_ID":         user.userName ?? user.id ?? "",
+      "COMPUTER_NAME":   "iOS",
+      "PROCESS_ID":      "3909",
+      "TRACER_PLACE_ID": patient.placeId
+    ]
+    modelLayer.loadSpecialHabits(with: params) { habits in
+      DispatchQueue.main.async { completion(habits) }
     }
   }
 

@@ -42,6 +42,7 @@ protocol NetworkLayer {
     func getPacksURL(with params: [String: String], finished: @escaping DataBlock)
     func getTriageInfo(with params: [String: String], finished: @escaping DataBlock)
     func loadUcaf(with params: [String: String], finished: @escaping DataBlock)
+    func loadSpecialHabits(with params: [String: String], finished: @escaping DataBlock)
     func getSymptoms(with params: [String: String], finished: @escaping DataBlock)
     func loadFlagImage(with params: [String: String], finished: @escaping DataBlock)
     func getVisitsDetail(with params: [String: String], finished: @escaping DataBlock)
@@ -82,6 +83,38 @@ class NetworkLayerImpl: NetworkLayer {
                     APILogger.logFailure(method: "GET", url: url, error: error.localizedDescription, duration: duration)
                 } else {
                     APILogger.logResponse(method: "GET", url: url, statusCode: code, data: response.data, duration: duration)
+                }
+                guard let data = response.data else { return }
+                finished(data)
+            }
+    }
+
+    /// Generic GET request with OAuth 1.0 HMAC-SHA1 signing (used by endpoints
+    /// that the server requires to be signed rather than Bearer-authed).
+    /// The OAuth Authorization header is built via `Constants.getoAuthValue`.
+    private func signedGet(_ urlString: String,
+                           params: [String: String],
+                           finished: @escaping DataBlock) {
+        guard let url = URL(string: urlString) else { return }
+        let oauthValue = Constants.getoAuthValue(url: url, method: "GET", parameters: params)
+        var headers = HTTPHeaders([HTTPHeader(name: "Authorization", value: oauthValue)])
+        if let bearerToken = UserDefaults.standard.string(forKey: "auth_token") {
+            // Some servers accept both; keep Bearer as fallback in the same request.
+            headers.add(name: "X-Auth-Token", value: bearerToken)
+        }
+        APILogger.logRequest(method: "GET(OAuth)", url: urlString, params: params)
+        let start = Date()
+        NetworkLayerImpl.session
+            .request(urlString, parameters: params, headers: headers)
+            .responseJSON { response in
+                let duration = Date().timeIntervalSince(start)
+                let code = response.response?.statusCode ?? 0
+                if let error = response.error {
+                    APILogger.logFailure(method: "GET(OAuth)", url: urlString,
+                                        error: error.localizedDescription, duration: duration)
+                } else {
+                    APILogger.logResponse(method: "GET(OAuth)", url: urlString,
+                                         statusCode: code, data: response.data, duration: duration)
                 }
                 guard let data = response.data else { return }
                 finished(data)
@@ -219,6 +252,13 @@ class NetworkLayerImpl: NetworkLayer {
 
     func loadUcaf(with params: [String: String], finished: @escaping DataBlock) {
         get(AppURLS.ip + "/MobileApi/api/MedicalRecord/loadUcaf", params: params, finished: finished)
+    }
+
+    func loadSpecialHabits(with params: [String: String], finished: @escaping DataBlock) {
+        // This endpoint requires OAuth 1.0 signing — not Bearer auth.
+        // Endpoint name intentionally matches the server typo "loadSpecialHappits".
+        signedGet(AppURLS.ip + "/MobileApi/api/MedicalRecord/loadSpecialHappits",
+                  params: params, finished: finished)
     }
 
     func getSymptoms(with params: [String: String], finished: @escaping DataBlock) {

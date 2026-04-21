@@ -35,6 +35,7 @@ protocol ModelLayer {
     func getPacksURL(with params:[String: String], finished: @escaping URLBlock)
     func getTriageInfo(with params: [String: String], finished: @escaping TriageDataBlock)
     func loadUcaf(with params: [String: String], finished: @escaping (UCAFLoadData?, UCAFCTASServer?) -> Void)
+    func loadSpecialHabits(with params: [String: String], finished: @escaping (SpecialHabitsData?) -> Void)
 
     func getSymptomCategories(with params: [String: String], finished: @escaping RegularSymptomCategoriesBlock)
     func getSymptoms(with params: [String: String], finished: @escaping SymptomsBlock)
@@ -233,6 +234,13 @@ extension ModelLayerImpl {
       let ucaf = self.translationLayer.getLoadUcafFromJson(data)
       let ctas = self.translationLayer.getLoadUcafCTASFromJson(data)
       finished(ucaf, ctas)
+    }
+  }
+
+  func loadSpecialHabits(with params: [String: String], finished: @escaping (SpecialHabitsData?) -> Void) {
+    networkLayer.loadSpecialHabits(with: params) { data in
+      let habits = self.translationLayer.getSpecialHabitsFromJson(data)
+      finished(habits)
     }
   }
 }

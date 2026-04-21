@@ -36,6 +36,7 @@ protocol TranslationLayer {
     func getVitalsDTOsFromJson(_ data: Data) -> UCAFData?
     func getLoadUcafFromJson(_ data: Data) -> UCAFLoadData?
     func getLoadUcafCTASFromJson(_ data: Data) -> UCAFCTASServer?
+    func getSpecialHabitsFromJson(_ data: Data) -> SpecialHabitsData?
     
     func getHistorySymptomsDTOsFromJson(_ data:Data) -> HistorySymptomCategories
     func getDiagnosisCategoriesDTOsFromJson(_ data: Data) -> DiagnosisCategories
@@ -565,6 +566,15 @@ extension TranslationLayerImpl {
               json.contains("CTAS_DATA_ROW") else { return nil }
         let keyPath = "Root.CTAS.CTAS_DATA.CTAS_DATA_ROW"
         return try? UCAFCTASServer(data: data, keyPath: keyPath)
+    }
+
+    // VitalSignsEntry: /MedicalRecord/loadSpecialHappits — special habits payload.
+    // Lives at Root.SPECIAL_HABITS (single object, not an array row).
+    func getSpecialHabitsFromJson(_ data: Data) -> SpecialHabitsData? {
+        guard let json = String(data: data, encoding: .utf8),
+              json.contains("SPECIAL_HABITS") else { return nil }
+        let keyPath = "Root.SPECIAL_HABITS"
+        return try? SpecialHabitsData(data: data, keyPath: keyPath)
     }
     
     // get diagnosis categories
