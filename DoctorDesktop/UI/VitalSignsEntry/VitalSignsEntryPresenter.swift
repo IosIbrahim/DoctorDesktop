@@ -27,10 +27,6 @@ protocol VitalSignsEntryPresenter {
   /// Completion is always invoked on the main queue.
   func loadSpecialHabits(completion: @escaping (SpecialHabitsData?) -> Void)
 
-  /// Fetches recorded vital signs history from `GetPatCustomizedSummary`.
-  /// Returns the `[VitalSign]` array (may be empty). Completion always on main queue.
-  func loadVitalSignsHistory(completion: @escaping ([VitalSign]) -> Void)
-
   /// Fetches the patient's visit history from `LoadPatientEpisodes`.
   /// Returns nil on network / parse failure. Completion always on main queue.
   func loadPatientHistory(completion: @escaping (PatientHistory?) -> Void)
@@ -153,25 +149,6 @@ final class VitalSignsEntryPresenterImpl: VitalSignsEntryPresenter {
     ]
     modelLayer.loadSpecialHabits(with: params) { habits in
       DispatchQueue.main.async { completion(habits) }
-    }
-  }
-
-  func loadVitalSignsHistory(completion: @escaping ([VitalSign]) -> Void) {
-    // Same params as OverviewPresenterImpl.getPatientSummary — scoped to the
-    // current visit only (VISIT_ID_ARRAY = single visit ID).
-    let params: [String: String] = [
-      "COMPUTER_NAME":   "iOS",
-      "TRACER_PLACE_ID": patient.placeId,
-      "PROCESS_ID":      "20531",
-      "USER_ID":         user.userName ?? user.id ?? "",
-      "BRANCH_ID":       user.branch   ?? "",
-      "PATIENT_ID":      patient.id.trimmingCharacters(in: .whitespacesAndNewlines),
-      "VISIT_ID_ARRAY":  patient.visitId
-    ]
-    modelLayer.getPatientSummary(with: params) { summary in
-      DispatchQueue.main.async {
-        completion(summary.vitalSigns ?? [])
-      }
     }
   }
 

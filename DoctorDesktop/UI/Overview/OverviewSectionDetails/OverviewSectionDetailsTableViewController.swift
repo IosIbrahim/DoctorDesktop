@@ -65,6 +65,119 @@ class OverviewSectionDetailsViewController: UIViewController {
     }
 
     styleFAB()
+    insertPatientHeaderCard()
+  }
+
+  // MARK: - Patient header card
+
+  private var patientHeaderContainer: UIView?
+
+  /// Builds a teal patient-header card identical to the one in
+  /// VitalSignsEntryViewController and pins it as the tableHeaderView so it
+  /// scrolls with the content.
+  private func insertPatientHeaderCard() {
+    let teal = UIColor(red: 0.22, green: 0.72, blue: 0.62, alpha: 1)
+
+    // Container — frame will be corrected in viewDidLayoutSubviews
+    let container = UIView()
+    container.backgroundColor = tableView.backgroundColor ?? view.backgroundColor ?? .clear
+
+    // Card
+    let card = UIView()
+    card.backgroundColor = teal
+    card.layer.cornerRadius = 10
+    card.layer.masksToBounds = true
+    card.translatesAutoresizingMaskIntoConstraints = false
+
+    // Person icon
+    let icon = UIImageView()
+    icon.tintColor = .white
+    icon.contentMode = .scaleAspectFit
+    if #available(iOS 13, *) {
+      icon.image = UIImage(systemName: "person.crop.circle.fill")
+    }
+    icon.translatesAutoresizingMaskIntoConstraints = false
+    icon.widthAnchor.constraint(equalToConstant: 36).isActive = true
+    icon.heightAnchor.constraint(equalToConstant: 36).isActive = true
+    icon.setContentHuggingPriority(.required, for: .horizontal)
+
+    // Name
+    let nameLabel = UILabel()
+    nameLabel.text = patient.name.isEmpty ? "-" : patient.name
+    nameLabel.font = UIFont.systemFont(ofSize: 17, weight: .bold)
+    nameLabel.textColor = .white
+    nameLabel.numberOfLines = 1
+
+    // Subtitle: nationality • date
+    let nat  = patient.nationality
+    let date = patient.date
+    let subtitle: String
+    if !nat.isEmpty && !date.isEmpty { subtitle = "\(nat) • \(date)" }
+    else if !nat.isEmpty             { subtitle = nat }
+    else                             { subtitle = date }
+
+    let subLabel = UILabel()
+    subLabel.text = subtitle
+    subLabel.font = UIFont.systemFont(ofSize: 12, weight: .regular)
+    subLabel.textColor = UIColor.white.withAlphaComponent(0.9)
+    subLabel.numberOfLines = 1
+
+    // Text stack
+    let textStack = UIStackView(arrangedSubviews: [nameLabel, subLabel])
+    textStack.axis = .vertical
+    textStack.spacing = 2
+
+    // Horizontal row
+    let row = UIStackView(arrangedSubviews: [icon, textStack])
+    row.axis = .horizontal
+    row.spacing = 12
+    row.alignment = .center
+    row.translatesAutoresizingMaskIntoConstraints = false
+
+    card.addSubview(row)
+    NSLayoutConstraint.activate([
+      row.topAnchor.constraint(equalTo: card.topAnchor,    constant:  14),
+      row.bottomAnchor.constraint(equalTo: card.bottomAnchor, constant: -14),
+      row.leadingAnchor.constraint(equalTo: card.leadingAnchor,  constant:  14),
+      row.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -14)
+    ])
+
+    // Card inside container (12pt top, 8pt bottom gap before the table)
+    container.addSubview(card)
+    NSLayoutConstraint.activate([
+      card.topAnchor.constraint(equalTo: container.topAnchor,    constant:  12),
+      card.leadingAnchor.constraint(equalTo: container.leadingAnchor),
+      card.trailingAnchor.constraint(equalTo: container.trailingAnchor),
+      card.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -8)
+    ])
+
+    patientHeaderContainer = container
+    tableView.tableHeaderView = container
+    refreshHeaderFrame()
+  }
+
+  /// Recalculates and applies the tableHeaderView frame height so Auto Layout
+  /// children size correctly. Called from viewDidLayoutSubviews.
+  private func refreshHeaderFrame() {
+    guard let header = patientHeaderContainer else { return }
+    let w = tableView.bounds.width > 0 ? tableView.bounds.width : UIScreen.main.bounds.width - 24
+    header.frame.size.width = w
+    header.setNeedsLayout()
+    header.layoutIfNeeded()
+    let h = header.systemLayoutSizeFitting(
+      CGSize(width: w, height: UILayoutFittingCompressedSize.height),
+      withHorizontalFittingPriority: .required,
+      verticalFittingPriority: UILayoutPriority(rawValue: 50)
+    ).height
+    if abs(header.frame.size.height - h) > 0.5 {
+      header.frame.size.height = h
+      tableView.tableHeaderView = header   // re-assign triggers UITableView reflow
+    }
+  }
+
+  override func viewDidLayoutSubviews() {
+    super.viewDidLayoutSubviews()
+    refreshHeaderFrame()
   }
 
   // MARK: - Layout helpers
