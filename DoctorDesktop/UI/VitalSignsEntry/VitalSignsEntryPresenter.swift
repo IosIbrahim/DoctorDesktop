@@ -268,7 +268,8 @@ final class VitalSignsEntryPresenterImpl: VitalSignsEntryPresenter {
     let dateSlash = slashFmt.string(from: now)   // "21/04/2026 13:46:46"
     let dateDash  = dashFmt.string(from: now)    // "21-04-2026 13:46:46"
 
-    let isUpdate = !(loadedUcaf?.ser ?? "").trimmingCharacters(in: .whitespaces).isEmpty
+    let existingSer = (loadedUcaf?.ser ?? "").trimmingCharacters(in: .whitespaces)
+    let isUpdate = !existingSer.isEmpty && existingSer != "0"
 
     // ── 1. Routing / identity object ─────────────────────────────────────────
     let ucParms: [String: Any] = [
@@ -322,7 +323,7 @@ final class VitalSignsEntryPresenterImpl: VitalSignsEntryPresenter {
       "PATIENT_ID":                 patient.id,
       "PULSE":                      str(values.pulse),
       "RESPIRATORY_RATE":           str(values.respiratoryRate),
-      "SER":                        str(loadedUcaf?.ser),
+      "SER":                        isUpdate ? existingSer : "0",  // "0" = new insert, real serial = update
       "TEMP":                       str(values.temperature),
       "USERID_ENTRY":               user.userName ?? user.id ?? "",
       "VISIT_ID":                   patient.visitId,
