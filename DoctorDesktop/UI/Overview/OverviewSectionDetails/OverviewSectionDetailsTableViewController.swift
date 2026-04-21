@@ -136,19 +136,35 @@ class OverviewSectionDetailsViewController: UIViewController {
 
     card.addSubview(row)
     NSLayoutConstraint.activate([
-      row.topAnchor.constraint(equalTo: card.topAnchor,    constant:  14),
-      row.bottomAnchor.constraint(equalTo: card.bottomAnchor, constant: -14),
+      row.topAnchor.constraint(equalTo: card.topAnchor,        constant:  14),
+      row.bottomAnchor.constraint(equalTo: card.bottomAnchor,  constant: -14),
       row.leadingAnchor.constraint(equalTo: card.leadingAnchor,  constant:  14),
       row.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -14)
     ])
 
-    // Card inside container (12pt top, 8pt bottom gap before the table)
+    // Section title label shown above the card
+    let titleLabel = UILabel()
+    titleLabel.text = presenter.overviewSection.title
+    titleLabel.font = UIFont.systemFont(ofSize: 15, weight: .bold)
+    titleLabel.textColor = teal
+    titleLabel.translatesAutoresizingMaskIntoConstraints = false
+
+    container.addSubview(titleLabel)
     container.addSubview(card)
+
+    // 12 pt horizontal inset on BOTH sides so the card has equal leading & trailing space
+    let hInset: CGFloat = 12
     NSLayoutConstraint.activate([
-      card.topAnchor.constraint(equalTo: container.topAnchor,    constant:  12),
-      card.leadingAnchor.constraint(equalTo: container.leadingAnchor),
-      card.trailingAnchor.constraint(equalTo: container.trailingAnchor),
-      card.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -8)
+      // Title: 14 pt from top, same horizontal inset as the card
+      titleLabel.topAnchor.constraint(equalTo: container.topAnchor,      constant:  14),
+      titleLabel.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: hInset),
+      titleLabel.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -hInset),
+
+      // Card: 8 pt gap below the title, equal margins on both sides
+      card.topAnchor.constraint(equalTo: titleLabel.bottomAnchor,        constant:   8),
+      card.leadingAnchor.constraint(equalTo: container.leadingAnchor,   constant:  hInset),
+      card.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -hInset),
+      card.bottomAnchor.constraint(equalTo: container.bottomAnchor,     constant:  -10)
     ])
 
     patientHeaderContainer = container
