@@ -274,6 +274,11 @@ final class VitalSignsEntryPresenterImpl: VitalSignsEntryPresenter {
       // RCP_SERV_SER is the appointment/schedule serial (from SCHED_SERIAL)
       "RCP_SERV_SER":  str(loadedUcaf?.schedSerial),
       "HOSP_ID":       str(loadedUcaf?.hospId),
+      // Pain-score metadata the server needs to link/update the scoring record
+      "SCORE_TYPE":    str(loadedUcaf?.scoreType),
+      "PAIN_SCORE_SER": str(loadedUcaf?.painScoreSer),
+      // Vital-sign remarks (free-text note attached to the UCAF row)
+      "VLS_REMARKS":   str(loadedUcaf?.vlsRemarks),
 
       // ── Vitals ──────────────────────────────────────────────────────────
       "BP":                str(values.bpSystolic),
