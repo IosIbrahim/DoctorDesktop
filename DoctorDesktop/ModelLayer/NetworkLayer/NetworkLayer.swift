@@ -44,6 +44,8 @@ protocol NetworkLayer {
     func loadUcaf(with params: [String: String], finished: @escaping DataBlock)
     func loadSpecialHabits(with params: [String: String], finished: @escaping DataBlock)
     func saveSpecialHabits(body: [String: Any], finished: @escaping DataBlock)
+    /// POST /MobileApi/api/MedicalRecordController/saveUcaf — saves vitals + special-needs flags.
+    func saveUcaf(body: [String: Any], finished: @escaping DataBlock)
     func getSymptoms(with params: [String: String], finished: @escaping DataBlock)
     func loadFlagImage(with params: [String: String], finished: @escaping DataBlock)
     func getVisitsDetail(with params: [String: String], finished: @escaping DataBlock)
@@ -290,6 +292,12 @@ class NetworkLayerImpl: NetworkLayer {
     func saveSpecialHabits(body: [String: Any], finished: @escaping DataBlock) {
         // Save uses Bearer auth (no OAuth). Body is nested JSON, not form-encoded.
         postJSON(AppURLS.ip + "/MobileApi/api/MedicalRecordController/saveSpecialHabits",
+                 body: body, finished: finished)
+    }
+
+    func saveUcaf(body: [String: Any], finished: @escaping DataBlock) {
+        // Same auth / encoding pattern as saveSpecialHabits.
+        postJSON(AppURLS.ip + "/MobileApi/api/MedicalRecordController/saveUcaf",
                  body: body, finished: finished)
     }
 

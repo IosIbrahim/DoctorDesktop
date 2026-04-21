@@ -31,10 +31,10 @@ protocol VitalSignsEntryPresenter {
   /// Returns nil on network / parse failure. Completion always on main queue.
   func loadPatientHistory(completion: @escaping (PatientHistory?) -> Void)
 
-  /// Called when the user taps Save. Currently local-only (matches the
-  /// placeholder nature of the Android screen in this codebase). A real
-  /// submit would be wired through ModelLayer here.
-  func save(values: VitalSignsEntryValues, completion: @escaping (Bool) -> Void)
+  /// Called when the user taps Save.
+  /// Fires `saveSpecialHabits` + `saveUCAF` in parallel; succeeds only if
+  /// both return code == 1.  Completion is always on the main queue.
+  func save(values: VitalSignsEntryValues, completion: @escaping (Bool, String?) -> Void)
 }
 
 /// All numeric / text fields are strings straight from the text fields so the
@@ -96,6 +96,10 @@ final class VitalSignsEntryPresenterImpl: VitalSignsEntryPresenter {
   let user: User
   private let modelLayer: ModelLayer
 
+  /// Stored after `loadInitialData` so `buildSaveUcafBody` can echo back the
+  /// SER / RCP_SERV_SER / HOSP_ID that the server needs to identify the record.
+  private var loadedUcaf: UCAFLoadData?
+
   init(patient: Patient, user: User, modelLayer: ModelLayer) {
     self.patient = patient
     self.user = user
@@ -128,7 +132,8 @@ final class VitalSignsEntryPresenterImpl: VitalSignsEntryPresenter {
       "BRANCH_ID":  user.branch ?? "",
       "LANG":       "E"
     ]
-    modelLayer.loadUcaf(with: params) { ucaf, ctas in
+    modelLayer.loadUcaf(with: params) { [weak self] ucaf, ctas in
+      self?.loadedUcaf = ucaf   // cache for save
       DispatchQueue.main.async {
         completion(ucaf, ctas)
       }
@@ -173,10 +178,32 @@ final class VitalSignsEntryPresenterImpl: VitalSignsEntryPresenter {
     }
   }
 
-  func save(values: VitalSignsEntryValues, completion: @escaping (Bool) -> Void) {
-    let body = buildSaveSpecialHabitsBody(values: values)
-    modelLayer.saveSpecialHabits(body: body) { success, message in
-      DispatchQueue.main.async { completion(success) }
+  func save(values: VitalSignsEntryValues, completion: @escaping (Bool, String?) -> Void) {
+    let habitsBody = buildSaveSpecialHabitsBody(values: values)
+    let ucafBody   = buildSaveUcafBody(values: values)
+
+    // Fire both in parallel; overall success = both return code 1.
+    let group = DispatchGroup()
+    var habitsOK  = false
+    var ucafOK    = false
+    var errorMsg: String?
+
+    group.enter()
+    modelLayer.saveSpecialHabits(body: habitsBody) { ok, msg in
+      habitsOK = ok
+      if let m = msg, !ok { errorMsg = m }
+      group.leave()
+    }
+
+    group.enter()
+    modelLayer.saveUcaf(body: ucafBody) { ok, msg in
+      ucafOK = ok
+      if let m = msg, !ok { errorMsg = m }
+      group.leave()
+    }
+
+    group.notify(queue: .main) {
+      completion(habitsOK && ucafOK, errorMsg)
     }
   }
 
@@ -221,6 +248,69 @@ final class VitalSignsEntryPresenterImpl: VitalSignsEntryPresenter {
       "_DD_UC_PARMS":           ucParms,
       "HISTORY_H":              historyH,
       "_PATIENT_SPECIAL_HABITS": habitsPayload
+    ]
+  }
+
+  /// Builds the flat JSON body for POST saveUcaf, which saves vitals + special-needs.
+  /// Fields that were never entered are sent as empty strings (matches Android).
+  /// SER / RCP_SERV_SER / HOSP_ID are echoed back from the loaded record so the
+  /// server knows whether to INSERT or UPDATE.
+  private func buildSaveUcafBody(values: VitalSignsEntryValues) -> [String: Any] {
+    let flag: (Bool) -> String = { $0 ? "1" : "0" }
+    let str: (String?) -> String = { $0 ?? "" }
+
+    return [
+      // ── Identity ────────────────────────────────────────────────────────
+      "PATIENT_ID":    patient.id.trimmingCharacters(in: .whitespacesAndNewlines),
+      "VISIT_ID":      patient.visitId,
+      "BRANCH_ID":     user.branch   ?? "",
+      "USER_ID":       user.userName ?? user.id ?? "",
+      "COMPUTER_NAME": "iOS",
+      "LANG":          "E",
+
+      // ── Record keys echoed from loadUcaf ─────────────────────────────────
+      // SER identifies the existing record (empty = new insert)
+      "SER":           str(loadedUcaf?.ser),
+      // RCP_SERV_SER is the appointment/schedule serial (from SCHED_SERIAL)
+      "RCP_SERV_SER":  str(loadedUcaf?.schedSerial),
+      "HOSP_ID":       str(loadedUcaf?.hospId),
+
+      // ── Vitals ──────────────────────────────────────────────────────────
+      "BP":                str(values.bpSystolic),
+      "PB_2":              str(values.bpDiastolic),
+      "TEMP":              str(values.temperature),
+      "PULSE":             str(values.pulse),
+      "RESPIRATORY_RATE":  str(values.respiratoryRate),
+      "O2SAT":             str(values.o2Sat),
+      "BLOOD_GLUCOSE":     str(values.bloodSugar),
+      "WEIGHT":            str(values.weight),
+      "HEIGHT":            str(values.height),
+      "HEAD_DIAMETER":     str(values.headCircumference),
+      "BLOOD_KETONES":     "",          // not on this screen
+      "URINE_SUGAR":       str(values.sugarUrine),
+      "URINE_ALBUMIN":     str(values.urineAlbumin),
+      "ACETONE_URINE":     str(values.acetoneUrine),
+      "APAU":              str(values.apau),
+      "URINE_OUT":         str(values.urineOut),
+      "PERIPHERAL_PULSE":  str(values.peripheralPulse),
+      "INTRA_ABDOMINAL_PRESSURE": str(values.intraAbdominalPressure),
+      "O2_DELIVERY":       str(values.o2Delivery),
+      "CHEST_CIRCUMFERENCE": str(values.chestCircumference),
+      "TOTAL_BILIRUBIN":   str(values.totalBilirubin),
+      "ABDOMEN_CIRCUMFERENCE": str(values.abdomenCircumference),
+      "SPIROMETER":        str(values.spirometer),
+
+      // ── Pain ────────────────────────────────────────────────────────────
+      "PAIN_SCALE_ADULT_SCORE": "\(values.painScale)",
+
+      // ── Special needs ───────────────────────────────────────────────────
+      "MUTE_FLAG":        flag(values.isMute),
+      "DEAF_FLAG":        flag(values.isBlind),    // server key is DEAF even though UI says "Blind"
+      "HANDICAPPED_FLAG": flag(values.isHandicapped),
+      "ABUSE_FLAG":       flag(values.hasAbuse),
+      "NEGLECT_FLAG":     flag(values.hasNeglect),
+      "SUICIDE_FLAG":     flag(values.hasSuicide),
+      "SELF_HARM_FLAG":   flag(values.hasSelfHarm),
     ]
   }
 }

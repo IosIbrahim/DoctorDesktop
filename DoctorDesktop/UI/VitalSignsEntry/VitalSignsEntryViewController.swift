@@ -1149,12 +1149,19 @@ final class VitalSignsEntryViewController: UIViewController {
       spinner.centerYAnchor.constraint(equalTo: view.centerYAnchor)
     ])
 
-    presenter.save(values: values) { [weak self] success in
+    presenter.save(values: values) { [weak self] success, serverMessage in
       spinner.stopAnimating()
       spinner.removeFromSuperview()
       guard let self = self else { return }
       let title = success ? "Saved" : "Error"
-      let msg   = success ? "Vital signs recorded successfully." : "Could not save vital signs."
+      // Show the server's own error message (e.g. "Please Enter Valid Value: Temperature")
+      // so the user knows exactly what is missing.
+      let msg: String
+      if success {
+        msg = "Vital signs recorded successfully."
+      } else {
+        msg = serverMessage ?? "Could not save vital signs. Please check all required fields."
+      }
       let alert = UIAlertController(title: title, message: msg, preferredStyle: .alert)
       alert.addAction(UIAlertAction(title: "OK", style: .default) { _ in
         if success {

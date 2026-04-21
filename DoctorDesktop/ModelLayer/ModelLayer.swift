@@ -37,6 +37,8 @@ protocol ModelLayer {
     func loadUcaf(with params: [String: String], finished: @escaping (UCAFLoadData?, UCAFCTASServer?) -> Void)
     func loadSpecialHabits(with params: [String: String], finished: @escaping (SpecialHabitsData?) -> Void)
     func saveSpecialHabits(body: [String: Any], finished: @escaping (Bool, String?) -> Void)
+    /// Saves the UCAF (vitals + special-needs) record.  Response: {"code":1,"message":"Save Success"}
+    func saveUcaf(body: [String: Any], finished: @escaping (Bool, String?) -> Void)
 
     func getSymptomCategories(with params: [String: String], finished: @escaping RegularSymptomCategoriesBlock)
     func getSymptoms(with params: [String: String], finished: @escaping SymptomsBlock)
@@ -249,6 +251,17 @@ extension ModelLayerImpl {
     networkLayer.saveSpecialHabits(body: body) { data in
       // Response: {"code":1,"message":"Save Success"}
       // code 1 = success, anything else = failure.
+      guard let json = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any] else {
+        finished(false, nil); return
+      }
+      let code    = json["code"]    as? Int ?? 0
+      let message = json["message"] as? String
+      finished(code == 1, message)
+    }
+  }
+
+  func saveUcaf(body: [String: Any], finished: @escaping (Bool, String?) -> Void) {
+    networkLayer.saveUcaf(body: body) { data in
       guard let json = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any] else {
         finished(false, nil); return
       }
