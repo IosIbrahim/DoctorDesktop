@@ -296,8 +296,8 @@ class NetworkLayerImpl: NetworkLayer {
     }
 
     func saveUcaf(body: [String: Any], finished: @escaping DataBlock) {
-        // Same auth / encoding pattern as saveSpecialHabits.
-        postJSON(AppURLS.ip + "/MobileApi/api/MedicalRecordController/saveUcaf",
+        // Confirmed from Android network logs: MedicalRecord (no "Controller"), UCAF uppercase.
+        postJSON(AppURLS.ip + "/MobileApi/api/MedicalRecord/saveUCAF",
                  body: body, finished: finished)
     }
 

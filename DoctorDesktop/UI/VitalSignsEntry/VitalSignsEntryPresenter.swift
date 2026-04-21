@@ -251,81 +251,112 @@ final class VitalSignsEntryPresenterImpl: VitalSignsEntryPresenter {
     ]
   }
 
-  /// Builds the **nested** JSON body for POST saveUcaf.
+  /// Builds the nested JSON body for POST /MobileApi/api/MedicalRecord/saveUCAF.
   ///
-  /// Follows the same envelope pattern as every other working save in this app:
-  ///   _DD_UC_PARMS           — routing / identity (matches saveSpecialHabits)
-  ///   _RCP_OUTPAT_DATAENTRY  — array containing one vitals + special-needs dict
-  ///                            (matches the pattern in EmergencyTriagePresenter)
-  ///
-  /// ⚠️  URL NOTE: The endpoint path must be confirmed with the backend team.
-  ///     Current value: /MobileApi/api/MedicalRecordController/saveUcaf
-  ///     If the server still returns non-JSON, try:
-  ///       /MobileApi/api/MedicalRecord/saveUcaf   (no "Controller")
+  /// Structure confirmed from Android network logs (200 OK):
+  ///   _DD_UC_PARMS        — routing / identity / pain-score meta
+  ///   _RCP_MASTERINDEX    — special-needs flags as integers (0 or 1)
+  ///   _RCP_OUTPAT_DATAENTRY — [ one vitals dict ]
   private func buildSaveUcafBody(values: VitalSignsEntryValues) -> [String: Any] {
-    let flag: (Bool) -> String = { $0 ? "1" : "0" }
+    let flagInt: (Bool) -> Int = { $0 ? 1 : 0 }
     let str: (String?) -> String = { $0 ?? "" }
 
-    // ── Routing envelope (mirrors saveSpecialHabits._DD_UC_PARMS) ────────────
+    // ── Current date in both formats the server expects ──────────────────────
+    let now = Date()
+    let slashFmt  = DateFormatter(); slashFmt.dateFormat  = "dd/MM/yyyy HH:mm:ss"
+    let dashFmt   = DateFormatter(); dashFmt.dateFormat   = "dd-MM-yyyy HH:mm:ss"
+    let dateSlash = slashFmt.string(from: now)   // "21/04/2026 13:46:46"
+    let dateDash  = dashFmt.string(from: now)    // "21-04-2026 13:46:46"
+
+    let isUpdate = !(loadedUcaf?.ser ?? "").trimmingCharacters(in: .whitespaces).isEmpty
+
+    // ── 1. Routing / identity object ─────────────────────────────────────────
     let ucParms: [String: Any] = [
-      "BRANCH_ID":     user.branch   ?? "",
-      "COMPUTER_NAME": "iOS",
-      "PATIENT_ID":    patient.id.trimmingCharacters(in: .whitespacesAndNewlines),
-      "USER_ID":       user.userName ?? user.id ?? "",
-      "VISIT_ID":      patient.visitId,
-      "LANG":          "E",
-      // Echoed back from loadUcaf so server can INSERT vs UPDATE
-      "SER":           str(loadedUcaf?.ser),
-      "RCP_SERV_SER":  str(loadedUcaf?.schedSerial),   // SCHED_SERIAL → RCP_SERV_SER
-      "HOSP_ID":       str(loadedUcaf?.hospId),
+      "BRANCH_ID":                  user.branch   ?? "",
+      "COMPUTER_NAME":              "iOS",
+      "DATE_FROM":                  dateSlash,
+      "DATE_FROM_STR_FORMATED":     dateDash,
+      "ITEM_VALUE":                 "\(values.painScale)",
+      "PATIENT_ID":                 patient.id,        // keep raw (server wants trailing spaces)
+      "PROCESS_ID":                 "1877",            // confirmed from Android
+      "RCP_SERV_SER":               str(loadedUcaf?.schedSerial),
+      "SCORE_CHARACTER_DESC":       painCharacterDesc(values.painScale),
+      "SCORE_TYPE":                 str(loadedUcaf?.scoreType),
+      "SELECTED_DATE":              dateSlash,
+      "SELECTED_DATE_STR_FORMATED": dateDash,
+      "SPEC_ID":                    patient.placeId,
+      "TRACER_PLACE_ID":            patient.placeId,
+      "USER_ID":                    user.userName ?? user.id ?? "",
+      "USER_OPEN_FLAG":             "D",              // "D" = Doctor
+      "VISIT_ID":                   patient.visitId,
+      "VISIT_ID_ARRAY":             patient.visitId,
     ]
 
-    // ── Vitals + special-needs row (one element array, matches triage save) ──
+    // ── 2. Special-needs flags — separate object, values are integers ─────────
+    let masterIndex: [String: Int] = [
+      "ABUSE_FLAG":       flagInt(values.hasAbuse),
+      "DEAF_FLAG":        flagInt(values.isBlind),
+      "HANDICAPPED_FLAG": flagInt(values.isHandicapped),
+      "MUTE_FLAG":        flagInt(values.isMute),
+      "NEGLECT_FLAG":     flagInt(values.hasNeglect),
+      "SELF_HARM_FLAG":   flagInt(values.hasSelfHarm),
+      "SUICIDE_FLAG":     flagInt(values.hasSuicide),
+    ]
+
+    // ── 3. Vitals row (array with one element) ───────────────────────────────
     let dataEntry: [String: Any] = [
-      // Vitals
-      "BP":                      str(values.bpSystolic),
-      "PB_2":                    str(values.bpDiastolic),
-      "TEMP":                    str(values.temperature),
-      "PULSE":                   str(values.pulse),
-      "RESPIRATORY_RATE":        str(values.respiratoryRate),
-      "O2SAT":                   str(values.o2Sat),
-      "BLOOD_GLUCOSE":           str(values.bloodSugar),
-      "WEIGHT":                  str(values.weight),
-      "HEIGHT":                  str(values.height),
-      "HEAD_DIAMETER":           str(values.headCircumference),
-      "BLOOD_KETONES":           "",
-      "URINE_SUGAR":             str(values.sugarUrine),
-      "URINE_ALBUMIN":           str(values.urineAlbumin),
-      "ACETONE_URINE":           str(values.acetoneUrine),
-      "APAU":                    str(values.apau),
-      "URINE_OUT":               str(values.urineOut),
-      "PERIPHERAL_PULSE":        str(values.peripheralPulse),
-      "INTRA_ABDOMINAL_PRESSURE": str(values.intraAbdominalPressure),
-      "O2_DELIVERY":             str(values.o2Delivery),
-      "CHEST_CIRCUMFERENCE":     str(values.chestCircumference),
-      "TOTAL_BILIRUBIN":         str(values.totalBilirubin),
-      "ABDOMEN_CIRCUMFERENCE":   str(values.abdomenCircumference),
-      "SPIROMETER":              str(values.spirometer),
-      // Pain
-      "PAIN_SCALE_ADULT_SCORE":  "\(values.painScale)",
-      "SCORE_TYPE":              str(loadedUcaf?.scoreType),
-      "PAIN_SCORE_SER":          str(loadedUcaf?.painScoreSer),
-      "VLS_REMARKS":             str(loadedUcaf?.vlsRemarks),
-      // Special needs
-      "MUTE_FLAG":               flag(values.isMute),
-      "DEAF_FLAG":               flag(values.isBlind),
-      "HANDICAPPED_FLAG":        flag(values.isHandicapped),
-      "ABUSE_FLAG":              flag(values.hasAbuse),
-      "NEGLECT_FLAG":            flag(values.hasNeglect),
-      "SUICIDE_FLAG":            flag(values.hasSuicide),
-      "SELF_HARM_FLAG":          flag(values.hasSelfHarm),
-      // Row-status (matches triage pattern)
-      "BUFFER_STATUS":           str(loadedUcaf?.ser) == "" ? "1" : "2",  // 1=insert, 2=update
+      "BLOOD_GLUCOSE":              str(values.bloodSugar),
+      "BLOOD_GLUCOSE_UNIT_ID":      "3",   // constant confirmed from Android
+      "HEAD_DIAMETER":              str(values.headCircumference),
+      "HEIGHT":                     str(values.height),
+      "O2SAT":                      str(values.o2Sat),
+      "WEIGHT":                     str(values.weight),
+      "WEIGHT_UNIT":                "",
+      "BP":                         str(values.bpSystolic),
+      "PB_2":                       str(values.bpDiastolic),
+      "BUFFER_STATUS":              isUpdate ? "2" : "1",   // 2=update, 1=insert
+      "HOSP_ID":                    str(loadedUcaf?.hospId),
+      "MODIFY_DATE":                dateSlash,
+      "MODIFY_DATE_STR_FORMATED":   dateDash,
+      "PAIN_SCALE_ADULT_SCORE":     "\(values.painScale)",
+      "PATIENT_ID":                 patient.id,
+      "PULSE":                      str(values.pulse),
+      "RESPIRATORY_RATE":           str(values.respiratoryRate),
+      "SER":                        str(loadedUcaf?.ser),
+      "TEMP":                       str(values.temperature),
+      "USERID_ENTRY":               user.userName ?? user.id ?? "",
+      "VISIT_ID":                   patient.visitId,
+      // Additional vitals not in Android sample but part of this screen
+      "BLOOD_KETONES":              "",
+      "URINE_SUGAR":                str(values.sugarUrine),
+      "URINE_ALBUMIN":              str(values.urineAlbumin),
+      "ACETONE_URINE":              str(values.acetoneUrine),
+      "APAU":                       str(values.apau),
+      "URINE_OUT":                  str(values.urineOut),
+      "PERIPHERAL_PULSE":           str(values.peripheralPulse),
+      "INTRA_ABDOMINAL_PRESSURE":   str(values.intraAbdominalPressure),
+      "O2_DELIVERY":                str(values.o2Delivery),
+      "CHEST_CIRCUMFERENCE":        str(values.chestCircumference),
+      "TOTAL_BILIRUBIN":            str(values.totalBilirubin),
+      "ABDOMEN_CIRCUMFERENCE":      str(values.abdomenCircumference),
+      "SPIROMETER":                 str(values.spirometer),
     ]
 
     return [
       "_DD_UC_PARMS":           ucParms,
-      "_RCP_OUTPAT_DATAENTRY":  [dataEntry],   // server expects an array
+      "_RCP_MASTERINDEX":       masterIndex,
+      "_RCP_OUTPAT_DATAENTRY":  [dataEntry],
     ]
+  }
+
+  /// Maps a 0-10 pain scale value to the server's SCORE_CHARACTER_DESC string.
+  private func painCharacterDesc(_ level: Int) -> String {
+    switch level {
+    case 0:       return "No Pain"
+    case 1...3:   return "With Mild discomfort"
+    case 4...6:   return "With Moderate discomfort"
+    case 7...9:   return "With Severe discomfort"
+    default:      return "With Worst Possible Pain"
+    }
   }
 }
