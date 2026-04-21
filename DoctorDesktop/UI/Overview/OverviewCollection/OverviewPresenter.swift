@@ -155,9 +155,9 @@ class OverviewPresenterImpl: OverviewPresenter {
   var patientHistoryActiveContentImages = [#imageLiteral(resourceName: "visit_content"), #imageLiteral(resourceName: "visit_content"), #imageLiteral(resourceName: "lab_content_actvie"), #imageLiteral(resourceName: "dr_content_active")]
   var patientHistoryNotActiveContentImage = #imageLiteral(resourceName: "visit_content_not_active")
   var patientHistoryTitles: [String] {
-    return ["Current Visit","All Visits",patientHistory?.currentSpeciality.name ?? "","DR/ Admin Istr"]
-     //   patientHistory?.currentDoctor.name ?? "",
-        
+    let speciality = patientHistory?.currentSpeciality.name ?? "Speciality"
+    let doctor     = patientHistory?.currentDoctor.name ?? "Doctor"
+    return ["Current Visit", "All Visits", speciality, doctor]
   }
 
 
@@ -220,12 +220,13 @@ class OverviewPresenterImpl: OverviewPresenter {
   func getPatientHistory(finished: @escaping EmptyBlock) {
     let params = [
       "COMPUTER_NAME": "iOS",
-      "INDEX_FROM": "0",
-      "INDEX_TO": "15",
-      "USER_ID": user.id ?? "",
-      "BRANCH_ID": user.branch ?? "",
-      "PATIENT_ID": patient.id,
-      "VISIT_ID": patient.visitId
+      "INDEX_FROM":    "0",
+      "INDEX_TO":      "15",
+      "Lang":          "2",       // matches Android — 2 = English
+      "USER_ID":       user.userName ?? user.id ?? "",
+      "BRANCH_ID":     user.branch   ?? "",
+      "PATIENT_ID":    patient.id,
+      "VISIT_ID":      patient.visitId
     ]
     modelLayer.getPatientHistory(with: params) { patientHistory in
       if let err = patientHistory.error {
