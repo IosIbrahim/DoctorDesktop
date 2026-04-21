@@ -66,6 +66,10 @@ final class VitalSignsEntryViewController: UIViewController {
     self.navigationCoordinator = navigationCoordinator
   }
 
+  /// When the server returned a CTAS row, we show it verbatim and skip the
+  /// local auto-calc so we never disagree with the backend.
+  private var serverCTAS: UCAFCTASServer?
+
   // MARK: - Lifecycle
   override func viewDidLoad() {
     super.viewDidLoad()
@@ -74,6 +78,98 @@ final class VitalSignsEntryViewController: UIViewController {
     setupNavigationBar()
     setupScrollContainer()
     buildContent()
+    loadInitialData()
+  }
+
+  // MARK: - Backend load
+  private func loadInitialData() {
+    let spinner = UIActivityIndicatorView(activityIndicatorStyle: .gray)
+    spinner.translatesAutoresizingMaskIntoConstraints = false
+    spinner.startAnimating()
+    view.addSubview(spinner)
+    NSLayoutConstraint.activate([
+      spinner.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+      spinner.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 8)
+    ])
+
+    presenter.loadInitialData { [weak self] ucaf, ctas in
+      spinner.stopAnimating()
+      spinner.removeFromSuperview()
+      guard let self = self else { return }
+      if let ucaf = ucaf { self.applyLoadedUcaf(ucaf) }
+      self.serverCTAS = ctas
+      if ctas != nil {
+        self.applyServerCTAS()
+      } else {
+        self.recomputeCTAS()
+      }
+    }
+  }
+
+  private func applyLoadedUcaf(_ d: UCAFLoadData) {
+    // Vitals
+    vitalFields["bpSystolic"]?.text           = d.bp
+    vitalFields["bpDiastolic"]?.text          = d.pb2
+    vitalFields["pulse"]?.text                = d.pulse
+    vitalFields["temperature"]?.text          = d.temp
+    vitalFields["respiratoryRate"]?.text      = d.respiratoryRate
+    vitalFields["o2Sat"]?.text                = d.o2Sat
+    vitalFields["bloodSugar"]?.text           = d.bloodGlucose
+    vitalFields["height"]?.text               = d.height
+    vitalFields["weight"]?.text               = d.weight
+    vitalFields["headCircumference"]?.text    = d.headDiameter
+
+    // Pain scale (0..10)
+    if let s = d.painScaleAdultScore, let iv = Int(s), iv >= 0, iv <= 10 {
+      values.painScale = iv
+      painSlider?.value = Float(iv)
+      painValueLabel?.text = "\(iv)"
+    }
+
+    // Special-needs flags ("1" = on)
+    let on: (String?) -> Bool = { ($0 ?? "").trimmingCharacters(in: .whitespaces) == "1" }
+    setCheckbox("mute",        on: on(d.muteFlag),        bind: &values.isMute)
+    setCheckbox("blind",       on: on(d.deafFlag),        bind: &values.isBlind)
+    setCheckbox("handicapped", on: on(d.handicappedFlag), bind: &values.isHandicapped)
+    setCheckbox("abuse",       on: on(d.abuseFlag),       bind: &values.hasAbuse)
+    setCheckbox("neglect",     on: on(d.neglectFlag),     bind: &values.hasNeglect)
+    setCheckbox("suicide",     on: on(d.suicideFlag),     bind: &values.hasSuicide)
+    setCheckbox("selfharm",    on: on(d.selfHarmFlag),    bind: &values.hasSelfHarm)
+  }
+
+  private func setCheckbox(_ key: String, on: Bool, bind: inout Bool) {
+    checkboxButtons[key]?.isSelected = on
+    bind = on
+  }
+
+  /// Parses "#RRGGBB" / "RRGGBB" hex into UIColor. Returns nil for malformed
+  /// input so the caller can fall back to the default CTAS-level color.
+  private static func colorFromHex(_ hex: String) -> UIColor? {
+    var s = hex.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+    if s.hasPrefix("#") { s.removeFirst() }
+    guard s.count == 6 else { return nil }
+    var v: UInt32 = 0
+    guard Scanner(string: s).scanHexInt32(&v) else { return nil }
+    let r = CGFloat((v & 0xFF0000) >> 16) / 255.0
+    let g = CGFloat((v & 0x00FF00) >> 8)  / 255.0
+    let b = CGFloat( v & 0x0000FF)        / 255.0
+    return UIColor(red: r, green: g, blue: b, alpha: 1)
+  }
+
+  private func applyServerCTAS() {
+    guard let ctas = serverCTAS else { return }
+    let level = Int(ctas.totalItemScore ?? "") ?? 5
+    let conclusion = (ctas.conclusionDesc ?? "").trimmingCharacters(in: CharacterSet(charactersIn: "[]"))
+    let title = conclusion.isEmpty ? ctasTitle(forLevel: level) : "CTAS \(level) — \(conclusion)"
+    ctasValueLabel?.text = title
+    ctasValueLabel?.textColor = labelColor
+    ctasBadge?.text = "\(level)"
+    if let hex = ctas.conclusionColor, let c = Self.colorFromHex(hex) {
+      ctasBadge?.backgroundColor = c
+    } else {
+      ctasBadge?.backgroundColor = ctasColor(forLevel: level)
+    }
+    values.ctasScore = title
   }
 
   // MARK: - Nav bar
@@ -603,6 +699,8 @@ final class VitalSignsEntryViewController: UIViewController {
 
   @objc private func recomputeCTAS() {
     guard ctasValueLabel != nil, ctasBadge != nil else { return }
+    // Server CTAS wins over local calc once it has been loaded.
+    if serverCTAS != nil { applyServerCTAS(); return }
     if let level = computeCTASLevel() {
       let title = ctasTitle(forLevel: level)
       ctasValueLabel.text = title

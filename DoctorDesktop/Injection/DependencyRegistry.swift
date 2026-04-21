@@ -560,7 +560,8 @@ extension DependencyRegistryImpl {
 extension DependencyRegistryImpl {
   func registerVitalSignsEntryPresenter() {
     container.register(VitalSignsEntryPresenter.self) { (r, patient: Patient, user: User) in
-      VitalSignsEntryPresenterImpl(patient: patient, user: user)
+      let modelLayer = r.resolve(ModelLayer.self)!
+      return VitalSignsEntryPresenterImpl(patient: patient, user: user, modelLayer: modelLayer)
     }
   }
 

@@ -34,7 +34,8 @@ protocol ModelLayer {
     func getPatientSummary(with params:[String: String], finished: @escaping PatientSummaryBlock)
     func getPacksURL(with params:[String: String], finished: @escaping URLBlock)
     func getTriageInfo(with params: [String: String], finished: @escaping TriageDataBlock)
-    
+    func loadUcaf(with params: [String: String], finished: @escaping (UCAFLoadData?, UCAFCTASServer?) -> Void)
+
     func getSymptomCategories(with params: [String: String], finished: @escaping RegularSymptomCategoriesBlock)
     func getSymptoms(with params: [String: String], finished: @escaping SymptomsBlock)
     func loadFlagImage(with params: [String: String], finished: @escaping DataBlock)
@@ -224,6 +225,14 @@ extension ModelLayerImpl {
     networkLayer.getSymptoms(with: params) { data in
       let symptoms = self.translationLayer.getSymptomsDTOsFromJson(data)
       finished(symptoms)
+    }
+  }
+
+  func loadUcaf(with params: [String: String], finished: @escaping (UCAFLoadData?, UCAFCTASServer?) -> Void) {
+    networkLayer.loadUcaf(with: params) { data in
+      let ucaf = self.translationLayer.getLoadUcafFromJson(data)
+      let ctas = self.translationLayer.getLoadUcafCTASFromJson(data)
+      finished(ucaf, ctas)
     }
   }
 }

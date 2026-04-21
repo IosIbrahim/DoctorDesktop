@@ -41,6 +41,7 @@ protocol NetworkLayer {
     func getPatientSummary(with params: [String: String], finished: @escaping DataBlock)
     func getPacksURL(with params: [String: String], finished: @escaping DataBlock)
     func getTriageInfo(with params: [String: String], finished: @escaping DataBlock)
+    func loadUcaf(with params: [String: String], finished: @escaping DataBlock)
     func getSymptoms(with params: [String: String], finished: @escaping DataBlock)
     func loadFlagImage(with params: [String: String], finished: @escaping DataBlock)
     func getVisitsDetail(with params: [String: String], finished: @escaping DataBlock)
@@ -214,6 +215,10 @@ class NetworkLayerImpl: NetworkLayer {
 
     func getTriageInfo(with params: [String: String], finished: @escaping DataBlock) {
         get(AppURLS.ip + "/MobileApi/api/loadTrige", params: params, finished: finished)
+    }
+
+    func loadUcaf(with params: [String: String], finished: @escaping DataBlock) {
+        get(AppURLS.ip + "/MobileApi/api/MedicalRecord/loadUcaf", params: params, finished: finished)
     }
 
     func getSymptoms(with params: [String: String], finished: @escaping DataBlock) {

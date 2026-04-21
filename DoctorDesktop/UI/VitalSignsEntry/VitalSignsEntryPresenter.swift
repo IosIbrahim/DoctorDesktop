@@ -16,6 +16,12 @@ protocol VitalSignsEntryPresenter {
   var patientDisplayName: String { get }
   var patientDisplaySubtitle: String { get }
 
+  /// Fetches the latest Vitals/UCAF payload for this patient's visit from the
+  /// server (`MedicalRecord/loadUcaf`) and returns any server-computed CTAS.
+  /// Either argument may be nil if the server returned nothing for that
+  /// section. The completion is always invoked on the main queue.
+  func loadInitialData(completion: @escaping (UCAFLoadData?, UCAFCTASServer?) -> Void)
+
   /// Called when the user taps Save. Currently local-only (matches the
   /// placeholder nature of the Android screen in this codebase). A real
   /// submit would be wired through ModelLayer here.
@@ -79,10 +85,12 @@ struct VitalSignsEntryValues {
 final class VitalSignsEntryPresenterImpl: VitalSignsEntryPresenter {
   let patient: Patient
   let user: User
+  private let modelLayer: ModelLayer
 
-  init(patient: Patient, user: User) {
+  init(patient: Patient, user: User, modelLayer: ModelLayer) {
     self.patient = patient
     self.user = user
+    self.modelLayer = modelLayer
   }
 
   var screenTitle: String { return "Add Vital Signs" }
@@ -99,6 +107,23 @@ final class VitalSignsEntryPresenterImpl: VitalSignsEntryPresenter {
     if !nationality.isEmpty && !date.isEmpty { return "\(nationality) • \(date)" }
     if !nationality.isEmpty { return nationality }
     return date
+  }
+
+  func loadInitialData(completion: @escaping (UCAFLoadData?, UCAFCTASServer?) -> Void) {
+    // Mirrors the Android `MedicalRecordRepository.loadUcaf` params. Uses the
+    // same shape as the existing triage call (BRANCH_ID/VISIT_ID/PATIENT_ID)
+    // since this backend keys visits the same way across these endpoints.
+    let params: [String: String] = [
+      "PATIENT_ID": patient.id.trimmingCharacters(in: .whitespacesAndNewlines),
+      "VISIT_ID":   patient.visitId,
+      "BRANCH_ID":  user.branch ?? "",
+      "LANG":       "E"
+    ]
+    modelLayer.loadUcaf(with: params) { ucaf, ctas in
+      DispatchQueue.main.async {
+        completion(ucaf, ctas)
+      }
+    }
   }
 
   func save(values: VitalSignsEntryValues, completion: @escaping (Bool) -> Void) {

@@ -34,6 +34,8 @@ protocol TranslationLayer {
     func getPatientSummaryDTOFromJson(_ data: Data) -> PatientSummary
     func getPacksURLFromJson(_ data: Data) -> URL?
     func getVitalsDTOsFromJson(_ data: Data) -> UCAFData?
+    func getLoadUcafFromJson(_ data: Data) -> UCAFLoadData?
+    func getLoadUcafCTASFromJson(_ data: Data) -> UCAFCTASServer?
     
     func getHistorySymptomsDTOsFromJson(_ data:Data) -> HistorySymptomCategories
     func getDiagnosisCategoriesDTOsFromJson(_ data: Data) -> DiagnosisCategories
@@ -547,6 +549,22 @@ extension TranslationLayerImpl {
             return nil
         }
         return ucafdata
+    }
+
+    // VitalSignsEntry: /MedicalRecord/loadUcaf — wider UCAF payload.
+    func getLoadUcafFromJson(_ data: Data) -> UCAFLoadData? {
+        guard let json = String(data: data, encoding: .utf8),
+              json.contains("UCAF_DATA_ROW") else { return nil }
+        let keyPath = "Root.UCAF_DATA.UCAF_DATA_ROW"
+        return try? UCAFLoadData(data: data, keyPath: keyPath)
+    }
+
+    // Server-computed CTAS block (may be absent).
+    func getLoadUcafCTASFromJson(_ data: Data) -> UCAFCTASServer? {
+        guard let json = String(data: data, encoding: .utf8),
+              json.contains("CTAS_DATA_ROW") else { return nil }
+        let keyPath = "Root.CTAS.CTAS_DATA.CTAS_DATA_ROW"
+        return try? UCAFCTASServer(data: data, keyPath: keyPath)
     }
     
     // get diagnosis categories
