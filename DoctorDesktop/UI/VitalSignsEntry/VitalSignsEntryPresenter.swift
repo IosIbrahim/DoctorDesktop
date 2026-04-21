@@ -149,10 +149,53 @@ final class VitalSignsEntryPresenterImpl: VitalSignsEntryPresenter {
   }
 
   func save(values: VitalSignsEntryValues, completion: @escaping (Bool) -> Void) {
-    // Placeholder: the Android counterpart posts to the triage endpoint.
-    // Here we just succeed locally so the UX flow works end-to-end.
-    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-      completion(true)
+    let body = buildSaveSpecialHabitsBody(values: values)
+    modelLayer.saveSpecialHabits(body: body) { success, message in
+      DispatchQueue.main.async { completion(success) }
     }
+  }
+
+  // MARK: - Private body builder
+
+  /// Builds the nested JSON body for POST saveSpecialHabits, mirroring the
+  /// Android contract exactly.
+  private func buildSaveSpecialHabitsBody(values: VitalSignsEntryValues) -> [String: Any] {
+    let flag: (Bool) -> String = { $0 ? "1" : "0" }
+    let hasHabits = values.hasSpecialHabits == true
+
+    let ucParms: [String: Any] = [
+      "BRANCH_ID":     user.branch   ?? "",
+      "COMPUTER_NAME": "iOS",
+      "PATIENT_ID":    patient.id,
+      "PROCESS_ID":    "214613",       // server-side save process ID for special habits
+      "SPEC_ID":       patient.placeId,
+      "USER_ID":       user.userName  ?? user.id ?? "",
+      "VISIT_ID":      patient.visitId
+    ]
+
+    // HISTORY_H.STATUS_FLAG = "2" is always sent as-is (matches Android).
+    let historyH: [String: Any] = [
+      "PATIENT_ID":  patient.id,
+      "STATUS_FLAG": "2"
+    ]
+
+    let habitsPayload: [String: Any] = [
+      "STATUS_FLAG":      hasHabits ? "1" : "0",
+      "ALCOHOL_FLAG":     flag(values.habitAlcohol),
+      "SMOKER_FLAG":      flag(values.habitSmoker),
+      "MORPHINE_FLAG":    flag(values.habitMorphine),
+      "CANNABINOID_FLAG": flag(values.habitCannabinoid),
+      "DRUGS_FLAG":       flag(values.habitSubstanceUse),
+      "SHISHA_FLAG":      flag(values.habitShisha),
+      "SHISHA_TEXT":      "",
+      "VAPE_FLAG":        flag(values.habitVape),
+      "OTHER_FLAG":       flag(values.habitOther)
+    ]
+
+    return [
+      "_DD_UC_PARMS":           ucParms,
+      "HISTORY_H":              historyH,
+      "_PATIENT_SPECIAL_HABITS": habitsPayload
+    ]
   }
 }

@@ -43,6 +43,7 @@ protocol NetworkLayer {
     func getTriageInfo(with params: [String: String], finished: @escaping DataBlock)
     func loadUcaf(with params: [String: String], finished: @escaping DataBlock)
     func loadSpecialHabits(with params: [String: String], finished: @escaping DataBlock)
+    func saveSpecialHabits(body: [String: Any], finished: @escaping DataBlock)
     func getSymptoms(with params: [String: String], finished: @escaping DataBlock)
     func loadFlagImage(with params: [String: String], finished: @escaping DataBlock)
     func getVisitsDetail(with params: [String: String], finished: @escaping DataBlock)
@@ -136,6 +137,31 @@ class NetworkLayerImpl: NetworkLayer {
                     APILogger.logFailure(method: "POST", url: url, error: error.localizedDescription, duration: duration)
                 } else {
                     APILogger.logResponse(method: "POST", url: url, statusCode: code, data: response.data, duration: duration)
+                }
+                guard let data = response.data else { return }
+                finished(data)
+            }
+    }
+
+    /// Generic POST that sends a nested JSON body (not form-encoded).
+    /// Used for endpoints like saveSpecialHabits whose body is a nested object.
+    private func postJSON(_ url: String,
+                          body: [String: Any],
+                          finished: @escaping DataBlock) {
+        APILogger.logRequest(method: "POST(JSON)", url: url, params: body)
+        let start = Date()
+        NetworkLayerImpl.session
+            .request(url, method: .post, parameters: body,
+                     encoding: JSONEncoding.default, headers: authHeaders)
+            .responseJSON { response in
+                let duration = Date().timeIntervalSince(start)
+                let code = response.response?.statusCode ?? 0
+                if let error = response.error {
+                    APILogger.logFailure(method: "POST(JSON)", url: url,
+                                        error: error.localizedDescription, duration: duration)
+                } else {
+                    APILogger.logResponse(method: "POST(JSON)", url: url,
+                                         statusCode: code, data: response.data, duration: duration)
                 }
                 guard let data = response.data else { return }
                 finished(data)
@@ -259,6 +285,12 @@ class NetworkLayerImpl: NetworkLayer {
         // Endpoint name intentionally matches the server typo "loadSpecialHappits".
         signedGet(AppURLS.ip + "/MobileApi/api/MedicalRecord/loadSpecialHappits",
                   params: params, finished: finished)
+    }
+
+    func saveSpecialHabits(body: [String: Any], finished: @escaping DataBlock) {
+        // Save uses Bearer auth (no OAuth). Body is nested JSON, not form-encoded.
+        postJSON(AppURLS.ip + "/MobileApi/api/MedicalRecordController/saveSpecialHabits",
+                 body: body, finished: finished)
     }
 
     func getSymptoms(with params: [String: String], finished: @escaping DataBlock) {
