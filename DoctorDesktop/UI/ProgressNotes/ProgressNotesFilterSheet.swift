@@ -4,20 +4,21 @@
 //
 //  Android-matched filter bottom sheet for the Progress Notes screen.
 //
-//  Layout (mirrors the Android screenshot):
+//  Layout (bottom sheet, slides up):
 //    ─── drag handle
-//    "Filter"             title
+//    "Filter"              title
 //    ──────────────────── divider
-//    "Filter"      label  + bordered dropdown → VISIT_TYPE_ROW
-//    "Visit Type"  label  + bordered dropdown → NURSE_REMARKS_FILTER_ROW
+//    "Visit Type"  label  + bordered dropdown  → VISIT_TYPE_ROW
+//    "Filter"      label  + bordered dropdown  → NURSE_REMARKS_FILTER_ROW
 //    [FILTER]  blue  button
 //    [RESET]   red   button
-//    ─── embedded UIPickerView (slides up inside sheet when a dropdown is tapped)
-//        Done bar
+//    ─── option panel (slides up inside same view when a dropdown is tapped)
+//        UITableView listing all options for the active dropdown
+//        Done bar at top
 //
-//  Picker is embedded INSIDE the sheet — no UIAlertController presentation,
-//  which avoids the iOS "popover on overFullScreen" rendering bug that caused
-//  only one item to appear.
+//  The option list is a UITableView (not UIPickerView). UITableView.reloadData()
+//  is synchronous and reliable — it was the only safe replacement for the
+//  UIPickerView that kept losing its rows after reloadAllComponents().
 //
 
 import UIKit
@@ -39,9 +40,9 @@ final class ProgressNotesFilterSheet: UIViewController {
 
     weak var delegate: ProgressNotesFilterSheetDelegate?
 
-    /// Options for the top dropdown (VISIT_TYPE_ROW).
+    /// Options for the Visit Type dropdown (VISIT_TYPE_ROW).
     var visitTypeOptions: [NurseNoteLookup] = []
-    /// Options for the bottom dropdown (NURSE_REMARKS_FILTER_ROW).
+    /// Options for the Nurse Remarks Filter dropdown (NURSE_REMARKS_FILTER_ROW).
     var filterOptions: [NurseNoteLookup] = []
 
     /// Pre-selected ids (restored when sheet re-opens).
@@ -53,32 +54,41 @@ final class ProgressNotesFilterSheet: UIViewController {
     private var selectedVisitTypeId: String = ""
     private var selectedFilterId:    String = ""
 
-    // Which dropdown is the picker currently serving.
-    private enum ActivePicker { case visitType, filter }
-    private var activePicker: ActivePicker = .visitType
+    private enum ActiveDropdown { case visitType, filter }
+    private var activeDropdown: ActiveDropdown = .visitType
 
-    // MARK: Views
+    // MARK: Sheet views
 
     private let dimView       = UIView()
     private let sheetView     = UIView()
     private let handle        = UIView()
     private let titleLabel    = UILabel()
-    private let filterLabel   = UILabel()
-    private let filterDropBtn = DropdownButton()
-    private let visitLabel    = UILabel()
-    private let visitDropBtn  = DropdownButton()
-    private let applyBtn      = UIButton(type: .system)
-    private let resetBtn      = UIButton(type: .system)
 
-    // Picker panel (hidden until a dropdown is tapped)
-    private let pickerPanel   = UIView()
-    private let pickerDoneBtn = UIButton(type: .system)
-    private let pickerView    = UIPickerView()
+    private let visitTypeLabel   = UILabel()     // "Visit Type"
+    private let visitTypeDropBtn = DropdownButton()
+    private let filterLabel      = UILabel()     // "Filter"
+    private let filterDropBtn    = DropdownButton()
 
-    // MARK: Layout
+    private let applyBtn = UIButton(type: .system)
+    private let resetBtn = UIButton(type: .system)
+
+    // MARK: Option panel (slides up in front of sheet)
+
+    private let optionPanel    = UIView()
+    private let optionDoneBar  = UIView()
+    private let optionDoneBtn  = UIButton(type: .system)
+    private let optionTable    = UITableView(frame: .zero, style: .plain)
+
+    private static let optionCellId = "OptionCell"
+
+    // MARK: Constraints
 
     private var sheetBottomConstraint: NSLayoutConstraint!
-    private var pickerBottomConstraint: NSLayoutConstraint!
+    private var optionPanelBottomConstraint: NSLayoutConstraint!
+
+    // Approx content height of the sheet (used for initial off-screen placement).
+    private let sheetHeight: CGFloat  = 360
+    private let optionPanelH: CGFloat = 260   // 44 toolbar + ~216 table
 
     // MARK: - Lifecycle
 
@@ -88,7 +98,7 @@ final class ProgressNotesFilterSheet: UIViewController {
         selectedVisitTypeId = initialVisitTypeId
         selectedFilterId    = initialFilterId
         buildUI()
-        refreshLabels()
+        refreshDropLabels()
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -96,17 +106,18 @@ final class ProgressNotesFilterSheet: UIViewController {
         slideSheetIn()
     }
 
-    // MARK: - UI Build
+    // MARK: - Build UI
 
     private func buildUI() {
-        // Dim overlay
+        // ── Dim overlay ────────────────────────────────────────────────────────
         dimView.backgroundColor = UIColor.black.withAlphaComponent(0.45)
         dimView.alpha = 0
         dimView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(dimView)
-        dimView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(didTapDim)))
+        dimView.addGestureRecognizer(
+            UITapGestureRecognizer(target: self, action: #selector(didTapDim)))
 
-        // Sheet card
+        // ── Sheet card ─────────────────────────────────────────────────────────
         sheetView.backgroundColor = .white
         sheetView.layer.cornerRadius = 20
         sheetView.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
@@ -115,7 +126,9 @@ final class ProgressNotesFilterSheet: UIViewController {
         sheetView.layer.shadowRadius  = 12
         sheetView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(sheetView)
-        sheetView.addGestureRecognizer(UISwipeGestureRecognizer(target: self, action: #selector(didTapDim)).also { $0.direction = .down })
+        let swipe = UISwipeGestureRecognizer(target: self, action: #selector(didTapDim))
+        swipe.direction = .down
+        sheetView.addGestureRecognizer(swipe)
 
         // Handle
         handle.backgroundColor = UIColor(white: 0.80, alpha: 1)
@@ -134,25 +147,29 @@ final class ProgressNotesFilterSheet: UIViewController {
         let divider = makeDivider()
         sheetView.addSubview(divider)
 
-        // "Visit Type" label + dropdown (VISIT_TYPE_ROW)
-        filterLabel.text = "Visit Type"
+        // Visit Type field
+        visitTypeLabel.text = "Visit Type"
+        styleFieldLabel(visitTypeLabel)
+        visitTypeLabel.translatesAutoresizingMaskIntoConstraints = false
+        sheetView.addSubview(visitTypeLabel)
+
+        visitTypeDropBtn.translatesAutoresizingMaskIntoConstraints = false
+        visitTypeDropBtn.addTarget(self,
+                                   action: #selector(didTapVisitTypeDrop),
+                                   for: .touchUpInside)
+        sheetView.addSubview(visitTypeDropBtn)
+
+        // Nurse Remarks Filter field
+        filterLabel.text = "Filter"
         styleFieldLabel(filterLabel)
         filterLabel.translatesAutoresizingMaskIntoConstraints = false
         sheetView.addSubview(filterLabel)
 
         filterDropBtn.translatesAutoresizingMaskIntoConstraints = false
-        filterDropBtn.addTarget(self, action: #selector(didTapFilterDrop), for: .touchUpInside)
+        filterDropBtn.addTarget(self,
+                                action: #selector(didTapFilterDrop),
+                                for: .touchUpInside)
         sheetView.addSubview(filterDropBtn)
-
-        // "Filter" label + dropdown (NURSE_REMARKS_FILTER_ROW)
-        visitLabel.text = "Filter"
-        styleFieldLabel(visitLabel)
-        visitLabel.translatesAutoresizingMaskIntoConstraints = false
-        sheetView.addSubview(visitLabel)
-
-        visitDropBtn.translatesAutoresizingMaskIntoConstraints = false
-        visitDropBtn.addTarget(self, action: #selector(didTapVisitDrop), for: .touchUpInside)
-        sheetView.addSubview(visitDropBtn)
 
         // FILTER button
         styleActionButton(applyBtn, title: "FILTER",
@@ -168,33 +185,44 @@ final class ProgressNotesFilterSheet: UIViewController {
         resetBtn.addTarget(self, action: #selector(didTapReset), for: .touchUpInside)
         sheetView.addSubview(resetBtn)
 
-        // ── Picker panel (slides up inside sheet) ─────────────────────────
-        pickerPanel.backgroundColor = UIColor(white: 0.97, alpha: 1)
-        pickerPanel.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(pickerPanel)                     // added to *view*, not sheetView
+        // ── Option panel ───────────────────────────────────────────────────────
+        // Added to `view` (on top of sheetView) so it appears in front.
+        optionPanel.backgroundColor = .white
+        optionPanel.layer.shadowColor   = UIColor.black.cgColor
+        optionPanel.layer.shadowOpacity = 0.10
+        optionPanel.layer.shadowRadius  = 8
+        optionPanel.layer.shadowOffset  = CGSize(width: 0, height: -2)
+        optionPanel.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(optionPanel)
 
-        // Done bar above picker
-        let pickerDoneBar = UIView()
-        pickerDoneBar.backgroundColor = UIColor(white: 0.94, alpha: 1)
-        pickerDoneBar.translatesAutoresizingMaskIntoConstraints = false
-        pickerPanel.addSubview(pickerDoneBar)
+        // Done bar
+        optionDoneBar.backgroundColor = UIColor(white: 0.94, alpha: 1)
+        optionDoneBar.translatesAutoresizingMaskIntoConstraints = false
+        optionPanel.addSubview(optionDoneBar)
 
-        pickerDoneBtn.setTitle("Done", for: .normal)
-        pickerDoneBtn.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
-        pickerDoneBtn.setTitleColor(UIColor(red: 0.18, green: 0.56, blue: 0.94, alpha: 1), for: .normal)
-        pickerDoneBtn.translatesAutoresizingMaskIntoConstraints = false
-        pickerDoneBtn.addTarget(self, action: #selector(didTapPickerDone), for: .touchUpInside)
-        pickerDoneBar.addSubview(pickerDoneBtn)
+        optionDoneBtn.setTitle("Done", for: .normal)
+        optionDoneBtn.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
+        optionDoneBtn.setTitleColor(
+            UIColor(red: 0.18, green: 0.56, blue: 0.94, alpha: 1), for: .normal)
+        optionDoneBtn.translatesAutoresizingMaskIntoConstraints = false
+        optionDoneBtn.addTarget(self, action: #selector(didTapOptionDone), for: .touchUpInside)
+        optionDoneBar.addSubview(optionDoneBtn)
 
-        pickerView.dataSource = self
-        pickerView.delegate   = self
-        pickerView.translatesAutoresizingMaskIntoConstraints = false
-        pickerPanel.addSubview(pickerView)
+        // Options table
+        optionTable.register(UITableViewCell.self,
+                             forCellReuseIdentifier: Self.optionCellId)
+        optionTable.dataSource   = self
+        optionTable.delegate     = self
+        optionTable.rowHeight    = 48
+        optionTable.separatorInset = .zero
+        optionTable.translatesAutoresizingMaskIntoConstraints = false
+        optionPanel.addSubview(optionTable)
 
-        // MARK: Constraints
-
-        sheetBottomConstraint  = sheetView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: 520)
-        pickerBottomConstraint = pickerPanel.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: 260)
+        // ── Constraints ────────────────────────────────────────────────────────
+        sheetBottomConstraint       = sheetView.bottomAnchor.constraint(
+            equalTo: view.bottomAnchor, constant: sheetHeight)
+        optionPanelBottomConstraint = optionPanel.bottomAnchor.constraint(
+            equalTo: view.bottomAnchor, constant: optionPanelH)
 
         NSLayoutConstraint.activate([
             // Dim
@@ -225,8 +253,18 @@ final class ProgressNotesFilterSheet: UIViewController {
             divider.trailingAnchor.constraint(equalTo: sheetView.trailingAnchor),
             divider.heightAnchor.constraint(equalToConstant: 0.5),
 
-            // Filter label + dropdown
-            filterLabel.topAnchor.constraint(equalTo: divider.bottomAnchor, constant: 20),
+            // Visit Type field
+            visitTypeLabel.topAnchor.constraint(equalTo: divider.bottomAnchor, constant: 20),
+            visitTypeLabel.leadingAnchor.constraint(equalTo: sheetView.leadingAnchor, constant: 20),
+            visitTypeLabel.trailingAnchor.constraint(equalTo: sheetView.trailingAnchor, constant: -20),
+
+            visitTypeDropBtn.topAnchor.constraint(equalTo: visitTypeLabel.bottomAnchor, constant: 8),
+            visitTypeDropBtn.leadingAnchor.constraint(equalTo: sheetView.leadingAnchor, constant: 20),
+            visitTypeDropBtn.trailingAnchor.constraint(equalTo: sheetView.trailingAnchor, constant: -20),
+            visitTypeDropBtn.heightAnchor.constraint(equalToConstant: 50),
+
+            // Filter field
+            filterLabel.topAnchor.constraint(equalTo: visitTypeDropBtn.bottomAnchor, constant: 20),
             filterLabel.leadingAnchor.constraint(equalTo: sheetView.leadingAnchor, constant: 20),
             filterLabel.trailingAnchor.constraint(equalTo: sheetView.trailingAnchor, constant: -20),
 
@@ -235,18 +273,8 @@ final class ProgressNotesFilterSheet: UIViewController {
             filterDropBtn.trailingAnchor.constraint(equalTo: sheetView.trailingAnchor, constant: -20),
             filterDropBtn.heightAnchor.constraint(equalToConstant: 50),
 
-            // Visit Type label + dropdown
-            visitLabel.topAnchor.constraint(equalTo: filterDropBtn.bottomAnchor, constant: 20),
-            visitLabel.leadingAnchor.constraint(equalTo: sheetView.leadingAnchor, constant: 20),
-            visitLabel.trailingAnchor.constraint(equalTo: sheetView.trailingAnchor, constant: -20),
-
-            visitDropBtn.topAnchor.constraint(equalTo: visitLabel.bottomAnchor, constant: 8),
-            visitDropBtn.leadingAnchor.constraint(equalTo: sheetView.leadingAnchor, constant: 20),
-            visitDropBtn.trailingAnchor.constraint(equalTo: sheetView.trailingAnchor, constant: -20),
-            visitDropBtn.heightAnchor.constraint(equalToConstant: 50),
-
             // Action buttons
-            applyBtn.topAnchor.constraint(equalTo: visitDropBtn.bottomAnchor, constant: 28),
+            applyBtn.topAnchor.constraint(equalTo: filterDropBtn.bottomAnchor, constant: 28),
             applyBtn.leadingAnchor.constraint(equalTo: sheetView.leadingAnchor, constant: 20),
             applyBtn.trailingAnchor.constraint(equalTo: sheetView.trailingAnchor, constant: -20),
             applyBtn.heightAnchor.constraint(equalToConstant: 50),
@@ -255,26 +283,30 @@ final class ProgressNotesFilterSheet: UIViewController {
             resetBtn.leadingAnchor.constraint(equalTo: sheetView.leadingAnchor, constant: 20),
             resetBtn.trailingAnchor.constraint(equalTo: sheetView.trailingAnchor, constant: -20),
             resetBtn.heightAnchor.constraint(equalToConstant: 50),
-            resetBtn.bottomAnchor.constraint(lessThanOrEqualTo: sheetView.bottomAnchor, constant: -28),
+            resetBtn.bottomAnchor.constraint(lessThanOrEqualTo: sheetView.bottomAnchor,
+                                             constant: -28),
 
-            // Picker panel
-            pickerPanel.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            pickerPanel.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            pickerBottomConstraint,
+            // Option panel
+            optionPanel.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            optionPanel.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            optionPanelBottomConstraint,
 
-            pickerDoneBar.topAnchor.constraint(equalTo: pickerPanel.topAnchor),
-            pickerDoneBar.leadingAnchor.constraint(equalTo: pickerPanel.leadingAnchor),
-            pickerDoneBar.trailingAnchor.constraint(equalTo: pickerPanel.trailingAnchor),
-            pickerDoneBar.heightAnchor.constraint(equalToConstant: 44),
+            // Done bar
+            optionDoneBar.topAnchor.constraint(equalTo: optionPanel.topAnchor),
+            optionDoneBar.leadingAnchor.constraint(equalTo: optionPanel.leadingAnchor),
+            optionDoneBar.trailingAnchor.constraint(equalTo: optionPanel.trailingAnchor),
+            optionDoneBar.heightAnchor.constraint(equalToConstant: 44),
 
-            pickerDoneBtn.centerYAnchor.constraint(equalTo: pickerDoneBar.centerYAnchor),
-            pickerDoneBtn.trailingAnchor.constraint(equalTo: pickerDoneBar.trailingAnchor, constant: -16),
+            optionDoneBtn.centerYAnchor.constraint(equalTo: optionDoneBar.centerYAnchor),
+            optionDoneBtn.trailingAnchor.constraint(equalTo: optionDoneBar.trailingAnchor,
+                                                     constant: -16),
 
-            pickerView.topAnchor.constraint(equalTo: pickerDoneBar.bottomAnchor),
-            pickerView.leadingAnchor.constraint(equalTo: pickerPanel.leadingAnchor),
-            pickerView.trailingAnchor.constraint(equalTo: pickerPanel.trailingAnchor),
-            pickerView.heightAnchor.constraint(equalToConstant: 216),
-            pickerView.bottomAnchor.constraint(equalTo: pickerPanel.bottomAnchor)
+            // Table
+            optionTable.topAnchor.constraint(equalTo: optionDoneBar.bottomAnchor),
+            optionTable.leadingAnchor.constraint(equalTo: optionPanel.leadingAnchor),
+            optionTable.trailingAnchor.constraint(equalTo: optionPanel.trailingAnchor),
+            optionTable.heightAnchor.constraint(equalToConstant: optionPanelH - 44),
+            optionTable.bottomAnchor.constraint(equalTo: optionPanel.bottomAnchor),
         ])
     }
 
@@ -293,8 +325,8 @@ final class ProgressNotesFilterSheet: UIViewController {
     private func slideSheetOut(then block: @escaping () -> Void) {
         UIView.animate(withDuration: 0.22, animations: {
             self.dimView.alpha = 0
-            self.sheetBottomConstraint.constant  = 520
-            self.pickerBottomConstraint.constant = 260   // also hide picker if open
+            self.sheetBottomConstraint.constant         = self.sheetHeight
+            self.optionPanelBottomConstraint.constant   = self.optionPanelH
             self.view.layoutIfNeeded()
         }, completion: { _ in block() })
     }
@@ -303,53 +335,71 @@ final class ProgressNotesFilterSheet: UIViewController {
         slideSheetOut { super.dismiss(animated: false, completion: completion) }
     }
 
-    // MARK: - Picker show / hide
+    // MARK: - Option panel show / hide
 
-    private func showPicker(for kind: ActivePicker) {
-        activePicker = kind
-
-        // Pre-select the currently chosen row.
-        let list   = currentList()
-        let selId  = (kind == .visitType) ? selectedVisitTypeId : selectedFilterId
-        let selIdx = list.firstIndex(where: { $0.id == selId }) ?? 0
-        pickerView.reloadAllComponents()
-        if selIdx < list.count { pickerView.selectRow(selIdx, inComponent: 0, animated: false) }
-
+    private func showOptionPanel(for kind: ActiveDropdown) {
+        activeDropdown = kind
+        // Reload the table synchronously before animating in.
+        optionTable.reloadData()
+        // Scroll to currently selected row (if any).
+        let list = currentList()
+        let selId  = kind == .visitType ? selectedVisitTypeId : selectedFilterId
+        if let idx = list.firstIndex(where: { $0.id == selId }) {
+            let ip = IndexPath(row: idx, section: 0)
+            optionTable.scrollToRow(at: ip, at: .middle, animated: false)
+        }
         UIView.animate(withDuration: 0.25) {
-            self.pickerBottomConstraint.constant = 0
+            self.optionPanelBottomConstraint.constant = 0
             self.view.layoutIfNeeded()
         }
     }
 
-    private func hidePicker() {
+    private func hideOptionPanel() {
         UIView.animate(withDuration: 0.22) {
-            self.pickerBottomConstraint.constant = 260
+            self.optionPanelBottomConstraint.constant = self.optionPanelH
             self.view.layoutIfNeeded()
+        }
+    }
+
+    // MARK: - Current option list
+
+    private func currentList() -> [NurseNoteLookup] {
+        switch activeDropdown {
+        case .visitType:
+            // VISIT_TYPE_ROW: Inpatient / Outpatient / Emergency
+            // Server does NOT include an "All" row → prepend one (id = "").
+            let base = visitTypeOptions
+            if base.isEmpty {
+                return [NurseNoteLookup(id: "", label: "All")]
+            }
+            let firstIsAll = base.first.map { $0.id.isEmpty || $0.label == "All" } ?? false
+            return firstIsAll ? base : [NurseNoteLookup(id: "", label: "All")] + base
+
+        case .filter:
+            // NURSE_REMARKS_FILTER_ROW already starts with "My View" (ID "0")
+            // and ends with "All" (ID "3") — use the server list as-is.
+            let base = filterOptions
+            if base.isEmpty {
+                return [NurseNoteLookup(id: "0", label: "My View")]
+            }
+            return base
         }
     }
 
     // MARK: - Actions
 
     @objc private func didTapDim() {
-        hidePicker()
+        hideOptionPanel()
         dismiss(animated: false)
     }
 
-    @objc private func didTapFilterDrop() { showPicker(for: .visitType) }
-    @objc private func didTapVisitDrop()  { showPicker(for: .filter) }
+    @objc private func didTapVisitTypeDrop() { showOptionPanel(for: .visitType) }
+    @objc private func didTapFilterDrop()    { showOptionPanel(for: .filter) }
 
-    @objc private func didTapPickerDone() {
-        let row  = pickerView.selectedRow(inComponent: 0)
-        let list = currentList()
-        guard row < list.count else { hidePicker(); return }
-        let item = list[row]
-        if activePicker == .visitType {
-            selectedVisitTypeId = item.id
-        } else {
-            selectedFilterId = item.id
-        }
-        refreshLabels()
-        hidePicker()
+    @objc private func didTapOptionDone() {
+        // Commit the tapped row (the last row the user highlighted by tapping).
+        // If the user didn't tap any row, keep the previous selection unchanged.
+        hideOptionPanel()
     }
 
     @objc private func didTapApply() {
@@ -362,39 +412,20 @@ final class ProgressNotesFilterSheet: UIViewController {
     @objc private func didTapReset() {
         selectedVisitTypeId = ""
         selectedFilterId    = ""
-        refreshLabels()
+        refreshDropLabels()
         dismiss(animated: false)
         delegate?.filterSheetDidReset(self)
     }
 
     // MARK: - Helpers
 
-    private func currentList() -> [NurseNoteLookup] {
-        switch activePicker {
-        case .visitType:
-            // VISIT_TYPE_ROW: { "1"=Inpatient, "2"=Outpatient, "3"=Emergency }
-            // Server does NOT include an "All" row — prepend one (id = "").
-            let base = visitTypeOptions
-            if base.isEmpty { return [NurseNoteLookup(id: "", label: "All")] }
-            let firstIsAll = base.first.map { $0.id.isEmpty || $0.label == "All" } ?? false
-            return firstIsAll ? base : [NurseNoteLookup(id: "", label: "All")] + base
-
-        case .filter:
-            // NURSE_REMARKS_FILTER_ROW already includes "My View" (ID "0") as the
-            // first row and "All" (ID "3") as the last row — use as-is.
-            let base = filterOptions
-            if base.isEmpty { return [NurseNoteLookup(id: "0", label: "My View")] }
-            return base
-        }
-    }
-
-    private func refreshLabels() {
-        // filterDropBtn serves VISIT_TYPE options → fallback "All"
-        filterDropBtn.setTitle(labelFor(id: selectedVisitTypeId,
-                                        in: visitTypeOptions, fallback: "All"), for: .normal)
-        // visitDropBtn serves NURSE_REMARKS_FILTER options → fallback "My View"
-        visitDropBtn.setTitle(labelFor(id: selectedFilterId,
-                                       in: filterOptions, fallback: "My View"), for: .normal)
+    private func refreshDropLabels() {
+        visitTypeDropBtn.setTitle(
+            labelFor(id: selectedVisitTypeId, in: visitTypeOptions, fallback: "All"),
+            for: .normal)
+        filterDropBtn.setTitle(
+            labelFor(id: selectedFilterId, in: filterOptions, fallback: "My View"),
+            for: .normal)
     }
 
     private func labelFor(id: String, in list: [NurseNoteLookup], fallback: String) -> String {
@@ -423,22 +454,56 @@ final class ProgressNotesFilterSheet: UIViewController {
     }
 }
 
-// MARK: - UIPickerViewDataSource / Delegate
+// MARK: - UITableViewDataSource / Delegate
 
-extension ProgressNotesFilterSheet: UIPickerViewDataSource, UIPickerViewDelegate {
-    func numberOfComponents(in pickerView: UIPickerView) -> Int { 1 }
+extension ProgressNotesFilterSheet: UITableViewDataSource, UITableViewDelegate {
 
-    func pickerView(_ pickerView: UIPickerView,
-                    numberOfRowsInComponent component: Int) -> Int {
+    func tableView(_ tableView: UITableView,
+                   numberOfRowsInSection section: Int) -> Int {
         return currentList().count
     }
 
-    func pickerView(_ pickerView: UIPickerView,
-                    titleForRow row: Int,
-                    forComponent component: Int) -> String? {
+    func tableView(_ tableView: UITableView,
+                   cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: Self.optionCellId,
+                                                 for: indexPath)
         let list = currentList()
-        guard row < list.count else { return nil }
-        return list[row].label
+        guard indexPath.row < list.count else { return cell }
+        let item = list[indexPath.row]
+
+        cell.textLabel?.text = item.label
+        cell.textLabel?.font = UIFont.systemFont(ofSize: 15, weight: .regular)
+
+        let selId = activeDropdown == .visitType ? selectedVisitTypeId : selectedFilterId
+        cell.accessoryType = (item.id == selId) ? .checkmark : .none
+        cell.tintColor = UIColor(red: 0.18, green: 0.56, blue: 0.94, alpha: 1)
+        return cell
+    }
+
+    func tableView(_ tableView: UITableView,
+                   didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
+
+        let list = currentList()
+        guard indexPath.row < list.count else { return }
+        let item = list[indexPath.row]
+
+        // Update the active selection and refresh checkmarks.
+        if activeDropdown == .visitType {
+            selectedVisitTypeId = item.id
+        } else {
+            selectedFilterId = item.id
+        }
+        tableView.reloadData()
+
+        // Update the dropdown button label in the sheet.
+        refreshDropLabels()
+
+        // Slide the option panel away after a brief delay so the user sees
+        // the checkmark land before it disappears.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) { [weak self] in
+            self?.hideOptionPanel()
+        }
     }
 }
 
@@ -470,17 +535,8 @@ private final class DropdownButton: UIButton {
                 iv.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -14),
                 iv.centerYAnchor.constraint(equalTo: centerYAnchor),
                 iv.widthAnchor.constraint(equalToConstant: 16),
-                iv.heightAnchor.constraint(equalToConstant: 16)
+                iv.heightAnchor.constraint(equalToConstant: 16),
             ])
         }
-    }
-}
-
-// MARK: - UISwipeGestureRecognizer helper
-
-private extension UISwipeGestureRecognizer {
-    @discardableResult
-    func also(_ configure: (UISwipeGestureRecognizer) -> Void) -> UISwipeGestureRecognizer {
-        configure(self); return self
     }
 }

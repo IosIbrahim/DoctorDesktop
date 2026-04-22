@@ -349,8 +349,25 @@ final class ProgressNotesViewController: UIViewController {
         let sheet = ProgressNotesFilterSheet()
         sheet.modalPresentationStyle = .overFullScreen
         sheet.modalTransitionStyle   = .crossDissolve
-        sheet.visitTypeOptions  = presenter.visitTypes
-        sheet.filterOptions     = presenter.filters
+
+        // Use presenter data. If the API hasn't responded yet, fall back to
+        // hardcoded values so the picker is never empty.
+        sheet.visitTypeOptions = presenter.visitTypes.isEmpty
+            ? [NurseNoteLookup(id: "1", label: "Inpatient"),
+               NurseNoteLookup(id: "2", label: "Outpatient"),
+               NurseNoteLookup(id: "3", label: "Emergency")]
+            : presenter.visitTypes
+
+        sheet.filterOptions = presenter.filters.isEmpty
+            ? [NurseNoteLookup(id: "0",  label: "My View"),
+               NurseNoteLookup(id: "1",  label: "Doctors"),
+               NurseNoteLookup(id: "2",  label: "Nursing"),
+               NurseNoteLookup(id: "4",  label: "Clinical Pharmacy"),
+               NurseNoteLookup(id: "5",  label: "Clinical Nutrition Specialists"),
+               NurseNoteLookup(id: "6",  label: "Infection Control"),
+               NurseNoteLookup(id: "3",  label: "All")]
+            : presenter.filters
+
         sheet.initialVisitTypeId = presenter.activeVisitTypeId
         sheet.initialFilterId    = presenter.activeFilterId
         sheet.delegate = self
