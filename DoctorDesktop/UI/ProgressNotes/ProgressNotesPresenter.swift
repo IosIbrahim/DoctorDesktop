@@ -222,6 +222,11 @@ final class ProgressNotesPresenterImpl: ProgressNotesPresenter {
     private func applyClientFilter(to source: [DoctorNurseNote]) -> [DoctorNurseNote] {
         var result = source
 
+        // ── Hide deleted notes (DELETE_UPDATE_FLAG == "1") ────────────────────
+        // Deleted notes must not appear in the active list regardless of other
+        // filter settings.  MODIFY_FLAG == "0" on the same row confirms deletion.
+        result = result.filter { ($0.deleteUpdateFlag ?? "") != "1" }
+
         // ── Visit Type (TYPE_FLAG in row == VISIT_TYPE_ROW.ID) ────────────────
         // "" means "All" → no restriction.
         if !activeVisitTypeId.isEmpty {
