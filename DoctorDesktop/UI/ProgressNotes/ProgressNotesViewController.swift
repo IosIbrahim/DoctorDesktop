@@ -359,52 +359,53 @@ final class ProgressNotesViewController: UIViewController {
 
     /// Show-to uses NURSE_REMARKS_SHOW_D_N_ROW — sets who can see the note being composed.
     @objc private func didTapShowTo() {
-        let list = presenter.showToList   // NURSE_REMARKS_SHOW_D_N_ROW
-        guard !list.isEmpty else {
-            showToButton.setTitle("Show to: All", for: .normal); return
+        // Guaranteed fallback so the picker always shows something even when
+        // the API hasn't loaded yet.
+        let list: [NurseNoteLookup] = presenter.showToList.isEmpty
+            ? [NurseNoteLookup(id: "0", label: "All"),
+               NurseNoteLookup(id: "1", label: "Doctors"),
+               NurseNoteLookup(id: "2", label: "Nursing"),
+               NurseNoteLookup(id: "3", label: "Clinical Pharmacy"),
+               NurseNoteLookup(id: "4", label: "Clinical Nutrition Specialists"),
+               NurseNoteLookup(id: "5", label: "Infection Control")]
+            : presenter.showToList
+
+        presentLookupPicker(title: "Show to", items: list,
+                            selectedId: presenter.draftShowToId) { [weak self] item in
+            self?.presenter.draftShowToId = item.id
+            self?.updateComposerChips()
         }
-        let ac = UIAlertController(title: "Show to", message: nil, preferredStyle: .actionSheet)
-        for item in list {
-            ac.addAction(UIAlertAction(title: item.label, style: .default) { [weak self] _ in
-                guard let self = self else { return }
-                self.presenter.draftShowToId = item.id
-                self.updateComposerChips()
-            })
-        }
-        ac.addAction(UIAlertAction(title: "Cancel", style: .cancel))
-        ac.popoverPresentationController?.sourceView = view
-        ac.popoverPresentationController?.sourceRect = CGRect(x: view.bounds.midX,
-                                                              y: view.bounds.midY,
-                                                              width: 1, height: 1)
-        present(ac, animated: true)
     }
 
     /// Priority uses NURSE_REMARKS_PRIORITY_ROW — sets the priority of the note being composed.
     @objc private func didTapPriority() {
-        let list = presenter.priorities   // NURSE_REMARKS_PRIORITY_ROW
-        let ac = UIAlertController(title: "Priority", message: nil, preferredStyle: .actionSheet)
-        if list.isEmpty {
-            // Fallback if server didn't return lookup rows yet.
-            for (id, label) in [("1", "Normal"), ("3", "Urgent")] {
-                ac.addAction(UIAlertAction(title: label, style: .default) { [weak self] _ in
-                    self?.presenter.draftPriorityId = id
-                    self?.updateComposerChips()
-                })
-            }
-        } else {
-            for item in list {
-                ac.addAction(UIAlertAction(title: item.label, style: .default) { [weak self] _ in
-                    self?.presenter.draftPriorityId = item.id
-                    self?.updateComposerChips()
-                })
-            }
+        let list: [NurseNoteLookup] = presenter.priorities.isEmpty
+            ? [NurseNoteLookup(id: "1", label: "Normal"),
+               NurseNoteLookup(id: "3", label: "Urgent")]
+            : presenter.priorities
+
+        presentLookupPicker(title: "Priority", items: list,
+                            selectedId: presenter.draftPriorityId) { [weak self] item in
+            self?.presenter.draftPriorityId = item.id
+            self?.updateComposerChips()
         }
-        ac.addAction(UIAlertAction(title: "Cancel", style: .cancel))
-        ac.popoverPresentationController?.sourceView = view
-        ac.popoverPresentationController?.sourceRect = CGRect(x: view.bounds.midX,
-                                                              y: view.bounds.midY,
-                                                              width: 1, height: 1)
-        present(ac, animated: true)
+    }
+
+    /// Presents a bottom-of-screen UIPickerView (never a UIAlertController) so
+    /// that all items always appear regardless of presentation context.
+    private func presentLookupPicker(title: String,
+                                     items: [NurseNoteLookup],
+                                     selectedId: String,
+                                     onPick: @escaping (NurseNoteLookup) -> Void) {
+        view.endEditing(true)
+        let picker = SimpleLookupPickerSheet()
+        picker.modalPresentationStyle = .overFullScreen
+        picker.modalTransitionStyle   = .crossDissolve
+        picker.pickerTitle = title
+        picker.items       = items
+        picker.selectedId  = selectedId
+        picker.onPick      = onPick
+        present(picker, animated: false)
     }
 
     @objc private func textChanged() {
@@ -461,24 +462,6 @@ final class ProgressNotesViewController: UIViewController {
     }
 
     // MARK: - Helpers
-
-    private func presentActionSheet(title: String,
-                                    options: [String],
-                                    onPick: @escaping (Int, String) -> Void) {
-        let ac = UIAlertController(title: title, message: nil, preferredStyle: .actionSheet)
-        for (i, opt) in options.enumerated() {
-            ac.addAction(UIAlertAction(title: opt, style: .default) { _ in
-                onPick(i, opt)
-            })
-        }
-        ac.addAction(UIAlertAction(title: "Cancel", style: .cancel))
-        // iPad popover safety
-        ac.popoverPresentationController?.sourceView = view
-        ac.popoverPresentationController?.sourceRect = CGRect(x: view.bounds.midX,
-                                                              y: view.bounds.midY,
-                                                              width: 1, height: 1)
-        present(ac, animated: true)
-    }
 
     private func presentAlert(_ msg: String) {
         let ac = UIAlertController(title: nil, message: msg, preferredStyle: .alert)
@@ -602,5 +585,173 @@ extension ProgressNotesViewController: VoiceNoteRecorderDelegate {
         if #available(iOS 13, *) {
             micButton.setImage(UIImage(systemName: "play.circle.fill"), for: .normal)
         }
+    }
+}
+
+// MARK: - SimpleLookupPickerSheet
+//
+// Reusable bottom-of-screen picker. Used for Show-to and Priority so that
+// all options are always visible via UIPickerView — no UIAlertController
+// chain issues, no single-item popover bugs.
+
+final class SimpleLookupPickerSheet: UIViewController,
+                                     UIPickerViewDataSource,
+                                     UIPickerViewDelegate {
+
+    var pickerTitle: String = ""
+    var items:       [NurseNoteLookup] = []
+    var selectedId:  String = ""
+    var onPick:      ((NurseNoteLookup) -> Void)?
+
+    private let dimView     = UIView()
+    private let panel       = UIView()
+    private let titleLbl    = UILabel()
+    private let doneBtn     = UIButton(type: .system)
+    private let cancelBtn   = UIButton(type: .system)
+    private let picker      = UIPickerView()
+
+    private var panelBottomConstraint: NSLayoutConstraint!
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        view.backgroundColor = .clear
+        buildUI()
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        // Pre-select the current value.
+        if let idx = items.firstIndex(where: { $0.id == selectedId }), idx < items.count {
+            picker.selectRow(idx, inComponent: 0, animated: false)
+        }
+        // Slide up
+        UIView.animate(withDuration: 0.28, delay: 0,
+                       usingSpringWithDamping: 0.85, initialSpringVelocity: 0,
+                       options: [], animations: {
+            self.dimView.alpha = 1
+            self.panelBottomConstraint.constant = 0
+            self.view.layoutIfNeeded()
+        })
+    }
+
+    private func buildUI() {
+        // Dim
+        dimView.backgroundColor = UIColor.black.withAlphaComponent(0.40)
+        dimView.alpha = 0
+        dimView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(dimView)
+        dimView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(didCancel)))
+
+        // Panel
+        panel.backgroundColor = .white
+        panel.layer.cornerRadius = 16
+        panel.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+        panel.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(panel)
+
+        // Title bar
+        let bar = UIView()
+        bar.backgroundColor = UIColor(white: 0.95, alpha: 1)
+        bar.layer.cornerRadius = 16
+        bar.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+        bar.translatesAutoresizingMaskIntoConstraints = false
+        panel.addSubview(bar)
+
+        titleLbl.text = pickerTitle
+        titleLbl.font = UIFont.systemFont(ofSize: 15, weight: .semibold)
+        titleLbl.textColor = UIColor(white: 0.15, alpha: 1)
+        titleLbl.textAlignment = .center
+        titleLbl.translatesAutoresizingMaskIntoConstraints = false
+        bar.addSubview(titleLbl)
+
+        cancelBtn.setTitle("Cancel", for: .normal)
+        cancelBtn.titleLabel?.font = UIFont.systemFont(ofSize: 15)
+        cancelBtn.setTitleColor(UIColor(white: 0.35, alpha: 1), for: .normal)
+        cancelBtn.translatesAutoresizingMaskIntoConstraints = false
+        cancelBtn.addTarget(self, action: #selector(didCancel), for: .touchUpInside)
+        bar.addSubview(cancelBtn)
+
+        doneBtn.setTitle("Done", for: .normal)
+        doneBtn.titleLabel?.font = UIFont.systemFont(ofSize: 15, weight: .semibold)
+        doneBtn.setTitleColor(UIColor(red: 0.18, green: 0.56, blue: 0.94, alpha: 1), for: .normal)
+        doneBtn.translatesAutoresizingMaskIntoConstraints = false
+        doneBtn.addTarget(self, action: #selector(didDone), for: .touchUpInside)
+        bar.addSubview(doneBtn)
+
+        picker.dataSource = self
+        picker.delegate   = self
+        picker.translatesAutoresizingMaskIntoConstraints = false
+        panel.addSubview(picker)
+
+        panelBottomConstraint = panel.bottomAnchor.constraint(equalTo: view.bottomAnchor,
+                                                               constant: 300)
+        NSLayoutConstraint.activate([
+            dimView.topAnchor.constraint(equalTo: view.topAnchor),
+            dimView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            dimView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            dimView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+
+            panel.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            panel.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            panelBottomConstraint,
+
+            bar.topAnchor.constraint(equalTo: panel.topAnchor),
+            bar.leadingAnchor.constraint(equalTo: panel.leadingAnchor),
+            bar.trailingAnchor.constraint(equalTo: panel.trailingAnchor),
+            bar.heightAnchor.constraint(equalToConstant: 44),
+
+            cancelBtn.leadingAnchor.constraint(equalTo: bar.leadingAnchor, constant: 12),
+            cancelBtn.centerYAnchor.constraint(equalTo: bar.centerYAnchor),
+
+            titleLbl.centerXAnchor.constraint(equalTo: bar.centerXAnchor),
+            titleLbl.centerYAnchor.constraint(equalTo: bar.centerYAnchor),
+
+            doneBtn.trailingAnchor.constraint(equalTo: bar.trailingAnchor, constant: -12),
+            doneBtn.centerYAnchor.constraint(equalTo: bar.centerYAnchor),
+
+            picker.topAnchor.constraint(equalTo: bar.bottomAnchor),
+            picker.leadingAnchor.constraint(equalTo: panel.leadingAnchor),
+            picker.trailingAnchor.constraint(equalTo: panel.trailingAnchor),
+            picker.heightAnchor.constraint(equalToConstant: 216),
+            picker.bottomAnchor.constraint(equalTo: panel.bottomAnchor),
+        ])
+    }
+
+    @objc private func didCancel() { slideDown(completion: nil) }
+
+    @objc private func didDone() {
+        let row  = picker.selectedRow(inComponent: 0)
+        guard row < items.count else { slideDown(completion: nil); return }
+        let item = items[row]
+        slideDown { [weak self] in
+            self?.onPick?(item)
+        }
+    }
+
+    private func slideDown(completion: (() -> Void)?) {
+        UIView.animate(withDuration: 0.22, animations: {
+            self.dimView.alpha = 0
+            self.panelBottomConstraint.constant = 300
+            self.view.layoutIfNeeded()
+        }, completion: { _ in
+            super.dismiss(animated: false, completion: completion)
+        })
+    }
+
+    override func dismiss(animated flag: Bool, completion: (() -> Void)? = nil) {
+        slideDown(completion: completion)
+    }
+
+    // UIPickerViewDataSource
+    func numberOfComponents(in pickerView: UIPickerView) -> Int { 1 }
+    func pickerView(_ pickerView: UIPickerView,
+                    numberOfRowsInComponent component: Int) -> Int { items.count }
+
+    // UIPickerViewDelegate
+    func pickerView(_ pickerView: UIPickerView,
+                    titleForRow row: Int,
+                    forComponent component: Int) -> String? {
+        guard row < items.count else { return nil }
+        return items[row].label
     }
 }

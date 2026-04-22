@@ -600,7 +600,13 @@ extension TranslationLayerImpl {
 
         let notes      = decodeArray(DoctorNurseNote.self, at: "Root.DOCTOR_NURSE_REMARKS.DOCTOR_NURSE_REMARKS_ROW")
         let priorities = decodeArray(NurseNoteLookup.self, at: "Root.NURSE_REMARKS_PRIORITY.NURSE_REMARKS_PRIORITY_ROW")
-        let visitTypes = decodeArray(NurseNoteLookup.self, at: "Root.NURSE_REMARKS_VISIT_TYPE.NURSE_REMARKS_VISIT_TYPE_ROW")
+        // Server uses "VISIT_TYPE" (not "NURSE_REMARKS_VISIT_TYPE"); try both so a
+        // future server rename doesn't silently break the filter sheet.
+        let visitTypes: [NurseNoteLookup] = {
+            let v = decodeArray(NurseNoteLookup.self, at: "Root.VISIT_TYPE.VISIT_TYPE_ROW")
+            if !v.isEmpty { return v }
+            return decodeArray(NurseNoteLookup.self, at: "Root.NURSE_REMARKS_VISIT_TYPE.NURSE_REMARKS_VISIT_TYPE_ROW")
+        }()
         let showToList = decodeArray(NurseNoteLookup.self, at: "Root.NURSE_REMARKS_SHOW_D_N.NURSE_REMARKS_SHOW_D_N_ROW")
         let filters    = decodeArray(NurseNoteLookup.self, at: "Root.NURSE_REMARKS_FILTER.NURSE_REMARKS_FILTER_ROW")
 
