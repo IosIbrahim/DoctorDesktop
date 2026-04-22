@@ -152,6 +152,12 @@
 		AABBCC010000000000000002 /* VitalSignsEntryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCC010000000000000004 /* VitalSignsEntryViewController.swift */; };
 		AABBCC010000000000000006 /* UCAFLoadData.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCC010000000000000007 /* UCAFLoadData.swift */; };
 		AABBCC010000000000000008 /* SpecialHabitsData.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCC010000000000000009 /* SpecialHabitsData.swift */; };
+		AABBCC020000000000000001 /* ProgressNotesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCC020000000000000101 /* ProgressNotesViewController.swift */; };
+		AABBCC020000000000000002 /* ProgressNotesPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCC020000000000000102 /* ProgressNotesPresenter.swift */; };
+		AABBCC020000000000000003 /* ProgressNoteRowCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCC020000000000000103 /* ProgressNoteRowCell.swift */; };
+		AABBCC020000000000000004 /* VoiceNoteRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCC020000000000000104 /* VoiceNoteRecorder.swift */; };
+		AABBCC020000000000000005 /* DoctorNurseNotesData.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCC020000000000000105 /* DoctorNurseNotesData.swift */; };
+		AABBCC020000000000000006 /* ProgressNotesFilterSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCC020000000000000106 /* ProgressNotesFilterSheet.swift */; };
 		366D863D2087E97A008B16BF /* PediatricsScorePopUpView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 366D861E2087E97A008B16BF /* PediatricsScorePopUpView.xib */; };
 		366D863E2087E97A008B16BF /* PediatricsScorePopUp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 366D861F2087E97A008B16BF /* PediatricsScorePopUp.swift */; };
 		366D863F2087E97A008B16BF /* PediatricsScorePopUpPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 366D86202087E97A008B16BF /* PediatricsScorePopUpPresenter.swift */; };
@@ -390,6 +396,12 @@
 		366D861C2087E97A008B16BF /* EmergencyTriagePresenter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmergencyTriagePresenter.swift; sourceTree = "<group>"; };
 		AABBCC010000000000000003 /* VitalSignsEntryPresenter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VitalSignsEntryPresenter.swift; sourceTree = "<group>"; };
 		AABBCC010000000000000004 /* VitalSignsEntryViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VitalSignsEntryViewController.swift; sourceTree = "<group>"; };
+		AABBCC020000000000000101 /* ProgressNotesViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProgressNotesViewController.swift; sourceTree = "<group>"; };
+		AABBCC020000000000000102 /* ProgressNotesPresenter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProgressNotesPresenter.swift; sourceTree = "<group>"; };
+		AABBCC020000000000000103 /* ProgressNoteRowCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProgressNoteRowCell.swift; sourceTree = "<group>"; };
+		AABBCC020000000000000104 /* VoiceNoteRecorder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VoiceNoteRecorder.swift; sourceTree = "<group>"; };
+		AABBCC020000000000000105 /* DoctorNurseNotesData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DoctorNurseNotesData.swift; sourceTree = "<group>"; };
+		AABBCC020000000000000106 /* ProgressNotesFilterSheet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProgressNotesFilterSheet.swift; sourceTree = "<group>"; };
 		AABBCC010000000000000007 /* UCAFLoadData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UCAFLoadData.swift; sourceTree = "<group>"; };
 		AABBCC010000000000000009 /* SpecialHabitsData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpecialHabitsData.swift; sourceTree = "<group>"; };
 		366D861E2087E97A008B16BF /* PediatricsScorePopUpView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PediatricsScorePopUpView.xib; sourceTree = "<group>"; };
@@ -925,6 +937,7 @@
 				366350C4201A646E0072C049 /* Message.swift */,
 				36A9006F2037231400748406 /* OverviewSection.swift */,
 				366C28B120407FA400FA4E3A /* PatientSummary.swift */,
+				AABBCC020000000000000105 /* DoctorNurseNotesData.swift */,
 				0F1A2B3C4D5E6F7A8B9C0D1F /* VisitDetail.swift */,
 				366D85F92087E76C008B16BF /* EmergencyTriage.swift */,
 				AD3239F922C791F00088E176 /* OperationPatient.swift */,
@@ -1029,6 +1042,18 @@
 				AABBCC010000000000000009 /* SpecialHabitsData.swift */,
 			);
 			path = VitalSignsEntry;
+			sourceTree = "<group>";
+		};
+		AABBCC020000000000000100 /* ProgressNotes */ = {
+			isa = PBXGroup;
+			children = (
+				AABBCC020000000000000101 /* ProgressNotesViewController.swift */,
+				AABBCC020000000000000102 /* ProgressNotesPresenter.swift */,
+				AABBCC020000000000000103 /* ProgressNoteRowCell.swift */,
+				AABBCC020000000000000104 /* VoiceNoteRecorder.swift */,
+				AABBCC020000000000000106 /* ProgressNotesFilterSheet.swift */,
+			);
+			path = ProgressNotes;
 			sourceTree = "<group>";
 		};
 		366D860F2087E97A008B16BF /* DiagnosisCategoryPopUpCell */ = {
@@ -1221,6 +1246,7 @@
 				3691B19820165C3B00544BA4 /* LabRadOrder */,
 				366D860E2087E97A008B16BF /* EmergencyTriage */,
 				AABBCC010000000000000005 /* VitalSignsEntry */,
+				AABBCC020000000000000100 /* ProgressNotes */,
 				363768542091C5C400CE45D8 /* Overview */,
 			);
 			path = UI;
@@ -1712,6 +1738,12 @@
 				AABBCC010000000000000002 /* VitalSignsEntryViewController.swift in Sources */,
 				AABBCC010000000000000006 /* UCAFLoadData.swift in Sources */,
 				AABBCC010000000000000008 /* SpecialHabitsData.swift in Sources */,
+				AABBCC020000000000000001 /* ProgressNotesViewController.swift in Sources */,
+				AABBCC020000000000000002 /* ProgressNotesPresenter.swift in Sources */,
+				AABBCC020000000000000003 /* ProgressNoteRowCell.swift in Sources */,
+				AABBCC020000000000000004 /* VoiceNoteRecorder.swift in Sources */,
+				AABBCC020000000000000005 /* DoctorNurseNotesData.swift in Sources */,
+				AABBCC020000000000000006 /* ProgressNotesFilterSheet.swift in Sources */,
 				366D863E2087E97A008B16BF /* PediatricsScorePopUp.swift in Sources */,
 				36A33C1A1FE31FE6007A9E55 /* UnitsPopup.swift in Sources */,
 				36883F1220710A5500A53AE7 /* WebViewerPresenter.swift in Sources */,

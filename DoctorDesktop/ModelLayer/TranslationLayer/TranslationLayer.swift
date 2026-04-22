@@ -37,6 +37,7 @@ protocol TranslationLayer {
     func getLoadUcafFromJson(_ data: Data) -> UCAFLoadData?
     func getLoadUcafCTASFromJson(_ data: Data) -> UCAFCTASServer?
     func getSpecialHabitsFromJson(_ data: Data) -> SpecialHabitsData?
+    func getDoctorNurseNotesFromJson(_ data: Data) -> DoctorNurseNotesData
     
     func getHistorySymptomsDTOsFromJson(_ data:Data) -> HistorySymptomCategories
     func getDiagnosisCategoriesDTOsFromJson(_ data: Data) -> DiagnosisCategories
@@ -575,6 +576,39 @@ extension TranslationLayerImpl {
               json.contains("SPECIAL_HABITS") else { return nil }
         let keyPath = "Root.SPECIAL_HABITS"
         return try? SpecialHabitsData(data: data, keyPath: keyPath)
+    }
+
+    // ProgressNotes: /MedicalRcordController/DDDocNurseNotesLoad (server typo preserved).
+    // Parses the notes list plus the four lookup arrays. Everything defaults to [] on
+    // missing/malformed data so the caller never crashes.
+    func getDoctorNurseNotesFromJson(_ data: Data) -> DoctorNurseNotesData {
+        let topLevel = try? JSONSerialization.jsonObject(with: data,
+                                                         options: .mutableContainers)
+
+        func decode<T: Decodable>(_ type: T.Type, at keyPath: String) -> T? {
+            guard let nested = safeValue(in: topLevel, keyPath: keyPath),
+                  JSONSerialization.isValidJSONObject(nested),
+                  let nestedData = try? JSONSerialization.data(withJSONObject: nested)
+            else { return nil }
+            return try? jsonDecoder.decode(T.self, from: nestedData)
+        }
+        func decodeArray<T: Decodable>(_ type: T.Type, at keyPath: String) -> [T] {
+            if let arr = decode([T].self, at: keyPath) { return arr }
+            if let one = decode(T.self,   at: keyPath) { return [one] }
+            return []
+        }
+
+        let notes      = decodeArray(DoctorNurseNote.self, at: "Root.DOCTOR_NURSE_REMARKS.DOCTOR_NURSE_REMARKS_ROW")
+        let priorities = decodeArray(NurseNoteLookup.self, at: "Root.NURSE_REMARKS_PRIORITY.NURSE_REMARKS_PRIORITY_ROW")
+        let visitTypes = decodeArray(NurseNoteLookup.self, at: "Root.NURSE_REMARKS_VISIT_TYPE.NURSE_REMARKS_VISIT_TYPE_ROW")
+        let showToList = decodeArray(NurseNoteLookup.self, at: "Root.NURSE_REMARKS_SHOW_D_N.NURSE_REMARKS_SHOW_D_N_ROW")
+        let filters    = decodeArray(NurseNoteLookup.self, at: "Root.NURSE_REMARKS_FILTER.NURSE_REMARKS_FILTER_ROW")
+
+        return DoctorNurseNotesData(notes: notes,
+                                    priorities: priorities,
+                                    visitTypes: visitTypes,
+                                    showToList: showToList,
+                                    filters: filters)
     }
     
     // get diagnosis categories

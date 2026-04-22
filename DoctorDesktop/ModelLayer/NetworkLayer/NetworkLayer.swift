@@ -46,6 +46,10 @@ protocol NetworkLayer {
     func saveSpecialHabits(body: [String: Any], finished: @escaping DataBlock)
     /// POST /MobileApi/api/MedicalRecordController/saveUcaf — saves vitals + special-needs flags.
     func saveUcaf(body: [String: Any], finished: @escaping DataBlock)
+    /// GET /MobileApi/api/MedicalRcordController/DDDocNurseNotesLoad — loads the
+    /// progress-notes screen (notes list + priority/visit-type/show-to/filter lookups).
+    /// Endpoint name preserves the server typo "MedicalRcordController".
+    func loadDoctorNurseNotes(with params: [String: String], finished: @escaping DataBlock)
     func getSymptoms(with params: [String: String], finished: @escaping DataBlock)
     func loadFlagImage(with params: [String: String], finished: @escaping DataBlock)
     func getVisitsDetail(with params: [String: String], finished: @escaping DataBlock)
@@ -299,6 +303,13 @@ class NetworkLayerImpl: NetworkLayer {
         // Confirmed from Android network logs: MedicalRecord (no "Controller"), UCAF uppercase.
         postJSON(AppURLS.ip + "/MobileApi/api/MedicalRecord/saveUCAF",
                  body: body, finished: finished)
+    }
+
+    func loadDoctorNurseNotes(with params: [String: String], finished: @escaping DataBlock) {
+        // Server requires OAuth 1.0 signing. Endpoint name intentionally preserves
+        // the server typo "MedicalRcordController" (missing 'e').
+        signedGet(AppURLS.ip + "/MobileApi/api/MedicalRcordController/DDDocNurseNotesLoad",
+                  params: params, finished: finished)
     }
 
     func getSymptoms(with params: [String: String], finished: @escaping DataBlock) {

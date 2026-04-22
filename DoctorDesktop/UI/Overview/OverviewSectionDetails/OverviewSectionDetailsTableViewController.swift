@@ -50,6 +50,7 @@ class OverviewSectionDetailsViewController: UIViewController {
     DietaryCell.register(with: tableView)
     LabsCell.register(with: tableView)
     OperationCatheterizationEndoscopyCell.register(with: tableView)
+    NotesCell.register(with: tableView)
 
     plusButton.isHidden = true
     stkAddNote.isHidden = true

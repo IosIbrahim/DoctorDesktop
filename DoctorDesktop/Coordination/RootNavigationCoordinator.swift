@@ -204,8 +204,20 @@ class RootNavigationCoordinatorImpl: NavigationCoordinator {
       let patientSummary = arguments?["patientSummary"] as? PatientSummary,
       let patient = arguments?["patient"] as? Patient,
       let user = arguments?["user"] as? User else { return }
-      let overviewSectionDetailsViewController = registry.makeOverviewSectionDetailsViewController(overviewSection: overviewSection, patientSummary: patientSummary, user: user,pat:patient)
-      overviewSectionDetailsViewController.patient = patient
+
+    // Progress notes has its own dedicated programmatic screen (Android-matched)
+    // with composer, voice notes, priority/show-to pickers, and the
+    // DDDocNurseNotesLoad API — bypass the legacy shared table VC.
+    if overviewSection == .progressNotes {
+      let progressNotesVC = registry.makeProgressNotesViewController(with: patient, user: user)
+      rootViewController.navigationController?.pushViewController(progressNotesVC, animated: true)
+      navState = .atOverviewSectionDetails
+      _ = patientSummary // kept for signature symmetry; progress notes loads its own data
+      return
+    }
+
+    let overviewSectionDetailsViewController = registry.makeOverviewSectionDetailsViewController(overviewSection: overviewSection, patientSummary: patientSummary, user: user,pat:patient)
+    overviewSectionDetailsViewController.patient = patient
     rootViewController.navigationController?.pushViewController(overviewSectionDetailsViewController, animated: true)
     navState = .atOverviewSectionDetails
   }

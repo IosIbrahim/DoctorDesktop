@@ -19,6 +19,7 @@ protocol DependencyRegistry {
   func makeWebViewerViewController(url: URL) -> WebViewerViewController
   func makeEmergencyTriageViewController(with patient: EmergencyPatient, user: User) -> EmergencyTriageViewController
   func makeVitalSignsEntryViewController(with patient: Patient, user: User) -> VitalSignsEntryViewController
+  func makeProgressNotesViewController(with patient: Patient, user: User) -> ProgressNotesViewController
 
   typealias rootNavigationCoordinatorMaker = (UIViewController) -> NavigationCoordinator
   typealias ComponentCellMaker = (UICollectionView, IndexPath, Component, ColorAndImageTuple) -> ComponentCell
@@ -153,6 +154,7 @@ class DependencyRegistryImpl: DependencyRegistry {
     registerEmergencyTriagePresenter()
     registerVitalCellPresenter()
     registerVitalSignsEntryPresenter()
+    registerProgressNotesPresenter()
   }
   
   func registerViewControllers() {
@@ -227,6 +229,7 @@ class DependencyRegistryImpl: DependencyRegistry {
     registerWebViewerViewController()
     registerEmergencyTriageViewController()
     registerVitalSignsEntryViewController()
+    registerProgressNotesViewController()
   }
   
   //MARK: - Maker Methods
@@ -576,5 +579,28 @@ extension DependencyRegistryImpl {
 
   func makeVitalSignsEntryViewController(with patient: Patient, user: User) -> VitalSignsEntryViewController {
     return container.resolve(VitalSignsEntryViewController.self, arguments: patient, user)!
+  }
+}
+
+// MARK: - ProgressNotes (programmatic, replaces OverviewSectionDetails for progress notes)
+extension DependencyRegistryImpl {
+  func registerProgressNotesPresenter() {
+    container.register(ProgressNotesPresenter.self) { (r, patient: Patient, user: User) in
+      let modelLayer = r.resolve(ModelLayer.self)!
+      return ProgressNotesPresenterImpl(patient: patient, user: user, modelLayer: modelLayer)
+    }
+  }
+
+  func registerProgressNotesViewController() {
+    container.register(ProgressNotesViewController.self) { (r, patient: Patient, user: User) in
+      let presenter = r.resolve(ProgressNotesPresenter.self, arguments: patient, user)!
+      let vc = ProgressNotesViewController()
+      vc.configure(with: presenter, navigationCoordinator: self.navigationCoordinator)
+      return vc
+    }
+  }
+
+  func makeProgressNotesViewController(with patient: Patient, user: User) -> ProgressNotesViewController {
+    return container.resolve(ProgressNotesViewController.self, arguments: patient, user)!
   }
 }

@@ -39,6 +39,8 @@ protocol ModelLayer {
     func saveSpecialHabits(body: [String: Any], finished: @escaping (Bool, String?) -> Void)
     /// Saves the UCAF (vitals + special-needs) record.  Response: {"code":1,"message":"Save Success"}
     func saveUcaf(body: [String: Any], finished: @escaping (Bool, String?) -> Void)
+    /// Loads the progress-notes screen (list + 4 lookup arrays).
+    func loadDoctorNurseNotes(with params: [String: String], finished: @escaping (DoctorNurseNotesData) -> Void)
 
     func getSymptomCategories(with params: [String: String], finished: @escaping RegularSymptomCategoriesBlock)
     func getSymptoms(with params: [String: String], finished: @escaping SymptomsBlock)
@@ -268,6 +270,14 @@ extension ModelLayerImpl {
       let code    = json["code"]    as? Int ?? 0
       let message = json["message"] as? String
       finished(code == 1, message)
+    }
+  }
+
+  func loadDoctorNurseNotes(with params: [String: String],
+                            finished: @escaping (DoctorNurseNotesData) -> Void) {
+    networkLayer.loadDoctorNurseNotes(with: params) { data in
+      let result = self.translationLayer.getDoctorNurseNotesFromJson(data)
+      finished(result)
     }
   }
 }
