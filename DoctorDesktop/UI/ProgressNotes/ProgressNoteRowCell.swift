@@ -284,7 +284,7 @@ final class ProgressNoteRowCell: UITableViewCell {
             let attr = NSAttributedString(
                 string: bodyText,
                 attributes: [
-                    .strikethroughStyle: NSUnderlineStyle.single.rawValue,
+                    .strikethroughStyle: NSUnderlineStyle.styleSingle.rawValue,
                     .strikethroughColor: UIColor(white: 0.45, alpha: 1),
                     .foregroundColor:    UIColor(white: 0.55, alpha: 1)
                 ])
@@ -352,6 +352,6 @@ private final class PaddedLabel: UILabel {
                       height: s.height + insets.top  + insets.bottom)
     }
     override func drawText(in rect: CGRect) {
-        super.drawText(in: rect.inset(by: insets))
+        super.drawText(in: UIEdgeInsetsInsetRect(rect, insets))
     }
 }
