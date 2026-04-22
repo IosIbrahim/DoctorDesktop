@@ -353,10 +353,10 @@ final class ProgressNotesViewController: UIViewController {
         // Use presenter data. If the API hasn't responded yet, fall back to
         // hardcoded values so the picker is never empty.
         sheet.visitTypeOptions = presenter.visitTypes.isEmpty
-            ? [NurseNoteLookup(id: "1", label: "Inpatient"),
+            ? [NurseNoteLookup(id: "1", label: "Inpatient"),   // VISIT_TYPE_ROW fallback
                NurseNoteLookup(id: "2", label: "Outpatient"),
                NurseNoteLookup(id: "3", label: "Emergency")]
-            : presenter.visitTypes
+            : presenter.visitTypes   // live API data — no synthetic "All" row
 
         sheet.filterOptions = presenter.filters.isEmpty
             ? [NurseNoteLookup(id: "0",  label: "My View"),

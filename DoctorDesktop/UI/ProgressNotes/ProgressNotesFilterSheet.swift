@@ -366,14 +366,15 @@ final class ProgressNotesFilterSheet: UIViewController {
     private func currentList() -> [NurseNoteLookup] {
         switch activeDropdown {
         case .visitType:
-            // VISIT_TYPE_ROW: Inpatient / Outpatient / Emergency
-            // Server does NOT include an "All" row → prepend one (id = "").
+            // VISIT_TYPE_ROW: Inpatient / Outpatient / Emergency — use server data as-is.
+            // "Show all" is achieved via the RESET button, not an "All" row here.
             let base = visitTypeOptions
             if base.isEmpty {
-                return [NurseNoteLookup(id: "", label: "All")]
+                return [NurseNoteLookup(id: "1", label: "Inpatient"),
+                        NurseNoteLookup(id: "2", label: "Outpatient"),
+                        NurseNoteLookup(id: "3", label: "Emergency")]
             }
-            let firstIsAll = base.first.map { $0.id.isEmpty || $0.label == "All" } ?? false
-            return firstIsAll ? base : [NurseNoteLookup(id: "", label: "All")] + base
+            return base
 
         case .filter:
             // NURSE_REMARKS_FILTER_ROW already starts with "My View" (ID "0")
