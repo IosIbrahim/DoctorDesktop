@@ -30,8 +30,8 @@ struct DoctorNurseNote: Decodable {
     let descEn: String?
     let descAr: String?
     let nurseNotes: String?
-    let userOpenFlag: String?      // "D" doctor, "N" nurse
-    let priorityType: String?      // "1" Normal, "3" Urgent
+    let userOpenFlag: String?      // "D" doctor, "N" nurse, "P" pharmacy …
+    let priorityType: String?      // "1" Normal, "2" Urgent
     let typeFlag: String?
     let showDN: String?            // visibility id
     let patientId: String?
@@ -71,8 +71,9 @@ struct DoctorNurseNote: Decodable {
         case reply                 = "REPLY"
     }
 
-    /// True if the row's PRIORITY_TYPE means "Urgent" (anything except "1").
-    var isUrgent: Bool { return (priorityType ?? "1") != "1" }
+    /// True when PRIORITY_TYPE == "2" (Urgent). ID "1" = Normal, ID "2" = Urgent
+    /// (confirmed from NURSE_REMARKS_PRIORITY_ROW in the API response).
+    var isUrgent: Bool { return priorityType == "2" }
 
     /// Best text for the note body: NURSE_NOTES if present, else English description.
     var body: String {
@@ -83,43 +84,39 @@ struct DoctorNurseNote: Decodable {
 
 // MARK: - Lookup item (used by priority / visit-type / show-to / filter)
 
-/// Generic id + label pair. The server uses different JSON key names per lookup,
-/// so we decode by peeking at the raw dictionary rather than fixed CodingKeys.
+/// Generic id + label pair decoded from the server's uniform lookup format:
+///   { "ID": "1", "NAME_EN": "Inpatient", "NAME_AR": "داخلى" }
+///
+/// `label` is resolved at decode time from NAME_EN / NAME_AR based on the
+/// current device language (Arabic → NAME_AR, everything else → NAME_EN).
 struct NurseNoteLookup: Decodable {
+    /// Raw value sent back to the API (e.g. TYPE_FLAG, PRIORITY_TYPE …).
     let id: String
+    /// Display string already resolved for the current app language.
     let label: String
 
+    // Convenience init used in tests, optimistic inserts, and "All" rows.
     init(id: String, label: String) {
-        self.id = id
+        self.id    = id
         self.label = label
     }
 
-    init(from decoder: Decoder) throws {
-        // All four lookup rows use a two-key dictionary: one "ID"-ish key and
-        // one "NAME"-ish key. Walk the container and pick the best candidates.
-        let container = try decoder.container(keyedBy: DynamicKey.self)
-        var foundId: String?
-        var foundName: String?
-        for key in container.allKeys {
-            let value = (try? container.decode(String.self, forKey: key))
-                ?? (try? container.decode(Int.self, forKey: key)).map(String.init)
-                ?? ""
-            let upper = key.stringValue.uppercased()
-            if upper.contains("NAME") || upper.contains("DESC") {
-                foundName = value
-            } else if foundId == nil {
-                foundId = value
-            }
-        }
-        self.id    = foundId   ?? ""
-        self.label = foundName ?? foundId ?? ""
+    // MARK: Decodable
+
+    private enum CodingKeys: String, CodingKey {
+        case id     = "ID"
+        case nameEn = "NAME_EN"
+        case nameAr = "NAME_AR"
     }
 
-    private struct DynamicKey: CodingKey {
-        var stringValue: String
-        var intValue: Int? { return nil }
-        init?(stringValue: String) { self.stringValue = stringValue }
-        init?(intValue: Int)       { return nil }
+    init(from decoder: Decoder) throws {
+        let c      = try decoder.container(keyedBy: CodingKeys.self)
+        id         = (try? c.decode(String.self, forKey: .id)) ?? ""
+        let nameEn = (try? c.decode(String.self, forKey: .nameEn)) ?? ""
+        let nameAr = (try? c.decode(String.self, forKey: .nameAr)) ?? ""
+        // Prefer Arabic label when the device is set to Arabic.
+        let isArabic = Locale.current.languageCode == "ar"
+        label = isArabic && !nameAr.isEmpty ? nameAr : (nameEn.isEmpty ? nameAr : nameEn)
     }
 }
 

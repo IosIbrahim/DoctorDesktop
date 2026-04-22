@@ -134,8 +134,8 @@ final class ProgressNotesFilterSheet: UIViewController {
         let divider = makeDivider()
         sheetView.addSubview(divider)
 
-        // "Filter" label + dropdown (VISIT_TYPE_ROW)
-        filterLabel.text = "Filter"
+        // "Visit Type" label + dropdown (VISIT_TYPE_ROW)
+        filterLabel.text = "Visit Type"
         styleFieldLabel(filterLabel)
         filterLabel.translatesAutoresizingMaskIntoConstraints = false
         sheetView.addSubview(filterLabel)
@@ -144,8 +144,8 @@ final class ProgressNotesFilterSheet: UIViewController {
         filterDropBtn.addTarget(self, action: #selector(didTapFilterDrop), for: .touchUpInside)
         sheetView.addSubview(filterDropBtn)
 
-        // "Visit Type" label + dropdown (NURSE_REMARKS_FILTER_ROW)
-        visitLabel.text = "Visit Type"
+        // "Filter" label + dropdown (NURSE_REMARKS_FILTER_ROW)
+        visitLabel.text = "Filter"
         styleFieldLabel(visitLabel)
         visitLabel.translatesAutoresizingMaskIntoConstraints = false
         sheetView.addSubview(visitLabel)
@@ -370,23 +370,29 @@ final class ProgressNotesFilterSheet: UIViewController {
     // MARK: - Helpers
 
     private func currentList() -> [NurseNoteLookup] {
-        let base: [NurseNoteLookup]
         switch activePicker {
-        case .visitType: base = visitTypeOptions
-        case .filter:    base = filterOptions
+        case .visitType:
+            // VISIT_TYPE_ROW: { "1"=Inpatient, "2"=Outpatient, "3"=Emergency }
+            // Server does NOT include an "All" row — prepend one (id = "").
+            let base = visitTypeOptions
+            if base.isEmpty { return [NurseNoteLookup(id: "", label: "All")] }
+            let firstIsAll = base.first.map { $0.id.isEmpty || $0.label == "All" } ?? false
+            return firstIsAll ? base : [NurseNoteLookup(id: "", label: "All")] + base
+
+        case .filter:
+            // NURSE_REMARKS_FILTER_ROW already includes "My View" (ID "0") as the
+            // first row and "All" (ID "3") as the last row — use as-is.
+            let base = filterOptions
+            if base.isEmpty { return [NurseNoteLookup(id: "0", label: "My View")] }
+            return base
         }
-        // Always prepend "All" / "My View" as the first (no-filter) option.
-        let allRow = NurseNoteLookup(id: "",
-                                     label: activePicker == .visitType ? "All" : "My View")
-        if base.isEmpty { return [allRow] }
-        // Avoid duplicating if server already includes it.
-        let firstIsAll = base.first.map { $0.id.isEmpty || $0.label == "All" || $0.label == "My View" } ?? false
-        return firstIsAll ? base : [allRow] + base
     }
 
     private func refreshLabels() {
+        // filterDropBtn serves VISIT_TYPE options → fallback "All"
         filterDropBtn.setTitle(labelFor(id: selectedVisitTypeId,
                                         in: visitTypeOptions, fallback: "All"), for: .normal)
+        // visitDropBtn serves NURSE_REMARKS_FILTER options → fallback "My View"
         visitDropBtn.setTitle(labelFor(id: selectedFilterId,
                                        in: filterOptions, fallback: "My View"), for: .normal)
     }

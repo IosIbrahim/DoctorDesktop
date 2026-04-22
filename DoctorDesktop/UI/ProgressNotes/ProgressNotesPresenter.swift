@@ -81,7 +81,14 @@ final class ProgressNotesPresenterImpl: ProgressNotesPresenter {
 
     // MARK: Loaded data
 
-    private(set) var notes:      [DoctorNurseNote] = []
+    /// Full unfiltered dataset returned by the API.  Client-side filter is applied
+    /// on the fly in `notes` so no second network call is needed when the user
+    /// changes the filter selection.
+    private var allNotes: [DoctorNurseNote] = []
+
+    /// Filtered view of `allNotes` — what the table actually displays.
+    var notes: [DoctorNurseNote] { applyClientFilter(to: allNotes) }
+
     private(set) var priorities: [NurseNoteLookup] = []
     private(set) var showToList: [NurseNoteLookup] = []
     private(set) var visitTypes: [NurseNoteLookup] = []
@@ -150,16 +157,15 @@ final class ProgressNotesPresenterImpl: ProgressNotesPresenter {
     func applyFilter(visitTypeId: String, filterId: String) {
         activeVisitTypeId = visitTypeId
         activeFilterId    = filterId
-        // INIT=0 → server skips re-sending lookup arrays (returns only the notes row).
-        // If the server always returns the lookups we use INIT=1 and just filter locally;
-        // pass the IDs as extra params for servers that honour them server-side.
-        fetch(init: "0", visitTypeId: visitTypeId, filterId: filterId)
+        // Filtering is client-side: no extra network call required.
+        // `notes` is a computed property that re-applies the filter on every access.
+        DispatchQueue.main.async { self.view?.progressNotesDidReload() }
     }
 
     func resetFilter() {
         activeVisitTypeId = ""
         activeFilterId    = ""
-        fetch(init: "0", visitTypeId: "", filterId: "")
+        DispatchQueue.main.async { self.view?.progressNotesDidReload() }
     }
 
     func send() {
@@ -199,7 +205,7 @@ final class ProgressNotesPresenterImpl: ProgressNotesPresenter {
             reply: nil
         )
 
-        notes.insert(optimistic, at: 0)
+        allNotes.insert(optimistic, at: 0)
         draftText     = ""
         draftVoiceURL = nil
 
@@ -209,27 +215,81 @@ final class ProgressNotesPresenterImpl: ProgressNotesPresenter {
         }
     }
 
+    // MARK: Client-side filtering
+
+    /// Returns `source` filtered by the currently active visit-type and nurse-remarks
+    /// filter selections.  Both filters are independent and cumulative.
+    private func applyClientFilter(to source: [DoctorNurseNote]) -> [DoctorNurseNote] {
+        var result = source
+
+        // ── Visit Type (TYPE_FLAG in row == VISIT_TYPE_ROW.ID) ────────────────
+        // "" means "All" → no restriction.
+        if !activeVisitTypeId.isEmpty {
+            result = result.filter { ($0.typeFlag ?? "") == activeVisitTypeId }
+        }
+
+        // ── Nurse Remarks filter ───────────────────────────────────────────────
+        // Mapping from NURSE_REMARKS_FILTER_ROW.ID → USER_OPEN_FLAG value
+        //   "0"  My View            → USER_ID == current user (trimmed)
+        //   "1"  Doctors            → USER_OPEN_FLAG == "D"
+        //   "2"  Nursing            → USER_OPEN_FLAG == "N"
+        //   "3"  All                → no restriction
+        //   "4"  Clinical Pharmacy  → USER_OPEN_FLAG == "P"
+        //   "5"  Clin. Nutrition    → USER_OPEN_FLAG == "CN"
+        //   "6"  Infection Control  → USER_OPEN_FLAG == "I"
+        //   ""   (none/reset)       → no restriction
+        if !activeFilterId.isEmpty {
+            result = result.filter { matchesNurseRemarksFilter($0) }
+        }
+
+        return result
+    }
+
+    private func matchesNurseRemarksFilter(_ note: DoctorNurseNote) -> Bool {
+        switch activeFilterId {
+        case "", "3":          // All / no selection
+            return true
+        case "0":              // My View — notes authored by the current user
+            let noteUser    = (note.userId ?? "").trimmingCharacters(in: .whitespaces)
+            let currentUser = (user.id     ?? "").trimmingCharacters(in: .whitespaces)
+            return noteUser == currentUser
+        case "1":              // Doctors
+            return (note.userOpenFlag ?? "").uppercased() == "D"
+        case "2":              // Nursing
+            return (note.userOpenFlag ?? "").uppercased() == "N"
+        case "4":              // Clinical Pharmacy
+            return (note.userOpenFlag ?? "").uppercased() == "P"
+        case "5":              // Clinical Nutrition Specialists
+            return (note.userOpenFlag ?? "").uppercased() == "CN"
+        case "6":              // Infection Control
+            return (note.userOpenFlag ?? "").uppercased() == "I"
+        default:
+            return true
+        }
+    }
+
     // MARK: Private fetch
 
+    /// Always performs a full load (INIT=1, no server-side filter params).
+    /// Filtering is applied client-side in `applyClientFilter(to:)`.
     private func fetch(init initFlag: String,
                        visitTypeId: String,
                        filterId: String) {
-        var params: [String: String] = [
-            "BRANCH_ID":      user.branch  ?? "",
+        let params: [String: String] = [
+            "BRANCH_ID":      user.branch ?? "",
             "COMPUTER_NAME":  "iOS",
-            "INIT":           initFlag,
+            "INIT":           "1",           // always fetch full dataset
             "Lang":           "en",
             "PATIENT_ID":     patient.id,
-            "TYPE_FLAG":      filterId.isEmpty    ? "0" : filterId,
-            "USER_ID":        user.id      ?? "",
+            "TYPE_FLAG":      "0",           // 0 = no server-side filter
+            "USER_ID":        user.id     ?? "",
             "USER_OPEN_FLAG": "D",
             "VISIT_ID_ARRAY": patient.visitId
         ]
-        if !visitTypeId.isEmpty { params["VISIT_TYPE"] = visitTypeId }
 
         modelLayer.loadDoctorNurseNotes(with: params) { [weak self] result in
             guard let self = self else { return }
-            self.notes = result.notes
+            self.allNotes = result.notes
 
             // Lookup arrays are only populated on INIT=1; keep previously loaded
             // values if the server returns empty arrays for filtered requests.
