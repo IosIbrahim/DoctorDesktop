@@ -296,7 +296,8 @@ class OverviewPresenterImpl: OverviewPresenter {
                       "patientSummary": patientSummary ?? [],
                       "patient":patient,
                       "permission":permisions,
-                      "user": user]
+                      "user": user,
+                      "visitIdArray": currentVisitIds.joined(separator: ",")]
     }
     
   func getPatientSummary(filtrationType: PatientHistoryFiltrationType, finished: @escaping EmptyBlock) {

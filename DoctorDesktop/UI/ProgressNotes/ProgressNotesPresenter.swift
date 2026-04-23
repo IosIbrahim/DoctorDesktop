@@ -108,10 +108,13 @@ final class ProgressNotesPresenterImpl: ProgressNotesPresenter {
 
     // MARK: Init
 
-    init(patient: Patient, user: User, modelLayer: ModelLayer) {
-        self.patient    = patient
-        self.user       = user
-        self.modelLayer = modelLayer
+    private let visitIdArray: String   // comma-separated visit IDs, e.g. "2,1"
+
+    init(patient: Patient, user: User, modelLayer: ModelLayer, visitIdArray: String) {
+        self.patient      = patient
+        self.user         = user
+        self.modelLayer   = modelLayer
+        self.visitIdArray = visitIdArray
     }
 
     // MARK: Binding
@@ -195,7 +198,7 @@ final class ProgressNotesPresenterImpl: ProgressNotesPresenter {
             showDN: draftShowToId,
             patientId: patient.id,
             visitId: patient.visitId,
-            userId: user.id,
+            userId: user.userName ?? user.id,
             deleteUpdateUser: nil,
             deleteUpdateDateTime: nil,
             deleteUpdateFlag: nil,
@@ -256,7 +259,7 @@ final class ProgressNotesPresenterImpl: ProgressNotesPresenter {
             return true
         case "0":              // My View — notes authored by the current user
             let noteUser    = (note.userId ?? "").trimmingCharacters(in: .whitespaces)
-            let currentUser = (user.id     ?? "").trimmingCharacters(in: .whitespaces)
+            let currentUser = (user.userName ?? user.id ?? "").trimmingCharacters(in: .whitespaces)
             return noteUser == currentUser
         case "1":              // Doctors
             return (note.userOpenFlag ?? "").uppercased() == "D"
@@ -280,47 +283,34 @@ final class ProgressNotesPresenterImpl: ProgressNotesPresenter {
     private func fetch(init initFlag: String,
                        visitTypeId: String,
                        filterId: String) {
-        // TYPE_FLAG drives the server-side category filter:
-        //   "0" = My View  (only notes where USER_ID == request USER_ID) ← wrong for full load
-        //   "1" = Doctors   "2" = Nursing   "4" = Pharmacy   …
-        //   "3" = All       ← returns every note regardless of author category
-        // We always load ALL notes on the initial fetch and do filtering client-side,
-        // so TYPE_FLAG must be "3" to prevent the server from silently dropping rows.
+
+        let patientId = patient.id.trimmingCharacters(in: .whitespacesAndNewlines)
+
         let params: [String: String] = [
-            "BRANCH_ID":      user.branch ?? "",
-            "COMPUTER_NAME":  "iOS",
-            "INIT":           "1",
-            "Lang":           "en",
-            "PATIENT_ID":     patient.id,
-            "TYPE_FLAG":      "3",           // All — no server-side category filter
-            "USER_ID":        user.id     ?? "",
+            "BRANCH_ID": user.branch ?? "",
+            "COMPUTER_NAME": "ios",
+            "INIT": initFlag,
+            "Lang": "2",
+            "PATIENT_ID": patientId,
+            "TYPE_FLAG": "1",
+            "USER_ID": user.userName ?? user.id ?? "",
             "USER_OPEN_FLAG": "D",
-            "VISIT_ID_ARRAY": patient.visitId
+            "VISIT_ID_ARRAY": visitIdArray
         ]
 
         modelLayer.loadDoctorNurseNotes(with: params) { [weak self] result in
             guard let self = self else { return }
+
             self.allNotes = result.notes
 
-            // Lookup arrays are only populated on INIT=1; keep previously loaded
-            // values if the server returns empty arrays for filtered requests.
             if !result.priorities.isEmpty { self.priorities = result.priorities }
             if !result.showToList.isEmpty { self.showToList = result.showToList }
             if !result.visitTypes.isEmpty { self.visitTypes = result.visitTypes }
-            if !result.filters.isEmpty    { self.filters    = result.filters    }
+            if !result.filters.isEmpty { self.filters = result.filters }
 
-            // Default Show-to to first row (e.g. "My View") on first load.
-            if self.draftShowToId.isEmpty, let first = self.showToList.first {
-                self.draftShowToId = first.id
+            DispatchQueue.main.async {
+                self.view?.progressNotesDidReload()
             }
-            // Keep priority "1" (Normal) if no matching row found.
-            if !self.priorities.isEmpty &&
-               !self.priorities.contains(where: { $0.id == self.draftPriorityId }),
-               let first = self.priorities.first {
-                self.draftPriorityId = first.id
-            }
-
-            DispatchQueue.main.async { self.view?.progressNotesDidReload() }
         }
     }
 

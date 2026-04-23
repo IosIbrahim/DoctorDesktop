@@ -9,6 +9,7 @@
 import Foundation
 import Alamofire
 import SwiftyBeaver
+import CommonCrypto
 
 typealias DataBlock = ((Data) -> Void)
 
@@ -306,10 +307,54 @@ class NetworkLayerImpl: NetworkLayer {
     }
 
     func loadDoctorNurseNotes(with params: [String: String], finished: @escaping DataBlock) {
-        // Server requires OAuth 1.0 signing. Endpoint name intentionally preserves
-        // the server typo "MedicalRcordController" (missing 'e').
-        signedGet(AppURLS.ip + "/MobileApi/api/MedicalRcordController/DDDocNurseNotesLoad",
-                  params: params, finished: finished)
+        // OAuth params go in the URL query string (same as Android, NOT Authorization header).
+        let base = AppURLS.ip + "/MobileApi/api/MedicalRcordController/DDDocNurseNotesLoad"
+        guard let (signedURL, baseString) = NetworkLayerImpl.buildOAuthURL(base: base, params: params) else {
+            print("❌ [NurseNotes] buildOAuthURL returned nil — HMAC failed")
+            return
+        }
+
+        print("╔══════════════════════════════════════════════════════════════════════")
+        print("║ [NurseNotes] FULL REQUEST")
+        print("║ METHOD : GET")
+        print("║ URL    : \(signedURL)")
+        print("║ HEADERS: (none — OAuth is in the URL query string)")
+        print("║")
+        print("║ curl equivalent:")
+        print("║ curl -v '\(signedURL)'")
+        print("║")
+        print("║ OAuth base string:")
+        print("║ \(baseString)")
+        print("╚══════════════════════════════════════════════════════════════════════")
+
+        // Use URLRequest directly so Foundation never re-encodes the pre-signed query.
+        guard let url = URL(string: signedURL) else {
+            print("❌ [NurseNotes] URL(string:) failed — signedURL contains illegal chars: \(signedURL)")
+            return
+        }
+        var urlRequest = URLRequest(url: url)
+        urlRequest.httpMethod = "GET"
+        urlRequest.timeoutInterval = 30
+
+        let start = Date()
+        NetworkLayerImpl.session
+            .request(urlRequest)
+            .responseData { response in
+                let duration = Date().timeIntervalSince(start)
+                let code = response.response?.statusCode ?? 0
+                let rawBody = response.data.flatMap { String(data: $0, encoding: .utf8) } ?? "<no body>"
+
+                print("╔══════════════════════════════════════════════════════════════════════")
+                print("║ [NurseNotes] RESPONSE  status=\(code)  time=\(String(format: "%.2f", duration))s")
+                print("║ Body: \(rawBody.prefix(500))")
+                print("╚══════════════════════════════════════════════════════════════════════")
+
+                if let error = response.error {
+                    print("❌ [NurseNotes] Network error: \(error.localizedDescription)")
+                }
+                guard let data = response.data else { return }
+                finished(data)
+            }
     }
 
     func getSymptoms(with params: [String: String], finished: @escaping DataBlock) {
@@ -343,5 +388,87 @@ class NetworkLayerImpl: NetworkLayer {
     func getVisitsDetail(with params: [String: String], finished: @escaping DataBlock) {
         get(AppURLS.ip + "/MobileApi/api/PatientController/GetVisitsDetail",
             params: params, finished: finished)
+    }
+
+    // MARK: - OAuth URL builder (query-string style, matches Android)
+
+    /// Builds a signed URL with OAuth 1.0 HMAC-SHA1 params appended as query-string
+    /// entries — exactly how the Android app signs DDDocNurseNotesLoad.
+    /// Returns (signedURL, oauthBaseString) for logging/debugging, or nil on HMAC failure.
+    static func buildOAuthURL(base: String, params: [String: String]) -> (url: String, baseString: String)? {
+        let consumerKey    = "khaber_1"
+        let consumerSecret = "khabeerP@$$w0rd"
+
+        let timestamp = String(Int(Date().timeIntervalSince1970))
+        let nonce = UUID().uuidString.replacingOccurrences(of: "-", with: "") // matches Android signed-int range
+
+        var all = params
+        all["oauth_consumer_key"]     = consumerKey
+        all["oauth_nonce"]            = nonce
+        all["oauth_signature_method"] = "HMAC-SHA1"
+        all["oauth_timestamp"]        = timestamp
+        all["oauth_version"]          = "1.0"
+
+        // Step 1: raw params (NO encoding here)
+        let paramString = all.sorted { $0.key < $1.key }
+            .map { "\($0.key)=\($0.value)" }
+            .joined(separator: "&")
+
+        // Step 2: encode ONLY final string once
+        let baseString = "GET&\(oauthEncode(base))&\(oauthEncode(paramString))"
+        // Step 3: HMAC-SHA1 key = percent(consumerSecret) & (no token secret)
+        let signingKey = "\(oauthEncode(consumerSecret))&"
+        guard let sig = hmacSHA1(key: signingKey, message: baseString) else {
+            return nil
+        }
+        all["oauth_signature"] = sig
+
+        // Step 4: build final URL — all params (including oauth_signature) in query string
+        let query = all.sorted { $0.key < $1.key }
+            .map { "\(oauthEncode($0.key))=\(oauthEncode($0.value))" }            .joined(separator: "&")
+
+        return ("\(base)?\(query)", baseString)
+    }
+
+    /// RFC 3986 percent-encoding for OAuth 1.0 base-string construction.
+    ///
+    /// IMPORTANT: Swift's `addingPercentEncoding` silently skips re-encoding of
+    /// already-percent-encoded sequences (e.g. `%2C` is left as-is instead of
+    /// becoming `%252C`). This breaks the double-encoding required in step 3 of
+    /// the OAuth base-string algorithm (encode the already-encoded param string).
+    /// We use a manual UTF-8 byte loop so `%` (0x25) is always encoded to `%25`.
+    private static func oauthEncode(_ s: String) -> String {
+        var result = ""
+        result.reserveCapacity(s.utf8.count * 3)
+        for byte in s.utf8 {
+            switch byte {
+            case 0x41...0x5A,  // A–Z
+                 0x61...0x7A,  // a–z
+                 0x30...0x39,  // 0–9
+                 0x2D,         // -
+                 0x2E,         // .
+                 0x5F,         // _
+                 0x7E:         // ~
+                result.append(Character(UnicodeScalar(byte)))
+            default:
+                result += String(format: "%%%02X", byte)
+            }
+        }
+        return result
+    }
+
+    private static func hmacSHA1(key: String, message: String) -> String? {
+        guard let keyBytes = key.data(using: .utf8),
+              let msgBytes = message.data(using: .utf8) else { return nil }
+        var digest = [UInt8](repeating: 0, count: Int(CC_SHA1_DIGEST_LENGTH))
+        keyBytes.withUnsafeBytes { kb in
+            msgBytes.withUnsafeBytes { mb in
+                CCHmac(CCHmacAlgorithm(kCCHmacAlgSHA1),
+                       kb.baseAddress, keyBytes.count,
+                       mb.baseAddress, msgBytes.count,
+                       &digest)
+            }
+        }
+        return Data(digest).base64EncodedString()
     }
 }

@@ -19,7 +19,7 @@ protocol DependencyRegistry {
   func makeWebViewerViewController(url: URL) -> WebViewerViewController
   func makeEmergencyTriageViewController(with patient: EmergencyPatient, user: User) -> EmergencyTriageViewController
   func makeVitalSignsEntryViewController(with patient: Patient, user: User) -> VitalSignsEntryViewController
-  func makeProgressNotesViewController(with patient: Patient, user: User) -> ProgressNotesViewController
+  func makeProgressNotesViewController(with patient: Patient, user: User, visitIdArray: String) -> ProgressNotesViewController
 
   typealias rootNavigationCoordinatorMaker = (UIViewController) -> NavigationCoordinator
   typealias ComponentCellMaker = (UICollectionView, IndexPath, Component, ColorAndImageTuple) -> ComponentCell
@@ -585,22 +585,22 @@ extension DependencyRegistryImpl {
 // MARK: - ProgressNotes (programmatic, replaces OverviewSectionDetails for progress notes)
 extension DependencyRegistryImpl {
   func registerProgressNotesPresenter() {
-    container.register(ProgressNotesPresenter.self) { (r, patient: Patient, user: User) in
+    container.register(ProgressNotesPresenter.self) { (r, patient: Patient, user: User, visitIdArray: String) in
       let modelLayer = r.resolve(ModelLayer.self)!
-      return ProgressNotesPresenterImpl(patient: patient, user: user, modelLayer: modelLayer)
+      return ProgressNotesPresenterImpl(patient: patient, user: user, modelLayer: modelLayer, visitIdArray: visitIdArray)
     }
   }
 
   func registerProgressNotesViewController() {
-    container.register(ProgressNotesViewController.self) { (r, patient: Patient, user: User) in
-      let presenter = r.resolve(ProgressNotesPresenter.self, arguments: patient, user)!
+    container.register(ProgressNotesViewController.self) { (r, patient: Patient, user: User, visitIdArray: String) in
+      let presenter = r.resolve(ProgressNotesPresenter.self, arguments: patient, user, visitIdArray)!
       let vc = ProgressNotesViewController()
       vc.configure(with: presenter, navigationCoordinator: self.navigationCoordinator)
       return vc
     }
   }
 
-  func makeProgressNotesViewController(with patient: Patient, user: User) -> ProgressNotesViewController {
-    return container.resolve(ProgressNotesViewController.self, arguments: patient, user)!
+  func makeProgressNotesViewController(with patient: Patient, user: User, visitIdArray: String) -> ProgressNotesViewController {
+    return container.resolve(ProgressNotesViewController.self, arguments: patient, user, visitIdArray)!
   }
 }

@@ -200,21 +200,25 @@ class RootNavigationCoordinatorImpl: NavigationCoordinator {
   }
 
   func showOverviewSectionDetails(arguments: Dictionary<String, Any>?) {
+    // Progress notes does not need patientSummary — it loads its own data via
+    // DDDocNurseNotesLoad. Handle it before the patientSummary guard so the
+    // screen always opens even when the overview summary hasn't loaded yet.
+    if let overviewSection = arguments?["overviewSection"] as? OverviewSection,
+       overviewSection == .progressNotes,
+       let patient = arguments?["patient"] as? Patient,
+       let user    = arguments?["user"]    as? User {
+      // Use all visit IDs from the overview if available; fall back to current visit only.
+      let visitIdArray = (arguments?["visitIdArray"] as? String) ?? patient.visitId
+      let progressNotesVC = registry.makeProgressNotesViewController(with: patient, user: user, visitIdArray: visitIdArray)
+      rootViewController.navigationController?.pushViewController(progressNotesVC, animated: true)
+      navState = .atOverviewSectionDetails
+      return
+    }
+
     guard let overviewSection = arguments?["overviewSection"] as? OverviewSection,
       let patientSummary = arguments?["patientSummary"] as? PatientSummary,
       let patient = arguments?["patient"] as? Patient,
       let user = arguments?["user"] as? User else { return }
-
-    // Progress notes has its own dedicated programmatic screen (Android-matched)
-    // with composer, voice notes, priority/show-to pickers, and the
-    // DDDocNurseNotesLoad API — bypass the legacy shared table VC.
-    if overviewSection == .progressNotes {
-      let progressNotesVC = registry.makeProgressNotesViewController(with: patient, user: user)
-      rootViewController.navigationController?.pushViewController(progressNotesVC, animated: true)
-      navState = .atOverviewSectionDetails
-      _ = patientSummary // kept for signature symmetry; progress notes loads its own data
-      return
-    }
 
     let overviewSectionDetailsViewController = registry.makeOverviewSectionDetailsViewController(overviewSection: overviewSection, patientSummary: patientSummary, user: user,pat:patient)
     overviewSectionDetailsViewController.patient = patient
