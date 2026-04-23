@@ -400,7 +400,7 @@ class NetworkLayerImpl: NetworkLayer {
         let consumerSecret = "khabeerP@$$w0rd"
 
         let timestamp = String(Int(Date().timeIntervalSince1970))
-        let nonce = UUID().uuidString.replacingOccurrences(of: "-", with: "") // matches Android signed-int range
+        let nonce = String(Int32.random(in: Int32.min...Int32.max))
 
         var all = params
         all["oauth_consumer_key"]     = consumerKey
@@ -409,12 +409,14 @@ class NetworkLayerImpl: NetworkLayer {
         all["oauth_timestamp"]        = timestamp
         all["oauth_version"]          = "1.0"
 
-        // Step 1: raw params (NO encoding here)
+        // Step 1 (RFC 5849 §3.4.1.3): oauthEncode EACH key and value individually.
+        // The encoded values (e.g. "2%2C1" for "2,1") go into the paramString.
         let paramString = all.sorted { $0.key < $1.key }
-            .map { "\($0.key)=\($0.value)" }
+            .map { "\(oauthEncode($0.key))=\(oauthEncode($0.value))" }
             .joined(separator: "&")
 
-        // Step 2: encode ONLY final string once
+        // Step 2: oauthEncode the entire paramString — this double-encodes any
+        // percent signs already in it (e.g. %2C → %252C), which is required.
         let baseString = "GET&\(oauthEncode(base))&\(oauthEncode(paramString))"
         // Step 3: HMAC-SHA1 key = percent(consumerSecret) & (no token secret)
         let signingKey = "\(oauthEncode(consumerSecret))&"
