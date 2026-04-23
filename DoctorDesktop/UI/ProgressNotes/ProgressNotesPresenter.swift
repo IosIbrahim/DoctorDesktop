@@ -280,13 +280,19 @@ final class ProgressNotesPresenterImpl: ProgressNotesPresenter {
     private func fetch(init initFlag: String,
                        visitTypeId: String,
                        filterId: String) {
+        // TYPE_FLAG drives the server-side category filter:
+        //   "0" = My View  (only notes where USER_ID == request USER_ID) ← wrong for full load
+        //   "1" = Doctors   "2" = Nursing   "4" = Pharmacy   …
+        //   "3" = All       ← returns every note regardless of author category
+        // We always load ALL notes on the initial fetch and do filtering client-side,
+        // so TYPE_FLAG must be "3" to prevent the server from silently dropping rows.
         let params: [String: String] = [
             "BRANCH_ID":      user.branch ?? "",
             "COMPUTER_NAME":  "iOS",
-            "INIT":           "1",           // always fetch full dataset
+            "INIT":           "1",
             "Lang":           "en",
             "PATIENT_ID":     patient.id,
-            "TYPE_FLAG":      "0",           // 0 = no server-side filter
+            "TYPE_FLAG":      "3",           // All — no server-side category filter
             "USER_ID":        user.id     ?? "",
             "USER_OPEN_FLAG": "D",
             "VISIT_ID_ARRAY": patient.visitId
