@@ -314,19 +314,6 @@ class NetworkLayerImpl: NetworkLayer {
             return
         }
 
-        print("╔══════════════════════════════════════════════════════════════════════")
-        print("║ [NurseNotes] FULL REQUEST")
-        print("║ METHOD : GET")
-        print("║ URL    : \(signedURL)")
-        print("║ HEADERS: (none — OAuth is in the URL query string)")
-        print("║")
-        print("║ curl equivalent:")
-        print("║ curl -v '\(signedURL)'")
-        print("║")
-        print("║ OAuth base string:")
-        print("║ \(baseString)")
-        print("╚══════════════════════════════════════════════════════════════════════")
-
         // Use URLRequest directly so Foundation never re-encodes the pre-signed query.
         guard let url = URL(string: signedURL) else {
             print("❌ [NurseNotes] URL(string:) failed — signedURL contains illegal chars: \(signedURL)")
@@ -335,6 +322,31 @@ class NetworkLayerImpl: NetworkLayer {
         var urlRequest = URLRequest(url: url)
         urlRequest.httpMethod = "GET"
         urlRequest.timeoutInterval = 30
+
+        // The endpoint is [Authorize]-protected on the ASP.NET side: the OAuth 1.0
+        // signature only identifies the *client app* (khaber_1), not the logged-in
+        // user. Without a Bearer token the server returns
+        //   {"Message":"Authorization has been denied for this request."}
+        // Postman + Android succeed because they send this same token from the
+        // login flow (stored in UserDefaults under "auth_token").
+        let bearerToken = UserDefaults.standard.string(forKey: "auth_token")
+        if let token = bearerToken, !token.isEmpty {
+            urlRequest.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+
+        print("╔══════════════════════════════════════════════════════════════════════")
+        print("║ [NurseNotes] FULL REQUEST")
+        print("║ METHOD : GET")
+        print("║ URL    : \(signedURL)")
+        if let token = bearerToken, !token.isEmpty {
+            print("║ HEADERS: Authorization: Bearer \(token)")
+        } else {
+            print("║ HEADERS: (none — no auth_token in UserDefaults ⚠️)")
+        }
+        print("║")
+        print("║ OAuth base string:")
+        print("║ \(baseString)")
+        print("╚══════════════════════════════════════════════════════════════════════")
 
         let start = Date()
         NetworkLayerImpl.session
