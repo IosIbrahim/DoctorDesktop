@@ -51,6 +51,11 @@ protocol NetworkLayer {
     /// progress-notes screen (notes list + priority/visit-type/show-to/filter lookups).
     /// Endpoint name preserves the server typo "MedicalRcordController".
     func loadDoctorNurseNotes(with params: [String: String], finished: @escaping DataBlock)
+    /// POST /MobileApi/api/MedicalRcordController/DDDocNurseNotesSave — saves a
+    /// new progress note. Body is `application/x-www-form-urlencoded` with three
+    /// JSON-string fields: SI, DOCTOR_NURSE_REMARKS, DD_UC_PARMS.
+    /// Response: `{"message":"Save Success"}`.
+    func saveDoctorNurseNotes(with params: [String: String], finished: @escaping DataBlock)
     func getSymptoms(with params: [String: String], finished: @escaping DataBlock)
     func loadFlagImage(with params: [String: String], finished: @escaping DataBlock)
     func getVisitsDetail(with params: [String: String], finished: @escaping DataBlock)
@@ -369,6 +374,72 @@ class NetworkLayerImpl: NetworkLayer {
             }
     }
 
+    func saveDoctorNurseNotes(with params: [String: String], finished: @escaping DataBlock) {
+        // Same auth pattern as Load: OAuth 1.0 in URL query (signature base includes
+        // the form params per RFC 5849 §3.4.1.3) + Bearer token in the Authorization
+        // header. Form body is `application/x-www-form-urlencoded`.
+        let base = AppURLS.ip + "/MobileApi/api/MedicalRcordController/DDDocNurseNotesSave"
+        guard let (signedURL, formBody, baseString) =
+            NetworkLayerImpl.buildOAuthPOST(base: base, formParams: params) else {
+            print("❌ [NurseNotesSave] buildOAuthPOST returned nil — HMAC failed")
+            return
+        }
+
+        guard let url = URL(string: signedURL) else {
+            print("❌ [NurseNotesSave] URL(string:) failed — signedURL contains illegal chars")
+            return
+        }
+        var urlRequest = URLRequest(url: url)
+        urlRequest.httpMethod = "POST"
+        urlRequest.timeoutInterval = 30
+        urlRequest.setValue("application/x-www-form-urlencoded",
+                            forHTTPHeaderField: "Content-Type")
+
+        let bearerToken = UserDefaults.standard.string(forKey: "auth_token")
+        if let token = bearerToken, !token.isEmpty {
+            urlRequest.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+
+        urlRequest.httpBody = formBody.data(using: .utf8)
+
+        print("╔══════════════════════════════════════════════════════════════════════")
+        print("║ [NurseNotesSave] FULL REQUEST")
+        print("║ METHOD : POST")
+        print("║ URL    : \(signedURL)")
+        if let token = bearerToken, !token.isEmpty {
+            print("║ HEADERS: Authorization: Bearer \(token)")
+        } else {
+            print("║ HEADERS: (no auth_token in UserDefaults ⚠️)")
+        }
+        print("║          Content-Type: application/x-www-form-urlencoded")
+        print("║")
+        print("║ BODY: \(formBody)")
+        print("║")
+        print("║ OAuth base string:")
+        print("║ \(baseString)")
+        print("╚══════════════════════════════════════════════════════════════════════")
+
+        let start = Date()
+        NetworkLayerImpl.session
+            .request(urlRequest)
+            .responseData { response in
+                let duration = Date().timeIntervalSince(start)
+                let code = response.response?.statusCode ?? 0
+                let rawBody = response.data.flatMap { String(data: $0, encoding: .utf8) } ?? "<no body>"
+
+                print("╔══════════════════════════════════════════════════════════════════════")
+                print("║ [NurseNotesSave] RESPONSE  status=\(code)  time=\(String(format: "%.2f", duration))s")
+                print("║ Body: \(rawBody.prefix(500))")
+                print("╚══════════════════════════════════════════════════════════════════════")
+
+                if let error = response.error {
+                    print("❌ [NurseNotesSave] Network error: \(error.localizedDescription)")
+                }
+                guard let data = response.data else { return }
+                finished(data)
+            }
+    }
+
     func getSymptoms(with params: [String: String], finished: @escaping DataBlock) {
         get(AppURLS.ip + "/MobileApi/api/cot_child", params: params, finished: finished)
     }
@@ -442,6 +513,60 @@ class NetworkLayerImpl: NetworkLayer {
             .map { "\(oauthEncode($0.key))=\(oauthEncode($0.value))" }            .joined(separator: "&")
 
         return ("\(base)?\(query)", baseString)
+    }
+
+    /// Builds a signed POST request for OAuth 1.0 HMAC-SHA1.
+    ///
+    /// Per RFC 5849 §3.4.1.3, when the request body is
+    /// `application/x-www-form-urlencoded` the form parameters are included in
+    /// the signature base string alongside the oauth_* parameters. The URL only
+    /// carries the oauth_* params; the form fields stay in the request body.
+    ///
+    /// Returns (urlWithOAuth, formBody, baseString) or nil on HMAC failure.
+    static func buildOAuthPOST(base: String,
+                               formParams: [String: String])
+        -> (url: String, body: String, baseString: String)?
+    {
+        let consumerKey    = "khaber_1"
+        let consumerSecret = "khabeerP@$$w0rd"
+
+        let timestamp = String(Int(Date().timeIntervalSince1970))
+        let nonce     = String(Int32.random(in: Int32.min...Int32.max))
+
+        // OAuth-only params — these also go into the URL query string.
+        var oauthParams: [String: String] = [
+            "oauth_consumer_key":     consumerKey,
+            "oauth_nonce":            nonce,
+            "oauth_signature_method": "HMAC-SHA1",
+            "oauth_timestamp":        timestamp,
+            "oauth_version":          "1.0",
+        ]
+
+        // Signature base: oauth + form params together, encoded per RFC 5849.
+        var all = oauthParams
+        for (k, v) in formParams { all[k] = v }
+        let paramString = all.sorted { $0.key < $1.key }
+            .map { "\(oauthEncode($0.key))=\(oauthEncode($0.value))" }
+            .joined(separator: "&")
+
+        let baseString = "POST&\(oauthEncode(base))&\(oauthEncode(paramString))"
+        let signingKey = "\(oauthEncode(consumerSecret))&"
+        guard let sig = hmacSHA1(key: signingKey, message: baseString) else {
+            return nil
+        }
+        oauthParams["oauth_signature"] = sig
+
+        // URL carries only oauth_* params.
+        let query = oauthParams.sorted { $0.key < $1.key }
+            .map { "\(oauthEncode($0.key))=\(oauthEncode($0.value))" }
+            .joined(separator: "&")
+
+        // Form body — same percent-encoding as query string values.
+        let body = formParams.sorted { $0.key < $1.key }
+            .map { "\(oauthEncode($0.key))=\(oauthEncode($0.value))" }
+            .joined(separator: "&")
+
+        return ("\(base)?\(query)", body, baseString)
     }
 
     /// RFC 3986 percent-encoding for OAuth 1.0 base-string construction.

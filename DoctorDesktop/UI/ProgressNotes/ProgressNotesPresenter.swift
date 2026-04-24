@@ -172,16 +172,65 @@ final class ProgressNotesPresenterImpl: ProgressNotesPresenter {
     }
 
     func send() {
-        let body = draftText.trimmingCharacters(in: .whitespacesAndNewlines)
-        let hasVoice = (draftVoiceURL != nil)
-        guard !body.isEmpty || hasVoice else {
+        let trimmed = draftText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else {
             view?.progressNotesDidSend(success: false,
-                                       message: "Please enter a note or record a voice message.")
+                                       message: "Please enter a note.")
             return
         }
 
+        // ── Build the three JSON payloads the server expects ─────────────────
+        let branchID = Int(user.branch ?? "1") ?? 1
+        let langID   = 2
+        let si: [String: Any] = [
+            "BranchID":     branchID,
+            "ComputerName": "ios",
+            "GroupID":      user.group ?? "DR",
+            "LanguageID":   langID,
+            "UserID":       user.userName ?? user.id ?? ""
+        ]
+
+        let remark: [String: Any] = [
+            "BUFFER_STATUS": "1",
+            "PRIORITY_TYPE": Int(draftPriorityId) ?? 1,
+            "SHOW_D_N":      Int(draftShowToId)   ?? 3,
+            "VISIT_ID":      patient.visitId,
+            "DESC_EN":       trimmed
+        ]
+
+        // PROCESS_ID / TRACER_PLACE_ID are fixed IDs for the "Save Progress Note"
+        // flow on the server (matching the values used by Android + Postman).
+        let ucParms: [String: Any] = [
+            "PATIENT_ID":      patient.id,
+            "VISIT_ID":        patient.visitId,
+            "PROCESS_ID":      "994",
+            "TRACER_PLACE_ID": "9",
+            "USER_OPEN_FLAG":  "D"
+        ]
+
+        guard
+            let siData      = try? JSONSerialization.data(withJSONObject: si,      options: []),
+            let remarksData = try? JSONSerialization.data(withJSONObject: [remark], options: []),
+            let ucData      = try? JSONSerialization.data(withJSONObject: ucParms, options: []),
+            let siStr       = String(data: siData,      encoding: .utf8),
+            let remarksStr  = String(data: remarksData, encoding: .utf8),
+            let ucStr       = String(data: ucData,      encoding: .utf8)
+        else {
+            DispatchQueue.main.async {
+                self.view?.progressNotesDidSend(success: false,
+                                                message: "Could not build request payload.")
+            }
+            return
+        }
+
+        let params: [String: String] = [
+            "SI":                   siStr,
+            "DOCTOR_NURSE_REMARKS": remarksStr,
+            "DD_UC_PARMS":          ucStr
+        ]
+
+        // ── Optimistic insert so the UI feels instant ─────────────────────────
         let now = Self.nowString()
-        let voiceMarker = hasVoice ? "[Voice note] " : ""
         let optimistic = DoctorNurseNote(
             ser: "0",
             empNameEn: user.englishName ?? user.userName,
@@ -189,9 +238,9 @@ final class ProgressNotesPresenterImpl: ProgressNotesPresenter {
             specialityEn: nil,
             categoryEn: nil,
             transDate: now,
-            descEn: voiceMarker + body,
+            descEn: trimmed,
             descAr: nil,
-            nurseNotes: voiceMarker + body,
+            nurseNotes: trimmed,
             userOpenFlag: "D",
             priorityType: draftPriorityId,
             typeFlag: "0",
@@ -207,14 +256,30 @@ final class ProgressNotesPresenterImpl: ProgressNotesPresenter {
             modifyFlag: "1",
             reply: nil
         )
-
         allNotes.insert(optimistic, at: 0)
         draftText     = ""
         draftVoiceURL = nil
+        DispatchQueue.main.async { self.view?.progressNotesDidReload() }
 
-        DispatchQueue.main.async {
-            self.view?.progressNotesDidReload()
-            self.view?.progressNotesDidSend(success: true, message: "Sent")
+        // ── Fire the API call ────────────────────────────────────────────────
+        modelLayer.saveDoctorNurseNotes(with: params) { [weak self] success, message in
+            guard let self = self else { return }
+            DispatchQueue.main.async {
+                if success {
+                    self.view?.progressNotesDidSend(success: true,
+                                                    message: message ?? "Sent")
+                    // Reload from server to pull the authoritative row (replaces
+                    // the optimistic one with the server's SER / TRANS_DATE).
+                    self.load()
+                } else {
+                    // Roll back the optimistic insert on failure.
+                    if !self.allNotes.isEmpty { self.allNotes.removeFirst() }
+                    self.view?.progressNotesDidReload()
+                    self.view?.progressNotesDidSend(
+                        success: false,
+                        message: message ?? "Could not save the note. Please try again.")
+                }
+            }
         }
     }
 

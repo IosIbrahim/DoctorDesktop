@@ -158,6 +158,7 @@
 		AABBCC020000000000000004 /* VoiceNoteRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCC020000000000000104 /* VoiceNoteRecorder.swift */; };
 		AABBCC020000000000000005 /* DoctorNurseNotesData.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCC020000000000000105 /* DoctorNurseNotesData.swift */; };
 		AABBCC020000000000000006 /* ProgressNotesFilterSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCC020000000000000106 /* ProgressNotesFilterSheet.swift */; };
+		AABBCC020000000000000007 /* SpeechDictation.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCC020000000000000107 /* SpeechDictation.swift */; };
 		366D863D2087E97A008B16BF /* PediatricsScorePopUpView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 366D861E2087E97A008B16BF /* PediatricsScorePopUpView.xib */; };
 		366D863E2087E97A008B16BF /* PediatricsScorePopUp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 366D861F2087E97A008B16BF /* PediatricsScorePopUp.swift */; };
 		366D863F2087E97A008B16BF /* PediatricsScorePopUpPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 366D86202087E97A008B16BF /* PediatricsScorePopUpPresenter.swift */; };
@@ -402,6 +403,7 @@
 		AABBCC020000000000000104 /* VoiceNoteRecorder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VoiceNoteRecorder.swift; sourceTree = "<group>"; };
 		AABBCC020000000000000105 /* DoctorNurseNotesData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DoctorNurseNotesData.swift; sourceTree = "<group>"; };
 		AABBCC020000000000000106 /* ProgressNotesFilterSheet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProgressNotesFilterSheet.swift; sourceTree = "<group>"; };
+		AABBCC020000000000000107 /* SpeechDictation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpeechDictation.swift; sourceTree = "<group>"; };
 		AABBCC010000000000000007 /* UCAFLoadData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UCAFLoadData.swift; sourceTree = "<group>"; };
 		AABBCC010000000000000009 /* SpecialHabitsData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpecialHabitsData.swift; sourceTree = "<group>"; };
 		366D861E2087E97A008B16BF /* PediatricsScorePopUpView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PediatricsScorePopUpView.xib; sourceTree = "<group>"; };
@@ -1052,6 +1054,7 @@
 				AABBCC020000000000000103 /* ProgressNoteRowCell.swift */,
 				AABBCC020000000000000104 /* VoiceNoteRecorder.swift */,
 				AABBCC020000000000000106 /* ProgressNotesFilterSheet.swift */,
+				AABBCC020000000000000107 /* SpeechDictation.swift */,
 			);
 			path = ProgressNotes;
 			sourceTree = "<group>";
@@ -1744,6 +1747,7 @@
 				AABBCC020000000000000004 /* VoiceNoteRecorder.swift in Sources */,
 				AABBCC020000000000000005 /* DoctorNurseNotesData.swift in Sources */,
 				AABBCC020000000000000006 /* ProgressNotesFilterSheet.swift in Sources */,
+				AABBCC020000000000000007 /* SpeechDictation.swift in Sources */,
 				366D863E2087E97A008B16BF /* PediatricsScorePopUp.swift in Sources */,
 				36A33C1A1FE31FE6007A9E55 /* UnitsPopup.swift in Sources */,
 				36883F1220710A5500A53AE7 /* WebViewerPresenter.swift in Sources */,

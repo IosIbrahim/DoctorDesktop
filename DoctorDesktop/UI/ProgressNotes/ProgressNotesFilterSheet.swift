@@ -171,16 +171,18 @@ final class ProgressNotesFilterSheet: UIViewController {
                                 for: .touchUpInside)
         sheetView.addSubview(filterDropBtn)
 
-        // FILTER button
-        styleActionButton(applyBtn, title: "FILTER",
-                          bg: UIColor(red: 0.18, green: 0.56, blue: 0.94, alpha: 1))
+        // Apply button — teal (brand) filled.
+        styleActionButton(applyBtn, title: "Apply Filter",
+                          bg: UIColor(red: 0.22, green: 0.72, blue: 0.62, alpha: 1),
+                          filled: true)
         applyBtn.translatesAutoresizingMaskIntoConstraints = false
         applyBtn.addTarget(self, action: #selector(didTapApply), for: .touchUpInside)
         sheetView.addSubview(applyBtn)
 
-        // RESET button
-        styleActionButton(resetBtn, title: "RESET",
-                          bg: UIColor(red: 0.88, green: 0.26, blue: 0.30, alpha: 1))
+        // Reset button — outlined (less visual weight than the primary action).
+        styleActionButton(resetBtn, title: "Reset",
+                          bg: UIColor(red: 0.88, green: 0.26, blue: 0.30, alpha: 1),
+                          filled: false)
         resetBtn.translatesAutoresizingMaskIntoConstraints = false
         resetBtn.addTarget(self, action: #selector(didTapReset), for: .touchUpInside)
         sheetView.addSubview(resetBtn)
@@ -203,7 +205,7 @@ final class ProgressNotesFilterSheet: UIViewController {
         optionDoneBtn.setTitle("Done", for: .normal)
         optionDoneBtn.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
         optionDoneBtn.setTitleColor(
-            UIColor(red: 0.18, green: 0.56, blue: 0.94, alpha: 1), for: .normal)
+            UIColor(red: 0.22, green: 0.72, blue: 0.62, alpha: 1), for: .normal)
         optionDoneBtn.translatesAutoresizingMaskIntoConstraints = false
         optionDoneBtn.addTarget(self, action: #selector(didTapOptionDone), for: .touchUpInside)
         optionDoneBar.addSubview(optionDoneBtn)
@@ -446,12 +448,25 @@ final class ProgressNotesFilterSheet: UIViewController {
         return v
     }
 
-    private func styleActionButton(_ btn: UIButton, title: String, bg: UIColor) {
-        btn.backgroundColor = bg
+    /// Filled = primary action (white text on colored bg + shadow).
+    /// Outlined = secondary action (colored text + matching border, transparent bg).
+    private func styleActionButton(_ btn: UIButton, title: String, bg: UIColor, filled: Bool) {
         btn.setTitle(title, for: .normal)
-        btn.setTitleColor(.white, for: .normal)
-        btn.titleLabel?.font = UIFont.systemFont(ofSize: 15, weight: .bold)
-        btn.layer.cornerRadius = 8
+        btn.titleLabel?.font = UIFont.systemFont(ofSize: 15, weight: .semibold)
+        btn.layer.cornerRadius = 12
+        if filled {
+            btn.backgroundColor = bg
+            btn.setTitleColor(.white, for: .normal)
+            btn.layer.shadowColor   = bg.cgColor
+            btn.layer.shadowOpacity = 0.28
+            btn.layer.shadowRadius  = 6
+            btn.layer.shadowOffset  = CGSize(width: 0, height: 2)
+        } else {
+            btn.backgroundColor   = .clear
+            btn.setTitleColor(bg, for: .normal)
+            btn.layer.borderColor = bg.withAlphaComponent(0.35).cgColor
+            btn.layer.borderWidth = 1
+        }
     }
 }
 
@@ -474,10 +489,12 @@ extension ProgressNotesFilterSheet: UITableViewDataSource, UITableViewDelegate {
 
         cell.textLabel?.text = item.label
         cell.textLabel?.font = UIFont.systemFont(ofSize: 15, weight: .regular)
+        cell.textLabel?.textColor = UIColor(white: 0.15, alpha: 1)
 
         let selId = activeDropdown == .visitType ? selectedVisitTypeId : selectedFilterId
         cell.accessoryType = (item.id == selId) ? .checkmark : .none
-        cell.tintColor = UIColor(red: 0.18, green: 0.56, blue: 0.94, alpha: 1)
+        // Teal checkmark to match the app's primary accent.
+        cell.tintColor = UIColor(red: 0.22, green: 0.72, blue: 0.62, alpha: 1)
         return cell
     }
 
@@ -517,27 +534,39 @@ private final class DropdownButton: UIButton {
 
     private func setup() {
         contentHorizontalAlignment = .left
-        contentEdgeInsets = UIEdgeInsets(top: 0, left: 14, bottom: 0, right: 44)
-        titleLabel?.font = UIFont.systemFont(ofSize: 15, weight: .regular)
-        setTitleColor(UIColor(white: 0.20, alpha: 1), for: .normal)
-        backgroundColor = UIColor(white: 0.97, alpha: 1)
-        layer.borderColor = UIColor(white: 0.80, alpha: 1).cgColor
+        contentEdgeInsets = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 44)
+        titleLabel?.font = UIFont.systemFont(ofSize: 15, weight: .medium)
+        setTitleColor(UIColor(white: 0.18, alpha: 1), for: .normal)
+        backgroundColor = UIColor(white: 0.98, alpha: 1)
+        layer.borderColor = UIColor(white: 0.88, alpha: 1).cgColor
         layer.borderWidth = 1.0
-        layer.cornerRadius = 8
+        layer.cornerRadius = 12
 
         if #available(iOS 13, *) {
-            let img = UIImage(systemName: "chevron.down")
+            let cfg = UIImage.SymbolConfiguration(pointSize: 13, weight: .semibold)
+            let img = UIImage(systemName: "chevron.down", withConfiguration: cfg)
             let iv  = UIImageView(image: img)
-            iv.tintColor = UIColor(white: 0.45, alpha: 1)
+            iv.tintColor = UIColor(red: 0.22, green: 0.72, blue: 0.62, alpha: 1)
             iv.contentMode = .scaleAspectFit
             iv.translatesAutoresizingMaskIntoConstraints = false
             addSubview(iv)
             NSLayoutConstraint.activate([
-                iv.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -14),
+                iv.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
                 iv.centerYAnchor.constraint(equalTo: centerYAnchor),
-                iv.widthAnchor.constraint(equalToConstant: 16),
-                iv.heightAnchor.constraint(equalToConstant: 16),
+                iv.widthAnchor.constraint(equalToConstant: 14),
+                iv.heightAnchor.constraint(equalToConstant: 14),
             ])
+        }
+    }
+
+    /// Highlight state — darker bg + teal border when the user is tapping.
+    override var isHighlighted: Bool {
+        didSet {
+            UIView.animate(withDuration: 0.12) {
+                self.backgroundColor = self.isHighlighted
+                    ? UIColor(white: 0.94, alpha: 1)
+                    : UIColor(white: 0.98, alpha: 1)
+            }
         }
     }
 }

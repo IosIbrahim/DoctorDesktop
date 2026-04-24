@@ -41,6 +41,9 @@ protocol ModelLayer {
     func saveUcaf(body: [String: Any], finished: @escaping (Bool, String?) -> Void)
     /// Loads the progress-notes screen (list + 4 lookup arrays).
     func loadDoctorNurseNotes(with params: [String: String], finished: @escaping (DoctorNurseNotesData) -> Void)
+    /// Saves a new progress note. Response: `{"message":"Save Success"}`.
+    /// Returns (success, serverMessage) via the completion.
+    func saveDoctorNurseNotes(with params: [String: String], finished: @escaping (Bool, String?) -> Void)
 
     func getSymptomCategories(with params: [String: String], finished: @escaping RegularSymptomCategoriesBlock)
     func getSymptoms(with params: [String: String], finished: @escaping SymptomsBlock)
@@ -278,6 +281,19 @@ extension ModelLayerImpl {
     networkLayer.loadDoctorNurseNotes(with: params) { data in
       let result = self.translationLayer.getDoctorNurseNotesFromJson(data)
       finished(result)
+    }
+  }
+
+  func saveDoctorNurseNotes(with params: [String: String],
+                            finished: @escaping (Bool, String?) -> Void) {
+    networkLayer.saveDoctorNurseNotes(with: params) { data in
+      // Server returns `{"message":"Save Success"}` on success, other message on failure.
+      guard let json = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any] else {
+        finished(false, nil); return
+      }
+      let message = json["message"] as? String
+      let success = (message ?? "").lowercased().contains("success")
+      finished(success, message)
     }
   }
 }

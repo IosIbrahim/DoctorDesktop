@@ -50,15 +50,25 @@ final class ProgressNotesViewController: UIViewController {
 
     // MARK: - State
 
-    private let recorder = VoiceNoteRecorder()
+    /// Live speech → text dictation driven by the mic button.
+    private let dictation = SpeechDictation()
+    /// Text that was already in the field before dictation started — partial
+    /// transcripts are appended to this snapshot, so the user never loses text
+    /// they typed manually.
+    private var preDictationText: String = ""
     private var composerBottomConstraint: NSLayoutConstraint!
 
     // MARK: - Colours
 
-    private let teal     = UIColor(red: 0.22, green: 0.72, blue: 0.62, alpha: 1)
-    private let pillBG   = UIColor(red: 0.94, green: 0.97, blue: 0.96, alpha: 1)
-    private let urgent   = UIColor(red: 0.88, green: 0.26, blue: 0.30, alpha: 1)
-    private let bgColor  = UIColor(red: 0.96, green: 0.97, blue: 0.98, alpha: 1)
+    private let teal       = UIColor(red: 0.22, green: 0.72, blue: 0.62, alpha: 1)
+    private let pillBG     = UIColor(red: 0.94, green: 0.97, blue: 0.96, alpha: 1)
+    private let pillBorder = UIColor(red: 0.86, green: 0.91, blue: 0.90, alpha: 1)
+    private let urgent     = UIColor(red: 0.88, green: 0.26, blue: 0.30, alpha: 1)
+    private let bgColor    = UIColor(red: 0.96, green: 0.97, blue: 0.98, alpha: 1)
+    private let chipText   = UIColor(red: 0.22, green: 0.26, blue: 0.32, alpha: 1)
+
+    /// Small red dot that appears on the filter pill when a filter is active.
+    private let filterActiveDot = UIView()
 
     // MARK: - Configure
 
@@ -74,7 +84,7 @@ final class ProgressNotesViewController: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = bgColor
         title = "Progress Notes"
-        recorder.delegate = self
+        dictation.delegate = self
         buildUI()
         registerKeyboardObservers()
         presenter.attach(view: self)
@@ -86,7 +96,7 @@ final class ProgressNotesViewController: UIViewController {
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         if isMovingFromParentViewController {
-            recorder.discardRecording()
+            dictation.cancel()
             navigationCoordinator?.movingBack()
         }
     }
@@ -125,10 +135,19 @@ final class ProgressNotesViewController: UIViewController {
         titleLabel.text = "Progress Notes"
         view.addSubview(titleLabel)
 
-        styleChipButton(filterPill, title: "All", systemIcon: "line.horizontal.3.decrease")
+        styleChipButton(filterPill, title: "Filter", systemIcon: "line.horizontal.3.decrease")
         filterPill.translatesAutoresizingMaskIntoConstraints = false
         filterPill.addTarget(self, action: #selector(didTapFilter), for: .touchUpInside)
         view.addSubview(filterPill)
+
+        // Active-filter dot (small red circle pinned to the pill's top-right)
+        filterActiveDot.backgroundColor = urgent
+        filterActiveDot.layer.cornerRadius = 4
+        filterActiveDot.layer.borderColor  = UIColor.white.cgColor
+        filterActiveDot.layer.borderWidth  = 1.5
+        filterActiveDot.translatesAutoresizingMaskIntoConstraints = false
+        filterActiveDot.isHidden = true
+        view.addSubview(filterActiveDot)
 
         // Table
         tableView.translatesAutoresizingMaskIntoConstraints = false
@@ -181,7 +200,7 @@ final class ProgressNotesViewController: UIViewController {
         micButton.addTarget(self, action: #selector(didTapMic), for: .touchUpInside)
         composerBar.addSubview(micButton)
 
-        styleChipButton(showToButton, title: "Show to: All", systemIcon: "eye")
+        styleChipButton(showToButton, title: "All", systemIcon: "eye")
         showToButton.translatesAutoresizingMaskIntoConstraints = false
         showToButton.addTarget(self, action: #selector(didTapShowTo), for: .touchUpInside)
         composerBar.addSubview(showToButton)
@@ -192,12 +211,21 @@ final class ProgressNotesViewController: UIViewController {
         composerBar.addSubview(priorityButton)
 
         sendButton.translatesAutoresizingMaskIntoConstraints = false
-        sendButton.setTitle("Send", for: .normal)
+        sendButton.setTitle("  Send", for: .normal)
         sendButton.setTitleColor(.white, for: .normal)
         sendButton.titleLabel?.font = UIFont.systemFont(ofSize: 14, weight: .semibold)
         sendButton.backgroundColor = teal
         sendButton.layer.cornerRadius = 18
-        sendButton.contentEdgeInsets = UIEdgeInsets(top: 8, left: 16, bottom: 8, right: 16)
+        sendButton.contentEdgeInsets = UIEdgeInsets(top: 8, left: 14, bottom: 8, right: 18)
+        sendButton.layer.shadowColor   = teal.cgColor
+        sendButton.layer.shadowOpacity = 0.28
+        sendButton.layer.shadowRadius  = 6
+        sendButton.layer.shadowOffset  = CGSize(width: 0, height: 2)
+        if #available(iOS 13, *) {
+            sendButton.setImage(UIImage(systemName: "paperplane.fill"), for: .normal)
+            sendButton.tintColor = .white
+            sendButton.imageEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 2)
+        }
         sendButton.addTarget(self, action: #selector(didTapSend), for: .touchUpInside)
         composerBar.addSubview(sendButton)
 
@@ -231,7 +259,12 @@ final class ProgressNotesViewController: UIViewController {
 
             filterPill.centerYAnchor.constraint(equalTo: titleLabel.centerYAnchor),
             filterPill.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -12),
-            filterPill.heightAnchor.constraint(equalToConstant: 30),
+            filterPill.heightAnchor.constraint(equalToConstant: 32),
+
+            filterActiveDot.widthAnchor.constraint(equalToConstant: 10),
+            filterActiveDot.heightAnchor.constraint(equalToConstant: 10),
+            filterActiveDot.trailingAnchor.constraint(equalTo: filterPill.trailingAnchor, constant: 2),
+            filterActiveDot.topAnchor.constraint(equalTo: filterPill.topAnchor, constant: -2),
 
             // Table
             tableView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 8),
@@ -277,13 +310,16 @@ final class ProgressNotesViewController: UIViewController {
 
     private func styleChipButton(_ btn: UIButton, title: String, systemIcon: String) {
         btn.backgroundColor = pillBG
-        btn.setTitleColor(UIColor(white: 0.25, alpha: 1), for: .normal)
-        btn.titleLabel?.font = UIFont.systemFont(ofSize: 12, weight: .medium)
-        btn.layer.cornerRadius = 15
-        btn.contentEdgeInsets = UIEdgeInsets(top: 0, left: 12, bottom: 0, right: 12)
+        btn.setTitleColor(chipText, for: .normal)
+        btn.titleLabel?.font = UIFont.systemFont(ofSize: 13, weight: .semibold)
+        btn.layer.cornerRadius = 16
+        btn.layer.borderWidth  = 1
+        btn.layer.borderColor  = pillBorder.cgColor
+        btn.contentEdgeInsets = UIEdgeInsets(top: 0, left: 14, bottom: 0, right: 14)
         btn.setTitle(title, for: .normal)
         if #available(iOS 13, *) {
-            btn.setImage(UIImage(systemName: systemIcon), for: .normal)
+            let cfg = UIImage.SymbolConfiguration(pointSize: 12, weight: .semibold)
+            btn.setImage(UIImage(systemName: systemIcon, withConfiguration: cfg), for: .normal)
             btn.tintColor = teal
             btn.imageEdgeInsets = UIEdgeInsets(top: 0, left: -4, bottom: 0, right: 4)
             btn.titleEdgeInsets = UIEdgeInsets(top: 0, left: 2, bottom: 0, right: 0)
@@ -292,11 +328,14 @@ final class ProgressNotesViewController: UIViewController {
 
     private func styleIconButton(_ btn: UIButton, systemIcon: String, tint: UIColor) {
         if #available(iOS 13, *) {
-            btn.setImage(UIImage(systemName: systemIcon), for: .normal)
+            let cfg = UIImage.SymbolConfiguration(pointSize: 16, weight: .semibold)
+            btn.setImage(UIImage(systemName: systemIcon, withConfiguration: cfg), for: .normal)
         }
         btn.tintColor = tint
         btn.backgroundColor = pillBG
         btn.layer.cornerRadius = 18
+        btn.layer.borderWidth  = 1
+        btn.layer.borderColor  = pillBorder.cgColor
     }
 
     // MARK: - Rendering
@@ -312,30 +351,43 @@ final class ProgressNotesViewController: UIViewController {
     }
 
     private func updateComposerChips() {
-        // Show-to chip (NURSE_REMARKS_SHOW_D_N_ROW)
-        showToButton.setTitle("Show to: \(presenter.draftShowToLabel)", for: .normal)
+        // Show-to chip — title is just the value (icon conveys the "show to" meaning).
+        showToButton.setTitle(presenter.draftShowToLabel, for: .normal)
 
-        // Priority chip (NURSE_REMARKS_PRIORITY_ROW)
+        // Priority chip — red theme when urgent, teal otherwise.
         priorityButton.setTitle(presenter.draftPriorityLabel, for: .normal)
         let isUrgent = presenter.isUrgentPriority
-        priorityButton.backgroundColor = isUrgent ? urgent.withAlphaComponent(0.12) : pillBG
-        priorityButton.setTitleColor(isUrgent ? urgent : UIColor(white: 0.25, alpha: 1), for: .normal)
+        priorityButton.backgroundColor     = isUrgent ? urgent.withAlphaComponent(0.10) : pillBG
+        priorityButton.layer.borderColor   = (isUrgent ? urgent.withAlphaComponent(0.35)
+                                                       : pillBorder).cgColor
+        priorityButton.setTitleColor(isUrgent ? urgent : chipText, for: .normal)
         priorityButton.tintColor = isUrgent ? urgent : teal
     }
 
-    /// Updates the filter pill to show the current active filter state.
+    /// Updates the filter pill to reflect the active filter state.
+    /// - Idle   → "Filter" in neutral gray, no dot.
+    /// - Active → label shows the active selection, pill tinted teal, red dot visible.
     private func updateFilterPill() {
         let vt = presenter.activeVisitTypeLabel
         let f  = presenter.activeFilterLabel
         let hasFilter = (presenter.activeVisitTypeId != "" || presenter.activeFilterId != "")
         if hasFilter {
-            filterPill.setTitle("\(vt) • \(f)", for: .normal)
-            filterPill.backgroundColor = teal.withAlphaComponent(0.12)
+            // Only include non-"All" labels in the title to keep it short.
+            let parts = [vt, f].filter { $0 != "All" && $0 != "My View" }
+            let title = parts.isEmpty ? "Filtered" : parts.joined(separator: " • ")
+            filterPill.setTitle(title, for: .normal)
+            filterPill.backgroundColor     = teal.withAlphaComponent(0.12)
+            filterPill.layer.borderColor   = teal.withAlphaComponent(0.35).cgColor
             filterPill.setTitleColor(teal, for: .normal)
+            filterPill.tintColor = teal
+            filterActiveDot.isHidden = false
         } else {
             filterPill.setTitle("Filter", for: .normal)
-            filterPill.backgroundColor = pillBG
-            filterPill.setTitleColor(UIColor(white: 0.25, alpha: 1), for: .normal)
+            filterPill.backgroundColor     = pillBG
+            filterPill.layer.borderColor   = pillBorder.cgColor
+            filterPill.setTitleColor(chipText, for: .normal)
+            filterPill.tintColor = teal
+            filterActiveDot.isHidden = true
         }
     }
 
@@ -435,47 +487,60 @@ final class ProgressNotesViewController: UIViewController {
         presenter.send()
     }
 
+    /// Mic button toggles live speech-to-text dictation. When active, the user
+    /// speaks and the transcription is streamed into the text field.
     @objc private func didTapMic() {
-        if recorder.isRecording {
-            _ = recorder.stopRecording()
-            recordingLabel.isHidden = false
-            recordingLabel.text = "● Voice note ready"
-            presenter.draftVoiceURL = recorder.recordedURL
-            if #available(iOS 13, *) {
-                micButton.setImage(UIImage(systemName: "play.circle.fill"), for: .normal)
-            }
+        if dictation.isRunning {
+            stopDictation()
             return
         }
-        if recorder.isPlaying {
-            recorder.stopPlayback()
-            if #available(iOS 13, *) {
-                micButton.setImage(UIImage(systemName: "play.circle.fill"), for: .normal)
-            }
-            return
-        }
-        if recorder.recordedURL != nil {
-            // Play back the recorded note.
-            _ = recorder.startPlayback()
-            if #available(iOS 13, *) {
-                micButton.setImage(UIImage(systemName: "stop.circle.fill"), for: .normal)
-            }
-            return
-        }
-        requestMicPermission { [weak self] granted in
-            guard let self = self, granted else {
-                self?.presentAlert("Microphone access is required to record voice notes.")
+        // Ensure we don't clobber text the user already typed.
+        preDictationText = textField.text ?? ""
+        dictation.requestAuthorization { [weak self] granted in
+            guard let self = self else { return }
+            guard granted else {
+                self.presentAlert("Microphone and Speech Recognition access are required to dictate notes. Enable them in Settings.")
                 return
             }
-            if self.recorder.startRecording() {
-                self.recordingLabel.isHidden = false
-                self.recordingLabel.text = "● Recording…"
-                if #available(iOS 13, *) {
-                    self.micButton.setImage(UIImage(systemName: "stop.fill"), for: .normal)
-                }
+            self.dictation.start()
+            if self.dictation.isRunning {
+                self.showDictationRunningState()
             } else {
-                self.presentAlert("Could not start recording.")
+                self.presentAlert("Could not start speech recognition.")
             }
         }
+    }
+
+    /// Stops the active dictation session. The recognizer may still emit a
+    /// final delegate callback shortly after, which we handle gracefully.
+    private func stopDictation() {
+        dictation.stop()
+        showDictationIdleState()
+    }
+
+    private func showDictationRunningState() {
+        recordingLabel.isHidden = false
+        recordingLabel.text     = "● Listening…"
+        if #available(iOS 13, *) {
+            let cfg = UIImage.SymbolConfiguration(pointSize: 16, weight: .semibold)
+            micButton.setImage(UIImage(systemName: "stop.fill", withConfiguration: cfg),
+                               for: .normal)
+            micButton.tintColor = urgent
+            micButton.layer.borderColor = urgent.withAlphaComponent(0.35).cgColor
+        }
+    }
+
+    private func showDictationIdleState() {
+        recordingLabel.isHidden = true
+        recordingLabel.text     = ""
+        if #available(iOS 13, *) {
+            let cfg = UIImage.SymbolConfiguration(pointSize: 16, weight: .semibold)
+            micButton.setImage(UIImage(systemName: "mic.fill", withConfiguration: cfg),
+                               for: .normal)
+            micButton.tintColor = teal
+            micButton.layer.borderColor = pillBorder.cgColor
+        }
+        micButton.transform = .identity
     }
 
     // MARK: - Helpers
@@ -484,23 +549,6 @@ final class ProgressNotesViewController: UIViewController {
         let ac = UIAlertController(title: nil, message: msg, preferredStyle: .alert)
         ac.addAction(UIAlertAction(title: "OK", style: .default))
         present(ac, animated: true)
-    }
-
-    private func requestMicPermission(_ completion: @escaping (Bool) -> Void) {
-        // Older SDKs expose `recordPermission()` as a method returning
-        // `AVAudioSessionRecordPermission`. The compile-time constants are
-        // `AVAudioSessionRecordPermission.granted`, `.denied`, `.undetermined`.
-        let session = AVAudioSession.sharedInstance()
-        let status: AVAudioSessionRecordPermission = session.recordPermission()
-        switch status {
-        case AVAudioSessionRecordPermission.granted: completion(true)
-        case AVAudioSessionRecordPermission.denied:  completion(false)
-        case AVAudioSessionRecordPermission.undetermined:
-            session.requestRecordPermission { granted in
-                DispatchQueue.main.async { completion(granted) }
-            }
-        default: completion(false)
-        }
     }
 
     // MARK: - Keyboard
@@ -547,18 +595,20 @@ extension ProgressNotesViewController: UITableViewDataSource, UITableViewDelegat
 
 extension ProgressNotesViewController: ProgressNotesView {
     func progressNotesDidReload() {
-        emptyLabel.isHidden = !presenter.notes.isEmpty
+        let count = presenter.notes.count
+        print("[ProgressNotes] VC progressNotesDidReload → \(count) notes → reloading tableView")
+        emptyLabel.isHidden = (count > 0)
         tableView.reloadData()
         updateComposerChips()
         updateFilterPill()
     }
 
     func progressNotesDidSend(success: Bool, message: String?) {
-        textField.text = ""
-        recordingLabel.isHidden = true
-        recordingLabel.text = ""
-        if #available(iOS 13, *) {
-            micButton.setImage(UIImage(systemName: "mic.fill"), for: .normal)
+        if success {
+            textField.text = ""
+            preDictationText = ""
+            dictation.cancel()
+            showDictationIdleState()
         }
         if let msg = message, !success { presentAlert(msg) }
     }
@@ -588,46 +638,72 @@ extension ProgressNotesViewController: UITextFieldDelegate {
     }
 }
 
-// MARK: - VoiceNoteRecorderDelegate
+// MARK: - SpeechDictationDelegate
 
-extension ProgressNotesViewController: VoiceNoteRecorderDelegate {
-    func voiceNoteRecorder(_ recorder: VoiceNoteRecorder, didUpdateLevel level: Float) {
-        // Cheap "pulse" effect on the mic button while recording.
-        let scale: CGFloat = 1.0 + CGFloat(level) * 0.15
-        UIView.animate(withDuration: 0.08) {
-            self.micButton.transform = CGAffineTransform(scaleX: scale, y: scale)
+extension ProgressNotesViewController: SpeechDictationDelegate {
+
+    /// Live partial / final transcription — splice into the text field after
+    /// whatever the user had typed before starting dictation.
+    func speechDictation(_ dictation: SpeechDictation,
+                         didUpdateTranscription text: String,
+                         isFinal: Bool) {
+        // If pre-existing text ends with non-space, add a separator.
+        let joiner: String
+        if preDictationText.isEmpty {
+            joiner = ""
+        } else if preDictationText.hasSuffix(" ") || preDictationText.hasSuffix("\n") {
+            joiner = ""
+        } else {
+            joiner = " "
+        }
+        let merged = preDictationText + joiner + text
+        textField.text = merged
+        presenter.draftText = merged
+
+        if isFinal {
+            // The recognizer signalled end-of-utterance; reset UI to idle.
+            showDictationIdleState()
+            // Commit the recognized text to the baseline so further dictation
+            // sessions append to it (don't overwrite).
+            preDictationText = merged
         }
     }
-    func voiceNoteRecorderDidFinishPlaying(_ recorder: VoiceNoteRecorder) {
-        if #available(iOS 13, *) {
-            micButton.setImage(UIImage(systemName: "play.circle.fill"), for: .normal)
-        }
+
+    func speechDictation(_ dictation: SpeechDictation, didFailWith message: String) {
+        showDictationIdleState()
+        presentAlert("Speech recognition failed: \(message)")
     }
 }
 
 // MARK: - SimpleLookupPickerSheet
 //
-// Reusable bottom-of-screen picker. Used for Show-to and Priority so that
-// all options are always visible via UIPickerView — no UIAlertController
-// chain issues, no single-item popover bugs.
+// Reusable bottom-of-screen picker. Used for Show-to and Priority.
+//
+// Implementation: checkmark-list UITableView (not UIPickerView wheel) — this
+// matches the ProgressNotesFilterSheet option panel and reads as more modern
+// than a spinning drum. Tap a row → commits the selection and dismisses.
 
 final class SimpleLookupPickerSheet: UIViewController,
-                                     UIPickerViewDataSource,
-                                     UIPickerViewDelegate {
+                                     UITableViewDataSource,
+                                     UITableViewDelegate {
 
     var pickerTitle: String = ""
     var items:       [NurseNoteLookup] = []
     var selectedId:  String = ""
     var onPick:      ((NurseNoteLookup) -> Void)?
 
-    private let dimView     = UIView()
-    private let panel       = UIView()
-    private let titleLbl    = UILabel()
-    private let doneBtn     = UIButton(type: .system)
-    private let cancelBtn   = UIButton(type: .system)
-    private let picker      = UIPickerView()
+    private let dimView   = UIView()
+    private let panel     = UIView()
+    private let grabber   = UIView()
+    private let titleLbl  = UILabel()
+    private let cancelBtn = UIButton(type: .system)
+    private let table     = UITableView(frame: .zero, style: .plain)
+
+    private static let cellId = "LookupCell"
 
     private var panelBottomConstraint: NSLayoutConstraint!
+    private let rowHeight:    CGFloat = 52
+    private let headerHeight: CGFloat = 56
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -637,13 +713,13 @@ final class SimpleLookupPickerSheet: UIViewController,
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        // Pre-select the current value.
-        if let idx = items.firstIndex(where: { $0.id == selectedId }), idx < items.count {
-            picker.selectRow(idx, inComponent: 0, animated: false)
+        // Scroll the selected row into view.
+        if let idx = items.firstIndex(where: { $0.id == selectedId }) {
+            table.scrollToRow(at: IndexPath(row: idx, section: 0),
+                              at: .middle, animated: false)
         }
-        // Slide up
         UIView.animate(withDuration: 0.28, delay: 0,
-                       usingSpringWithDamping: 0.85, initialSpringVelocity: 0,
+                       usingSpringWithDamping: 0.85, initialSpringVelocity: 0.3,
                        options: [], animations: {
             self.dimView.alpha = 1
             self.panelBottomConstraint.constant = 0
@@ -652,56 +728,68 @@ final class SimpleLookupPickerSheet: UIViewController,
     }
 
     private func buildUI() {
-        // Dim
+        // Dim overlay — tap to cancel.
         dimView.backgroundColor = UIColor.black.withAlphaComponent(0.40)
         dimView.alpha = 0
         dimView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(dimView)
         dimView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(didCancel)))
 
-        // Panel
+        // Panel (rounded top corners, soft shadow).
         panel.backgroundColor = .white
-        panel.layer.cornerRadius = 16
+        panel.layer.cornerRadius = 20
         panel.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+        panel.layer.shadowColor   = UIColor.black.cgColor
+        panel.layer.shadowOpacity = 0.10
+        panel.layer.shadowRadius  = 12
         panel.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(panel)
+        let swipe = UISwipeGestureRecognizer(target: self, action: #selector(didCancel))
+        swipe.direction = .down
+        panel.addGestureRecognizer(swipe)
 
-        // Title bar
-        let bar = UIView()
-        bar.backgroundColor = UIColor(white: 0.95, alpha: 1)
-        bar.layer.cornerRadius = 16
-        bar.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
-        bar.translatesAutoresizingMaskIntoConstraints = false
-        panel.addSubview(bar)
+        // Grabber handle.
+        grabber.backgroundColor = UIColor(white: 0.80, alpha: 1)
+        grabber.layer.cornerRadius = 2.5
+        grabber.translatesAutoresizingMaskIntoConstraints = false
+        panel.addSubview(grabber)
 
+        // Title.
         titleLbl.text = pickerTitle
-        titleLbl.font = UIFont.systemFont(ofSize: 15, weight: .semibold)
-        titleLbl.textColor = UIColor(white: 0.15, alpha: 1)
+        titleLbl.font = UIFont.systemFont(ofSize: 17, weight: .bold)
+        titleLbl.textColor = UIColor(white: 0.10, alpha: 1)
         titleLbl.textAlignment = .center
         titleLbl.translatesAutoresizingMaskIntoConstraints = false
-        bar.addSubview(titleLbl)
+        panel.addSubview(titleLbl)
 
+        // Cancel text-button.
         cancelBtn.setTitle("Cancel", for: .normal)
-        cancelBtn.titleLabel?.font = UIFont.systemFont(ofSize: 15)
-        cancelBtn.setTitleColor(UIColor(white: 0.35, alpha: 1), for: .normal)
+        cancelBtn.titleLabel?.font = UIFont.systemFont(ofSize: 14, weight: .medium)
+        cancelBtn.setTitleColor(UIColor(white: 0.40, alpha: 1), for: .normal)
         cancelBtn.translatesAutoresizingMaskIntoConstraints = false
         cancelBtn.addTarget(self, action: #selector(didCancel), for: .touchUpInside)
-        bar.addSubview(cancelBtn)
+        panel.addSubview(cancelBtn)
 
-        doneBtn.setTitle("Done", for: .normal)
-        doneBtn.titleLabel?.font = UIFont.systemFont(ofSize: 15, weight: .semibold)
-        doneBtn.setTitleColor(UIColor(red: 0.18, green: 0.56, blue: 0.94, alpha: 1), for: .normal)
-        doneBtn.translatesAutoresizingMaskIntoConstraints = false
-        doneBtn.addTarget(self, action: #selector(didDone), for: .touchUpInside)
-        bar.addSubview(doneBtn)
+        // Divider under title.
+        let divider = UIView()
+        divider.backgroundColor = UIColor(white: 0.92, alpha: 1)
+        divider.translatesAutoresizingMaskIntoConstraints = false
+        panel.addSubview(divider)
 
-        picker.dataSource = self
-        picker.delegate   = self
-        picker.translatesAutoresizingMaskIntoConstraints = false
-        panel.addSubview(picker)
+        // Options table.
+        table.register(UITableViewCell.self, forCellReuseIdentifier: Self.cellId)
+        table.dataSource = self
+        table.delegate   = self
+        table.rowHeight  = rowHeight
+        table.separatorInset = UIEdgeInsets(top: 0, left: 20, bottom: 0, right: 20)
+        table.translatesAutoresizingMaskIntoConstraints = false
+        panel.addSubview(table)
 
+        // Fit panel: header + up to 6 visible rows, rest scrolls.
+        let maxRows = CGFloat(min(items.count, 6))
+        let panelH  = headerHeight + maxRows * rowHeight + 16
         panelBottomConstraint = panel.bottomAnchor.constraint(equalTo: view.bottomAnchor,
-                                                               constant: 300)
+                                                              constant: panelH)
         NSLayoutConstraint.activate([
             dimView.topAnchor.constraint(equalTo: view.topAnchor),
             dimView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
@@ -711,44 +799,39 @@ final class SimpleLookupPickerSheet: UIViewController,
             panel.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             panel.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             panelBottomConstraint,
+            panel.heightAnchor.constraint(equalToConstant: panelH),
 
-            bar.topAnchor.constraint(equalTo: panel.topAnchor),
-            bar.leadingAnchor.constraint(equalTo: panel.leadingAnchor),
-            bar.trailingAnchor.constraint(equalTo: panel.trailingAnchor),
-            bar.heightAnchor.constraint(equalToConstant: 44),
+            grabber.topAnchor.constraint(equalTo: panel.topAnchor, constant: 10),
+            grabber.centerXAnchor.constraint(equalTo: panel.centerXAnchor),
+            grabber.widthAnchor.constraint(equalToConstant: 40),
+            grabber.heightAnchor.constraint(equalToConstant: 5),
 
-            cancelBtn.leadingAnchor.constraint(equalTo: bar.leadingAnchor, constant: 12),
-            cancelBtn.centerYAnchor.constraint(equalTo: bar.centerYAnchor),
+            titleLbl.topAnchor.constraint(equalTo: grabber.bottomAnchor, constant: 10),
+            titleLbl.centerXAnchor.constraint(equalTo: panel.centerXAnchor),
+            titleLbl.leadingAnchor.constraint(greaterThanOrEqualTo: panel.leadingAnchor, constant: 60),
+            titleLbl.trailingAnchor.constraint(lessThanOrEqualTo: panel.trailingAnchor, constant: -60),
 
-            titleLbl.centerXAnchor.constraint(equalTo: bar.centerXAnchor),
-            titleLbl.centerYAnchor.constraint(equalTo: bar.centerYAnchor),
+            cancelBtn.centerYAnchor.constraint(equalTo: titleLbl.centerYAnchor),
+            cancelBtn.leadingAnchor.constraint(equalTo: panel.leadingAnchor, constant: 16),
 
-            doneBtn.trailingAnchor.constraint(equalTo: bar.trailingAnchor, constant: -12),
-            doneBtn.centerYAnchor.constraint(equalTo: bar.centerYAnchor),
+            divider.topAnchor.constraint(equalTo: titleLbl.bottomAnchor, constant: 12),
+            divider.leadingAnchor.constraint(equalTo: panel.leadingAnchor),
+            divider.trailingAnchor.constraint(equalTo: panel.trailingAnchor),
+            divider.heightAnchor.constraint(equalToConstant: 0.5),
 
-            picker.topAnchor.constraint(equalTo: bar.bottomAnchor),
-            picker.leadingAnchor.constraint(equalTo: panel.leadingAnchor),
-            picker.trailingAnchor.constraint(equalTo: panel.trailingAnchor),
-            picker.heightAnchor.constraint(equalToConstant: 216),
-            picker.bottomAnchor.constraint(equalTo: panel.bottomAnchor),
+            table.topAnchor.constraint(equalTo: divider.bottomAnchor),
+            table.leadingAnchor.constraint(equalTo: panel.leadingAnchor),
+            table.trailingAnchor.constraint(equalTo: panel.trailingAnchor),
+            table.bottomAnchor.constraint(equalTo: panel.bottomAnchor, constant: -16),
         ])
     }
 
     @objc private func didCancel() { slideDown(completion: nil) }
 
-    @objc private func didDone() {
-        let row  = picker.selectedRow(inComponent: 0)
-        guard row < items.count else { slideDown(completion: nil); return }
-        let item = items[row]
-        slideDown { [weak self] in
-            self?.onPick?(item)
-        }
-    }
-
     private func slideDown(completion: (() -> Void)?) {
         UIView.animate(withDuration: 0.22, animations: {
             self.dimView.alpha = 0
-            self.panelBottomConstraint.constant = 300
+            self.panelBottomConstraint.constant = self.panel.bounds.height
             self.view.layoutIfNeeded()
         }, completion: { _ in
             super.dismiss(animated: false, completion: completion)
@@ -759,16 +842,38 @@ final class SimpleLookupPickerSheet: UIViewController,
         slideDown(completion: completion)
     }
 
-    // UIPickerViewDataSource
-    func numberOfComponents(in pickerView: UIPickerView) -> Int { 1 }
-    func pickerView(_ pickerView: UIPickerView,
-                    numberOfRowsInComponent component: Int) -> Int { items.count }
+    // MARK: UITableViewDataSource
 
-    // UIPickerViewDelegate
-    func pickerView(_ pickerView: UIPickerView,
-                    titleForRow row: Int,
-                    forComponent component: Int) -> String? {
-        guard row < items.count else { return nil }
-        return items[row].label
+    func tableView(_ tableView: UITableView,
+                   numberOfRowsInSection section: Int) -> Int { items.count }
+
+    func tableView(_ tableView: UITableView,
+                   cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: Self.cellId, for: indexPath)
+        guard indexPath.row < items.count else { return cell }
+        let item = items[indexPath.row]
+
+        cell.textLabel?.text  = item.label
+        cell.textLabel?.font  = UIFont.systemFont(ofSize: 15, weight: .regular)
+        cell.textLabel?.textColor = UIColor(white: 0.15, alpha: 1)
+        cell.accessoryType    = (item.id == selectedId) ? .checkmark : .none
+        cell.tintColor        = UIColor(red: 0.22, green: 0.72, blue: 0.62, alpha: 1)
+        cell.selectionStyle   = .default
+        return cell
+    }
+
+    // MARK: UITableViewDelegate
+
+    func tableView(_ tableView: UITableView,
+                   didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
+        guard indexPath.row < items.count else { return }
+        let item = items[indexPath.row]
+        selectedId = item.id
+        tableView.reloadData()
+        // Brief delay so the user registers the checkmark before the sheet dismisses.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) { [weak self] in
+            self?.slideDown { self?.onPick?(item) }
+        }
     }
 }
