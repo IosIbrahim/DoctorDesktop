@@ -75,10 +75,141 @@ struct DoctorNurseNote: Decodable {
     /// (confirmed from NURSE_REMARKS_PRIORITY_ROW in the API response).
     var isUrgent: Bool { return priorityType == "2" }
 
+    /// True when the server has soft-deleted this row.
+    var isDeleted: Bool { return deleteUpdateFlag == "1" }
+
     /// Best text for the note body: NURSE_NOTES if present, else English description.
     var body: String {
         if let n = nurseNotes, !n.isEmpty { return n }
         return descEn ?? ""
+    }
+
+    // MARK: - Decodable
+    //
+    // We need a hand-rolled `init(from:)` instead of the synthesized one because
+    // the server sends REPLY in two completely different shapes:
+    //
+    //   • Empty string:  "REPLY":""
+    //   • Nested object: "REPLY":{"REPLY_ROW":{"REPLY_DESC":"ttttt", ...}}
+    //
+    // The synthesized decoder declares `reply: String?` and throws on shape #2,
+    // which causes the entire DOCTOR_NURSE_REMARKS_ROW array to fail decoding —
+    // dropping every note in the response. To stay tolerant we use `try?` for
+    // every field and decode REPLY through a custom helper that flattens the
+    // nested object into its `REPLY_DESC` text.
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        ser                  = (try? c.decode(String.self, forKey: .ser))
+        empNameEn            = (try? c.decode(String.self, forKey: .empNameEn))
+        empNameAr            = (try? c.decode(String.self, forKey: .empNameAr))
+        specialityEn         = (try? c.decode(String.self, forKey: .specialityEn))
+        categoryEn           = (try? c.decode(String.self, forKey: .categoryEn))
+        transDate            = (try? c.decode(String.self, forKey: .transDate))
+        descEn               = (try? c.decode(String.self, forKey: .descEn))
+        descAr               = (try? c.decode(String.self, forKey: .descAr))
+        nurseNotes           = (try? c.decode(String.self, forKey: .nurseNotes))
+        userOpenFlag         = (try? c.decode(String.self, forKey: .userOpenFlag))
+        priorityType         = (try? c.decode(String.self, forKey: .priorityType))
+        typeFlag             = (try? c.decode(String.self, forKey: .typeFlag))
+        showDN               = (try? c.decode(String.self, forKey: .showDN))
+        patientId            = (try? c.decode(String.self, forKey: .patientId))
+        visitId              = (try? c.decode(String.self, forKey: .visitId))
+        userId               = (try? c.decode(String.self, forKey: .userId))
+        deleteUpdateUser     = (try? c.decode(String.self, forKey: .deleteUpdateUser))
+        deleteUpdateDateTime = (try? c.decode(String.self, forKey: .deleteUpdateDateTime))
+        deleteUpdateFlag     = (try? c.decode(String.self, forKey: .deleteUpdateFlag))
+        conclusion           = (try? c.decode(String.self, forKey: .conclusion))
+        recommendation       = (try? c.decode(String.self, forKey: .recommendation))
+        modifyFlag           = (try? c.decode(String.self, forKey: .modifyFlag))
+
+        // REPLY: try plain String first; fall back to the nested object form.
+        if let s = try? c.decode(String.self, forKey: .reply) {
+            reply = s.isEmpty ? nil : s
+        } else if let nested = try? c.decode(ReplyEnvelope.self, forKey: .reply) {
+            reply = nested.replyRow?.replyDesc
+        } else {
+            reply = nil
+        }
+    }
+
+    /// Helper for decoding the nested REPLY object form:
+    /// `{"REPLY_ROW":{"REPLY_DESC":"…"}}`. Anything missing → nil and the
+    /// wrapper falls back to "no reply".
+    private struct ReplyEnvelope: Decodable {
+        let replyRow: ReplyRow?
+        enum CodingKeys: String, CodingKey { case replyRow = "REPLY_ROW" }
+        struct ReplyRow: Decodable {
+            let replyDesc: String?
+            enum CodingKeys: String, CodingKey { case replyDesc = "REPLY_DESC" }
+        }
+    }
+
+    /// Memberwise init — needed for hand-built rows (optimistic inserts,
+    /// deletion-marking copies, unit tests). Has the same parameter order as
+    /// the property declarations above.
+    init(ser: String?, empNameEn: String?, empNameAr: String?,
+         specialityEn: String?, categoryEn: String?,
+         transDate: String?, descEn: String?, descAr: String?,
+         nurseNotes: String?, userOpenFlag: String?, priorityType: String?,
+         typeFlag: String?, showDN: String?, patientId: String?,
+         visitId: String?, userId: String?,
+         deleteUpdateUser: String?, deleteUpdateDateTime: String?,
+         deleteUpdateFlag: String?, conclusion: String?,
+         recommendation: String?, modifyFlag: String?, reply: String?) {
+        self.ser = ser
+        self.empNameEn = empNameEn
+        self.empNameAr = empNameAr
+        self.specialityEn = specialityEn
+        self.categoryEn = categoryEn
+        self.transDate = transDate
+        self.descEn = descEn
+        self.descAr = descAr
+        self.nurseNotes = nurseNotes
+        self.userOpenFlag = userOpenFlag
+        self.priorityType = priorityType
+        self.typeFlag = typeFlag
+        self.showDN = showDN
+        self.patientId = patientId
+        self.visitId = visitId
+        self.userId = userId
+        self.deleteUpdateUser = deleteUpdateUser
+        self.deleteUpdateDateTime = deleteUpdateDateTime
+        self.deleteUpdateFlag = deleteUpdateFlag
+        self.conclusion = conclusion
+        self.recommendation = recommendation
+        self.modifyFlag = modifyFlag
+        self.reply = reply
+    }
+
+    /// Returns a copy with DELETE_UPDATE_* fields filled in as if the server had
+    /// just processed a soft-delete. Used for optimistic UI updates while the
+    /// delete POST is in flight.
+    func markedDeleted(by userId: String?, at dateTime: String) -> DoctorNurseNote {
+        return DoctorNurseNote(
+            ser: ser,
+            empNameEn: empNameEn,
+            empNameAr: empNameAr,
+            specialityEn: specialityEn,
+            categoryEn: categoryEn,
+            transDate: transDate,
+            descEn: descEn,
+            descAr: descAr,
+            nurseNotes: nurseNotes,
+            userOpenFlag: userOpenFlag,
+            priorityType: priorityType,
+            typeFlag: typeFlag,
+            showDN: showDN,
+            patientId: patientId,
+            visitId: visitId,
+            userId: self.userId,
+            deleteUpdateUser: userId,
+            deleteUpdateDateTime: dateTime,
+            deleteUpdateFlag: "1",
+            conclusion: conclusion,
+            recommendation: recommendation,
+            modifyFlag: "0",
+            reply: reply
+        )
     }
 }
 

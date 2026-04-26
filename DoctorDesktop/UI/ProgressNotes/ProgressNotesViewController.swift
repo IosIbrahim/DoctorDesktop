@@ -586,8 +586,35 @@ extension ProgressNotesViewController: UITableViewDataSource, UITableViewDelegat
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: ProgressNoteRowCell.reuseId,
                                                  for: indexPath) as! ProgressNoteRowCell
-        cell.configure(with: presenter.notes[indexPath.row])
+        let note = presenter.notes[indexPath.row]
+        cell.configure(with: note)
+        // Snapshot the SER (not the IndexPath — rows can shift between the tap and
+        // the callback) so the presenter can find the right row to soft-delete.
+        let ser = note.ser
+        cell.onDeleteTapped = { [weak self] in
+            self?.confirmDelete(ser: ser)
+        }
         return cell
+    }
+
+    /// Presents a two-button alert before soft-deleting a note. Matches the
+    /// Android flow where the user must confirm before the strikethrough lands.
+    private func confirmDelete(ser: String?) {
+        let alert = UIAlertController(
+            title: "Delete Note?",
+            message: "This note will be marked as deleted and shown with a strikethrough.",
+            preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        alert.addAction(UIAlertAction(title: "Delete", style: .destructive) { [weak self] _ in
+            guard let self = self else { return }
+            // Resolve the current index from the (stable) SER so shifts in the
+            // list during the confirmation don't trigger the wrong delete.
+            guard let idx = self.presenter.notes.firstIndex(where: { $0.ser == ser }) else {
+                return
+            }
+            self.presenter.deleteNote(at: idx)
+        })
+        present(alert, animated: true)
     }
 }
 

@@ -66,6 +66,9 @@ protocol ProgressNotesPresenter: AnyObject {
     func resetFilter()
     /// Send the current draft.
     func send()
+    /// Soft-delete the note at the given row in `notes`. The UI shows an
+    /// optimistic strikethrough while the POST is in flight.
+    func deleteNote(at index: Int)
 }
 
 // MARK: - Implementation
@@ -283,6 +286,106 @@ final class ProgressNotesPresenterImpl: ProgressNotesPresenter {
         }
     }
 
+    // MARK: Delete
+
+    /// Soft-delete at a filtered-list index. Builds the exact payload Android
+    /// sends and POSTs through the regular Save endpoint — the server distinguishes
+    /// "delete" from "create" by `BUFFER_STATUS=3` plus the dedicated process IDs
+    /// (PROCESS_ID=4179 / TRACER_PLACE_ID=298).  We optimistically mark the row
+    /// deleted so the strikethrough appears instantly, then reload from the server
+    /// on success so DELETE_UPDATE_DATETIME / DELETE_UPDATE_USER round-trip.
+    func deleteNote(at index: Int) {
+        let filtered = notes
+        guard index >= 0, index < filtered.count else { return }
+        let target = filtered[index]
+
+        // Locate the row in the unfiltered backing store by SER (stable identifier).
+        guard let allIdx = allNotes.firstIndex(where: { $0.ser == target.ser }) else {
+            return
+        }
+
+        // Already deleted? No-op (idempotent — prevents double POSTs from rapid taps).
+        if allNotes[allIdx].isDeleted { return }
+
+        // ── Build payload exactly as Android sends it ─────────────────────────────
+        // Android trace decoded:
+        //   SI={BranchID:1,ComputerName:"android",GroupID:"DR",LanguageID:2,UserID:"KHABEER"}
+        //   DOCTOR_NURSE_REMARKS=[{BUFFER_STATUS:"3",SER:"…",VISIT_ID:"…"}]
+        //   DD_UC_PARMS={PATIENT_ID:"…",VISIT_ID:"…",PROCESS_ID:"4179",
+        //                TRACER_PLACE_ID:"298",USER_OPEN_FLAG:"D"}
+        let branchID = Int(user.branch ?? "1") ?? 1
+        let si: [String: Any] = [
+            "BranchID":     branchID,
+            "ComputerName": "ios",
+            "GroupID":      user.group ?? "DR",
+            "LanguageID":   2,
+            "UserID":       user.userName ?? user.id ?? ""
+        ]
+
+        // BUFFER_STATUS=3 is the magic flag the server checks to perform a soft
+        // delete instead of an insert. Only SER + VISIT_ID accompany it.
+        let remark: [String: Any] = [
+            "BUFFER_STATUS": "3",
+            "SER":           target.ser ?? "",
+            "VISIT_ID":      target.visitId ?? patient.visitId
+        ]
+
+        // Distinct process IDs route the request to the delete handler on the
+        // server side (different from save's 994 / 9).
+        let ucParms: [String: Any] = [
+            "PATIENT_ID":      patient.id,
+            "VISIT_ID":        patient.visitId,
+            "PROCESS_ID":      "4179",
+            "TRACER_PLACE_ID": "298",
+            "USER_OPEN_FLAG":  "D"
+        ]
+
+        guard
+            let siData      = try? JSONSerialization.data(withJSONObject: si,      options: []),
+            let remarksData = try? JSONSerialization.data(withJSONObject: [remark], options: []),
+            let ucData      = try? JSONSerialization.data(withJSONObject: ucParms, options: []),
+            let siStr       = String(data: siData,      encoding: .utf8),
+            let remarksStr  = String(data: remarksData, encoding: .utf8),
+            let ucStr       = String(data: ucData,      encoding: .utf8)
+        else { return }
+
+        let params: [String: String] = [
+            "SI":                   siStr,
+            "DOCTOR_NURSE_REMARKS": remarksStr,
+            "DD_UC_PARMS":          ucStr
+        ]
+
+        // ── Optimistic strikethrough ─────────────────────────────────────────────
+        let original = allNotes[allIdx]
+        allNotes[allIdx] = original.markedDeleted(
+            by: user.userName ?? user.id,
+            at: Self.nowString())
+        DispatchQueue.main.async { self.view?.progressNotesDidReload() }
+
+        // ── Fire the API call ────────────────────────────────────────────────────
+        // Delete uses the SAME endpoint as save — the server inspects BUFFER_STATUS
+        // to choose between insert and soft-delete. So we route through
+        // `saveDoctorNurseNotes`; no separate "delete" endpoint is needed.
+        modelLayer.saveDoctorNurseNotes(with: params) { [weak self] success, message in
+            guard let self = self else { return }
+            DispatchQueue.main.async {
+                if success {
+                    print("✅ [NurseNotesDelete] server confirmed soft-delete (\(target.ser ?? "?"))")
+                    // Reload from server to pick up DELETE_UPDATE_FLAG=1 on the row,
+                    // which keeps the strikethrough sticky after navigating away
+                    // and back into the screen.
+                    self.load()
+                } else {
+                    print("⚠️ [NurseNotesDelete] server failed — message=\(message ?? "<nil>"). Reverting.")
+                    if allIdx < self.allNotes.count {
+                        self.allNotes[allIdx] = original
+                    }
+                    self.view?.progressNotesDidReload()
+                }
+            }
+        }
+    }
+
     // MARK: Client-side filtering
 
     /// Returns `source` filtered by the currently active visit-type and nurse-remarks
@@ -290,10 +393,10 @@ final class ProgressNotesPresenterImpl: ProgressNotesPresenter {
     private func applyClientFilter(to source: [DoctorNurseNote]) -> [DoctorNurseNote] {
         var result = source
 
-        // ── Hide deleted notes (DELETE_UPDATE_FLAG == "1") ────────────────────
-        // Deleted notes must not appear in the active list regardless of other
-        // filter settings.  MODIFY_FLAG == "0" on the same row confirms deletion.
-        result = result.filter { ($0.deleteUpdateFlag ?? "") != "1" }
+        // NOTE: Deleted notes are kept in the list on purpose — the UI renders
+        // them with a strikethrough (matching the Android design). Filtering out
+        // rows with DELETE_UPDATE_FLAG == "1" used to happen here; it's gone so
+        // the user can still see what was removed.
 
         // ── Visit Type (TYPE_FLAG in row == VISIT_TYPE_ROW.ID) ────────────────
         // "" means "All" → no restriction.
@@ -319,6 +422,17 @@ final class ProgressNotesPresenterImpl: ProgressNotesPresenter {
     }
 
     private func matchesNurseRemarksFilter(_ note: DoctorNurseNote) -> Bool {
+        // Each filter matches notes that are EITHER authored by that role
+        // (USER_OPEN_FLAG) OR addressed to that role (SHOW_D_N). Previously we
+        // only checked USER_OPEN_FLAG — which meant a note written by a doctor
+        // and "shown to" Nursing wouldn't appear under the Nursing filter.
+        //
+        // SHOW_D_N id mapping comes from NURSE_REMARKS_SHOW_D_N_ROW:
+        //   "0" All   "1" Doctors   "2" Nursing
+        //   "3" Clinical Pharmacy   "4" Clinical Nutrition   "5" Infection Control
+        let openFlag = (note.userOpenFlag ?? "").uppercased()
+        let showDN   = (note.showDN ?? "").trimmingCharacters(in: .whitespaces)
+
         switch activeFilterId {
         case "", "3":          // All / no selection
             return true
@@ -327,15 +441,15 @@ final class ProgressNotesPresenterImpl: ProgressNotesPresenter {
             let currentUser = (user.userName ?? user.id ?? "").trimmingCharacters(in: .whitespaces)
             return noteUser == currentUser
         case "1":              // Doctors
-            return (note.userOpenFlag ?? "").uppercased() == "D"
+            return openFlag == "D" || showDN == "1" || showDN == "0"
         case "2":              // Nursing
-            return (note.userOpenFlag ?? "").uppercased() == "N"
+            return openFlag == "N" || showDN == "2" || showDN == "0"
         case "4":              // Clinical Pharmacy
-            return (note.userOpenFlag ?? "").uppercased() == "P"
+            return openFlag == "P" || showDN == "3" || showDN == "0"
         case "5":              // Clinical Nutrition Specialists
-            return (note.userOpenFlag ?? "").uppercased() == "CN"
+            return openFlag == "CN" || showDN == "4" || showDN == "0"
         case "6":              // Infection Control
-            return (note.userOpenFlag ?? "").uppercased() == "I"
+            return openFlag == "I" || showDN == "5" || showDN == "0"
         default:
             return true
         }

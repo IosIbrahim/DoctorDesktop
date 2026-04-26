@@ -52,7 +52,13 @@ protocol NetworkLayer {
     /// Endpoint name preserves the server typo "MedicalRcordController".
     func loadDoctorNurseNotes(with params: [String: String], finished: @escaping DataBlock)
     /// POST /MobileApi/api/MedicalRcordController/DDDocNurseNotesSave — saves a
-    /// new progress note. Body is `application/x-www-form-urlencoded` with three
+    /// new progress note (BUFFER_STATUS=1) OR soft-deletes one (BUFFER_STATUS=3).
+    /// Both operations hit the same endpoint; the server distinguishes them by
+    /// BUFFER_STATUS inside DOCTOR_NURSE_REMARKS plus PROCESS_ID/TRACER_PLACE_ID
+    /// in DD_UC_PARMS (994/9 = save, 4179/298 = delete). The deleted row is NOT
+    /// removed from subsequent GET responses; instead the server sets
+    /// DELETE_UPDATE_FLAG=1 / MODIFY_FLAG=0 on the row and the UI renders a
+    /// strikethrough. Body is `application/x-www-form-urlencoded` with three
     /// JSON-string fields: SI, DOCTOR_NURSE_REMARKS, DD_UC_PARMS.
     /// Response: `{"message":"Save Success"}`.
     func saveDoctorNurseNotes(with params: [String: String], finished: @escaping DataBlock)
@@ -375,18 +381,32 @@ class NetworkLayerImpl: NetworkLayer {
     }
 
     func saveDoctorNurseNotes(with params: [String: String], finished: @escaping DataBlock) {
+        // Single endpoint handles both create and soft-delete — caller decides
+        // which by setting BUFFER_STATUS (1=save, 3=delete) inside
+        // DOCTOR_NURSE_REMARKS plus the matching PROCESS_ID/TRACER_PLACE_ID in
+        // DD_UC_PARMS.
+        let base = AppURLS.ip + "/MobileApi/api/MedicalRcordController/DDDocNurseNotesSave"
+        signedFormPOST(base: base, tag: "NurseNotesSave", params: params, finished: finished)
+    }
+
+    /// Shared helper: signed (OAuth 1.0 HMAC-SHA1) POST with a form-urlencoded body,
+    /// Bearer token in the Authorization header, and verbose request/response logging.
+    /// Used by `saveDoctorNurseNotes` (which carries both create and soft-delete).
+    private func signedFormPOST(base: String,
+                                tag: String,
+                                params: [String: String],
+                                finished: @escaping DataBlock) {
         // Same auth pattern as Load: OAuth 1.0 in URL query (signature base includes
         // the form params per RFC 5849 §3.4.1.3) + Bearer token in the Authorization
         // header. Form body is `application/x-www-form-urlencoded`.
-        let base = AppURLS.ip + "/MobileApi/api/MedicalRcordController/DDDocNurseNotesSave"
         guard let (signedURL, formBody, baseString) =
             NetworkLayerImpl.buildOAuthPOST(base: base, formParams: params) else {
-            print("❌ [NurseNotesSave] buildOAuthPOST returned nil — HMAC failed")
+            print("❌ [\(tag)] buildOAuthPOST returned nil — HMAC failed")
             return
         }
 
         guard let url = URL(string: signedURL) else {
-            print("❌ [NurseNotesSave] URL(string:) failed — signedURL contains illegal chars")
+            print("❌ [\(tag)] URL(string:) failed — signedURL contains illegal chars")
             return
         }
         var urlRequest = URLRequest(url: url)
@@ -403,7 +423,7 @@ class NetworkLayerImpl: NetworkLayer {
         urlRequest.httpBody = formBody.data(using: .utf8)
 
         print("╔══════════════════════════════════════════════════════════════════════")
-        print("║ [NurseNotesSave] FULL REQUEST")
+        print("║ [\(tag)] FULL REQUEST")
         print("║ METHOD : POST")
         print("║ URL    : \(signedURL)")
         if let token = bearerToken, !token.isEmpty {
@@ -428,12 +448,12 @@ class NetworkLayerImpl: NetworkLayer {
                 let rawBody = response.data.flatMap { String(data: $0, encoding: .utf8) } ?? "<no body>"
 
                 print("╔══════════════════════════════════════════════════════════════════════")
-                print("║ [NurseNotesSave] RESPONSE  status=\(code)  time=\(String(format: "%.2f", duration))s")
+                print("║ [\(tag)] RESPONSE  status=\(code)  time=\(String(format: "%.2f", duration))s")
                 print("║ Body: \(rawBody.prefix(500))")
                 print("╚══════════════════════════════════════════════════════════════════════")
 
                 if let error = response.error {
-                    print("❌ [NurseNotesSave] Network error: \(error.localizedDescription)")
+                    print("❌ [\(tag)] Network error: \(error.localizedDescription)")
                 }
                 guard let data = response.data else { return }
                 finished(data)

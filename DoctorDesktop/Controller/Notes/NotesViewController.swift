@@ -75,30 +75,65 @@ class NotesViewController: UIViewController {
     func callAPI() {
         guard let s = sessionParams() else { return }
 
-        let query = "PATIENT_ID=\(s.patient_id)&USER_ID=\(s.user_id)&BRANCH_ID=\(s.branch_id)&COMPUTER_NAME=ios&USER_OPEN_FLAG=D&TYPE_FLAG=1&Lang=en"
-        guard let urlString = (Constants.APIProvider.DDDocNurseNotesLoad + query)
-            .addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
-        else { return }
+        let params: [String: String] = [
+            "PATIENT_ID": s.patient_id,
+            "USER_ID": s.user_id,
+            "BRANCH_ID": s.branch_id,
+            "COMPUTER_NAME": "ios",
+            "USER_OPEN_FLAG": "D",
+            "TYPE_FLAG": "3",
+            "Lang": "2",
+            "VISIT_ID_ARRAY": s.visit_id
+        ]
 
-        WebserviceMananger.sharedInstance.makeCall(method: .get, url: urlString, parameters: nil, vc: self) { [weak self] data, error in
-            guard let self = self, error == nil,
+        WebserviceMananger.sharedInstance.makeCall(
+            method: .get,
+            url: Constants.APIProvider.DDDocNurseNotesLoad,
+            parameters: params,
+            vc: self
+        ) { [weak self] data, error in
+
+            guard let self = self,
+                  error == nil,
                   let root = (data as? [String: AnyObject])?["Root"] as? [String: AnyObject]
             else { return }
 
-            self.parseRows(from: root, key: "DOCTOR_NURSE_REMARKS", rowKey: "DOCTOR_NURSE_REMARKS_ROW") { row in
+            // ── Messages ─────────────────────────────
+            self.messages.removeAll()
+
+            self.parseRows(
+                from: root,
+                key: "DOCTOR_NURSE_REMARKS",
+                rowKey: "DOCTOR_NURSE_REMARKS_ROW"
+            ) { row in
                 if let msg = ListOfDoctorNurseMessages(JSON: row) {
                     self.messages.append(msg)
                 }
             }
+
             self.tableView.reloadData()
 
-            self.parseRows(from: root, key: "NURSE_REMARKS_PRIORITY", rowKey: "NURSE_REMARKS_PRIORITY_ROW") { row in
+            // ── Priority ─────────────────────────────
+            self.NURSE_REMARKS_PRIORITY_List.removeAll()
+
+            self.parseRows(
+                from: root,
+                key: "NURSE_REMARKS_PRIORITY",
+                rowKey: "NURSE_REMARKS_PRIORITY_ROW"
+            ) { row in
                 if let item = NURSE_REMARKS_PRIORITY_ROW(JSON: row) {
                     self.NURSE_REMARKS_PRIORITY_List.append(item)
                 }
             }
 
-            self.parseRows(from: root, key: "NURSE_REMARKS_SHOW_D_N", rowKey: "NURSE_REMARKS_SHOW_D_N_ROW") { row in
+            // ── Show To ──────────────────────────────
+            self.NURSE_REMARKS_SHOW_D_N_List.removeAll()
+
+            self.parseRows(
+                from: root,
+                key: "NURSE_REMARKS_SHOW_D_N",
+                rowKey: "NURSE_REMARKS_SHOW_D_N_ROW"
+            ) { row in
                 if let item = NURSE_REMARKS_SHOW_D_N(JSON: row) {
                     self.NURSE_REMARKS_SHOW_D_N_List.append(item)
                 }

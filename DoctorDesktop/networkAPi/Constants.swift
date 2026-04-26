@@ -45,8 +45,8 @@ struct Constants {
         static var baseIP  = "41.33.82.156:29804"
         static var APIBase = "http://\(baseIP)/MobileApi/api/"
 
-        static var sendMessage           = baseIP + "MobileApi/api/MedicalRcordController/DDDocNurseNotesSave"
-        static var DDDocNurseNotesLoad   = baseIP + "MobileApi/api/MedicalRcordController/DDDocNurseNotesLoad?"
+        static var sendMessage = APIBase + "MedicalRcordController/DDDocNurseNotesSave"
+        static var DDDocNurseNotesLoad = APIBase + "MedicalRcordController/DDDocNurseNotesLoad"
         static var PrimeCareTempFiles    = "http://\(baseIP)/sihtest/TempFiles/ReportPDFS/"
         static var PRINTREPORTSUBMIT     = APIBase + "MedicalRecordController/PRINTREPORTSUBMIT"
         static var SubmitStepNew         = APIBase + "SubmitStepNew"

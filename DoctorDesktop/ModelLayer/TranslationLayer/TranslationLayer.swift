@@ -582,8 +582,25 @@ extension TranslationLayerImpl {
     // Parses the notes list plus the four lookup arrays. Everything defaults to [] on
     // missing/malformed data so the caller never crashes.
     func getDoctorNurseNotesFromJson(_ data: Data) -> DoctorNurseNotesData {
+        // ── Diagnostic: dump raw response to console ──────────────────────────
+        let rawString = String(data: data, encoding: .utf8) ?? "<non-UTF8 data>"
+        print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        print("[ProgressNotes] RAW RESPONSE (\(data.count) bytes):")
+        // Print in chunks so Xcode doesn't truncate long lines
+        let chunkSize = 800
+        var offset = rawString.startIndex
+        while offset < rawString.endIndex {
+            let end = rawString.index(offset, offsetBy: chunkSize, limitedBy: rawString.endIndex) ?? rawString.endIndex
+            print(rawString[offset..<end])
+            offset = end
+        }
+        print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+
         let topLevel = try? JSONSerialization.jsonObject(with: data,
                                                          options: .mutableContainers)
+        if topLevel == nil {
+            print("[ProgressNotes] ⚠️ JSON parse failed — topLevel is nil")
+        }
 
         func decode<T: Decodable>(_ type: T.Type, at keyPath: String) -> T? {
             guard let nested = safeValue(in: topLevel, keyPath: keyPath),
@@ -609,6 +626,11 @@ extension TranslationLayerImpl {
         }()
         let showToList = decodeArray(NurseNoteLookup.self, at: "Root.NURSE_REMARKS_SHOW_D_N.NURSE_REMARKS_SHOW_D_N_ROW")
         let filters    = decodeArray(NurseNoteLookup.self, at: "Root.NURSE_REMARKS_FILTER.NURSE_REMARKS_FILTER_ROW")
+
+        print("[ProgressNotes] PARSE RESULT → notes:\(notes.count)  priorities:\(priorities.count)  visitTypes:\(visitTypes.count)  showTo:\(showToList.count)  filters:\(filters.count)")
+        if !notes.isEmpty {
+            print("[ProgressNotes] First note → SER:\(notes[0].ser ?? "?")  EMP:\(notes[0].empNameEn ?? "?")  DATE:\(notes[0].transDate ?? "?")  BODY:\(notes[0].body.prefix(80))")
+        }
 
         return DoctorNurseNotesData(notes: notes,
                                     priorities: priorities,

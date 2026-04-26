@@ -41,7 +41,10 @@ protocol ModelLayer {
     func saveUcaf(body: [String: Any], finished: @escaping (Bool, String?) -> Void)
     /// Loads the progress-notes screen (list + 4 lookup arrays).
     func loadDoctorNurseNotes(with params: [String: String], finished: @escaping (DoctorNurseNotesData) -> Void)
-    /// Saves a new progress note. Response: `{"message":"Save Success"}`.
+    /// Saves a new progress note (BUFFER_STATUS=1) OR soft-deletes one
+    /// (BUFFER_STATUS=3) — the server distinguishes the two via the BUFFER_STATUS
+    /// field inside DOCTOR_NURSE_REMARKS plus the PROCESS_ID/TRACER_PLACE_ID in
+    /// DD_UC_PARMS. Response: `{"message":"Save Success"}`.
     /// Returns (success, serverMessage) via the completion.
     func saveDoctorNurseNotes(with params: [String: String], finished: @escaping (Bool, String?) -> Void)
 
@@ -296,6 +299,11 @@ extension ModelLayerImpl {
       finished(success, message)
     }
   }
+
+  // NOTE: There is no separate `deleteDoctorNurseNote` here on purpose. The
+  // server uses a single endpoint for both create and soft-delete; the caller
+  // sets `BUFFER_STATUS=3` (plus PROCESS_ID=4179, TRACER_PLACE_ID=298) inside
+  // the params and routes through `saveDoctorNurseNotes` above.
 }
 
 extension ModelLayerImpl {

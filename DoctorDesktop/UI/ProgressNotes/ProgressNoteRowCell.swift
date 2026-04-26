@@ -12,7 +12,7 @@
 //    DESC_EN / NURSE_NOTES      → bodyLabel          (NURSE_NOTES preferred)
 //    PRIORITY_TYPE              → priorityChip       ("1"=Normal, "2"=Urgent)
 //    REPLY                      → replyBar           (shown when non-empty)
-//    DELETE_UPDATE_FLAG         → deleted overlay    ("1" = note was deleted)
+//    DELETE_UPDATE_FLAG         → strikethrough body + dim card ("1" = deleted)
 //
 
 import UIKit
@@ -26,7 +26,13 @@ final class ProgressNoteRowCell: UITableViewCell {
     private static let normalColor  = UIColor(red: 0.17, green: 0.63, blue: 0.40, alpha: 1)
     private static let urgentColor  = UIColor(red: 0.88, green: 0.26, blue: 0.30, alpha: 1)
     private static let teal         = UIColor(red: 0.22, green: 0.72, blue: 0.62, alpha: 1)
-    private static let deletedColor = UIColor(red: 0.55, green: 0.55, blue: 0.55, alpha: 1)
+
+    // MARK: Callbacks
+
+    /// Invoked when the user taps the red trash icon. The cell does not perform
+    /// the delete itself — the view controller is responsible for confirmation
+    /// + calling the presenter.
+    var onDeleteTapped: (() -> Void)?
 
     // MARK: Views
 
@@ -37,13 +43,19 @@ final class ProgressNoteRowCell: UITableViewCell {
     private let dateLabel     = UILabel()
     private let bodyLabel     = UILabel()
     private let priorityChip  = PaddedLabel()
-    private let deletedBadge  = PaddedLabel()   // shown when DELETE_UPDATE_FLAG == "1"
+    private let deleteButton  = UIButton(type: .system)
     private let voiceIcon     = UIImageView()
 
     // Reply row
     private let replyBar      = UIView()
     private let replyDot      = UIView()
     private let replyLabel    = UILabel()
+
+    // ── Layout constraints toggled by `configure(with:)` ──────────────────────
+    // When the note is deleted we hide the trash button and pin the priority chip
+    // directly to the card's trailing edge instead of to the hidden button.
+    private var chipTrailingToDeleteBtn: NSLayoutConstraint!
+    private var chipTrailingToCardEdge:  NSLayoutConstraint!
 
     // MARK: Init
 
@@ -92,18 +104,23 @@ final class ProgressNoteRowCell: UITableViewCell {
         priorityChip.translatesAutoresizingMaskIntoConstraints = false
         card.addSubview(priorityChip)
 
-        // ── Deleted badge (hidden by default) ───────────────────────────────────
-        deletedBadge.text = "Deleted"
-        deletedBadge.font = UIFont.systemFont(ofSize: 10, weight: .semibold)
-        deletedBadge.textColor = .white
-        deletedBadge.textAlignment = .center
-        deletedBadge.backgroundColor = Self.deletedColor
-        deletedBadge.layer.cornerRadius = 7
-        deletedBadge.layer.masksToBounds = true
-        deletedBadge.insets = UIEdgeInsets(top: 2, left: 6, bottom: 2, right: 6)
-        deletedBadge.isHidden = true
-        deletedBadge.translatesAutoresizingMaskIntoConstraints = false
-        card.addSubview(deletedBadge)
+        // ── Delete (trash) button ──────────────────────────────────────────────
+        // Matches the Android design: red trash icon to the right of the priority
+        // chip. Hidden once the note is already soft-deleted.
+        if #available(iOS 13, *) {
+            let cfg = UIImage.SymbolConfiguration(pointSize: 15, weight: .semibold)
+            deleteButton.setImage(UIImage(systemName: "trash", withConfiguration: cfg),
+                                  for: .normal)
+        }
+        deleteButton.tintColor = Self.urgentColor
+        deleteButton.backgroundColor = .clear
+        deleteButton.contentEdgeInsets = UIEdgeInsets(top: 4, left: 6, bottom: 4, right: 6)
+        deleteButton.addTarget(self, action: #selector(didTapDelete), for: .touchUpInside)
+        deleteButton.translatesAutoresizingMaskIntoConstraints = false
+        card.addSubview(deleteButton)
+
+        // (Deleted state is rendered as a strikethrough on bodyLabel + dimmed
+        // card alpha — no separate "Deleted" badge per design feedback.)
 
         // ── Name ────────────────────────────────────────────────────────────────
         nameLabel.font = UIFont.systemFont(ofSize: 14, weight: .semibold)
@@ -174,13 +191,16 @@ final class ProgressNoteRowCell: UITableViewCell {
             avatar.widthAnchor.constraint(equalToConstant: 40),
             avatar.heightAnchor.constraint(equalToConstant: 40),
 
-            // Priority chip — top-right
+            // Priority chip — top-right. Trailing anchor is toggled in configure():
+            // next to the trash button when the note is active, or directly at the
+            // card edge once the note has been deleted (trash button hidden).
             priorityChip.topAnchor.constraint(equalTo: card.topAnchor, constant: 12),
-            priorityChip.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -12),
 
-            // Deleted badge — sits to the left of priority chip (hidden when not deleted)
-            deletedBadge.centerYAnchor.constraint(equalTo: priorityChip.centerYAnchor),
-            deletedBadge.trailingAnchor.constraint(equalTo: priorityChip.leadingAnchor, constant: -6),
+            // Delete (trash) button — pinned to the card's trailing edge.
+            deleteButton.centerYAnchor.constraint(equalTo: priorityChip.centerYAnchor),
+            deleteButton.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -8),
+            deleteButton.widthAnchor.constraint(greaterThanOrEqualToConstant: 32),
+            deleteButton.heightAnchor.constraint(equalToConstant: 28),
 
             // Name — right of avatar, left of priority chip
             nameLabel.topAnchor.constraint(equalTo: avatar.topAnchor, constant: 2),
@@ -228,6 +248,14 @@ final class ProgressNoteRowCell: UITableViewCell {
             replyLabel.trailingAnchor.constraint(equalTo: replyBar.trailingAnchor),
             replyLabel.bottomAnchor.constraint(equalTo: replyBar.bottomAnchor),
         ])
+
+        // Two competing priorityChip trailing constraints — exactly one is active
+        // at any time, chosen in configure(with:) based on the note's deleted state.
+        chipTrailingToDeleteBtn = priorityChip.trailingAnchor.constraint(
+            equalTo: deleteButton.leadingAnchor, constant: -6)
+        chipTrailingToCardEdge  = priorityChip.trailingAnchor.constraint(
+            equalTo: card.trailingAnchor, constant: -12)
+        chipTrailingToDeleteBtn.isActive = true   // default: active note → trash visible
 
         // When no reply bar, bodyLabel must close the card bottom.
         let bodyBottom = bodyLabel.bottomAnchor.constraint(
@@ -304,9 +332,13 @@ final class ProgressNoteRowCell: UITableViewCell {
             priorityChip.backgroundColor = Self.normalColor
         }
 
-        // ── Deleted badge & card dimming ─────────────────────────────────────────
-        deletedBadge.isHidden = !isDeleted
-        card.alpha            = isDeleted ? 0.55 : 1.0
+        // ── Deleted-state styling: card dim + trash hidden ───────────────────────
+        // No "Deleted" badge — the strikethrough on bodyLabel above is the only
+        // textual signal, matching the user's design feedback.
+        card.alpha            = isDeleted ? 0.75 : 1.0
+        deleteButton.isHidden = isDeleted
+        chipTrailingToDeleteBtn.isActive = !isDeleted
+        chipTrailingToCardEdge.isActive  = isDeleted
 
         // ── Voice note icon ──────────────────────────────────────────────────────
         let hasVoice = note.nurseNotes?.contains("[Voice note]") ?? false
@@ -330,18 +362,27 @@ final class ProgressNoteRowCell: UITableViewCell {
         bodyLabel.attributedText = nil
         bodyLabel.text           = nil
         card.alpha               = 1.0
-        deletedBadge.isHidden    = true
+        deleteButton.isHidden    = false
+        chipTrailingToDeleteBtn.isActive = true
+        chipTrailingToCardEdge.isActive  = false
+        onDeleteTapped           = nil
         voiceIcon.isHidden       = true
         replyBar.isHidden        = true
         replyLabel.text          = nil
+    }
+
+    // MARK: - Actions
+
+    @objc private func didTapDelete() {
+        onDeleteTapped?()
     }
 }
 
 // MARK: - PaddedLabel (replaces the string-padding hack for chips)
 
 /// UILabel subclass that adds configurable insets around the text.
-/// Used for priorityChip and deletedBadge so padding is layout-driven,
-/// not embedded in the label's string content.
+/// Used for priorityChip so padding is layout-driven rather than embedded
+/// in the label's string content.
 private final class PaddedLabel: UILabel {
     var insets = UIEdgeInsets(top: 3, left: 8, bottom: 3, right: 8) {
         didSet { invalidateIntrinsicContentSize() }
