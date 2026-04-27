@@ -138,6 +138,13 @@ final class ProgressNotesViewController: UIViewController {
         styleChipButton(filterPill, title: "Filter", systemIcon: "line.horizontal.3.decrease")
         filterPill.translatesAutoresizingMaskIntoConstraints = false
         filterPill.addTarget(self, action: #selector(didTapFilter), for: .touchUpInside)
+        // When a filter is active the pill becomes "Filter: <selection>" — long
+        // selections used to render as "Doctors • A…" because the chip was
+        // letting itself be compressed. Lock it to its intrinsic width.
+        filterPill.titleLabel?.lineBreakMode = .byClipping
+        filterPill.titleLabel?.adjustsFontSizeToFitWidth = false
+        filterPill.setContentCompressionResistancePriority(.required, for: .horizontal)
+        filterPill.setContentHuggingPriority(.defaultHigh, for: .horizontal)
         view.addSubview(filterPill)
 
         // Active-filter dot (small red circle pinned to the pill's top-right)
@@ -158,7 +165,8 @@ final class ProgressNotesViewController: UIViewController {
         tableView.dataSource = self
         tableView.delegate   = self
         tableView.keyboardDismissMode = .interactive
-        tableView.register(ProgressNoteRowCell.self, forCellReuseIdentifier: ProgressNoteRowCell.reuseId)
+        tableView.register(ProgressNoteRowCell.self,   forCellReuseIdentifier: ProgressNoteRowCell.reuseId)
+        tableView.register(ProgressNoteReplyCell.self, forCellReuseIdentifier: ProgressNoteReplyCell.reuseId)
         view.addSubview(tableView)
 
         emptyLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -200,7 +208,9 @@ final class ProgressNotesViewController: UIViewController {
         micButton.addTarget(self, action: #selector(didTapMic), for: .touchUpInside)
         composerBar.addSubview(micButton)
 
-        styleChipButton(showToButton, title: "All", systemIcon: "eye")
+        // Show-to: ICON ONLY (no label) per design — the eye glyph alone
+        // signals "who can see this". Tap still opens the show-to picker.
+        styleIconOnlyChipButton(showToButton, systemIcon: "eye")
         showToButton.translatesAutoresizingMaskIntoConstraints = false
         showToButton.addTarget(self, action: #selector(didTapShowTo), for: .touchUpInside)
         composerBar.addSubview(showToButton)
@@ -208,6 +218,10 @@ final class ProgressNotesViewController: UIViewController {
         styleChipButton(priorityButton, title: "Normal", systemIcon: "flag.fill")
         priorityButton.translatesAutoresizingMaskIntoConstraints = false
         priorityButton.addTarget(self, action: #selector(didTapPriority), for: .touchUpInside)
+        // Don't let layout squeeze "Normal" / "Urgent" into "N…al".
+        priorityButton.titleLabel?.lineBreakMode = .byClipping
+        priorityButton.setContentCompressionResistancePriority(.required, for: .horizontal)
+        priorityButton.setContentHuggingPriority(.defaultHigh, for: .horizontal)
         composerBar.addSubview(priorityButton)
 
         sendButton.translatesAutoresizingMaskIntoConstraints = false
@@ -326,6 +340,27 @@ final class ProgressNotesViewController: UIViewController {
         }
     }
 
+    /// Small circular chip with an SF Symbol and NO title — used for the
+    /// show-to selector where the eye glyph carries the meaning on its own.
+    private func styleIconOnlyChipButton(_ btn: UIButton, systemIcon: String) {
+        btn.backgroundColor = pillBG
+        btn.setTitle(nil, for: .normal)
+        btn.layer.cornerRadius = 15        // matches 30pt height
+        btn.layer.borderWidth  = 1
+        btn.layer.borderColor  = pillBorder.cgColor
+        btn.contentEdgeInsets  = .zero
+        btn.imageEdgeInsets    = .zero
+        btn.titleEdgeInsets    = .zero
+        if #available(iOS 13, *) {
+            let cfg = UIImage.SymbolConfiguration(pointSize: 14, weight: .semibold)
+            btn.setImage(UIImage(systemName: systemIcon, withConfiguration: cfg), for: .normal)
+            btn.tintColor = teal
+        }
+        // Make it a square pill — matches the priority chip's height.
+        btn.translatesAutoresizingMaskIntoConstraints = false
+        btn.widthAnchor.constraint(equalToConstant: 30).isActive = true
+    }
+
     private func styleIconButton(_ btn: UIButton, systemIcon: String, tint: UIColor) {
         if #available(iOS 13, *) {
             let cfg = UIImage.SymbolConfiguration(pointSize: 16, weight: .semibold)
@@ -351,8 +386,12 @@ final class ProgressNotesViewController: UIViewController {
     }
 
     private func updateComposerChips() {
-        // Show-to chip — title is just the value (icon conveys the "show to" meaning).
-        showToButton.setTitle(presenter.draftShowToLabel, for: .normal)
+        // Show-to is icon-only by design — the chosen audience is conveyed by
+        // the picker sheet, not a chip label. Keep the title nil and just
+        // update the accessibility hint so VoiceOver still announces the
+        // current selection.
+        showToButton.setTitle(nil, for: .normal)
+        showToButton.accessibilityLabel = "Show to: \(presenter.draftShowToLabel)"
 
         // Priority chip — red theme when urgent, teal otherwise.
         priorityButton.setTitle(presenter.draftPriorityLabel, for: .normal)
@@ -483,8 +522,29 @@ final class ProgressNotesViewController: UIViewController {
 
     @objc private func didTapSend() {
         view.endEditing(true)
+        // Snapshot the current text into the presenter BEFORE clearing the
+        // field. Clearing immediately prevents the duplicate-send bug where
+        // a rapid second tap would re-pull the (still-populated) field into
+        // draftText and fire another POST while the first was in flight.
         presenter.draftText = textField.text ?? ""
+        textField.text = ""
+        preDictationText = ""
+        // Visually + functionally lock the send button until the POST resolves.
+        // The presenter's internal `isSending` guard is the real defence; this
+        // is just user feedback that the tap was registered.
+        setSendButtonEnabled(false)
         presenter.send()
+        // If the presenter rejected the send (empty text, already in flight),
+        // its `isSending` will be false and we should re-enable straight away.
+        if !presenter.isSending {
+            setSendButtonEnabled(true)
+        }
+    }
+
+    /// Updates the send button's enabled-state and visual appearance.
+    private func setSendButtonEnabled(_ enabled: Bool) {
+        sendButton.isEnabled = enabled
+        sendButton.alpha     = enabled ? 1.0 : 0.5
     }
 
     /// Mic button toggles live speech-to-text dictation. When active, the user
@@ -580,21 +640,59 @@ final class ProgressNotesViewController: UIViewController {
 extension ProgressNotesViewController: UITableViewDataSource, UITableViewDelegate {
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return presenter?.notes.count ?? 0
+        // Each note + its (optional) reply each get their own row, so the
+        // count comes from `displayItems` rather than `notes` directly.
+        return presenter?.displayItems.count ?? 0
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: ProgressNoteRowCell.reuseId,
-                                                 for: indexPath) as! ProgressNoteRowCell
-        let note = presenter.notes[indexPath.row]
-        cell.configure(with: note)
-        // Snapshot the SER (not the IndexPath — rows can shift between the tap and
-        // the callback) so the presenter can find the right row to soft-delete.
-        let ser = note.ser
-        cell.onDeleteTapped = { [weak self] in
-            self?.confirmDelete(ser: ser)
+        let item = presenter.displayItems[indexPath.row]
+        switch item {
+        case .note(let note):
+            let cell = tableView.dequeueReusableCell(withIdentifier: ProgressNoteRowCell.reuseId,
+                                                     for: indexPath) as! ProgressNoteRowCell
+            cell.configure(with: note)
+            // Snapshot the SER (not the IndexPath — rows can shift between the
+            // tap and the callback) so the presenter can find the right row
+            // to soft-delete or attach a reply to.
+            let ser = note.ser
+            cell.onDeleteTapped = { [weak self] in
+                self?.confirmDelete(ser: ser)
+            }
+            cell.onReplyTapped = { [weak self] in
+                self?.presentReplyComposer(parentSer: ser)
+            }
+            return cell
+
+        case .reply(let reply, _):
+            let cell = tableView.dequeueReusableCell(withIdentifier: ProgressNoteReplyCell.reuseId,
+                                                     for: indexPath) as! ProgressNoteReplyCell
+            cell.configure(with: reply)
+            return cell
         }
-        return cell
+    }
+
+    /// Presents a small text-input alert for composing a reply to a parent note.
+    /// The reply lives only on this device for now (presenter.addLocalReply is
+    /// in-memory only) — the POST API will be wired in a follow-up.
+    /// Reply-on-reply is forbidden by design: this is only invoked from
+    /// `ProgressNoteRowCell` (parent notes), never from `ProgressNoteReplyCell`.
+    private func presentReplyComposer(parentSer: String?) {
+        guard let ser = parentSer, !ser.isEmpty, ser != "0" else {
+            // Optimistic / unsynced parent — bail. Reply needs a real SER so it
+            // can be re-attached to the right row when the server reloads.
+            presentAlert("This note hasn't synced yet. Please wait a moment and try again.")
+            return
+        }
+        // Custom modal (replaces the old UIAlertController) so the user gets
+        // a multi-line text view + a mic button for live speech-to-text,
+        // matching the main composer.
+        let composer = ReplyComposerViewController()
+        composer.onSubmit = { [weak self] body in
+            guard let self = self, let body = body else { return }
+            self.presenter.addLocalReply(toNoteSer: ser, body: body)
+        }
+        present(composer, animated: true)
     }
 
     /// Presents a two-button alert before soft-deleting a note. Matches the
@@ -622,15 +720,21 @@ extension ProgressNotesViewController: UITableViewDataSource, UITableViewDelegat
 
 extension ProgressNotesViewController: ProgressNotesView {
     func progressNotesDidReload() {
-        let count = presenter.notes.count
-        print("[ProgressNotes] VC progressNotesDidReload → \(count) notes → reloading tableView")
-        emptyLabel.isHidden = (count > 0)
+        // Drive the empty state from `notes` (i.e. parent rows only) — when
+        // there are notes but no replies the table still has content.
+        let noteCount = presenter.notes.count
+        let rowCount  = presenter.displayItems.count
+        print("[ProgressNotes] VC progressNotesDidReload → \(noteCount) notes / \(rowCount) rows → reloading tableView")
+        emptyLabel.isHidden = (noteCount > 0)
         tableView.reloadData()
         updateComposerChips()
         updateFilterPill()
     }
 
     func progressNotesDidSend(success: Bool, message: String?) {
+        // Re-enable send regardless of outcome (paired with `setSendButtonEnabled(false)`
+        // in didTapSend).
+        setSendButtonEnabled(true)
         if success {
             textField.text = ""
             preDictationText = ""

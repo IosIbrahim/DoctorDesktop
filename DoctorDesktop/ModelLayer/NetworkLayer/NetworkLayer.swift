@@ -62,6 +62,14 @@ protocol NetworkLayer {
     /// JSON-string fields: SI, DOCTOR_NURSE_REMARKS, DD_UC_PARMS.
     /// Response: `{"message":"Save Success"}`.
     func saveDoctorNurseNotes(with params: [String: String], finished: @escaping DataBlock)
+    /// POST /MobileApi/api/MedicalRcordController/DDDocNurseReplySave — appends a
+    /// reply to an existing progress note. Same auth + body shape as save:
+    /// form-urlencoded with three JSON-string fields (SI, DOCTOR_NURSE_REMARKS,
+    /// DD_UC_PARMS). DOCTOR_NURSE_REMARKS is a single-row array of
+    /// `{BUFFER_STATUS:"1", PARENT_SER:"<note SER>", REPLY_DESC:"<text>"}`.
+    /// PROCESS_ID is `2064` (distinct from the save endpoint's `994`).
+    /// Response: `{"message":"Save Success"}`.
+    func saveDoctorNurseReply(with params: [String: String], finished: @escaping DataBlock)
     func getSymptoms(with params: [String: String], finished: @escaping DataBlock)
     func loadFlagImage(with params: [String: String], finished: @escaping DataBlock)
     func getVisitsDetail(with params: [String: String], finished: @escaping DataBlock)
@@ -387,6 +395,14 @@ class NetworkLayerImpl: NetworkLayer {
         // DD_UC_PARMS.
         let base = AppURLS.ip + "/MobileApi/api/MedicalRcordController/DDDocNurseNotesSave"
         signedFormPOST(base: base, tag: "NurseNotesSave", params: params, finished: finished)
+    }
+
+    func saveDoctorNurseReply(with params: [String: String], finished: @escaping DataBlock) {
+        // Replies have a dedicated endpoint distinct from notes save/delete.
+        // Same auth/body machinery as `saveDoctorNurseNotes` though, so we
+        // route through the same signed-form-POST helper.
+        let base = AppURLS.ip + "/MobileApi/api/MedicalRcordController/DDDocNurseReplySave"
+        signedFormPOST(base: base, tag: "NurseReplySave", params: params, finished: finished)
     }
 
     /// Shared helper: signed (OAuth 1.0 HMAC-SHA1) POST with a form-urlencoded body,

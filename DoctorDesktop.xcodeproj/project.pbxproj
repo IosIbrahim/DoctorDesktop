@@ -155,6 +155,8 @@
 		AABBCC020000000000000001 /* ProgressNotesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCC020000000000000101 /* ProgressNotesViewController.swift */; };
 		AABBCC020000000000000002 /* ProgressNotesPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCC020000000000000102 /* ProgressNotesPresenter.swift */; };
 		AABBCC020000000000000003 /* ProgressNoteRowCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCC020000000000000103 /* ProgressNoteRowCell.swift */; };
+		AABBCC020000000000000008 /* ProgressNoteReplyCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCC020000000000000108 /* ProgressNoteReplyCell.swift */; };
+		AABBCC020000000000000009 /* ReplyComposerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCC020000000000000109 /* ReplyComposerViewController.swift */; };
 		AABBCC020000000000000004 /* VoiceNoteRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCC020000000000000104 /* VoiceNoteRecorder.swift */; };
 		AABBCC020000000000000005 /* DoctorNurseNotesData.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCC020000000000000105 /* DoctorNurseNotesData.swift */; };
 		AABBCC020000000000000006 /* ProgressNotesFilterSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCC020000000000000106 /* ProgressNotesFilterSheet.swift */; };
@@ -400,6 +402,8 @@
 		AABBCC020000000000000101 /* ProgressNotesViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProgressNotesViewController.swift; sourceTree = "<group>"; };
 		AABBCC020000000000000102 /* ProgressNotesPresenter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProgressNotesPresenter.swift; sourceTree = "<group>"; };
 		AABBCC020000000000000103 /* ProgressNoteRowCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProgressNoteRowCell.swift; sourceTree = "<group>"; };
+		AABBCC020000000000000108 /* ProgressNoteReplyCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProgressNoteReplyCell.swift; sourceTree = "<group>"; };
+		AABBCC020000000000000109 /* ReplyComposerViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReplyComposerViewController.swift; sourceTree = "<group>"; };
 		AABBCC020000000000000104 /* VoiceNoteRecorder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VoiceNoteRecorder.swift; sourceTree = "<group>"; };
 		AABBCC020000000000000105 /* DoctorNurseNotesData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DoctorNurseNotesData.swift; sourceTree = "<group>"; };
 		AABBCC020000000000000106 /* ProgressNotesFilterSheet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProgressNotesFilterSheet.swift; sourceTree = "<group>"; };
@@ -1052,6 +1056,8 @@
 				AABBCC020000000000000101 /* ProgressNotesViewController.swift */,
 				AABBCC020000000000000102 /* ProgressNotesPresenter.swift */,
 				AABBCC020000000000000103 /* ProgressNoteRowCell.swift */,
+				AABBCC020000000000000108 /* ProgressNoteReplyCell.swift */,
+				AABBCC020000000000000109 /* ReplyComposerViewController.swift */,
 				AABBCC020000000000000104 /* VoiceNoteRecorder.swift */,
 				AABBCC020000000000000106 /* ProgressNotesFilterSheet.swift */,
 				AABBCC020000000000000107 /* SpeechDictation.swift */,
@@ -1744,6 +1750,8 @@
 				AABBCC020000000000000001 /* ProgressNotesViewController.swift in Sources */,
 				AABBCC020000000000000002 /* ProgressNotesPresenter.swift in Sources */,
 				AABBCC020000000000000003 /* ProgressNoteRowCell.swift in Sources */,
+				AABBCC020000000000000008 /* ProgressNoteReplyCell.swift in Sources */,
+				AABBCC020000000000000009 /* ReplyComposerViewController.swift in Sources */,
 				AABBCC020000000000000004 /* VoiceNoteRecorder.swift in Sources */,
 				AABBCC020000000000000005 /* DoctorNurseNotesData.swift in Sources */,
 				AABBCC020000000000000006 /* ProgressNotesFilterSheet.swift in Sources */,

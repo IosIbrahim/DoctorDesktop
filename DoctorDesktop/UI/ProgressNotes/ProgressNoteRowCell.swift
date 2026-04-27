@@ -11,8 +11,11 @@
 //    TRANSDATE                  → dateLabel
 //    DESC_EN / NURSE_NOTES      → bodyLabel          (NURSE_NOTES preferred)
 //    PRIORITY_TYPE              → priorityChip       ("1"=Normal, "2"=Urgent)
-//    REPLY                      → replyBar           (shown when non-empty)
 //    DELETE_UPDATE_FLAG         → strikethrough body + dim card ("1" = deleted)
+//
+//  Replies (REPLY.REPLY_ROW) are rendered as their own right-aligned bubble
+//  by ProgressNoteReplyCell — the view controller interleaves the two cell
+//  types based on `presenter.displayItems`. This cell never shows reply text.
 //
 
 import UIKit
@@ -34,6 +37,13 @@ final class ProgressNoteRowCell: UITableViewCell {
     /// + calling the presenter.
     var onDeleteTapped: (() -> Void)?
 
+    /// Invoked when the user taps the "Reply" pill at the bottom of the card.
+    /// The view controller presents a text-input prompt and calls
+    /// `presenter.addLocalReply(toNoteSer:body:)`. Reply-on-reply is forbidden,
+    /// so this callback is wired only on parent-note cells (this class) and
+    /// never on `ProgressNoteReplyCell`.
+    var onReplyTapped: (() -> Void)?
+
     // MARK: Views
 
     private let card          = UIView()
@@ -44,12 +54,8 @@ final class ProgressNoteRowCell: UITableViewCell {
     private let bodyLabel     = UILabel()
     private let priorityChip  = PaddedLabel()
     private let deleteButton  = UIButton(type: .system)
+    private let replyButton   = UIButton(type: .system)
     private let voiceIcon     = UIImageView()
-
-    // Reply row
-    private let replyBar      = UIView()
-    private let replyDot      = UIView()
-    private let replyLabel    = UILabel()
 
     // ── Layout constraints toggled by `configure(with:)` ──────────────────────
     // When the note is deleted we hide the trash button and pin the priority chip
@@ -160,21 +166,35 @@ final class ProgressNoteRowCell: UITableViewCell {
         }
         card.addSubview(voiceIcon)
 
-        // ── Reply row ────────────────────────────────────────────────────────────
-        replyBar.isHidden = true
-        replyBar.translatesAutoresizingMaskIntoConstraints = false
-        card.addSubview(replyBar)
-
-        replyDot.backgroundColor = Self.teal
-        replyDot.layer.cornerRadius = 3
-        replyDot.translatesAutoresizingMaskIntoConstraints = false
-        replyBar.addSubview(replyDot)
-
-        replyLabel.font = UIFont.italicSystemFont(ofSize: 12)
-        replyLabel.textColor = UIColor(white: 0.35, alpha: 1)
-        replyLabel.numberOfLines = 0
-        replyLabel.translatesAutoresizingMaskIntoConstraints = false
-        replyBar.addSubview(replyLabel)
+        // ── Reply pill ──────────────────────────────────────────────────────────
+        // Bottom-trailing pill that opens the reply composer. Reply text itself
+        // is rendered as a separate ProgressNoteReplyCell below — this button
+        // only triggers the input flow. No reply-on-reply: this button only
+        // exists on parent notes.
+        replyButton.setTitle("Reply", for: .normal)
+        replyButton.titleLabel?.font = UIFont.systemFont(ofSize: 12, weight: .semibold)
+        replyButton.setTitleColor(Self.teal, for: .normal)
+        replyButton.backgroundColor = Self.teal.withAlphaComponent(0.10)
+        replyButton.layer.cornerRadius = 12
+        replyButton.contentEdgeInsets = UIEdgeInsets(top: 4, left: 12, bottom: 4, right: 12)
+        if #available(iOS 13, *) {
+            let cfg = UIImage.SymbolConfiguration(pointSize: 11, weight: .semibold)
+            replyButton.setImage(UIImage(systemName: "arrowshape.turn.up.left.fill",
+                                         withConfiguration: cfg),
+                                 for: .normal)
+            replyButton.tintColor = Self.teal
+            replyButton.imageEdgeInsets = UIEdgeInsets(top: 0, left: -4, bottom: 0, right: 4)
+            replyButton.titleEdgeInsets = UIEdgeInsets(top: 0, left: 2, bottom: 0, right: 0)
+        }
+        replyButton.addTarget(self, action: #selector(didTapReply), for: .touchUpInside)
+        replyButton.translatesAutoresizingMaskIntoConstraints = false
+        // Don't let layout shorten "Reply" into "R…ly". Forcing high
+        // compression resistance + clipping keeps the full word visible.
+        replyButton.titleLabel?.lineBreakMode = .byClipping
+        replyButton.titleLabel?.adjustsFontSizeToFitWidth = false
+        replyButton.setContentCompressionResistancePriority(.required, for: .horizontal)
+        replyButton.setContentHuggingPriority(.required, for: .horizontal)
+        card.addSubview(replyButton)
 
         // ── Layout ──────────────────────────────────────────────────────────────
         NSLayoutConstraint.activate([
@@ -231,22 +251,11 @@ final class ProgressNoteRowCell: UITableViewCell {
             voiceIcon.widthAnchor.constraint(equalToConstant: 22),
             voiceIcon.heightAnchor.constraint(equalToConstant: 22),
 
-            // Reply bar — below body
-            replyBar.topAnchor.constraint(equalTo: bodyLabel.bottomAnchor, constant: 8),
-            replyBar.leadingAnchor.constraint(equalTo: card.leadingAnchor, constant: 12),
-            replyBar.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -12),
-            replyBar.bottomAnchor.constraint(equalTo: card.bottomAnchor, constant: -12),
-
-            replyDot.leadingAnchor.constraint(equalTo: replyBar.leadingAnchor),
-            replyDot.centerYAnchor.constraint(equalTo: replyLabel.firstBaselineAnchor,
-                                              constant: -4),
-            replyDot.widthAnchor.constraint(equalToConstant: 6),
-            replyDot.heightAnchor.constraint(equalToConstant: 6),
-
-            replyLabel.topAnchor.constraint(equalTo: replyBar.topAnchor),
-            replyLabel.leadingAnchor.constraint(equalTo: replyDot.trailingAnchor, constant: 8),
-            replyLabel.trailingAnchor.constraint(equalTo: replyBar.trailingAnchor),
-            replyLabel.bottomAnchor.constraint(equalTo: replyBar.bottomAnchor),
+            // Reply pill below the body, trailing-aligned. Closes the card.
+            replyButton.topAnchor.constraint(equalTo: bodyLabel.bottomAnchor, constant: 8),
+            replyButton.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -12),
+            replyButton.heightAnchor.constraint(equalToConstant: 24),
+            replyButton.bottomAnchor.constraint(equalTo: card.bottomAnchor, constant: -10),
         ])
 
         // Two competing priorityChip trailing constraints — exactly one is active
@@ -256,12 +265,6 @@ final class ProgressNoteRowCell: UITableViewCell {
         chipTrailingToCardEdge  = priorityChip.trailingAnchor.constraint(
             equalTo: card.trailingAnchor, constant: -12)
         chipTrailingToDeleteBtn.isActive = true   // default: active note → trash visible
-
-        // When no reply bar, bodyLabel must close the card bottom.
-        let bodyBottom = bodyLabel.bottomAnchor.constraint(
-            equalTo: card.bottomAnchor, constant: -12)
-        bodyBottom.priority = UILayoutPriority(rawValue: 749)
-        bodyBottom.isActive = true
     }
 
     // MARK: - Configure
@@ -337,6 +340,11 @@ final class ProgressNoteRowCell: UITableViewCell {
         // textual signal, matching the user's design feedback.
         card.alpha            = isDeleted ? 0.75 : 1.0
         deleteButton.isHidden = isDeleted
+        // Optimistic-only rows (SER missing or "0") have no server identity yet,
+        // so a reply on them couldn't be associated with a parent. We hide the
+        // reply pill until the server reload comes back with the real SER.
+        let hasServerSer = !(note.ser ?? "").isEmpty && (note.ser ?? "") != "0"
+        replyButton.isHidden  = isDeleted || !hasServerSer
         chipTrailingToDeleteBtn.isActive = !isDeleted
         chipTrailingToCardEdge.isActive  = isDeleted
 
@@ -344,15 +352,8 @@ final class ProgressNoteRowCell: UITableViewCell {
         let hasVoice = note.nurseNotes?.contains("[Voice note]") ?? false
         voiceIcon.isHidden = !hasVoice
 
-        // ── Reply bar ────────────────────────────────────────────────────────────
-        let reply = note.reply?.trimmingCharacters(in: .whitespaces) ?? ""
-        if reply.isEmpty {
-            replyBar.isHidden  = true
-            replyLabel.text    = nil
-        } else {
-            replyBar.isHidden  = false
-            replyLabel.text    = reply
-        }
+        // (Reply text is rendered by ProgressNoteReplyCell on the next row —
+        // see ProgressNotesPresenter.displayItems.)
     }
 
     // MARK: - Reuse reset
@@ -363,18 +364,22 @@ final class ProgressNoteRowCell: UITableViewCell {
         bodyLabel.text           = nil
         card.alpha               = 1.0
         deleteButton.isHidden    = false
+        replyButton.isHidden     = false
         chipTrailingToDeleteBtn.isActive = true
         chipTrailingToCardEdge.isActive  = false
         onDeleteTapped           = nil
+        onReplyTapped            = nil
         voiceIcon.isHidden       = true
-        replyBar.isHidden        = true
-        replyLabel.text          = nil
     }
 
     // MARK: - Actions
 
     @objc private func didTapDelete() {
         onDeleteTapped?()
+    }
+
+    @objc private func didTapReply() {
+        onReplyTapped?()
     }
 }
 

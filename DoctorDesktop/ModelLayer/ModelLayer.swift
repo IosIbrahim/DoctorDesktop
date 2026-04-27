@@ -47,6 +47,9 @@ protocol ModelLayer {
     /// DD_UC_PARMS. Response: `{"message":"Save Success"}`.
     /// Returns (success, serverMessage) via the completion.
     func saveDoctorNurseNotes(with params: [String: String], finished: @escaping (Bool, String?) -> Void)
+    /// POSTs a reply to an existing progress note. Returns (success, message)
+    /// — message is `"Save Success"` on the happy path.
+    func saveDoctorNurseReply(with params: [String: String], finished: @escaping (Bool, String?) -> Void)
 
     func getSymptomCategories(with params: [String: String], finished: @escaping RegularSymptomCategoriesBlock)
     func getSymptoms(with params: [String: String], finished: @escaping SymptomsBlock)
@@ -291,6 +294,20 @@ extension ModelLayerImpl {
                             finished: @escaping (Bool, String?) -> Void) {
     networkLayer.saveDoctorNurseNotes(with: params) { data in
       // Server returns `{"message":"Save Success"}` on success, other message on failure.
+      guard let json = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any] else {
+        finished(false, nil); return
+      }
+      let message = json["message"] as? String
+      let success = (message ?? "").lowercased().contains("success")
+      finished(success, message)
+    }
+  }
+
+  func saveDoctorNurseReply(with params: [String: String],
+                            finished: @escaping (Bool, String?) -> Void) {
+    networkLayer.saveDoctorNurseReply(with: params) { data in
+      // Same response shape as saveDoctorNurseNotes — `{"message":"Save Success"}`
+      // on success, anything else on failure.
       guard let json = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any] else {
         finished(false, nil); return
       }

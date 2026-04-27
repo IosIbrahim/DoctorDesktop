@@ -20,6 +20,16 @@ protocol ProgressNotesView: AnyObject {
     func progressNotesDidSend(success: Bool, message: String?)
 }
 
+// MARK: - Display item
+
+/// One row in the table. Notes that have a non-deleted REPLY_ROW expand into
+/// TWO sequential items — the parent note (left bubble) immediately followed
+/// by its reply (right bubble) — matching the Android chat layout.
+enum ProgressNoteDisplayItem {
+    case note(DoctorNurseNote)
+    case reply(DoctorNurseNoteReply, parentSer: String?)
+}
+
 // MARK: - Presenter protocol
 
 protocol ProgressNotesPresenter: AnyObject {
@@ -29,6 +39,9 @@ protocol ProgressNotesPresenter: AnyObject {
 
     // Loaded lookup arrays (populated after first successful load)
     var notes:       [DoctorNurseNote] { get }
+    /// Flat list the table renders — interleaves notes with their replies so
+    /// each reply gets its own right-aligned bubble cell.
+    var displayItems: [ProgressNoteDisplayItem] { get }
     var priorities:  [NurseNoteLookup] { get }   // NURSE_REMARKS_PRIORITY_ROW
     var showToList:  [NurseNoteLookup] { get }   // NURSE_REMARKS_SHOW_D_N_ROW
     var visitTypes:  [NurseNoteLookup] { get }   // VISIT_TYPE_ROW
@@ -66,9 +79,30 @@ protocol ProgressNotesPresenter: AnyObject {
     func resetFilter()
     /// Send the current draft.
     func send()
+    /// True while a `send()` POST is in flight. The view binds the send
+    /// button's enabled-state to this so rapid double-taps can't fire
+    /// multiple POSTs (which is what produced 3-4 duplicate rows server-side).
+    var isSending: Bool { get }
     /// Soft-delete the note at the given row in `notes`. The UI shows an
     /// optimistic strikethrough while the POST is in flight.
     func deleteNote(at index: Int)
+
+    // MARK: - Replies
+    //
+    // The server stores ONE reply per note in REPLY_ROW. The "compose reply"
+    // feature now POSTs to DDDocNurseReplySave and reloads on success so
+    // the freshly-saved reply round-trips through the authoritative list.
+    // The local dictionary `localReplies` is kept as the optimistic
+    // intermediate state — the bubble appears instantly, then `load()`
+    // wipes it and replaces it with REPLY_ROW from the server.
+
+    /// Optimistically append a reply locally, then fire the POST. On
+    /// success the screen reloads (server REPLY_ROW replaces the local
+    /// bubble); on failure the optimistic insert is rolled back.
+    /// `parentSer` MUST be the SER of a real (synced) parent note —
+    /// you cannot reply to a reply, and you cannot reply to an
+    /// optimistic row that hasn't received its server SER yet.
+    func addLocalReply(toNoteSer parentSer: String, body: String)
 }
 
 // MARK: - Implementation
@@ -91,6 +125,46 @@ final class ProgressNotesPresenterImpl: ProgressNotesPresenter {
 
     /// Filtered view of `allNotes` — what the table actually displays.
     var notes: [DoctorNurseNote] { applyClientFilter(to: allNotes) }
+
+    /// Local-only replies composed on this device. Keyed by parent note SER.
+    /// Wiped on every `load()` (until the server API is wired the new
+    /// reply only lives in memory — that's the explicit user requirement).
+    private var localReplies: [String: [DoctorNurseNoteReply]] = [:]
+
+    /// Set to true while a save POST is in flight; gates `send()` against
+    /// re-entry from rapid taps.
+    private(set) var isSending: Bool = false
+
+    /// Flat list of cells: each note is followed by its server-side reply
+    /// (when present and not server-deleted) and then any local replies
+    /// composed on this device. Replies inherit the parent's filter
+    /// visibility because they're built from the already-filtered `notes`.
+    var displayItems: [ProgressNoteDisplayItem] {
+        var items: [ProgressNoteDisplayItem] = []
+        // Estimate: parent + server reply + ≤2 local replies on average.
+        items.reserveCapacity(notes.count * 3)
+        for n in notes {
+            items.append(.note(n))
+            // Server-side replies. REPLY_ROW comes back as either a single
+            // object or an array depending on the count — both shapes are
+            // already normalised into `replyDetails` by the DTO layer, so we
+            // can just iterate. Skipping deleted/empty rows mirrors the old
+            // single-reply branch.
+            for r in n.replyDetails where !r.isDeleted && !r.body.isEmpty {
+                items.append(.reply(r, parentSer: n.ser))
+            }
+            // Locally-composed replies appended in order. We key by SER so
+            // a reply stays attached to the right note even when the server
+            // returns a fresh list (replies on rows the server never knew
+            // about — i.e. SER == "0" optimistic inserts — also work).
+            if let ser = n.ser, let extras = localReplies[ser] {
+                for r in extras where !r.body.isEmpty {
+                    items.append(.reply(r, parentSer: ser))
+                }
+            }
+        }
+        return items
+    }
 
     private(set) var priorities: [NurseNoteLookup] = []
     private(set) var showToList: [NurseNoteLookup] = []
@@ -175,12 +249,21 @@ final class ProgressNotesPresenterImpl: ProgressNotesPresenter {
     }
 
     func send() {
+        // Re-entrancy guard.  Without it, rapid taps on the Send button would
+        // fire `presenter.send()` 3-4 times before the first POST returned —
+        // each tap re-pulled the (still-populated) text field into draftText
+        // and inserted a new optimistic row, and the server actually received
+        // 3-4 separate inserts, producing identical-looking duplicates on the
+        // next reload.
+        if isSending { return }
+
         let trimmed = draftText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else {
             view?.progressNotesDidSend(success: false,
                                        message: "Please enter a note.")
             return
         }
+        isSending = true
 
         // ── Build the three JSON payloads the server expects ─────────────────
         let branchID = Int(user.branch ?? "1") ?? 1
@@ -271,11 +354,16 @@ final class ProgressNotesPresenterImpl: ProgressNotesPresenter {
                 if success {
                     self.view?.progressNotesDidSend(success: true,
                                                     message: message ?? "Sent")
-                    // Reload from server to pull the authoritative row (replaces
-                    // the optimistic one with the server's SER / TRANS_DATE).
-                    self.load()
+                    // Keep `isSending` true through the reload — between the
+                    // save callback and the load() callback there's a brief
+                    // window during which a fast retap could fire a second
+                    // save and the server would persist a duplicate. The
+                    // load() callback will clear isSending once the server's
+                    // authoritative list is in.
+                    self.fetchAndClearSending()
                 } else {
                     // Roll back the optimistic insert on failure.
+                    self.isSending = false
                     if !self.allNotes.isEmpty { self.allNotes.removeFirst() }
                     self.view?.progressNotesDidReload()
                     self.view?.progressNotesDidSend(
@@ -283,6 +371,138 @@ final class ProgressNotesPresenterImpl: ProgressNotesPresenter {
                         message: message ?? "Could not save the note. Please try again.")
                 }
             }
+        }
+    }
+
+    /// load() variant used after a successful save. Clears `isSending` only
+    /// once the post-save reload has populated the authoritative list, closing
+    /// the rapid-retap duplicate-save window.
+    private func fetchAndClearSending() {
+        fetch(init: "1", visitTypeId: "", filterId: "", clearIsSendingOnDone: true)
+    }
+
+    // MARK: - Local reply append
+
+    func addLocalReply(toNoteSer parentSer: String, body: String) {
+        let trimmed = body.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        guard !parentSer.isEmpty, parentSer != "0" else {
+            // Should be blocked at the call site (the Reply pill is hidden
+            // for unsynced rows), but guard here too — replying to an
+            // optimistic row would 500 the server.
+            DispatchQueue.main.async {
+                self.view?.progressNotesDidSend(
+                    success: false,
+                    message: "This note hasn't synced yet. Try again in a moment.")
+            }
+            return
+        }
+
+        // ── Optimistic local bubble so the UI feels instant ────────────────
+        // SER is nil because the server hasn't assigned one yet; the
+        // post-success reload replaces this with the authoritative
+        // REPLY_ROW (which carries the real SER, dateEnter, etc.).
+        let reply = DoctorNurseNoteReply(
+            ser:             nil,
+            replyDesc:       trimmed,
+            userEnterNameEn: user.englishName ?? user.userName,
+            userEnterNameAr: user.arabicName,
+            dateEnter:       Self.nowString(),
+            userDelete:      nil,
+            dateDelete:      nil,
+            deleteFlag:      nil,
+            userOpenFlag:    "D",
+            modifyFlag:      "1"
+        )
+
+        var bucket = localReplies[parentSer] ?? []
+        bucket.append(reply)
+        localReplies[parentSer] = bucket
+        DispatchQueue.main.async { self.view?.progressNotesDidReload() }
+
+        // ── Build payload (matches Android byte-for-byte) ──────────────────
+        // SI: branch / user identity (same shape as save).
+        // DOCTOR_NURSE_REMARKS: single-row array — BUFFER_STATUS=1 is the
+        // server's "insert" flag; PARENT_SER points at the note we're
+        // replying to; REPLY_DESC carries the body.
+        // DD_UC_PARMS: PROCESS_ID="2064" routes the request to the reply
+        // handler on the server (distinct from save's "994" / delete's
+        // "4179").
+        let branchID = Int(user.branch ?? "1") ?? 1
+        let si: [String: Any] = [
+            "BranchID":     branchID,
+            "ComputerName": "ios",
+            "GroupID":      user.group ?? "DR",
+            "LanguageID":   2,
+            "UserID":       user.userName ?? user.id ?? ""
+        ]
+        let remark: [String: Any] = [
+            "BUFFER_STATUS": "1",
+            "PARENT_SER":    parentSer,
+            "REPLY_DESC":    trimmed
+        ]
+        let ucParms: [String: Any] = [
+            "PATIENT_ID":      patient.id,
+            "VISIT_ID":        patient.visitId,
+            "PROCESS_ID":      "2064",
+            "TRACER_PLACE_ID": "9",
+            "USER_OPEN_FLAG":  "D"
+        ]
+
+        guard
+            let siData      = try? JSONSerialization.data(withJSONObject: si,      options: []),
+            let remarksData = try? JSONSerialization.data(withJSONObject: [remark], options: []),
+            let ucData      = try? JSONSerialization.data(withJSONObject: ucParms, options: []),
+            let siStr       = String(data: siData,      encoding: .utf8),
+            let remarksStr  = String(data: remarksData, encoding: .utf8),
+            let ucStr       = String(data: ucData,      encoding: .utf8)
+        else {
+            rollbackLastLocalReply(parentSer: parentSer)
+            DispatchQueue.main.async {
+                self.view?.progressNotesDidSend(
+                    success: false,
+                    message: "Could not build reply payload.")
+            }
+            return
+        }
+
+        let params: [String: String] = [
+            "SI":                   siStr,
+            "DOCTOR_NURSE_REMARKS": remarksStr,
+            "DD_UC_PARMS":          ucStr
+        ]
+
+        modelLayer.saveDoctorNurseReply(with: params) { [weak self] success, message in
+            guard let self = self else { return }
+            DispatchQueue.main.async {
+                if success {
+                    print("✅ [NurseReplySave] server confirmed reply on parent \(parentSer)")
+                    // Reload — load() clears `localReplies` and pulls the
+                    // authoritative REPLY_ROW for the parent note.
+                    self.load()
+                    self.view?.progressNotesDidSend(success: true,
+                                                    message: message ?? "Reply sent")
+                } else {
+                    print("⚠️ [NurseReplySave] server failed — \(message ?? "<nil>"). Reverting.")
+                    self.rollbackLastLocalReply(parentSer: parentSer)
+                    self.view?.progressNotesDidReload()
+                    self.view?.progressNotesDidSend(
+                        success: false,
+                        message: message ?? "Could not send the reply. Please try again.")
+                }
+            }
+        }
+    }
+
+    /// Drops the most-recently-appended optimistic reply for `parentSer`.
+    /// Called when the POST fails so the local bubble disappears.
+    private func rollbackLastLocalReply(parentSer: String) {
+        guard var bucket = localReplies[parentSer], !bucket.isEmpty else { return }
+        bucket.removeLast()
+        if bucket.isEmpty {
+            localReplies.removeValue(forKey: parentSer)
+        } else {
+            localReplies[parentSer] = bucket
         }
     }
 
@@ -459,9 +679,12 @@ final class ProgressNotesPresenterImpl: ProgressNotesPresenter {
 
     /// Always performs a full load (INIT=1, no server-side filter params).
     /// Filtering is applied client-side in `applyClientFilter(to:)`.
+    /// `clearIsSendingOnDone` is set by the post-save reload path so the send
+    /// button stays locked until the authoritative list lands.
     private func fetch(init initFlag: String,
                        visitTypeId: String,
-                       filterId: String) {
+                       filterId: String,
+                       clearIsSendingOnDone: Bool = false) {
 
         let patientId = patient.id.trimmingCharacters(in: .whitespacesAndNewlines)
 
@@ -480,7 +703,18 @@ final class ProgressNotesPresenterImpl: ProgressNotesPresenter {
         modelLayer.loadDoctorNurseNotes(with: params) { [weak self] result in
             guard let self = self else { return }
 
-            self.allNotes = result.notes
+            // Defensive dedup: a previous build of the save endpoint occasionally
+            // produced 3-4 identical rows for a single tap (the user reported
+            // "writing one note shows up 3 or 4 times"). The root cause was
+            // upstream — but until that's confirmed fixed server-side, we
+            // collapse any rows that share the same SER, or, if SER is missing,
+            // the same (visit, user, body, date, priority) fingerprint.
+            self.allNotes = Self.dedupedNotes(result.notes)
+            // Server is the source of truth. Until the reply-POST API is
+            // wired the local additions are intentionally discarded on every
+            // refresh — that way the user never sees a "ghost" reply that
+            // the server doesn't actually know about.
+            self.localReplies.removeAll()
 
             if !result.priorities.isEmpty { self.priorities = result.priorities }
             if !result.showToList.isEmpty { self.showToList = result.showToList }
@@ -488,6 +722,7 @@ final class ProgressNotesPresenterImpl: ProgressNotesPresenter {
             if !result.filters.isEmpty { self.filters = result.filters }
 
             DispatchQueue.main.async {
+                if clearIsSendingOnDone { self.isSending = false }
                 self.view?.progressNotesDidReload()
             }
         }
@@ -500,5 +735,39 @@ final class ProgressNotesPresenterImpl: ProgressNotesPresenter {
         f.locale     = Locale(identifier: "en_US_POSIX")
         f.dateFormat = "dd/MM/yyyy hh:mm a"
         return f.string(from: Date())
+    }
+
+    /// Collapses duplicate rows in the server response.
+    /// Keeps the first occurrence of any SER seen more than once; if SER is
+    /// missing, falls back to a content fingerprint (visit + user + body
+    /// + date + priority).  Order is preserved.
+    private static func dedupedNotes(_ raw: [DoctorNurseNote]) -> [DoctorNurseNote] {
+        var seenSer = Set<String>()
+        var seenFingerprint = Set<String>()
+        var out: [DoctorNurseNote] = []
+        out.reserveCapacity(raw.count)
+        for n in raw {
+            let ser = (n.ser ?? "").trimmingCharacters(in: .whitespaces)
+            if !ser.isEmpty, ser != "0" {
+                if seenSer.contains(ser) { continue }
+                seenSer.insert(ser)
+                out.append(n)
+                continue
+            }
+            // SER missing/zero → fingerprint by content so optimistic rows
+            // don't collide either.
+            let body = (n.nurseNotes ?? n.descEn ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+            let fp = [
+                n.visitId    ?? "",
+                n.userId     ?? "",
+                n.transDate  ?? "",
+                n.priorityType ?? "",
+                body
+            ].joined(separator: "|")
+            if seenFingerprint.contains(fp) { continue }
+            seenFingerprint.insert(fp)
+            out.append(n)
+        }
+        return out
     }
 }

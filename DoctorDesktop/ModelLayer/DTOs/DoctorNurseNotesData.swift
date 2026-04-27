@@ -44,6 +44,17 @@ struct DoctorNurseNote: Decodable {
     let recommendation: String?
     let modifyFlag: String?
     let reply: String?
+    /// Structured REPLY_ROW(s). The server returns this in three different
+    /// shapes depending on how many replies the note has:
+    ///   • absent / `""` — no replies → empty array
+    ///   • one reply     — REPLY_ROW is a single object
+    ///   • 2+ replies    — REPLY_ROW is an array of objects
+    /// We normalise all three into a single `[DoctorNurseNoteReply]` so the
+    /// cell can iterate without caring about the wire shape.
+    let replyDetails: [DoctorNurseNoteReply]
+
+    /// Convenience for callers that only care about the first reply.
+    var replyDetail: DoctorNurseNoteReply? { replyDetails.first }
 
     enum CodingKeys: String, CodingKey {
         case ser                   = "SER"
@@ -123,24 +134,37 @@ struct DoctorNurseNote: Decodable {
         modifyFlag           = (try? c.decode(String.self, forKey: .modifyFlag))
 
         // REPLY: try plain String first; fall back to the nested object form.
+        // When the nested form is present we keep BOTH `reply` (the plain text
+        // of the FIRST reply, for legacy callers) and `replyDetails` (the full
+        // list — single-object and array shapes are both flattened here).
         if let s = try? c.decode(String.self, forKey: .reply) {
-            reply = s.isEmpty ? nil : s
+            reply         = s.isEmpty ? nil : s
+            replyDetails  = []
         } else if let nested = try? c.decode(ReplyEnvelope.self, forKey: .reply) {
-            reply = nested.replyRow?.replyDesc
+            replyDetails  = nested.rows
+            reply         = nested.rows.first?.replyDesc
         } else {
-            reply = nil
+            reply         = nil
+            replyDetails  = []
         }
     }
 
-    /// Helper for decoding the nested REPLY object form:
-    /// `{"REPLY_ROW":{"REPLY_DESC":"…"}}`. Anything missing → nil and the
-    /// wrapper falls back to "no reply".
+    /// Helper for decoding the nested REPLY object form. The server sends
+    /// REPLY_ROW as either a single object OR an array depending on whether
+    /// the note has one reply or many — `RowList` flattens both into one array.
     private struct ReplyEnvelope: Decodable {
-        let replyRow: ReplyRow?
+        let rows: [DoctorNurseNoteReply]
         enum CodingKeys: String, CodingKey { case replyRow = "REPLY_ROW" }
-        struct ReplyRow: Decodable {
-            let replyDesc: String?
-            enum CodingKeys: String, CodingKey { case replyDesc = "REPLY_DESC" }
+        init(from decoder: Decoder) throws {
+            let c = try decoder.container(keyedBy: CodingKeys.self)
+            // Try array first (2+ replies), then single object (1 reply).
+            if let arr = try? c.decode([DoctorNurseNoteReply].self, forKey: .replyRow) {
+                rows = arr
+            } else if let one = try? c.decode(DoctorNurseNoteReply.self, forKey: .replyRow) {
+                rows = [one]
+            } else {
+                rows = []
+            }
         }
     }
 
@@ -155,7 +179,8 @@ struct DoctorNurseNote: Decodable {
          visitId: String?, userId: String?,
          deleteUpdateUser: String?, deleteUpdateDateTime: String?,
          deleteUpdateFlag: String?, conclusion: String?,
-         recommendation: String?, modifyFlag: String?, reply: String?) {
+         recommendation: String?, modifyFlag: String?, reply: String?,
+         replyDetails: [DoctorNurseNoteReply] = []) {
         self.ser = ser
         self.empNameEn = empNameEn
         self.empNameAr = empNameAr
@@ -179,6 +204,7 @@ struct DoctorNurseNote: Decodable {
         self.recommendation = recommendation
         self.modifyFlag = modifyFlag
         self.reply = reply
+        self.replyDetails = replyDetails
     }
 
     /// Returns a copy with DELETE_UPDATE_* fields filled in as if the server had
@@ -208,8 +234,112 @@ struct DoctorNurseNote: Decodable {
             conclusion: conclusion,
             recommendation: recommendation,
             modifyFlag: "0",
-            reply: reply
+            reply: reply,
+            replyDetails: replyDetails
         )
+    }
+}
+
+// MARK: - Reply (decoded from REPLY_ROW)
+
+/// One reply attached to a parent DoctorNurseNote. Decoded from the nested
+/// REPLY object form returned by DDDocNurseNotesLoad:
+///
+///     "REPLY": { "REPLY_ROW": {
+///         "SER": "22373",
+///         "REPLY_DESC": "...",
+///         "USER_ENTER_NAME_AR": "...",
+///         "USER_ENTER_NAME_EN": "Moustafa Ali Hussein Hassanein",
+///         "DATE_ENTER": "18/10/2025 15:11:39",
+///         "USER_DELETE": null, "DATE_DELETE": null, "DELETE_FLAG": null,
+///         "USER_OPEN_FLAG": "N", "MODIFY_FLAG": "1"
+///     } }
+///
+/// Every field is optional because the server occasionally omits values
+/// (DELETE_FLAG comes back as `null` for live replies); the cell defaults
+/// safely whenever a field is missing.
+struct DoctorNurseNoteReply: Decodable {
+    let ser: String?
+    let replyDesc: String?
+    let userEnterNameEn: String?
+    let userEnterNameAr: String?
+    let dateEnter: String?
+    let userDelete: String?
+    let dateDelete: String?
+    let deleteFlag: String?
+    let userOpenFlag: String?
+    let modifyFlag: String?
+
+    enum CodingKeys: String, CodingKey {
+        case ser             = "SER"
+        case replyDesc       = "REPLY_DESC"
+        case userEnterNameEn = "USER_ENTER_NAME_EN"
+        case userEnterNameAr = "USER_ENTER_NAME_AR"
+        case dateEnter       = "DATE_ENTER"
+        case userDelete      = "USER_DELETE"
+        case dateDelete      = "DATE_DELETE"
+        case deleteFlag      = "DELETE_FLAG"
+        case userOpenFlag    = "USER_OPEN_FLAG"
+        case modifyFlag      = "MODIFY_FLAG"
+    }
+
+    // Same `try?`-everywhere strategy as DoctorNurseNote so a missing /
+    // mismatched field can never break the surrounding array decode.
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        ser             = (try? c.decode(String.self, forKey: .ser))
+        replyDesc       = (try? c.decode(String.self, forKey: .replyDesc))
+        userEnterNameEn = (try? c.decode(String.self, forKey: .userEnterNameEn))
+        userEnterNameAr = (try? c.decode(String.self, forKey: .userEnterNameAr))
+        dateEnter       = (try? c.decode(String.self, forKey: .dateEnter))
+        userDelete      = (try? c.decode(String.self, forKey: .userDelete))
+        dateDelete      = (try? c.decode(String.self, forKey: .dateDelete))
+        deleteFlag      = (try? c.decode(String.self, forKey: .deleteFlag))
+        userOpenFlag    = (try? c.decode(String.self, forKey: .userOpenFlag))
+        modifyFlag      = (try? c.decode(String.self, forKey: .modifyFlag))
+    }
+
+    /// Memberwise init — used to build replies locally before the server
+    /// has a SER for them (the iOS-only "compose reply" feature). Order
+    /// follows the property declarations above.
+    init(ser: String?,
+         replyDesc: String?,
+         userEnterNameEn: String?,
+         userEnterNameAr: String?,
+         dateEnter: String?,
+         userDelete: String?,
+         dateDelete: String?,
+         deleteFlag: String?,
+         userOpenFlag: String?,
+         modifyFlag: String?) {
+        self.ser             = ser
+        self.replyDesc       = replyDesc
+        self.userEnterNameEn = userEnterNameEn
+        self.userEnterNameAr = userEnterNameAr
+        self.dateEnter       = dateEnter
+        self.userDelete      = userDelete
+        self.dateDelete      = dateDelete
+        self.deleteFlag      = deleteFlag
+        self.userOpenFlag    = userOpenFlag
+        self.modifyFlag      = modifyFlag
+    }
+
+    /// True when the server has soft-deleted this reply.
+    var isDeleted: Bool { return deleteFlag == "1" }
+
+    /// Locale-aware author name. Falls back to the other language when the
+    /// preferred one is empty.
+    var authorName: String {
+        let isArabic = Locale.current.languageCode == "ar"
+        let nameAr = userEnterNameAr?.trimmingCharacters(in: .whitespaces) ?? ""
+        let nameEn = userEnterNameEn?.trimmingCharacters(in: .whitespaces) ?? ""
+        if isArabic { return nameAr.isEmpty ? nameEn : nameAr }
+        return nameEn.isEmpty ? nameAr : nameEn
+    }
+
+    /// Trimmed reply body, ready for display.
+    var body: String {
+        return (replyDesc ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
     }
 }
 
