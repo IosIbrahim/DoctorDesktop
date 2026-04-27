@@ -43,7 +43,6 @@ final class ProgressNoteRowCell: UITableViewCell {
     // MARK: Views
 
     private let card          = UIView()
-    private let accentBar     = UIView()
     private let initialsView  = UIView()
     private let initialsLabel = UILabel()
     private let nameLabel     = UILabel()
@@ -87,12 +86,6 @@ final class ProgressNoteRowCell: UITableViewCell {
         card.clipsToBounds = false
         card.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(card)
-
-        // ── Left accent bar ─────────────────────────────────────────────────────
-        accentBar.layer.cornerRadius = 3
-        accentBar.layer.maskedCorners = [.layerMinXMinYCorner, .layerMinXMaxYCorner]
-        accentBar.translatesAutoresizingMaskIntoConstraints = false
-        card.addSubview(accentBar)
 
         // ── Initials badge ──────────────────────────────────────────────────────
         initialsView.layer.cornerRadius = 17
@@ -208,15 +201,9 @@ final class ProgressNoteRowCell: UITableViewCell {
             card.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 12),
             card.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -12),
 
-            // Accent bar — full card height, left edge
-            accentBar.topAnchor.constraint(equalTo: card.topAnchor),
-            accentBar.bottomAnchor.constraint(equalTo: card.bottomAnchor),
-            accentBar.leadingAnchor.constraint(equalTo: card.leadingAnchor),
-            accentBar.widthAnchor.constraint(equalToConstant: 4),
-
-            // Initials badge — top-left (right of accent bar)
+            // Initials badge — top-left
             initialsView.topAnchor.constraint(equalTo: card.topAnchor, constant: 12),
-            initialsView.leadingAnchor.constraint(equalTo: accentBar.trailingAnchor, constant: 10),
+            initialsView.leadingAnchor.constraint(equalTo: card.leadingAnchor, constant: 12),
             initialsView.widthAnchor.constraint(equalToConstant: 34),
             initialsView.heightAnchor.constraint(equalToConstant: 34),
             initialsLabel.centerXAnchor.constraint(equalTo: initialsView.centerXAnchor),
@@ -249,7 +236,7 @@ final class ProgressNoteRowCell: UITableViewCell {
 
             // Body — below initials badge, full width
             bodyLabel.topAnchor.constraint(equalTo: initialsView.bottomAnchor, constant: 10),
-            bodyLabel.leadingAnchor.constraint(equalTo: accentBar.trailingAnchor, constant: 14),
+            bodyLabel.leadingAnchor.constraint(equalTo: card.leadingAnchor, constant: 14),
             bodyLabel.trailingAnchor.constraint(equalTo: voiceIcon.leadingAnchor, constant: -6),
 
             // Voice icon
@@ -282,11 +269,6 @@ final class ProgressNoteRowCell: UITableViewCell {
 
         // ── Priority color (used for accent bar, chip, initials) ─────────────────
         let priorityColor = isUrgent ? Self.urgentColor : Self.normalColor
-
-        // ── Left accent bar ──────────────────────────────────────────────────────
-        accentBar.backgroundColor = isDeleted
-            ? UIColor(white: 0.80, alpha: 1)
-            : priorityColor
 
         // ── Initials badge ───────────────────────────────────────────────────────
         let nameEn = note.empNameEn?.trimmingCharacters(in: .whitespaces)
