@@ -194,8 +194,8 @@ class RootNavigationCoordinatorImpl: NavigationCoordinator {
       guard let patient = arguments?["patient"] as? Patient,
           let permision = arguments?["permission"] as? PermissionModel,
           let user = arguments?["user"] as? User else { return }
-      let overviewCollectionViewController = registry.makeOverviewCollectionViewController(with: patient, user: user,permision: permision)
-      rootViewController.navigationController?.pushViewController(overviewCollectionViewController, animated: true)
+      let liteVC = registry.makeLiteOverviewViewController(with: patient, user: user, permission: permision)
+      rootViewController.navigationController?.pushViewController(liteVC, animated: true)
       navState = .atOverviewCollection
   }
 

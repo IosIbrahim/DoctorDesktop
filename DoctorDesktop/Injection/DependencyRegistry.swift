@@ -20,6 +20,7 @@ protocol DependencyRegistry {
   func makeEmergencyTriageViewController(with patient: EmergencyPatient, user: User) -> EmergencyTriageViewController
   func makeVitalSignsEntryViewController(with patient: Patient, user: User) -> VitalSignsEntryViewController
   func makeProgressNotesViewController(with patient: Patient, user: User, visitIdArray: String) -> ProgressNotesViewController
+  func makeLiteOverviewViewController(with patient: Patient, user: User, permission: PermissionModel) -> LiteOverviewViewController
 
   typealias rootNavigationCoordinatorMaker = (UIViewController) -> NavigationCoordinator
   typealias ComponentCellMaker = (UICollectionView, IndexPath, Component, ColorAndImageTuple) -> ComponentCell
@@ -230,6 +231,7 @@ class DependencyRegistryImpl: DependencyRegistry {
     registerEmergencyTriageViewController()
     registerVitalSignsEntryViewController()
     registerProgressNotesViewController()
+    registerLiteOverviewViewController()
   }
   
   //MARK: - Maker Methods
@@ -602,5 +604,27 @@ extension DependencyRegistryImpl {
 
   func makeProgressNotesViewController(with patient: Patient, user: User, visitIdArray: String) -> ProgressNotesViewController {
     return container.resolve(ProgressNotesViewController.self, arguments: patient, user, visitIdArray)!
+  }
+}
+
+// MARK: - LiteOverview (patient header + embedded ProgressNotes, no section grid)
+extension DependencyRegistryImpl {
+  func registerLiteOverviewViewController() {
+    container.register(LiteOverviewViewController.self) { (r, patient: Patient, user: User, permission: PermissionModel) in
+      let overviewPresenter = r.resolve(OverviewPresenter.self, arguments: patient, user, permission)!
+      // Visit-ID array defaults to the current visit; the notes VC resolves all
+      // linked visits after the overview presenter loads patient history.
+      let notesVC = r.resolve(ProgressNotesViewController.self,
+                               arguments: patient, user, patient.visitId)!
+      let vc = LiteOverviewViewController()
+      vc.configure(with: overviewPresenter,
+                   notesViewController: notesVC,
+                   navigationCoordinator: self.navigationCoordinator)
+      return vc
+    }
+  }
+
+  func makeLiteOverviewViewController(with patient: Patient, user: User, permission: PermissionModel) -> LiteOverviewViewController {
+    return container.resolve(LiteOverviewViewController.self, arguments: patient, user, permission)!
   }
 }

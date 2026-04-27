@@ -50,6 +50,11 @@ final class ProgressNotesViewController: UIViewController {
 
     // MARK: - State
 
+    /// When `true` the VC is embedded inside `LiteOverviewViewController`.
+    /// The compact patient header card is hidden; the title row anchors directly
+    /// to the top of the view. Must be set before `view` is first accessed.
+    var isEmbedded: Bool = false
+
     /// Live speech → text dictation driven by the mic button.
     private let dictation = SpeechDictation()
     /// Text that was already in the field before dictation started — partial
@@ -95,7 +100,8 @@ final class ProgressNotesViewController: UIViewController {
 
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        if isMovingFromParentViewController {
+        // When embedded in LiteOverviewViewController the parent handles back navigation.
+        if isMovingFromParentViewController && !isEmbedded {
             dictation.cancel()
             navigationCoordinator?.movingBack()
         }
@@ -104,29 +110,31 @@ final class ProgressNotesViewController: UIViewController {
     // MARK: - UI
 
     private func buildUI() {
-        // Header card
-        headerCard.backgroundColor = teal
-        headerCard.layer.cornerRadius = 10
-        headerCard.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(headerCard)
+        // Header card — only shown in standalone mode (not when embedded in LiteOverview)
+        if !isEmbedded {
+            headerCard.backgroundColor = teal
+            headerCard.layer.cornerRadius = 10
+            headerCard.translatesAutoresizingMaskIntoConstraints = false
+            view.addSubview(headerCard)
 
-        headerIcon.translatesAutoresizingMaskIntoConstraints = false
-        headerIcon.tintColor = .white
-        headerIcon.contentMode = .scaleAspectFit
-        if #available(iOS 13, *) {
-            headerIcon.image = UIImage(systemName: "person.crop.circle.fill")
+            headerIcon.translatesAutoresizingMaskIntoConstraints = false
+            headerIcon.tintColor = .white
+            headerIcon.contentMode = .scaleAspectFit
+            if #available(iOS 13, *) {
+                headerIcon.image = UIImage(systemName: "person.crop.circle.fill")
+            }
+            headerCard.addSubview(headerIcon)
+
+            headerName.translatesAutoresizingMaskIntoConstraints = false
+            headerName.font = UIFont.systemFont(ofSize: 17, weight: .bold)
+            headerName.textColor = .white
+            headerCard.addSubview(headerName)
+
+            headerSubtitle.translatesAutoresizingMaskIntoConstraints = false
+            headerSubtitle.font = UIFont.systemFont(ofSize: 12, weight: .regular)
+            headerSubtitle.textColor = UIColor.white.withAlphaComponent(0.9)
+            headerCard.addSubview(headerSubtitle)
         }
-        headerCard.addSubview(headerIcon)
-
-        headerName.translatesAutoresizingMaskIntoConstraints = false
-        headerName.font = UIFont.systemFont(ofSize: 17, weight: .bold)
-        headerName.textColor = .white
-        headerCard.addSubview(headerName)
-
-        headerSubtitle.translatesAutoresizingMaskIntoConstraints = false
-        headerSubtitle.font = UIFont.systemFont(ofSize: 12, weight: .regular)
-        headerSubtitle.textColor = UIColor.white.withAlphaComponent(0.9)
-        headerCard.addSubview(headerSubtitle)
 
         // Title + filter row
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -247,28 +255,35 @@ final class ProgressNotesViewController: UIViewController {
         let guide = view.safeAreaLayoutGuide
         composerBottomConstraint = composerBar.bottomAnchor.constraint(equalTo: guide.bottomAnchor)
 
+        if !isEmbedded {
+            NSLayoutConstraint.activate([
+                headerCard.topAnchor.constraint(equalTo: guide.topAnchor, constant: 8),
+                headerCard.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 12),
+                headerCard.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -12),
+                headerCard.heightAnchor.constraint(equalToConstant: 64),
+
+                headerIcon.leadingAnchor.constraint(equalTo: headerCard.leadingAnchor, constant: 14),
+                headerIcon.centerYAnchor.constraint(equalTo: headerCard.centerYAnchor),
+                headerIcon.widthAnchor.constraint(equalToConstant: 36),
+                headerIcon.heightAnchor.constraint(equalToConstant: 36),
+
+                headerName.leadingAnchor.constraint(equalTo: headerIcon.trailingAnchor, constant: 12),
+                headerName.trailingAnchor.constraint(equalTo: headerCard.trailingAnchor, constant: -14),
+                headerName.topAnchor.constraint(equalTo: headerCard.topAnchor, constant: 14),
+
+                headerSubtitle.leadingAnchor.constraint(equalTo: headerName.leadingAnchor),
+                headerSubtitle.trailingAnchor.constraint(equalTo: headerName.trailingAnchor),
+                headerSubtitle.topAnchor.constraint(equalTo: headerName.bottomAnchor, constant: 2),
+            ])
+        }
+
+        let titleTop: NSLayoutConstraint = isEmbedded
+            ? titleLabel.topAnchor.constraint(equalTo: guide.topAnchor, constant: 12)
+            : titleLabel.topAnchor.constraint(equalTo: headerCard.bottomAnchor, constant: 12)
+
         NSLayoutConstraint.activate([
-            // Header
-            headerCard.topAnchor.constraint(equalTo: guide.topAnchor, constant: 8),
-            headerCard.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 12),
-            headerCard.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -12),
-            headerCard.heightAnchor.constraint(equalToConstant: 64),
-
-            headerIcon.leadingAnchor.constraint(equalTo: headerCard.leadingAnchor, constant: 14),
-            headerIcon.centerYAnchor.constraint(equalTo: headerCard.centerYAnchor),
-            headerIcon.widthAnchor.constraint(equalToConstant: 36),
-            headerIcon.heightAnchor.constraint(equalToConstant: 36),
-
-            headerName.leadingAnchor.constraint(equalTo: headerIcon.trailingAnchor, constant: 12),
-            headerName.trailingAnchor.constraint(equalTo: headerCard.trailingAnchor, constant: -14),
-            headerName.topAnchor.constraint(equalTo: headerCard.topAnchor, constant: 14),
-
-            headerSubtitle.leadingAnchor.constraint(equalTo: headerName.leadingAnchor),
-            headerSubtitle.trailingAnchor.constraint(equalTo: headerName.trailingAnchor),
-            headerSubtitle.topAnchor.constraint(equalTo: headerName.bottomAnchor, constant: 2),
-
             // Title + filter
-            titleLabel.topAnchor.constraint(equalTo: headerCard.bottomAnchor, constant: 12),
+            titleTop,
             titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
 
             filterPill.centerYAnchor.constraint(equalTo: titleLabel.centerYAnchor),
