@@ -607,18 +607,13 @@ extension DependencyRegistryImpl {
   }
 }
 
-// MARK: - LiteOverview (patient header + embedded ProgressNotes, no section grid)
+// MARK: - LiteOverview (patient header + Remarks card → navigates to ProgressNotes)
 extension DependencyRegistryImpl {
   func registerLiteOverviewViewController() {
     container.register(LiteOverviewViewController.self) { (r, patient: Patient, user: User, permission: PermissionModel) in
       let overviewPresenter = r.resolve(OverviewPresenter.self, arguments: patient, user, permission)!
-      // Visit-ID array defaults to the current visit; the notes VC resolves all
-      // linked visits after the overview presenter loads patient history.
-      let notesVC = r.resolve(ProgressNotesViewController.self,
-                               arguments: patient, user, patient.visitId)!
       let vc = LiteOverviewViewController()
       vc.configure(with: overviewPresenter,
-                   notesViewController: notesVC,
                    navigationCoordinator: self.navigationCoordinator)
       return vc
     }
