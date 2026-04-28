@@ -84,6 +84,7 @@
 		363768AB2091C5C400CE45D8 /* OverviewSectionCellPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 363768852091C5C400CE45D8 /* OverviewSectionCellPresenter.swift */; };
 		363768AC2091C5C400CE45D8 /* OverviewCollectionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 363768872091C5C400CE45D8 /* OverviewCollectionViewController.swift */; };
 		363768AD2091C5C400CE45D8 /* OverviewPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 363768882091C5C400CE45D8 /* OverviewPresenter.swift */; };
+		519C8271AA69611CACC50198 /* PatientHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AF146219F22A176451A1643 /* PatientHeaderView.swift */; };
 		36393C9F20894E85008410FD /* ClinicalAlertCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 36393C9720894E85008410FD /* ClinicalAlertCell.xib */; };
 		36393CA020894E85008410FD /* ClinicalAlertCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36393C9820894E85008410FD /* ClinicalAlertCell.swift */; };
 		36393CA120894E85008410FD /* ClinicalInfoPopup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36393C9A20894E85008410FD /* ClinicalInfoPopup.swift */; };
@@ -136,6 +137,7 @@
 		3660ADD6200CBE3F0089ADEF /* OrderServiceCellPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3660ADD5200CBE3F0089ADEF /* OrderServiceCellPresenter.swift */; };
 		366350C5201A646E0072C049 /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = 366350C4201A646E0072C049 /* Message.swift */; };
 		366C28B220407FA400FA4E3A /* PatientSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 366C28B120407FA400FA4E3A /* PatientSummary.swift */; };
+		0F1A2B3C4D5E6F7A8B9C0D1E /* VisitDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F1A2B3C4D5E6F7A8B9C0D1F /* VisitDetail.swift */; };
 		366D85FA2087E76C008B16BF /* EmergencyTriage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 366D85F92087E76C008B16BF /* EmergencyTriage.swift */; };
 		366D85FC2087E77E008B16BF /* Patient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 366D85FB2087E77E008B16BF /* Patient.swift */; };
 		366D86322087E97A008B16BF /* DiagnosisCategoryPopUpCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 366D86102087E97A008B16BF /* DiagnosisCategoryPopUpCell.xib */; };
@@ -146,6 +148,19 @@
 		366D86372087E97A008B16BF /* DiagnosisCategoryPopUp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 366D86162087E97A008B16BF /* DiagnosisCategoryPopUp.swift */; };
 		366D86382087E97A008B16BF /* EmergencyTriageView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 366D86172087E97A008B16BF /* EmergencyTriageView.xib */; };
 		366D863C2087E97A008B16BF /* EmergencyTriagePresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 366D861C2087E97A008B16BF /* EmergencyTriagePresenter.swift */; };
+		AABBCC010000000000000001 /* VitalSignsEntryPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCC010000000000000003 /* VitalSignsEntryPresenter.swift */; };
+		AABBCC010000000000000002 /* VitalSignsEntryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCC010000000000000004 /* VitalSignsEntryViewController.swift */; };
+		AABBCC010000000000000006 /* UCAFLoadData.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCC010000000000000007 /* UCAFLoadData.swift */; };
+		AABBCC010000000000000008 /* SpecialHabitsData.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCC010000000000000009 /* SpecialHabitsData.swift */; };
+		AABBCC020000000000000001 /* ProgressNotesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCC020000000000000101 /* ProgressNotesViewController.swift */; };
+		AABBCC020000000000000002 /* ProgressNotesPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCC020000000000000102 /* ProgressNotesPresenter.swift */; };
+		AABBCC020000000000000003 /* ProgressNoteRowCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCC020000000000000103 /* ProgressNoteRowCell.swift */; };
+		AABBCC020000000000000008 /* ProgressNoteReplyCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCC020000000000000108 /* ProgressNoteReplyCell.swift */; };
+		AABBCC020000000000000009 /* ReplyComposerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCC020000000000000109 /* ReplyComposerViewController.swift */; };
+		AABBCC020000000000000004 /* VoiceNoteRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCC020000000000000104 /* VoiceNoteRecorder.swift */; };
+		AABBCC020000000000000005 /* DoctorNurseNotesData.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCC020000000000000105 /* DoctorNurseNotesData.swift */; };
+		AABBCC020000000000000006 /* ProgressNotesFilterSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCC020000000000000106 /* ProgressNotesFilterSheet.swift */; };
+		AABBCC020000000000000007 /* SpeechDictation.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCC020000000000000107 /* SpeechDictation.swift */; };
 		366D863D2087E97A008B16BF /* PediatricsScorePopUpView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 366D861E2087E97A008B16BF /* PediatricsScorePopUpView.xib */; };
 		366D863E2087E97A008B16BF /* PediatricsScorePopUp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 366D861F2087E97A008B16BF /* PediatricsScorePopUp.swift */; };
 		366D863F2087E97A008B16BF /* PediatricsScorePopUpPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 366D86202087E97A008B16BF /* PediatricsScorePopUpPresenter.swift */; };
@@ -318,6 +333,7 @@
 		363768852091C5C400CE45D8 /* OverviewSectionCellPresenter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OverviewSectionCellPresenter.swift; sourceTree = "<group>"; };
 		363768872091C5C400CE45D8 /* OverviewCollectionViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OverviewCollectionViewController.swift; sourceTree = "<group>"; };
 		363768882091C5C400CE45D8 /* OverviewPresenter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OverviewPresenter.swift; sourceTree = "<group>"; };
+		5AF146219F22A176451A1643 /* PatientHeaderView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PatientHeaderView.swift; sourceTree = "<group>"; };
 		36393C9720894E85008410FD /* ClinicalAlertCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ClinicalAlertCell.xib; sourceTree = "<group>"; };
 		36393C9820894E85008410FD /* ClinicalAlertCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClinicalAlertCell.swift; sourceTree = "<group>"; };
 		36393C9A20894E85008410FD /* ClinicalInfoPopup.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClinicalInfoPopup.swift; sourceTree = "<group>"; };
@@ -370,6 +386,7 @@
 		3660ADD5200CBE3F0089ADEF /* OrderServiceCellPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrderServiceCellPresenter.swift; sourceTree = "<group>"; };
 		366350C4201A646E0072C049 /* Message.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Message.swift; sourceTree = "<group>"; };
 		366C28B120407FA400FA4E3A /* PatientSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PatientSummary.swift; sourceTree = "<group>"; };
+		0F1A2B3C4D5E6F7A8B9C0D1F /* VisitDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisitDetail.swift; sourceTree = "<group>"; };
 		366D85F92087E76C008B16BF /* EmergencyTriage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmergencyTriage.swift; sourceTree = "<group>"; };
 		366D85FB2087E77E008B16BF /* Patient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Patient.swift; sourceTree = "<group>"; };
 		366D86102087E97A008B16BF /* DiagnosisCategoryPopUpCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = DiagnosisCategoryPopUpCell.xib; sourceTree = "<group>"; };
@@ -380,6 +397,19 @@
 		366D86162087E97A008B16BF /* DiagnosisCategoryPopUp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DiagnosisCategoryPopUp.swift; sourceTree = "<group>"; };
 		366D86172087E97A008B16BF /* EmergencyTriageView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = EmergencyTriageView.xib; sourceTree = "<group>"; };
 		366D861C2087E97A008B16BF /* EmergencyTriagePresenter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmergencyTriagePresenter.swift; sourceTree = "<group>"; };
+		AABBCC010000000000000003 /* VitalSignsEntryPresenter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VitalSignsEntryPresenter.swift; sourceTree = "<group>"; };
+		AABBCC010000000000000004 /* VitalSignsEntryViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VitalSignsEntryViewController.swift; sourceTree = "<group>"; };
+		AABBCC020000000000000101 /* ProgressNotesViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProgressNotesViewController.swift; sourceTree = "<group>"; };
+		AABBCC020000000000000102 /* ProgressNotesPresenter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProgressNotesPresenter.swift; sourceTree = "<group>"; };
+		AABBCC020000000000000103 /* ProgressNoteRowCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProgressNoteRowCell.swift; sourceTree = "<group>"; };
+		AABBCC020000000000000108 /* ProgressNoteReplyCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProgressNoteReplyCell.swift; sourceTree = "<group>"; };
+		AABBCC020000000000000109 /* ReplyComposerViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReplyComposerViewController.swift; sourceTree = "<group>"; };
+		AABBCC020000000000000104 /* VoiceNoteRecorder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VoiceNoteRecorder.swift; sourceTree = "<group>"; };
+		AABBCC020000000000000105 /* DoctorNurseNotesData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DoctorNurseNotesData.swift; sourceTree = "<group>"; };
+		AABBCC020000000000000106 /* ProgressNotesFilterSheet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProgressNotesFilterSheet.swift; sourceTree = "<group>"; };
+		AABBCC020000000000000107 /* SpeechDictation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpeechDictation.swift; sourceTree = "<group>"; };
+		AABBCC010000000000000007 /* UCAFLoadData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UCAFLoadData.swift; sourceTree = "<group>"; };
+		AABBCC010000000000000009 /* SpecialHabitsData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpecialHabitsData.swift; sourceTree = "<group>"; };
 		366D861E2087E97A008B16BF /* PediatricsScorePopUpView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PediatricsScorePopUpView.xib; sourceTree = "<group>"; };
 		366D861F2087E97A008B16BF /* PediatricsScorePopUp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PediatricsScorePopUp.swift; sourceTree = "<group>"; };
 		366D86202087E97A008B16BF /* PediatricsScorePopUpPresenter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PediatricsScorePopUpPresenter.swift; sourceTree = "<group>"; };
@@ -794,6 +824,7 @@
 			children = (
 				363768872091C5C400CE45D8 /* OverviewCollectionViewController.swift */,
 				363768882091C5C400CE45D8 /* OverviewPresenter.swift */,
+				5AF146219F22A176451A1643 /* PatientHeaderView.swift */,
 			);
 			path = OverviewCollection;
 			sourceTree = "<group>";
@@ -912,6 +943,8 @@
 				366350C4201A646E0072C049 /* Message.swift */,
 				36A9006F2037231400748406 /* OverviewSection.swift */,
 				366C28B120407FA400FA4E3A /* PatientSummary.swift */,
+				AABBCC020000000000000105 /* DoctorNurseNotesData.swift */,
+				0F1A2B3C4D5E6F7A8B9C0D1F /* VisitDetail.swift */,
 				366D85F92087E76C008B16BF /* EmergencyTriage.swift */,
 				AD3239F922C791F00088E176 /* OperationPatient.swift */,
 				0E206BBC23325E9900E25EFB /* precrition.swift */,
@@ -1004,6 +1037,32 @@
 				366D86172087E97A008B16BF /* EmergencyTriageView.xib */,
 			);
 			path = EmergencyTriage;
+			sourceTree = "<group>";
+		};
+		AABBCC010000000000000005 /* VitalSignsEntry */ = {
+			isa = PBXGroup;
+			children = (
+				AABBCC010000000000000003 /* VitalSignsEntryPresenter.swift */,
+				AABBCC010000000000000004 /* VitalSignsEntryViewController.swift */,
+				AABBCC010000000000000007 /* UCAFLoadData.swift */,
+				AABBCC010000000000000009 /* SpecialHabitsData.swift */,
+			);
+			path = VitalSignsEntry;
+			sourceTree = "<group>";
+		};
+		AABBCC020000000000000100 /* ProgressNotes */ = {
+			isa = PBXGroup;
+			children = (
+				AABBCC020000000000000101 /* ProgressNotesViewController.swift */,
+				AABBCC020000000000000102 /* ProgressNotesPresenter.swift */,
+				AABBCC020000000000000103 /* ProgressNoteRowCell.swift */,
+				AABBCC020000000000000108 /* ProgressNoteReplyCell.swift */,
+				AABBCC020000000000000109 /* ReplyComposerViewController.swift */,
+				AABBCC020000000000000104 /* VoiceNoteRecorder.swift */,
+				AABBCC020000000000000106 /* ProgressNotesFilterSheet.swift */,
+				AABBCC020000000000000107 /* SpeechDictation.swift */,
+			);
+			path = ProgressNotes;
 			sourceTree = "<group>";
 		};
 		366D860F2087E97A008B16BF /* DiagnosisCategoryPopUpCell */ = {
@@ -1195,6 +1254,8 @@
 				368462131FE69F7300284402 /* PatientOverview */,
 				3691B19820165C3B00544BA4 /* LabRadOrder */,
 				366D860E2087E97A008B16BF /* EmergencyTriage */,
+				AABBCC010000000000000005 /* VitalSignsEntry */,
+				AABBCC020000000000000100 /* ProgressNotes */,
 				363768542091C5C400CE45D8 /* Overview */,
 			);
 			path = UI;
@@ -1607,6 +1668,7 @@
 				3648C588274D36840061C994 /* ListPopupViewControllerExtensions.swift in Sources */,
 				36779681203040620033D8F0 /* RootNavigationCoordinator.swift in Sources */,
 				363768AC2091C5C400CE45D8 /* OverviewCollectionViewController.swift in Sources */,
+				519C8271AA69611CACC50198 /* PatientHeaderView.swift in Sources */,
 				363768972091C5C400CE45D8 /* AllergyFindingComplaintHistoryCellPresenter.swift in Sources */,
 				3637689F2091C5C400CE45D8 /* DietaryCell.swift in Sources */,
 				46B646AA1FD2E44100D8D340 /* AppDelegate.swift in Sources */,
@@ -1681,6 +1743,19 @@
 				3648C58A274D36940061C994 /* ListPopupTableViewCell.swift in Sources */,
 				366D86372087E97A008B16BF /* DiagnosisCategoryPopUp.swift in Sources */,
 				366D863C2087E97A008B16BF /* EmergencyTriagePresenter.swift in Sources */,
+				AABBCC010000000000000001 /* VitalSignsEntryPresenter.swift in Sources */,
+				AABBCC010000000000000002 /* VitalSignsEntryViewController.swift in Sources */,
+				AABBCC010000000000000006 /* UCAFLoadData.swift in Sources */,
+				AABBCC010000000000000008 /* SpecialHabitsData.swift in Sources */,
+				AABBCC020000000000000001 /* ProgressNotesViewController.swift in Sources */,
+				AABBCC020000000000000002 /* ProgressNotesPresenter.swift in Sources */,
+				AABBCC020000000000000003 /* ProgressNoteRowCell.swift in Sources */,
+				AABBCC020000000000000008 /* ProgressNoteReplyCell.swift in Sources */,
+				AABBCC020000000000000009 /* ReplyComposerViewController.swift in Sources */,
+				AABBCC020000000000000004 /* VoiceNoteRecorder.swift in Sources */,
+				AABBCC020000000000000005 /* DoctorNurseNotesData.swift in Sources */,
+				AABBCC020000000000000006 /* ProgressNotesFilterSheet.swift in Sources */,
+				AABBCC020000000000000007 /* SpeechDictation.swift in Sources */,
 				366D863E2087E97A008B16BF /* PediatricsScorePopUp.swift in Sources */,
 				36A33C1A1FE31FE6007A9E55 /* UnitsPopup.swift in Sources */,
 				36883F1220710A5500A53AE7 /* WebViewerPresenter.swift in Sources */,
@@ -1708,6 +1783,7 @@
 				3656DD01274BC3A1008DC057 /* NotesViewController.swift in Sources */,
 				366D863F2087E97A008B16BF /* PediatricsScorePopUpPresenter.swift in Sources */,
 				366C28B220407FA400FA4E3A /* PatientSummary.swift in Sources */,
+				0F1A2B3C4D5E6F7A8B9C0D1E /* VisitDetail.swift in Sources */,
 				3650EEDB1FDC691F000A349C /* TranslationLayer.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

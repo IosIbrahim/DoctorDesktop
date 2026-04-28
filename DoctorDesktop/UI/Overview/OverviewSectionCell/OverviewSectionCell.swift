@@ -47,7 +47,10 @@ extension OverviewSectionCell {
     }
     self.sectionView.backgroundColor = presenter.sectionColor
     self.sectionTitleLabel.text = presenter.sectionTitle
-    self.counterLabel.text = "\(presenter.counter)"
+    // counter == -1 means "hide badge" (e.g. Vital Signs)
+    let hideBadge = presenter.counter < 0
+    counterView.isHidden = hideBadge
+    counterLabel.text = hideBadge ? "" : "\(presenter.counter)"
   }
 }
 

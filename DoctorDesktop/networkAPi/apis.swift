@@ -5,141 +5,90 @@
 //  Created by Macintosh HD on 9/18/19.
 //  Copyright © 2019 khabeer Group. All rights reserved.
 //
+
 import Alamofire
 import Foundation
 import SwiftyJSON
-class apis :NSObject {
-        struct AlamofireAppManager {
-            static let shared: Session = {
-                let configuration = URLSessionConfiguration.default
-                configuration.timeoutIntervalForRequest = 30
-                configuration.timeoutIntervalForResource = 30
-                let sessionManager = Alamofire.Session(configuration: configuration)
-                return sessionManager
-            }()
-        }
-    
-     class func getPrescriptionDate(params : [String:String],completion: @escaping ( _ precrition:[precrition])->Void) {
 
-        let url = AppURLS.ip+"/MobileApi/api/WorkFlowController/workflow"
-        
-        print(url)
-        
-       
-      
-        AlamofireAppManager.shared.request(url,parameters: params)
-            .responseJSON { response in
-                guard let data = response.data else { return }
-                
-                print(data)
-                print(response)
-                print(JSON(response))
-//                var precritions1 = [precrition]()
+class apis: NSObject {
 
-                let keyPath = "Root"
-                guard let precritions = try? Precritions (data: data, keyPath: keyPath)
-                    
-                    else {
-                    if let precrition = try? precrition (data: data, keyPath: keyPath) {
-                       return  
-                    } else {
-                        return 
-                        //                        return []
-                    }
-                    return
-                }
-                
-                completion(precritions)
-                
-                
-//                finished(user)
-        }
+    private struct Session {
+        static let shared: Alamofire.Session = {
+            let config = URLSessionConfiguration.default
+            config.timeoutIntervalForRequest  = 30
+            config.timeoutIntervalForResource = 30
+            return Alamofire.Session(configuration: config)
+        }()
     }
-    class func getPrescriptiondetails(params : [String:Any],completion: @escaping ( _ precrition:Welcome)->Void) {
-        
-        
-        print(params)
-        let url = AppURLS.ip+"/MobileApi/api/StockController/get_speciality_shortlist"
- 
-        AlamofireAppManager.shared.request(url,parameters: params)
-            .responseJSON { response in
-                guard let data = response.data else { return }
-                
-                print(data)
-                print(response)
-                print(JSON(response.value))
-                
-                switch response.result {
-                case .success (let value):
-                    do{
-                        
-                        let welcome1 = try?    JSONDecoder().decode(Welcome.self, from: data)
-                        if let model = welcome1 {
-                            completion(model)
-                        }else {
-                            print("Error Error Error")
-                        }
-                        
-                    }
-                    
-                    catch{
-                        
-                    }
-                    
-                case .failure(let error):
-                    print(error)
-                    
-                }
-                
+
+    // MARK: - Prescription list
+
+    class func getPrescriptionDate(params: [String: String],
+                                   completion: @escaping (_ prescriptions: [precrition]) -> Void) {
+        let url = AppURLS.ip + "/MobileApi/api/WorkFlowController/workflow"
+        APILogger.logRequest(method: "GET", url: url, params: params)
+        let start = Date()
+
+        Session.shared.request(url, parameters: params).responseJSON { response in
+            let duration = Date().timeIntervalSince(start)
+            let code = response.response?.statusCode ?? 0
+            if let error = response.error {
+                APILogger.logFailure(method: "GET", url: url, error: error.localizedDescription, duration: duration)
+                return
             }
-    }
-    
-    class func getSearchResultInprecription(params : [String:Any],completion: @escaping ( _ precrition:searchModel?)->Void) {
-        
-        
-        print(params)
-        //http://192.168.1.174/MobileApi/api/StockController/get_speciality_shortlist?BRANCH_ID=1&FLAG=1&PATIENT_ID=569&PRESC_TYPE=1697&USER_ID=KHABEER&VISIT_ID=3
-        
-        let url = AppURLS.ip+"/MobileApi/api/StockController/GETDRUGS"
-        
-        print(url)
-        
-        
-        
-        AlamofireAppManager.shared.request(url,parameters: params)
-            .responseJSON { response in
-                guard let data = response.data else { return }
-                
-                print(data)
-                print(response)
-                
-                switch response.result {
-                case .success (let value):
-                    do{
-                        let searchResult = try?    JSONDecoder().decode(searchModel.self, from: data)
-                        
-                        guard let data  = searchResult else{
-                            completion(nil)
-
-                            return
-                        }
-                            completion(searchResult!)
-                    }
-                        
-                    catch{
-                        
-                    }
-        
-                    
-                case .failure(let error):
-                    print(error)
-                    
-                }
-            
+            APILogger.logResponse(method: "GET", url: url, statusCode: code, data: response.data, duration: duration)
+            guard let data = response.data else { return }
+            if let prescriptions = try? Precritions(data: data, keyPath: "Root") {
+                completion(prescriptions)
+            }
         }
     }
 
-    
-    
-}
+    // MARK: - Prescription details
 
+    class func getPrescriptiondetails(params: [String: Any],
+                                      completion: @escaping (_ result: Welcome) -> Void) {
+        let url = AppURLS.ip + "/MobileApi/api/StockController/get_speciality_shortlist"
+        APILogger.logRequest(method: "GET", url: url, params: params)
+        let start = Date()
+
+        Session.shared.request(url, parameters: params).responseJSON { response in
+            let duration = Date().timeIntervalSince(start)
+            let code = response.response?.statusCode ?? 0
+            if let error = response.error {
+                APILogger.logFailure(method: "GET", url: url, error: error.localizedDescription, duration: duration)
+                return
+            }
+            APILogger.logResponse(method: "GET", url: url, statusCode: code, data: response.data, duration: duration)
+            guard let data = response.data else { return }
+            if let model = try? JSONDecoder().decode(Welcome.self, from: data) {
+                completion(model)
+            } else {
+                APILogger.logDecodeError(url: url, error: NSError(domain: "Welcome decode failed", code: -1, userInfo: nil))
+            }
+        }
+    }
+
+    // MARK: - Drug search
+
+    class func getSearchResultInprecription(params: [String: Any],
+                                            completion: @escaping (_ result: searchModel?) -> Void) {
+        let url = AppURLS.ip + "/MobileApi/api/StockController/GETDRUGS"
+        APILogger.logRequest(method: "GET", url: url, params: params)
+        let start = Date()
+
+        Session.shared.request(url, parameters: params).responseJSON { response in
+            let duration = Date().timeIntervalSince(start)
+            let code = response.response?.statusCode ?? 0
+            if let error = response.error {
+                APILogger.logFailure(method: "GET", url: url, error: error.localizedDescription, duration: duration)
+                completion(nil)
+                return
+            }
+            APILogger.logResponse(method: "GET", url: url, statusCode: code, data: response.data, duration: duration)
+            guard let data = response.data else { completion(nil); return }
+            let result = try? JSONDecoder().decode(searchModel.self, from: data)
+            completion(result)
+        }
+    }
+}

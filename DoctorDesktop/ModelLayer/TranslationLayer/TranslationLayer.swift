@@ -34,12 +34,17 @@ protocol TranslationLayer {
     func getPatientSummaryDTOFromJson(_ data: Data) -> PatientSummary
     func getPacksURLFromJson(_ data: Data) -> URL?
     func getVitalsDTOsFromJson(_ data: Data) -> UCAFData?
+    func getLoadUcafFromJson(_ data: Data) -> UCAFLoadData?
+    func getLoadUcafCTASFromJson(_ data: Data) -> UCAFCTASServer?
+    func getSpecialHabitsFromJson(_ data: Data) -> SpecialHabitsData?
+    func getDoctorNurseNotesFromJson(_ data: Data) -> DoctorNurseNotesData
     
     func getHistorySymptomsDTOsFromJson(_ data:Data) -> HistorySymptomCategories
     func getDiagnosisCategoriesDTOsFromJson(_ data: Data) -> DiagnosisCategories
     func getPainScoresDTOsFromJson(_ data: Data) -> Scores
     func getSymptomCategoriesDTOsFromJson(_ data: Data) -> RegularSymptomCategories
     func getSymptomsDTOsFromJson(_ data: Data) -> Symptoms
+    func getVisitDetailDTOFromJson(_ data: Data) -> VisitDetail?
 }
 
 class TranslationLayerImpl: TranslationLayer {
@@ -411,80 +416,96 @@ extension TranslationLayerImpl{
 }
 
 extension TranslationLayerImpl {
-    func getPatientSummaryDTOFromJson(_ data: Data) -> PatientSummary {
-        var message:String?
-        do {
-            // make sure this JSON is in the format we expect
-            if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
-                // try to read out a string array
-                message = json["message"] as? String
-                print(json)
-                
-            }
-        } catch let error as NSError {
-            print("Failed to load: \(error.localizedDescription)")
+
+    // MARK: - Safe key-path traversal
+    //
+    // value(forKeyPath:) uses Objective-C KVC. If any intermediate node in the
+    // path is not an NSDictionary (e.g. the server returns "" for an empty
+    // field instead of null / {}), KVC throws NSUnknownKeyException — which
+    // cannot be caught with Swift's try/catch and kills the app.
+    //
+    // This pure-Swift traversal returns nil instead of crashing.
+    private func safeValue(in root: Any?, keyPath: String) -> Any? {
+        let keys = keyPath.components(separatedBy: ".")
+        var node: Any? = root
+        for key in keys {
+            guard let dict = node as? [String: Any] else { return nil }
+            node = dict[key]
         }
-        print(String(data: data, encoding: .utf8) ?? "")
-        var complaints = try? [Complaint].decode(data, keyPath: "Root.PATIENT.PATIENT_ROW.COMPLAINS.COMPLAINS_ROW",jsonDecoder:jsonDecoder)
-        print("com")
-        if complaints?.isEmpty == true {
-            let topLevel = try? JSONSerialization.jsonObject(with: data, options: JSONSerialization.ReadingOptions.mutableContainers)
-              if let nestedJson = (topLevel as? AnyObject)?.value(forKeyPath: "Root.PATIENT.PATIENT_ROW.COMPLAINS.COMPLAINS_ROW") {
-                  let nestedData = try? JSONSerialization.data(withJSONObject: nestedJson)
-                  print("nestedData:",String(data: nestedData ?? .init(), encoding: .utf8) ?? "")
-                  let model = try? jsonDecoder.decode([Complaint].self, from: nestedData ?? .init())
-                  print(model ?? [])
-                  if complaints?.isEmpty ?? false {
-                      complaints = model ?? []
-                  }
-              }
+        return node
+    }
+
+    func getPatientSummaryDTOFromJson(_ data: Data) -> PatientSummary {
+
+        // Parse top-level object once — reused for all key-path lookups below.
+        let topLevel = try? JSONSerialization.jsonObject(with: data,
+                                                         options: .mutableContainers)
+
+        // Backend sometimes returns {"message":"exception in backend"} instead
+        // of real data. Surface the message so the presenter can retry.
+        let message = (topLevel as? [String: Any])?["message"] as? String
+
+        // ── Helper: decode an array at a given key-path, returns [] on any failure ──
+        func decode<T: Decodable>(_ type: T.Type, at keyPath: String) -> T? {
+            guard let nested = safeValue(in: topLevel, keyPath: keyPath),
+                  JSONSerialization.isValidJSONObject(nested),
+                  let nestedData = try? JSONSerialization.data(withJSONObject: nested)
+            else { return nil }
+            return try? jsonDecoder.decode(T.self, from: nestedData)
         }
 
-        let findings = try? [Finding].decode(data, keyPath: "Root.PATIENT.PATIENT_ROW.FINDINGS.FINDINGS_ROW", jsonDecoder: jsonDecoder)
-        let diagnosis = try? [Diagnosis].decode(data, keyPath: "Root.PATIENT.PATIENT_ROW.DIAGNOSIS.DIAGNOSIS_ROW", jsonDecoder: jsonDecoder)
-        let history = try? [History].decode(data, keyPath: "Root.PATIENT.PATIENT_ROW.HISTORY.HISTORY_ROW", jsonDecoder: jsonDecoder)
-        let allergies = try? [Allergy].decode(data, keyPath: "Root.PATIENT.PATIENT_ROW.ALLERGY.ALLERGY_ROW")
-        let medications = getMedictionsDTOsFromJson(data)
-        let scorings = try? [Scoring].decode(data, keyPath: "Root.PATIENT.PATIENT_ROW.SCORING.SCORING_ROW")
-        let nurseRemarks = try? [NurseRemark].decode(data, keyPath: "Root.PATIENT.PATIENT_ROW.NURSE_REMARKS.NURSE_REMARKS_ROW")
-        var operations = try? [Operation].decode(data, keyPath: "Root.PATIENT.PATIENT_ROW.OPERATION.OPERATION_ROW", jsonDecoder: jsonDecoder)
-        
-//          if let nestedJson = (data as AnyObject).value(forKeyPath: "Root.PATIENT.PATIENT_ROW.OPERATION.OPERATION_ROW") {
-//              let nestedData = try? JSONSerialization.data(withJSONObject: nestedJson)
-//              print("nestedData:",String(data: nestedData ?? .init(), encoding: .utf8) ?? "")
-//              if let models = try? jsonDecoder.decode([Operation].self, from: nestedData ?? .init()) {
-//                  operations = models
-//              }
-//              if let model = try? jsonDecoder.decode(Operation.self, from: nestedData ?? .init()) {
-//                  operations = [model]
-//              }
-//              
-//          }
-        let catheters = try! [Cather].decode(data, keyPath: "Root.PATIENT.PATIENT_ROW.CATHETER.CATHETER_ROW", jsonDecoder: jsonDecoder)
-        
-        let endoscopies = try! [Endoscopy].decode(data, keyPath: "Root.PATIENT.PATIENT_ROW.ENDOSCOPY.ENDOSCOPY_ROW", jsonDecoder: jsonDecoder)
-        let rads = try! [Rad].decode(data, keyPath: "Root.PATIENT.PATIENT_ROW.RAD.RAD_ROW", jsonDecoder: jsonDecoder)
-        let clinicServices = try! [ClinicService].decode(data, keyPath: "Root.PATIENT.PATIENT_ROW.CLINIC_SERVICES.CLINIC_SERVICES_ROW", jsonDecoder: jsonDecoder)
-        
-        
-        print(clinicServices)
-        let dietaries = try! [Dietary].decode(data, keyPath: "Root.PATIENT.PATIENT_ROW.DIETRY.DIETRY_ROW", jsonDecoder: jsonDecoder)
-        //    let labs = try? [Lab].decode(data, keyPath: "Root.PATIENT.PATIENT_ROW.LAB.LAB_ROW.LAB_CATEGORY.LAB_CATEGORY_ROW")
-        let labsTest = try? [Lab].decode(data, keyPath: "Root.PATIENT.PATIENT_ROW.LAB.LAB_ROW.PENDING_LAB_ORDERS.PENDING_LAB_ORDERS_ROW")
-        
-        //    let labfinal = labs //== nil ? labsTest : labs
-        var vitalSigns = try! [VitalSign].decode(data, keyPath: "Root.PATIENT.PATIENT_ROW.VITAL_SIGNS.VITAL_SIGNS_ROW.DETAILS.DETAILS_ROW", jsonDecoder: jsonDecoder)
-    //    let vitalSigns = try! [VitalSign].decode(data, keyPath: "Root.PATIENT.PATIENT_ROW.VITAL_SIGNS.VITAL_SIGNS_ROW", jsonDecoder: jsonDecoder)
-        
-            let topLevel = try? JSONSerialization.jsonObject(with: data, options: JSONSerialization.ReadingOptions.mutableContainers)
-              if let nestedJson = (topLevel as? AnyObject)?.value(forKeyPath: "Root.PATIENT.PATIENT_ROW.VITAL_SIGNS.VITAL_SIGNS_ROW.DETAILS.DETAILS_ROW") {
-                  let nestedData = try? JSONSerialization.data(withJSONObject: nestedJson)
-                  print("nestedData:",String(data: nestedData ?? .init(), encoding: .utf8) ?? "")
-                  let models = try? jsonDecoder.decode([VitalSign].self, from: nestedData ?? .init())
-                  print(models ?? [])
-                  vitalSigns = models ?? []
-                  
-              }
+        func decodeArray<T: Decodable>(_ type: T.Type, at keyPath: String) -> [T] {
+            if let arr = decode([T].self, at: keyPath) { return arr }
+            if let one = decode(T.self,   at: keyPath) { return [one] }
+            return []
+        }
+
+        let complaints    = decodeArray(Complaint.self,  at: "Root.PATIENT.PATIENT_ROW.COMPLAINS.COMPLAINS_ROW")
+        let findings      = decodeArray(Finding.self,    at: "Root.PATIENT.PATIENT_ROW.FINDINGS.FINDINGS_ROW")
+        let diagnosis     = decodeArray(Diagnosis.self,  at: "Root.PATIENT.PATIENT_ROW.DIAGNOSIS.DIAGNOSIS_ROW")
+        let history       = decodeArray(History.self,    at: "Root.PATIENT.PATIENT_ROW.HISTORY.HISTORY_ROW")
+        let allergies     = decodeArray(Allergy.self,    at: "Root.PATIENT.PATIENT_ROW.ALLERGY.ALLERGY_ROW")
+        let scorings      = decodeArray(Scoring.self,    at: "Root.PATIENT.PATIENT_ROW.SCORING.SCORING_ROW")
+        let nurseRemarks  = decodeArray(NurseRemark.self,at: "Root.PATIENT.PATIENT_ROW.NURSE_REMARKS.NURSE_REMARKS_ROW")
+        let operations    = decodeArray(Operation.self,  at: "Root.PATIENT.PATIENT_ROW.OPERATION.OPERATION_ROW")
+        let catheters     = decodeArray(Cather.self,     at: "Root.PATIENT.PATIENT_ROW.CATHETER.CATHETER_ROW")
+        let endoscopies   = decodeArray(Endoscopy.self,  at: "Root.PATIENT.PATIENT_ROW.ENDOSCOPY.ENDOSCOPY_ROW")
+        let rads          = decodeArray(Rad.self,        at: "Root.PATIENT.PATIENT_ROW.RAD.RAD_ROW")
+        let clinicServices = decodeArray(ClinicService.self, at: "Root.PATIENT.PATIENT_ROW.CLINIC_SERVICES.CLINIC_SERVICES_ROW")
+        let dietaries     = decodeArray(Dietary.self,    at: "Root.PATIENT.PATIENT_ROW.DIETRY.DIETRY_ROW")
+        // Labs: LAB_ROW is a category wrapper (keys: LAB_CATEGORY, PENDING_LAB_ORDERS).
+        // Actual lab orders live inside PENDING_LAB_ORDERS.PENDING_LAB_ORDERS_ROW.
+        // LAB_ROW can be a single dict (1 category) or an array (multiple categories).
+        var labsTest: [Lab] = []
+        let labRowValue = safeValue(in: topLevel, keyPath: "Root.PATIENT.PATIENT_ROW.LAB.LAB_ROW")
+        let labRows: [[String: Any]] = {
+            if let arr = labRowValue as? [[String: Any]] { return arr }
+            if let dict = labRowValue as? [String: Any] { return [dict] }
+            return []
+        }()
+        for labRow in labRows {
+            guard let pending = labRow["PENDING_LAB_ORDERS"],
+                  JSONSerialization.isValidJSONObject(pending),
+                  let pendingData = try? JSONSerialization.data(withJSONObject: pending),
+                  let pendingTop = try? JSONSerialization.jsonObject(with: pendingData),
+                  let ordersRaw = safeValue(in: pendingTop, keyPath: "PENDING_LAB_ORDERS_ROW"),
+                  JSONSerialization.isValidJSONObject(ordersRaw),
+                  let ordersData = try? JSONSerialization.data(withJSONObject: ordersRaw)
+            else { continue }
+            if let arr = try? jsonDecoder.decode([Lab].self, from: ordersData) {
+                labsTest += arr
+            } else if let one = try? jsonDecoder.decode(Lab.self, from: ordersData) {
+                labsTest.append(one)
+            }
+        }
+
+        let vitalSigns    = decodeArray(VitalSign.self,  at: "Root.PATIENT.PATIENT_ROW.VITAL_SIGNS.VITAL_SIGNS_ROW.DETAILS.DETAILS_ROW")
+        let medications   = getMedictionsDTOsFromJson(data)
+        // New sections (API typo preserved: OPERTAION_REQUESTS)
+        let pathologies       = decodeArray(OperationCatherEndoscopy.self, at: "Root.PATIENT.PATIENT_ROW.PATHOLOGY.PATHOLOGY_ROW")
+        let operationRequests = decodeArray(OperationCatherEndoscopy.self, at: "Root.PATIENT.PATIENT_ROW.OPERTAION_REQUESTS.OPERTAION_REQUESTS_ROW")
+        let bloodBankItems    = decodeArray(OperationCatherEndoscopy.self, at: "Root.PATIENT.PATIENT_ROW.BLOOD_BANK.BLOOD_BANK_ROW")
+        let medicalReports    = decodeArray(OperationCatherEndoscopy.self, at: "Root.PATIENT.PATIENT_ROW.MEDICAL_REPORTS.MEDICAL_REPORTS_ROW")
 
         return PatientSummary(complaints: complaints,
                               findings: findings,
@@ -500,8 +521,12 @@ extension TranslationLayerImpl {
                               rads: rads,
                               clinicServices: clinicServices,
                               dietaries: dietaries,
-                              labs: labsTest ?? [],
+                              labs: labsTest,
                               vitalSigns: vitalSigns,
+                              pathologies: pathologies,
+                              operationRequests: operationRequests,
+                              bloodBankItems: bloodBankItems,
+                              medicalReports: medicalReports,
                               message: message)
     }
 }
@@ -526,6 +551,92 @@ extension TranslationLayerImpl {
             return nil
         }
         return ucafdata
+    }
+
+    // VitalSignsEntry: /MedicalRecord/loadUcaf — wider UCAF payload.
+    func getLoadUcafFromJson(_ data: Data) -> UCAFLoadData? {
+        guard let json = String(data: data, encoding: .utf8),
+              json.contains("UCAF_DATA_ROW") else { return nil }
+        let keyPath = "Root.UCAF_DATA.UCAF_DATA_ROW"
+        return try? UCAFLoadData(data: data, keyPath: keyPath)
+    }
+
+    // Server-computed CTAS block (may be absent).
+    func getLoadUcafCTASFromJson(_ data: Data) -> UCAFCTASServer? {
+        guard let json = String(data: data, encoding: .utf8),
+              json.contains("CTAS_DATA_ROW") else { return nil }
+        let keyPath = "Root.CTAS.CTAS_DATA.CTAS_DATA_ROW"
+        return try? UCAFCTASServer(data: data, keyPath: keyPath)
+    }
+
+    // VitalSignsEntry: /MedicalRecord/loadSpecialHappits — special habits payload.
+    // Lives at Root.SPECIAL_HABITS (single object, not an array row).
+    func getSpecialHabitsFromJson(_ data: Data) -> SpecialHabitsData? {
+        guard let json = String(data: data, encoding: .utf8),
+              json.contains("SPECIAL_HABITS") else { return nil }
+        let keyPath = "Root.SPECIAL_HABITS"
+        return try? SpecialHabitsData(data: data, keyPath: keyPath)
+    }
+
+    // ProgressNotes: /MedicalRcordController/DDDocNurseNotesLoad (server typo preserved).
+    // Parses the notes list plus the four lookup arrays. Everything defaults to [] on
+    // missing/malformed data so the caller never crashes.
+    func getDoctorNurseNotesFromJson(_ data: Data) -> DoctorNurseNotesData {
+        // ── Diagnostic: dump raw response to console ──────────────────────────
+        let rawString = String(data: data, encoding: .utf8) ?? "<non-UTF8 data>"
+        print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        print("[ProgressNotes] RAW RESPONSE (\(data.count) bytes):")
+        // Print in chunks so Xcode doesn't truncate long lines
+        let chunkSize = 800
+        var offset = rawString.startIndex
+        while offset < rawString.endIndex {
+            let end = rawString.index(offset, offsetBy: chunkSize, limitedBy: rawString.endIndex) ?? rawString.endIndex
+            print(rawString[offset..<end])
+            offset = end
+        }
+        print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+
+        let topLevel = try? JSONSerialization.jsonObject(with: data,
+                                                         options: .mutableContainers)
+        if topLevel == nil {
+            print("[ProgressNotes] ⚠️ JSON parse failed — topLevel is nil")
+        }
+
+        func decode<T: Decodable>(_ type: T.Type, at keyPath: String) -> T? {
+            guard let nested = safeValue(in: topLevel, keyPath: keyPath),
+                  JSONSerialization.isValidJSONObject(nested),
+                  let nestedData = try? JSONSerialization.data(withJSONObject: nested)
+            else { return nil }
+            return try? jsonDecoder.decode(T.self, from: nestedData)
+        }
+        func decodeArray<T: Decodable>(_ type: T.Type, at keyPath: String) -> [T] {
+            if let arr = decode([T].self, at: keyPath) { return arr }
+            if let one = decode(T.self,   at: keyPath) { return [one] }
+            return []
+        }
+
+        let notes      = decodeArray(DoctorNurseNote.self, at: "Root.DOCTOR_NURSE_REMARKS.DOCTOR_NURSE_REMARKS_ROW")
+        let priorities = decodeArray(NurseNoteLookup.self, at: "Root.NURSE_REMARKS_PRIORITY.NURSE_REMARKS_PRIORITY_ROW")
+        // Server uses "VISIT_TYPE" (not "NURSE_REMARKS_VISIT_TYPE"); try both so a
+        // future server rename doesn't silently break the filter sheet.
+        let visitTypes: [NurseNoteLookup] = {
+            let v = decodeArray(NurseNoteLookup.self, at: "Root.VISIT_TYPE.VISIT_TYPE_ROW")
+            if !v.isEmpty { return v }
+            return decodeArray(NurseNoteLookup.self, at: "Root.NURSE_REMARKS_VISIT_TYPE.NURSE_REMARKS_VISIT_TYPE_ROW")
+        }()
+        let showToList = decodeArray(NurseNoteLookup.self, at: "Root.NURSE_REMARKS_SHOW_D_N.NURSE_REMARKS_SHOW_D_N_ROW")
+        let filters    = decodeArray(NurseNoteLookup.self, at: "Root.NURSE_REMARKS_FILTER.NURSE_REMARKS_FILTER_ROW")
+
+        print("[ProgressNotes] PARSE RESULT → notes:\(notes.count)  priorities:\(priorities.count)  visitTypes:\(visitTypes.count)  showTo:\(showToList.count)  filters:\(filters.count)")
+        if !notes.isEmpty {
+            print("[ProgressNotes] First note → SER:\(notes[0].ser ?? "?")  EMP:\(notes[0].empNameEn ?? "?")  DATE:\(notes[0].transDate ?? "?")  BODY:\(notes[0].body.prefix(80))")
+        }
+
+        return DoctorNurseNotesData(notes: notes,
+                                    priorities: priorities,
+                                    visitTypes: visitTypes,
+                                    showToList: showToList,
+                                    filters: filters)
     }
     
     // get diagnosis categories
@@ -596,6 +707,12 @@ extension TranslationLayerImpl {
             }
         }
         return symptoms
+    }
+
+    // get visit detail (blood type, phone, allergy, etc.)
+    func getVisitDetailDTOFromJson(_ data: Data) -> VisitDetail? {
+        let keyPath = "Root.PV.PV_R"
+        return try? VisitDetail(data: data, keyPath: keyPath)
     }
 }
 

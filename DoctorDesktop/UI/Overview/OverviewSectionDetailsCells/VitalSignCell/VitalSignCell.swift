@@ -11,46 +11,111 @@ import UIKit
 class VitalSignCell: UITableViewCell {
   var presenter: VitalSignCellPresenter!
 
-    @IBOutlet weak var imgProgress: UIImageView!
-    @IBOutlet weak var title: UILabel!
+  @IBOutlet weak var imgProgress: UIImageView!
+  @IBOutlet weak var title: UILabel!
   @IBOutlet weak var currentResult: UILabel!
   @IBOutlet weak var firstPreviousResult: UILabel!
   @IBOutlet weak var secondPreviousResult: UILabel!
 
+  private static let teal   = UIColor(red: 0.22, green: 0.72, blue: 0.62, alpha: 1)
+  private static let evenBg = UIColor.white
+  private static let oddBg  = UIColor(red: 0.93, green: 0.98, blue: 0.97, alpha: 1)
+
   override func awakeFromNib() {
     super.awakeFromNib()
+    selectionStyle = .none
+    setupFonts()
+    setupIcon()
+  }
+
+  // MARK: - One-time setup
+
+  private func setupFonts() {
+    title.font                    = UIFont.systemFont(ofSize: 14, weight: .semibold)
+    currentResult.numberOfLines   = 0
+    firstPreviousResult.numberOfLines  = 0
+    secondPreviousResult.numberOfLines = 0
+
+    // Let background fill the full cell width — no default system insets
+    preservesSuperviewLayoutMargins = false
+    layoutMargins = .zero
+  }
+
+  private func setupIcon() {
+    if #available(iOS 13, *) {
+      imgProgress.image        = UIImage(systemName: "chart.bar.fill")
+      imgProgress.tintColor    = VitalSignCell.teal
+      imgProgress.contentMode  = .scaleAspectFit
+    }
   }
 
   override func prepareForReuse() {
-      
-    self.title.text = ""
-    self.currentResult.text = ""
-    self.firstPreviousResult.text = ""
-    self.secondPreviousResult.text = ""
-      
+    super.prepareForReuse()
+    title.text                     = ""
+    currentResult.attributedText   = nil
+    firstPreviousResult.attributedText  = nil
+    secondPreviousResult.attributedText = nil
+    currentResult.text             = ""
+    firstPreviousResult.text       = ""
+    secondPreviousResult.text      = ""
   }
 }
 
-//MARK: - Configure
+// MARK: - Configure
 extension VitalSignCell {
-  func configure(with presenter: VitalSignCellPresenter) {
+  func configure(with presenter: VitalSignCellPresenter, rowIndex: Int = 0) {
     self.presenter = presenter
-    self.title.text = presenter.vitalSignTitle
-    self.currentResult.text = presenter.currentResult
-    self.firstPreviousResult.text = presenter.firstPreviousResult
-    self.secondPreviousResult.text = presenter.secondPreviousResult
+
+    // Title
+    title.text      = presenter.vitalSignTitle
+    title.textColor = VitalSignCell.teal
+
+    // Result labels — bold value, small gray date
+    currentResult.attributedText        = styled(presenter.currentResult)
+    firstPreviousResult.attributedText  = styled(presenter.firstPreviousResult)
+    secondPreviousResult.attributedText = styled(presenter.secondPreviousResult)
+
+    // Zebra background
+    let hasData = !presenter.currentResult.isEmpty
+    backgroundColor         = rowIndex % 2 == 0 ? VitalSignCell.evenBg : VitalSignCell.oddBg
+    contentView.backgroundColor = backgroundColor
+
+    // Chart icon
+    imgProgress.isHidden = !hasData
+  }
+
+  /// Returns an NSAttributedString: value line in bold dark + date lines in small gray.
+  private func styled(_ text: String) -> NSAttributedString {
+    guard !text.isEmpty else { return NSAttributedString(string: "") }
+    let lines  = text.components(separatedBy: "\n")
+    let result = NSMutableAttributedString()
+
+    // First line = value (e.g. "37.2" or "102 / 58")
+    if let value = lines.first {
+      result.append(NSAttributedString(string: value, attributes: [
+        .font           : UIFont.systemFont(ofSize: 15, weight: .bold),
+        .foregroundColor: UIColor(white: 0.15, alpha: 1)
+      ]))
+    }
+
+    // Remaining lines = date
+    if lines.count > 1 {
+      let dateStr = lines.dropFirst().joined(separator: "\n")
+      result.append(NSAttributedString(string: "\n" + dateStr, attributes: [
+        .font           : UIFont.systemFont(ofSize: 11, weight: .regular),
+        .foregroundColor: UIColor.gray
+      ]))
+    }
+
+    return result
   }
 }
 
-//MARK: - Helper Methods
+// MARK: - Helper Methods
 extension VitalSignCell {
-  public static var cellId: String {
-    return "VitalSignCell"
-  }
+  public static var cellId: String { return "VitalSignCell" }
 
-  public static var bundle: Bundle {
-    return Bundle(for: VitalSignCell.self)
-  }
+  public static var bundle: Bundle { return Bundle(for: VitalSignCell.self) }
 
   public static var nib: UINib {
     return UINib(nibName: VitalSignCell.cellId, bundle: VitalSignCell.bundle)
@@ -64,25 +129,32 @@ extension VitalSignCell {
     return bundle.loadNibNamed(VitalSignCell.cellId, owner: owner, options: nil)?.first as! VitalSignCell
   }
 
-  public static func dequeue(from tableView: UITableView, for indexPath: IndexPath, with presenter: VitalSignCellPresenter) -> VitalSignCell {
-    let cell = tableView.dequeueReusableCell(withIdentifier: VitalSignCell.cellId, for: indexPath) as! VitalSignCell
+  public static func dequeue(from tableView: UITableView,
+                             for indexPath: IndexPath,
+                             with presenter: VitalSignCellPresenter) -> VitalSignCell {
+    let cell = tableView.dequeueReusableCell(withIdentifier: VitalSignCell.cellId,
+                                             for: indexPath) as! VitalSignCell
     cell.configure(with: presenter)
     return cell
   }
 
   public static func dequeueHeader(from tableView: UITableView) -> VitalSignCell {
     let cell = tableView.dequeueReusableCell(withIdentifier: VitalSignCell.cellId) as! VitalSignCell
-    cell.title.text = "Name"
-    cell.currentResult.text = "Result"
-    cell.firstPreviousResult.text = "Previous"
-    cell.secondPreviousResult.text = "Previous"
-    cell.imgProgress.isHidden = true
-    cell.title.textColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 1)
-    cell.currentResult.textColor = #colorLiteral(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
-    cell.firstPreviousResult.textColor = #colorLiteral(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
-    cell.secondPreviousResult.textColor = #colorLiteral(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
-    cell.backgroundColor = #colorLiteral(red: 0.3556457162, green: 0.6066671014, blue: 0.6494460106, alpha: 1)
+    cell.title.text               = "Name"
+    cell.title.font               = UIFont.systemFont(ofSize: 14, weight: .bold)
+    cell.title.textColor          = .white
+    cell.currentResult.text       = "Result"
+    cell.currentResult.font       = UIFont.systemFont(ofSize: 13, weight: .semibold)
+    cell.currentResult.textColor  = .white
+    cell.firstPreviousResult.text  = "Previous"
+    cell.firstPreviousResult.font  = UIFont.systemFont(ofSize: 13, weight: .semibold)
+    cell.firstPreviousResult.textColor = .white
+    cell.secondPreviousResult.text  = "Previous"
+    cell.secondPreviousResult.font  = UIFont.systemFont(ofSize: 13, weight: .semibold)
+    cell.secondPreviousResult.textColor = .white
+    cell.imgProgress.isHidden     = true
+    cell.backgroundColor          = UIColor(red: 0.28, green: 0.58, blue: 0.62, alpha: 1)
+    cell.contentView.backgroundColor = cell.backgroundColor
     return cell
   }
 }
-

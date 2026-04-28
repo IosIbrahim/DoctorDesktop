@@ -41,7 +41,7 @@ class NotesCell: UITableViewCell {
         lblUser.text = note.doctorEnglishName
         lblDate.text = note.nurseTransactionDate
         lblNote.text = note.englishDescription
-        if note.status == 1 {
+        if note.status == "1" {
             pickerStatus.backgroundColor = .systemGreen
             lblStatus.textColor = .white
             lblStatus.text = "Normal"
@@ -61,11 +61,11 @@ extension NotesCell {
   }
 
   public static var bundle: Bundle {
-    return Bundle(for: ScoringCell.self)
+    return Bundle(for: NotesCell.self)
   }
 
   public static var nib: UINib {
-    return UINib(nibName: ScoringCell.cellId, bundle: ScoringCell.bundle)
+    return UINib(nibName: NotesCell.cellId, bundle: NotesCell.bundle)
   }
 
   public static func register(with tableView: UITableView) {
@@ -74,6 +74,16 @@ extension NotesCell {
 
   public static func loadFromNib(owner: Any?) -> NotesCell {
     return bundle.loadNibNamed(NotesCell.cellId, owner: owner, options: nil)?.first as! NotesCell
+  }
+
+  /// Dequeues a `NotesCell` already configured with `note`.
+  /// Used by `ProgressNotesViewController` which registers the cell programmatically.
+  public static func dequeue(from tableView: UITableView,
+                             for indexPath: IndexPath,
+                             with note: NurseRemark) -> NotesCell {
+    let cell = tableView.dequeueReusableCell(withIdentifier: NotesCell.cellId, for: indexPath) as! NotesCell
+    cell.drawCell(note)
+    return cell
   }
 
 //  public static func dequeue(from tableView: UITableView, for indexPath: IndexPath, with presenter: ScoringCellPresenter) -> ScoringCell {

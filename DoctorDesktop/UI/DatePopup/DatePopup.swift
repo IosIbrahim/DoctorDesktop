@@ -9,10 +9,64 @@
 import UIKit
 
 class DatePopup: UIViewController {
-  
-  @IBOutlet weak var datePicker: UIDatePicker!
-  
-  override func viewDidLoad() {
-    super.viewDidLoad()
-  }
+
+    // MARK: - Public — callers read .date from this picker
+    let datePicker: UIDatePicker = {
+        let picker = UIDatePicker()
+        picker.datePickerMode = .date
+        picker.date = Date()                        // always open on today
+        picker.preferredDatePickerStyle = .inline   // full calendar grid
+        // Teal selection circle matching the design
+        picker.tintColor = UIColor(red: 0.05, green: 0.60, blue: 0.65, alpha: 1)
+        picker.translatesAutoresizingMaskIntoConstraints = false
+        return picker
+    }()
+
+    // MARK: - Private UI
+
+    private let cardView: UIView = {
+        let v = UIView()
+        v.backgroundColor = .white
+        v.layer.cornerRadius = 20
+        v.layer.shadowColor  = UIColor.black.cgColor
+        v.layer.shadowOpacity = 0.10
+        v.layer.shadowRadius  = 16
+        v.layer.shadowOffset  = CGSize(width: 0, height: 4)
+        v.translatesAutoresizingMaskIntoConstraints = false
+        return v
+    }()
+
+    // MARK: - Lifecycle
+
+    override func loadView() {
+        let root = UIView()
+        root.backgroundColor = .clear
+        view = root
+        buildLayout()
+    }
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+    }
+
+    // MARK: - Layout
+
+    private func buildLayout() {
+        view.addSubview(cardView)
+        cardView.addSubview(datePicker)
+
+        NSLayoutConstraint.activate([
+            // Card fills the popup frame
+            cardView.topAnchor.constraint(equalTo: view.topAnchor),
+            cardView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            cardView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            cardView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+
+            // Picker sits inside card with equal padding on all sides
+            datePicker.topAnchor.constraint(equalTo: cardView.topAnchor, constant: 12),
+            datePicker.leadingAnchor.constraint(equalTo: cardView.leadingAnchor, constant: 12),
+            datePicker.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: -12),
+            datePicker.bottomAnchor.constraint(equalTo: cardView.bottomAnchor, constant: -12),
+        ])
+    }
 }

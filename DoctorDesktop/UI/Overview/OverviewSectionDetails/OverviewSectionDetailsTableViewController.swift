@@ -38,9 +38,9 @@ class OverviewSectionDetailsViewController: UIViewController {
     
   override func viewDidLoad() {
     super.viewDidLoad()
-    plusButton.layer.cornerRadius = 25
 
     tableView.tableFooterView = UIView()
+    addTableViewHorizontalPadding(12)
     VitalSignCell.register(with: tableView)
     MedicationCell.register(with: tableView)
     DiagnosisCell.register(with: tableView)
@@ -50,14 +50,190 @@ class OverviewSectionDetailsViewController: UIViewController {
     DietaryCell.register(with: tableView)
     LabsCell.register(with: tableView)
     OperationCatheterizationEndoscopyCell.register(with: tableView)
-      plusButton.isHidden = true
-      stkAddNote.isHidden = true
-      stkReply.isHidden = true
-      if presenter.overviewSection == .labExamination ||  presenter.overviewSection == .radTest {
-          plusButton.isHidden = false
-      }else if presenter.overviewSection == .progressNotes {
-          stkAddNote.isHidden = false
+    NotesCell.register(with: tableView)
+
+    plusButton.isHidden = true
+    stkAddNote.isHidden = true
+    stkReply.isHidden = true
+
+    let showPlus = presenter.overviewSection == .vitalSigns
+                || presenter.overviewSection == .labExamination
+                || presenter.overviewSection == .radTest
+    plusButton.isHidden = !showPlus
+
+    if presenter.overviewSection == .progressNotes {
+        stkAddNote.isHidden = false
+    }
+
+    styleFAB()
+    insertPatientHeaderCard()
+  }
+
+  // MARK: - Patient header card
+
+  // Stored so frames can be recalculated in viewDidLayoutSubviews.
+  private var patientHeaderContainer: UIView?
+  private var patientHeaderCard:      UIView?
+  private var vitalHistoryTitleLabel: UILabel?
+
+  /// Builds the tableHeaderView using frame-based layout.
+  ///
+  /// Layout (top → bottom):
+  ///   12 pt  — top gap
+  ///   64 pt  — teal patient card  (equal 12 pt left & right margins)
+  ///   10 pt  — gap
+  ///   22 pt  — "Vital Sign History" label
+  ///    6 pt  — bottom gap  (tight, so the column-header row sits close)
+  private func insertPatientHeaderCard() {
+    let teal = UIColor(red: 0.22, green: 0.72, blue: 0.62, alpha: 1)
+
+    let container = UIView()
+    container.backgroundColor = .clear
+
+    // ── Patient card ─────────────────────────────────────────────────────
+    let card = UIView()
+    card.backgroundColor = teal
+    card.layer.cornerRadius = 10
+    card.layer.masksToBounds = true
+
+    let icon = UIImageView()
+    icon.tintColor = .white
+    icon.contentMode = .scaleAspectFit
+    if #available(iOS 13, *) {
+      icon.image = UIImage(systemName: "person.crop.circle.fill")
+    }
+    icon.translatesAutoresizingMaskIntoConstraints = false
+    icon.widthAnchor.constraint(equalToConstant: 36).isActive = true
+    icon.heightAnchor.constraint(equalToConstant: 36).isActive = true
+    icon.setContentHuggingPriority(.required, for: .horizontal)
+
+    let nameLabel = UILabel()
+    nameLabel.text = patient.name.isEmpty ? "-" : patient.name
+    nameLabel.font = UIFont.systemFont(ofSize: 17, weight: .bold)
+    nameLabel.textColor = .white
+    nameLabel.numberOfLines = 1
+
+    let nat  = patient.nationality
+    let date = patient.date
+    let subtitle: String
+    if !nat.isEmpty && !date.isEmpty { subtitle = "\(nat) • \(date)" }
+    else if !nat.isEmpty             { subtitle = nat }
+    else                             { subtitle = date }
+
+    let subLabel = UILabel()
+    subLabel.text = subtitle
+    subLabel.font = UIFont.systemFont(ofSize: 12, weight: .regular)
+    subLabel.textColor = UIColor.white.withAlphaComponent(0.9)
+
+    let textStack = UIStackView(arrangedSubviews: [nameLabel, subLabel])
+    textStack.axis = .vertical
+    textStack.spacing = 2
+
+    let row = UIStackView(arrangedSubviews: [icon, textStack])
+    row.axis = .horizontal
+    row.spacing = 12
+    row.alignment = .center
+    row.translatesAutoresizingMaskIntoConstraints = false
+    card.addSubview(row)
+    NSLayoutConstraint.activate([
+      row.topAnchor.constraint(equalTo: card.topAnchor,        constant:  14),
+      row.bottomAnchor.constraint(equalTo: card.bottomAnchor,  constant: -14),
+      row.leadingAnchor.constraint(equalTo: card.leadingAnchor,   constant:  14),
+      row.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -14)
+    ])
+    container.addSubview(card)
+
+    // ── "Vital Sign History" label above the column-header row ───────────
+    let historyTitle = UILabel()
+    historyTitle.text = "Vital Sign History"
+    historyTitle.font = UIFont.systemFont(ofSize: 14, weight: .semibold)
+    historyTitle.textColor = UIColor(white: 0.25, alpha: 1)
+    container.addSubview(historyTitle)
+
+    patientHeaderContainer = container
+    patientHeaderCard      = card
+    vitalHistoryTitleLabel = historyTitle
+
+    tableView.tableHeaderView = container
+    applyHeaderFrames()
+  }
+
+  /// Frame-based layout so leading == trailing margin (12 pt each side).
+  ///
+  /// Key fix: derive width from `view.bounds.width - 24` (known tableView padding)
+  /// rather than `tableView.bounds.width`, which can be unreliable depending on
+  /// how the storyboard trailing constraint is stored.
+  private func applyHeaderFrames() {
+    guard
+      let container = patientHeaderContainer,
+      let card      = patientHeaderCard,
+      let histLabel = vitalHistoryTitleLabel
+    else { return }
+
+    // Use view.bounds.width - 24 (the known tableView horizontal padding × 2).
+    // Do NOT use tableView.bounds.width: the storyboard trailing constraint
+    // direction can make it wider than view.bounds.width - 24, causing the card
+    // to overflow the right edge with no visible trailing margin.
+    let tableHPad: CGFloat = 24        // addTableViewHorizontalPadding(12) × 2
+    let w: CGFloat = (view.bounds.width > 0 ? view.bounds.width : UIScreen.main.bounds.width) - tableHPad
+
+    let hInset:      CGFloat = 12
+    let cardW        = w - 2 * hInset  // symmetric left = right = 12 pt
+    let cardH:       CGFloat = 64
+    let histH:       CGFloat = 22
+    let topGap:      CGFloat = 8
+    let cardHistGap: CGFloat = 8
+    let bottomGap:   CGFloat = 0       // flush — pulls table right up
+
+    let cardY   = topGap
+    let histY   = cardY + cardH + cardHistGap
+    let totalH  = histY + histH + bottomGap
+
+    card.frame      = CGRect(x: hInset, y: cardY,  width: cardW, height: cardH)
+    histLabel.frame = CGRect(x: hInset, y: histY,  width: cardW, height: histH)
+    container.frame = CGRect(x: 0,      y: 0,       width: w,    height: totalH)
+
+    if tableView.tableHeaderView?.frame.height != totalH {
+      tableView.tableHeaderView = container
+    }
+  }
+
+  override func viewDidLayoutSubviews() {
+    super.viewDidLayoutSubviews()
+    applyHeaderFrames()
+  }
+
+  // MARK: - Layout helpers
+
+  /// Shrinks the tableView horizontally by updating its storyboard leading/trailing
+  /// constraints, so every cell gets natural side margins without touching any XIB.
+  private func addTableViewHorizontalPadding(_ padding: CGFloat) {
+    for constraint in view.constraints {
+      if constraint.firstItem as? UIView == tableView {
+        if constraint.firstAttribute == .leading  { constraint.constant =  padding }
+        if constraint.firstAttribute == .trailing { constraint.constant = -padding }
+      } else if constraint.secondItem as? UIView == tableView {
+        if constraint.secondAttribute == .leading  { constraint.constant =  padding }
+        if constraint.secondAttribute == .trailing { constraint.constant = -padding }
       }
+    }
+  }
+
+  // MARK: - FAB styling
+  private func styleFAB() {
+    plusButton.layer.cornerRadius  = 28
+    plusButton.clipsToBounds       = false
+    plusButton.backgroundColor     = UIColor(red: 0.24, green: 0.74, blue: 0.64, alpha: 1) // teal
+    plusButton.tintColor           = .white
+    plusButton.setTitle("+", for: .normal)
+    plusButton.titleLabel?.font    = UIFont.systemFont(ofSize: 32, weight: .light)
+    plusButton.setTitleColor(.white, for: .normal)
+
+    // Drop shadow
+    plusButton.layer.shadowColor   = UIColor.black.cgColor
+    plusButton.layer.shadowOffset  = CGSize(width: 0, height: 4)
+    plusButton.layer.shadowRadius  = 8
+    plusButton.layer.shadowOpacity = 0.25
   }
     
     
@@ -90,10 +266,18 @@ class OverviewSectionDetailsViewController: UIViewController {
     }
     
     @IBAction func addOntap(_ sender: Any) {
-      //  navigationController?.pushViewController(patientlis, animated: <#T##Bool#>)
-       // let storyboard = UIStoryboard(name: "Main", bundle: nil)
-      //  let vc = storyboard.instantiateViewController(withIdentifier: "prescriptionListVC")
-     //   navigationController?.pushViewController(vc, animated: true)
+        if presenter.overviewSection == .vitalSigns {
+            // Reuse EmergencyTriageViewController for vital-sign entry
+            navigationCoordinator?.setNavigationStatus(.atOverviewSectionDetails)
+            let args: [String: Any] = [
+                "viewType": "vitalSigns",
+                "patient" : patient,
+                "user"    : presenter.user
+            ]
+            navigationCoordinator?.next(arguments: args)
+            return
+        }
+
         navigationCoordinator?.setNavigationStatus(.atPatientList)
         var template = TemplateType.labOrder
         if presenter.overviewSection == .labExamination {
@@ -102,7 +286,7 @@ class OverviewSectionDetailsViewController: UIViewController {
                         "patient":patient,
                         "user":presenter.user] as [String : Any]
             navigationCoordinator?.next(arguments: args)
-        }else if presenter.overviewSection == .radTest {
+        } else if presenter.overviewSection == .radTest {
             template = .radOrder
             let args = ["viewType":"order",
                         "patient":patient,
@@ -110,7 +294,6 @@ class OverviewSectionDetailsViewController: UIViewController {
                         "user":presenter.user] as [String : Any]
             navigationCoordinator?.next(arguments: args)
         }
-        
     }
     
 
@@ -156,6 +339,7 @@ extension OverviewSectionDetailsViewController: UITableViewDataSource {
     case .catheterization: return presenter.patientSummary.catheters?.count ?? 0
     case .endoscopy: return presenter.patientSummary.endoscopies?.count ?? 0
     case .dietary: return presenter.patientSummary.dietaries?.count ?? 0
+    case .pathology, .operationRequest, .bloodBank, .medicalReport: return 0
     }
   }
 
@@ -189,6 +373,7 @@ extension OverviewSectionDetailsViewController: UITableViewDataSource {
     case .endoscopy: return operationCatherEndoscopyCellMaker(tableView, indexPath, presenter.patientSummary.endoscopies![indexPath.row])
     //case .clinicServices: return clinicalServiceCellMaker(tableView, indexPath, presenter.patientSummary.clinicServices![indexPath.row])
     case .dietary: return dietaryCellMaker(tableView, indexPath, presenter.patientSummary.dietaries![indexPath.row])
+    case .pathology, .operationRequest, .bloodBank, .medicalReport: break
     }
     return UITableViewCell()
   }
@@ -208,6 +393,7 @@ extension OverviewSectionDetailsViewController: UITableViewDelegate {
     case .operation, .catheterization, .endoscopy: return OperationCatheterizationEndoscopyCell.dequeueHeader(from: tableView)
     //case .clinicServices: return ClinicServiceCell.dequeueHeader(from: tableView)
     case .dietary: return DietaryCell.dequeueHeader(from: tableView)
+    case .pathology, .operationRequest, .bloodBank, .medicalReport: break
     }
     return nil
   }

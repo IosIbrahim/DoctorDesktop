@@ -20,6 +20,7 @@ protocol Patient {
   var countyFlag: UIImage? { get set }
   var name: String { get }
   var nationality: String { get }
+  var bloodType: String { get }
 }
 
 struct InpatientPatient: Decodable, Patient {
@@ -42,8 +43,11 @@ struct InpatientPatient: Decodable, Patient {
   var financialAccount: String
   var flagImageName: String
   var countyFlag: UIImage?
+  var bloodTypeDescEn: String?
+  var bloodTypeDescAr: String?
   var name: String { return nameInEnglish }
   var nationality: String { return nationalityInEnglish }
+  var bloodType: String { return bloodTypeDescEn ?? bloodTypeDescAr ?? "" }
   var highLightFlag:String?
   var age: String { return ageInEnglish}
   var doctorName: String { return doctorNameInEnglish }
@@ -75,6 +79,8 @@ struct InpatientPatient: Decodable, Patient {
     case financialAccount = "PATFINANACCOUNT"
     case flagImageName = "PIC_PATH"
     case date = "VISIT_START_DATE"
+    case bloodTypeDescEn = "V_PATIENT_BLOOD_DESC_EN"
+    case bloodTypeDescAr = "V_PATIENT_BLOOD_DESC_AR"
   }
 }
 
@@ -183,9 +189,10 @@ struct OutpatientPatient: Decodable, Patient {
     var countyFlag: UIImage?
     var name: String { return nameInEnglish }
     var nationality: String { return nationalityInEnglish }
+    var bloodType: String { return "" }
     var age: String { return ageDec ?? "" }
-    
-    
+
+
 
   enum CodingKeys: String, CodingKey {
       case ageDec = "AGE_DESC"
@@ -288,6 +295,7 @@ struct EmergencyPatient: Decodable, Patient {
   var countyFlag: UIImage?
   var name: String { return nameInEnglish }
   var nationality: String { return nationalityInEnglish }
+  var bloodType: String { return "" }
 
   var arrivalMethod: String? { return arrivalMethodInEnglish }
 
@@ -308,6 +316,27 @@ struct EmergencyPatient: Decodable, Patient {
     case placeId = "PLACE_ID"
     case financialAccount = "PATFINANACCOUNT"
     case flagImageName = "PIC_PATH"
+  }
+
+  /// Bridge any Patient (e.g. from the Overview screen) into an EmergencyPatient
+  /// so the existing EmergencyTriageViewController can be reused for vital-sign entry.
+  init(bridging patient: Patient) {
+    self.nameInEnglish         = patient.name
+    self.nameInArabic          = patient.name
+    self.nationalityInEnglish  = patient.nationality
+    self.nationalityInArabic   = patient.nationality
+    self.arrivalMethodInEnglish = nil
+    self.arrivalMethodInArabic  = nil
+    self.visitStartDate  = patient.date
+    self.triaged         = "0"
+    self.accuteCondition = nil
+    self.id              = patient.id
+    self.genderAge       = patient.genderAge
+    self.visitId         = patient.visitId
+    self.placeId         = patient.placeId
+    self.financialAccount = patient.financialAccount
+    self.flagImageName   = patient.flagImageName
+    self.countyFlag      = patient.countyFlag
   }
 }
 
@@ -400,8 +429,9 @@ struct ClinicalPatient: Decodable, Patient {
     var countyFlag: UIImage?
     var name: String { return nameInEnglish }
     var nationality: String { return nationalityInEnglish }
+    var bloodType: String { return "" }
     var age: String { return ageDec }
-    
+
 
   enum CodingKeys: String, CodingKey {
       case ageDec = "AGE_DESC"

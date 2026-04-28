@@ -18,6 +18,8 @@ protocol DependencyRegistry {
     func makeOverviewSectionDetailsViewController(overviewSection: OverviewSection, patientSummary: PatientSummary, user: User,pat:Patient) -> OverviewSectionDetailsViewController
   func makeWebViewerViewController(url: URL) -> WebViewerViewController
   func makeEmergencyTriageViewController(with patient: EmergencyPatient, user: User) -> EmergencyTriageViewController
+  func makeVitalSignsEntryViewController(with patient: Patient, user: User) -> VitalSignsEntryViewController
+  func makeProgressNotesViewController(with patient: Patient, user: User, visitIdArray: String) -> ProgressNotesViewController
 
   typealias rootNavigationCoordinatorMaker = (UIViewController) -> NavigationCoordinator
   typealias ComponentCellMaker = (UICollectionView, IndexPath, Component, ColorAndImageTuple) -> ComponentCell
@@ -151,6 +153,8 @@ class DependencyRegistryImpl: DependencyRegistry {
     registerDietaryCellPresenter()
     registerEmergencyTriagePresenter()
     registerVitalCellPresenter()
+    registerVitalSignsEntryPresenter()
+    registerProgressNotesPresenter()
   }
   
   func registerViewControllers() {
@@ -224,6 +228,8 @@ class DependencyRegistryImpl: DependencyRegistry {
     registerOverviewSectionDetailsViewController()
     registerWebViewerViewController()
     registerEmergencyTriageViewController()
+    registerVitalSignsEntryViewController()
+    registerProgressNotesViewController()
   }
   
   //MARK: - Maker Methods
@@ -435,7 +441,9 @@ extension DependencyRegistryImpl {
   }
   func makeVitalSignCell(for tableView: UITableView, at indexPath: IndexPath, vitalSign: VitalSign) -> VitalSignCell {
     let presenter = container.resolve(VitalSignCellPresenter.self, argument: vitalSign)!
-    return VitalSignCell.dequeue(from: tableView, for: indexPath, with: presenter)
+    let cell = VitalSignCell.dequeue(from: tableView, for: indexPath, with: presenter)
+    cell.configure(with: presenter, rowIndex: indexPath.row)
+    return cell
   }
   func makeMedicationCell(for tableView: UITableView, at indexPath: IndexPath, medication: Medication) -> MedicationCell {
     let presenter = container.resolve(MedicationCellPresenter.self, argument: medication)!
@@ -548,5 +556,51 @@ extension DependencyRegistryImpl {
 
   func makePediatricsScorePopUp(with pediatricsScoreElements: PediatricsScoreElements, selectedScoreChoices: [PediatricsScoreChoice]) -> PediatricsScorePopUp {
     return container.resolve(PediatricsScorePopUp.self, arguments: pediatricsScoreElements, selectedScoreChoices)!
+  }
+}
+
+// MARK: - VitalSignsEntry (code-only Add Vital Signs screen)
+extension DependencyRegistryImpl {
+  func registerVitalSignsEntryPresenter() {
+    container.register(VitalSignsEntryPresenter.self) { (r, patient: Patient, user: User) in
+      let modelLayer = r.resolve(ModelLayer.self)!
+      return VitalSignsEntryPresenterImpl(patient: patient, user: user, modelLayer: modelLayer)
+    }
+  }
+
+  func registerVitalSignsEntryViewController() {
+    container.register(VitalSignsEntryViewController.self) { (r, patient: Patient, user: User) in
+      let presenter = r.resolve(VitalSignsEntryPresenter.self, arguments: patient, user)!
+      let vc = VitalSignsEntryViewController()
+      vc.configure(with: presenter, navigationCoordinator: self.navigationCoordinator)
+      return vc
+    }
+  }
+
+  func makeVitalSignsEntryViewController(with patient: Patient, user: User) -> VitalSignsEntryViewController {
+    return container.resolve(VitalSignsEntryViewController.self, arguments: patient, user)!
+  }
+}
+
+// MARK: - ProgressNotes (programmatic, replaces OverviewSectionDetails for progress notes)
+extension DependencyRegistryImpl {
+  func registerProgressNotesPresenter() {
+    container.register(ProgressNotesPresenter.self) { (r, patient: Patient, user: User, visitIdArray: String) in
+      let modelLayer = r.resolve(ModelLayer.self)!
+      return ProgressNotesPresenterImpl(patient: patient, user: user, modelLayer: modelLayer, visitIdArray: visitIdArray)
+    }
+  }
+
+  func registerProgressNotesViewController() {
+    container.register(ProgressNotesViewController.self) { (r, patient: Patient, user: User, visitIdArray: String) in
+      let presenter = r.resolve(ProgressNotesPresenter.self, arguments: patient, user, visitIdArray)!
+      let vc = ProgressNotesViewController()
+      vc.configure(with: presenter, navigationCoordinator: self.navigationCoordinator)
+      return vc
+    }
+  }
+
+  func makeProgressNotesViewController(with patient: Patient, user: User, visitIdArray: String) -> ProgressNotesViewController {
+    return container.resolve(ProgressNotesViewController.self, arguments: patient, user, visitIdArray)!
   }
 }

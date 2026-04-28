@@ -15,12 +15,17 @@ class OverviewCollectionViewController: UIViewController, NVActivityIndicatorVie
     @IBOutlet weak var historyCollectionView: UICollectionView!
     @IBOutlet weak var summaryCollectionView: UICollectionView!
     lazy var toastBar: ToastBar = .init(settings: .agent, in: parent?.view)
-    
+
     private var presenter: OverviewPresenter!
     private var selectIndex:Int = .zero
     private weak var navigationCoordinator: NavigationCoordinator?
     private var patientHistoryFiltrationCellMaker: DependencyRegistry.PatientHistoryFiltrationCellMaker!
     private var overviewSectionCellMaker: DependencyRegistry.OverviewSectionCellMaker!
+
+    // Patient header
+    private var patientHeaderView: PatientHeaderView!
+    /// Keeps the header flush with the bottom of the navigation bar.
+    private var headerTopConstraint: NSLayoutConstraint!
 
   func configure(with presenter: OverviewPresenter,
                  patientHistoryFiltrationCellMaker: @escaping DependencyRegistry.PatientHistoryFiltrationCellMaker,
@@ -45,7 +50,43 @@ class OverviewCollectionViewController: UIViewController, NVActivityIndicatorVie
     OverviewSectionCell.register(with: summaryCollectionView)
     historyCollectionView.allowsMultipleSelection = false
     startAnimating(message: "Loading...")
-   
+    setupPatientHeader()
+  }
+
+  // MARK: - Patient Header
+
+  private func setupPatientHeader() {
+    patientHeaderView = PatientHeaderView()
+    view.addSubview(patientHeaderView)
+
+    // Pin to the top of the view (constant updated once safe-area is known)
+    headerTopConstraint = patientHeaderView.topAnchor.constraint(equalTo: view.topAnchor)
+    NSLayoutConstraint.activate([
+      headerTopConstraint,
+      patientHeaderView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+      patientHeaderView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+      patientHeaderView.heightAnchor.constraint(equalToConstant: PatientHeaderView.preferredHeight),
+    ])
+
+    // Push the storyboard collection views below the header.
+    // This works when the storyboard views are constrained to the safe area top.
+    additionalSafeAreaInsets.top = PatientHeaderView.preferredHeight
+
+    // Populate immediately with data already in the presenter
+    patientHeaderView.configure(patient: presenter.patient)
+
+    // Keep the header visually above the collection views
+    view.bringSubview(toFront: patientHeaderView)
+  }
+
+  /// Called by UIKit whenever the safe-area insets change (e.g. on first layout,
+  /// device rotation).  We reposition the header to stay just below the nav bar.
+  override func viewSafeAreaInsetsDidChange() {
+    super.viewSafeAreaInsetsDidChange()
+    // safeAreaInsets.top = navBarHeight + additionalSafeAreaInsets.top
+    // → navBarHeight = safeAreaInsets.top − additionalSafeAreaInsets.top
+    let navBarHeight = view.safeAreaInsets.top - additionalSafeAreaInsets.top
+    headerTopConstraint.constant = max(navBarHeight, 0)
   }
 
   @IBAction func didPressMenu(_ sender: Any) {
@@ -59,7 +100,27 @@ class OverviewCollectionViewController: UIViewController, NVActivityIndicatorVie
     
     override func viewWillAppear(_ animated: Bool) {
       super.viewWillAppear(true)
-        presenter.getPatientHistory {
+
+      // Load visit detail (blood type, phone, allergy, etc.)
+      presenter.getVisitsDetail {
+        if let detail = self.presenter.visitDetail {
+          self.patientHeaderView.updateFromVisitDetail(detail)
+        }
+      }
+
+      presenter.getPatientHistory {
+          let history = self.presenter.patientHistory
+
+          // Specialty chip
+          let specialtyName = history?.currentSpeciality.name ?? ""
+          self.patientHeaderView.updateSpecialty(specialtyName)
+
+          // Insurance — find current visit and read CONTRACT_NAME_EN
+          let contractName = history?.patientVisits
+              .first(where: { $0.id == self.presenter.patient.visitId })?
+              .contractNameEn ?? ""
+          self.patientHeaderView.updateInsurance(contractName)
+
           self.historyCollectionView.reloadSections(IndexSet(integer: 0))
           self.historyCollectionView.selectItem(at: IndexPath(item: 0, section: 0), animated: false, scrollPosition: [.centeredHorizontally])
           self.collectionView(self.historyCollectionView, didSelectItemAt : IndexPath(item: 0, section: 0))
@@ -87,7 +148,9 @@ extension OverviewCollectionViewController: UICollectionViewDataSource {
       return cell
     } else {
       guard let overviewSection = OverviewSection(rawValue: indexPath.row) else { return UICollectionViewCell() }
-      return overviewSectionCellMaker(collectionView, indexPath, overviewSection.imageName, overviewSection.title, overviewSection.color, presenter.patientSummaryCounts[indexPath.row])
+      // Vital Signs count is not meaningful as a summary number — hide the badge
+      let count = overviewSection == .vitalSigns ? -1 : presenter.patientSummaryCounts[indexPath.row]
+      return overviewSectionCellMaker(collectionView, indexPath, overviewSection.imageName, overviewSection.title, overviewSection.color, count)
     }
   }
 }
@@ -111,8 +174,11 @@ extension OverviewCollectionViewController: UICollectionViewDelegate {
           if let msg = self.presenter.patientSummary?.message {
               self.toastBar.show(with: msg)
           }
-        self.stopAnimating()
-        self.summaryCollectionView.reloadData()
+          // Update allergy chip from summary (more reliable than VisitDetail)
+          let allergyName = self.presenter.patientSummary?.allergies?.first?.allergyTypeEnglishName
+          self.patientHeaderView.updateAllergyFromSummary(allergyName)
+          self.stopAnimating()
+          self.summaryCollectionView.reloadData()
       }
     } else {
       guard let overviewSection = OverviewSection(rawValue: indexPath.row) else { return }

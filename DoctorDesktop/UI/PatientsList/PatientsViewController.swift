@@ -116,9 +116,24 @@ class PatientsViewController: UIViewController, NVActivityIndicatorViewable {
     switch presenter.componentType {
     case .emergency, .clinicalAlert:
       getPatientsDetails(withSelectedUnitIndex: -1)
+    case .outpatient, .inpatient, .ICU, .nicu:
+      // Hide content — UnitsPopup is about to be pushed immediately on top.
+      setContentVisible(false)
+      getPatientsUnits()
     default:
       getPatientsUnits()
     }
+  }
+
+  // MARK: - Content visibility helper
+
+  /// Hides/shows the main content area (table + selector bar).
+  /// Called with `false` before UnitsPopup appears, and `true` after a clinic is selected.
+  fileprivate func setContentVisible(_ visible: Bool) {
+    tableView.isHidden          = !visible
+    dropDownView.isHidden       = !visible
+    countView.isHidden          = !visible
+    selectionTitleLabel.isHidden = !visible
   }
   
     override func viewWillAppear(_ animated: Bool) {
@@ -174,12 +189,27 @@ extension PatientsViewController {
 //    SideMenuManager.default.menuAddScreenEdgePanGesturesToPresent(toView: self.navigationController!.view)
   }
 
-  fileprivate func showUnitsPopupDialog() {
-      let unitsPopup = unitsPopupMaker(presenter.title, self.presenter.patientUnits)
-      unitsPopup.delegate = self
-      unitsPopup.modalPresentationStyle = .fullScreen
-      self.present(unitsPopup, animated: true, completion: nil)
-   //   UIApplication.shared.isStatusBarHidden = true
+  /// Creates and pushes UnitsPopup immediately, then returns it so the caller
+  /// can call reloadWith(units:) once the API finishes.
+  @discardableResult
+  fileprivate func showUnitsPopupDialog() -> UnitsPopup {
+    let unitsPopup = unitsPopupMaker(presenter.title, self.presenter.patientUnits)
+    unitsPopup.delegate = self
+    unitsPopup.selectedDate = selectedDate
+
+    unitsPopup.onDateChanged = { [weak self, weak unitsPopup] newDate in
+      guard let self = self, let popup = unitsPopup else { return }
+      self.selectedDate = newDate
+      self.dateLabel.text = self.dateFormatter.string(from: newDate)
+      self.selectedUnitIndex = nil
+      self.presenter.clearData()
+      self.presenter.getOutpatientClinics(withDate: newDate) {
+        popup.reloadWith(units: self.presenter.patientUnits)
+      }
+    }
+
+    navigationController?.pushViewController(unitsPopup, animated: true)
+    return unitsPopup
   }
   
   fileprivate func showDatePopupDialog() {
@@ -211,21 +241,7 @@ extension PatientsViewController {
     // Top of drop down will be below the anchorView
     dropDown.bottomOffset = CGPoint(x: 0, y:(dropDown.anchorView?.plainView.bounds.height)!)
     
-    /*** IMPORTANT PART FOR CUSTOM CELLS ***/
-    dropDown.cellNib = UINib(nibName: "UnitsDropDrownCell", bundle: nil)
-    dropDown.customCellConfiguration = { (index: Index, item: String, cell: DropDownCell) -> Void in
-      guard let cell = cell as? UnitsPopupCell else { return }
-      
-      // Setup your custom UI components
-//      cell.countLabel.text = self.presenter.patientUnits[index].patientsCount
-        
-//        print(self.presenter.patientUnits[index])
-        
-//      if self.presenter.patientUnits[index].patientsCount == "0" {
-//        cell.countView.isHidden = true
-//      }
-    }
-    /*** END - IMPORTANT PART FOR CUSTOM CELLS ***/
+    // Custom nib removed — clinic selection is handled by the pushed UnitsPopup
     
     dropDown.backgroundColor = .white
     dropDown.selectionBackgroundColor = .lightGray
@@ -247,19 +263,24 @@ extension PatientsViewController {
   fileprivate func getPatientsUnits() {
     switch presenter.componentType {
     case .inpatient:
+      let popup = showUnitsPopupDialog()
       presenter.getInpatientUnits(isICU: 0) {
-        self.showUnitsPopupDialog()
         self.setupDropDownMenu(dropDown: self.dropDown)
+        popup.reloadWith(units: self.presenter.patientUnits)
       }
     case .ICU:
+      let popup = showUnitsPopupDialog()
       presenter.getInpatientUnits(isICU: 1) {
-        self.showUnitsPopupDialog()
         self.setupDropDownMenu(dropDown: self.dropDown)
+        popup.reloadWith(units: self.presenter.patientUnits)
       }
     case .outpatient:
+      // Push UnitsPopup immediately (shows spinner) — no waiting, no white flash.
+      // Populate it once the API responds.
+      let popup = showUnitsPopupDialog()
       presenter.getOutpatientClinics(withDate: selectedDate) {
-        self.showUnitsPopupDialog()
         self.setupDropDownMenu(dropDown: self.dropDown)
+        popup.reloadWith(units: self.presenter.patientUnits)
       }
     case .operations:
         presenter.getOperationPatients(withDate: selectedDate) {
@@ -269,11 +290,12 @@ extension PatientsViewController {
       getPatientsDetails(withSelectedUnitIndex: -1)
     case .clinicalAlert:
       break
-    case .nicu :
-        presenter.getInpatientUnits(isICU: 2) {
-          self.showUnitsPopupDialog()
-          self.setupDropDownMenu(dropDown: self.dropDown)
-        }
+    case .nicu:
+      let popup = showUnitsPopupDialog()
+      presenter.getInpatientUnits(isICU: 2) {
+        self.setupDropDownMenu(dropDown: self.dropDown)
+        popup.reloadWith(units: self.presenter.patientUnits)
+      }
     default: break
     }
   }
@@ -327,16 +349,21 @@ extension PatientsViewController {
 extension PatientsViewController {
   fileprivate func didSelectPatientUnit(atIndex index: Int) {
     guard selectedUnitIndex != index else { return }
+    setContentVisible(true)     // reveal UI now that a clinic has been chosen
     selectionTitleLabel.text = self.presenter.patientUnits[index].name
     self.selectedUnitIndex = index
-    
-    if presenter.patientUnits[index].patientsCount == "0" {
-      self.countView.isHidden = true
+
+    // Update the count badge (display only — never block loading)
+    let count = presenter.patientUnits[index].patientsCount
+    if count == "0" {
+      countView.isHidden = true
     } else {
-      self.countView.isHidden = false
-      self.countLabel.text = self.presenter.patientUnits[index].patientsCount
-      getPatientsDetails(withSelectedUnitIndex: index)
+      countView.isHidden = false
+      countLabel.text = count
     }
+
+    // Always fetch patients regardless of cached count
+    getPatientsDetails(withSelectedUnitIndex: index)
   }
   
   fileprivate func didSelectDate(date: Date) {
@@ -344,9 +371,9 @@ extension PatientsViewController {
     guard newDateString != dateFormatter.string(from: selectedDate) else { return }
     self.dateLabel.text = newDateString
     selectedDate = date
-    selectionTitleLabel.text = "Select"
-    countView.isHidden = true
+    selectedUnitIndex = nil   // allow re-selection of same clinic index on new date
     presenter.clearData()
+    setContentVisible(false)  // hide content — UnitsPopup is about to appear again
     getPatientsUnits()
   }
 }
@@ -477,9 +504,7 @@ extension PatientsViewController: UITableViewDelegate {
 
 extension PatientsViewController: UnitsPopupDelegate {
   func unitsPopup(_ unitsPopup: UnitsPopup, didSelectUnitAt index: Int) {
-    self.dismiss(animated: true) {
-      self.didSelectPatientUnit(atIndex: index)
-    }
-    UIApplication.shared.isStatusBarHidden = false
+    navigationController?.popViewController(animated: true)
+    didSelectPatientUnit(atIndex: index)
   }
 }

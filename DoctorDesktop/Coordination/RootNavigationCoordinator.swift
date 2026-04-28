@@ -24,6 +24,7 @@ enum NavigationState {
   atOrderCheckoutList,
   atOverviewCollection,
   atOverviewSectionDetails,
+  atVitalSignsEntry,   // EmergencyTriageVC opened from Overview + button
   atWebViewer
 }
 
@@ -53,6 +54,7 @@ class RootNavigationCoordinatorImpl: NavigationCoordinator {
 
     case .atOverviewCollection: navState = .atPatientList
     case .atOverviewSectionDetails: navState = .atOverviewCollection
+    case .atVitalSignsEntry:        navState = .atOverviewSectionDetails
     case .atWebViewer: navState = .atOverviewSectionDetails
     }
   }
@@ -105,7 +107,13 @@ class RootNavigationCoordinatorImpl: NavigationCoordinator {
       } else {
         showOverviewSectionDetails(arguments: arguments)
       }
-    case .atOverviewSectionDetails: showWebViewer(arguments: arguments)
+    case .atOverviewSectionDetails:
+      if let viewType = arguments?["viewType"] as? String, viewType == "vitalSigns" {
+        showVitalSignsEntry(arguments: arguments)
+      } else {
+        showWebViewer(arguments: arguments)
+      }
+    case .atVitalSignsEntry: break
     case .atWebViewer: break
     }
   }
@@ -123,7 +131,10 @@ class RootNavigationCoordinatorImpl: NavigationCoordinator {
           let permission = arguments?["permission"] as? PermissionModel,
       let user = arguments?["user"] as? User else { return }
     let patientsViewController = registry.makePatientsViewController(with: componentType, user: user,permission: permission)
-    rootViewController.navigationController?.pushViewController(patientsViewController, animated: true)
+    // For types that immediately push UnitsPopup, push PatientsViewController silently
+    // so only UnitsPopup slides in and the user never sees the underlying blank screen.
+    let showsUnitsPopup: Bool = [ComponentType.outpatient, .inpatient, .ICU, .nicu].contains(componentType)
+    rootViewController.navigationController?.pushViewController(patientsViewController, animated: !showsUnitsPopup)
     navState = .atPatientList
   }
 
@@ -134,6 +145,16 @@ class RootNavigationCoordinatorImpl: NavigationCoordinator {
     //rootViewController.navigationController?.present(emergencyTriageViewController, animated: true, completion: nil)
     rootViewController.navigationController?.pushViewController(emergencyTriageViewController, animated: true)
     navState = .atEmergencyTriage
+  }
+
+  /// Opens the code-only Add Vital Signs screen from the Overview vital-signs + button.
+  /// Uses the Android-matched VitalSignsEntryViewController (programmatic, not XIB-based).
+  func showVitalSignsEntry(arguments: Dictionary<String, Any>?) {
+    guard let patient = arguments?["patient"] as? Patient,
+          let user    = arguments?["user"]    as? User else { return }
+    let vc = registry.makeVitalSignsEntryViewController(with: patient, user: user)
+    rootViewController.navigationController?.pushViewController(vc, animated: true)
+    navState = .atVitalSignsEntry
   }
 
   func showOrderCollection(arguments: Dictionary<String, Any>?) {
@@ -179,12 +200,28 @@ class RootNavigationCoordinatorImpl: NavigationCoordinator {
   }
 
   func showOverviewSectionDetails(arguments: Dictionary<String, Any>?) {
+    // Progress notes does not need patientSummary — it loads its own data via
+    // DDDocNurseNotesLoad. Handle it before the patientSummary guard so the
+    // screen always opens even when the overview summary hasn't loaded yet.
+    if let overviewSection = arguments?["overviewSection"] as? OverviewSection,
+       overviewSection == .progressNotes,
+       let patient = arguments?["patient"] as? Patient,
+       let user    = arguments?["user"]    as? User {
+      // Use all visit IDs from the overview if available; fall back to current visit only.
+      let visitIdArray = (arguments?["visitIdArray"] as? String) ?? patient.visitId
+      let progressNotesVC = registry.makeProgressNotesViewController(with: patient, user: user, visitIdArray: visitIdArray)
+      rootViewController.navigationController?.pushViewController(progressNotesVC, animated: true)
+      navState = .atOverviewSectionDetails
+      return
+    }
+
     guard let overviewSection = arguments?["overviewSection"] as? OverviewSection,
       let patientSummary = arguments?["patientSummary"] as? PatientSummary,
       let patient = arguments?["patient"] as? Patient,
       let user = arguments?["user"] as? User else { return }
-      let overviewSectionDetailsViewController = registry.makeOverviewSectionDetailsViewController(overviewSection: overviewSection, patientSummary: patientSummary, user: user,pat:patient)
-      overviewSectionDetailsViewController.patient = patient
+
+    let overviewSectionDetailsViewController = registry.makeOverviewSectionDetailsViewController(overviewSection: overviewSection, patientSummary: patientSummary, user: user,pat:patient)
+    overviewSectionDetailsViewController.patient = patient
     rootViewController.navigationController?.pushViewController(overviewSectionDetailsViewController, animated: true)
     navState = .atOverviewSectionDetails
   }

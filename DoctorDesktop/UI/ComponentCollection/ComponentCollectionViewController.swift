@@ -49,7 +49,10 @@ class ComponentCollectionViewController: UIViewController {
 
   override func viewDidLayoutSubviews() {
     super.viewDidLayoutSubviews()
-    self.collectionView.reloadData()
+    // Only invalidate the layout so cells resize correctly on rotation —
+    // do NOT call reloadData() here; it was firing on every layout pass and
+    // causing the collection view to rebuild all cells continuously.
+    collectionView.collectionViewLayout.invalidateLayout()
   }
   override func viewWillDisappear(_ animated: Bool) {
     super.viewWillDisappear(true)

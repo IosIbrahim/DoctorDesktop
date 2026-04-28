@@ -34,10 +34,27 @@ protocol ModelLayer {
     func getPatientSummary(with params:[String: String], finished: @escaping PatientSummaryBlock)
     func getPacksURL(with params:[String: String], finished: @escaping URLBlock)
     func getTriageInfo(with params: [String: String], finished: @escaping TriageDataBlock)
-    
+    func loadUcaf(with params: [String: String], finished: @escaping (UCAFLoadData?, UCAFCTASServer?) -> Void)
+    func loadSpecialHabits(with params: [String: String], finished: @escaping (SpecialHabitsData?) -> Void)
+    func saveSpecialHabits(body: [String: Any], finished: @escaping (Bool, String?) -> Void)
+    /// Saves the UCAF (vitals + special-needs) record.  Response: {"code":1,"message":"Save Success"}
+    func saveUcaf(body: [String: Any], finished: @escaping (Bool, String?) -> Void)
+    /// Loads the progress-notes screen (list + 4 lookup arrays).
+    func loadDoctorNurseNotes(with params: [String: String], finished: @escaping (DoctorNurseNotesData) -> Void)
+    /// Saves a new progress note (BUFFER_STATUS=1) OR soft-deletes one
+    /// (BUFFER_STATUS=3) — the server distinguishes the two via the BUFFER_STATUS
+    /// field inside DOCTOR_NURSE_REMARKS plus the PROCESS_ID/TRACER_PLACE_ID in
+    /// DD_UC_PARMS. Response: `{"message":"Save Success"}`.
+    /// Returns (success, serverMessage) via the completion.
+    func saveDoctorNurseNotes(with params: [String: String], finished: @escaping (Bool, String?) -> Void)
+    /// POSTs a reply to an existing progress note. Returns (success, message)
+    /// — message is `"Save Success"` on the happy path.
+    func saveDoctorNurseReply(with params: [String: String], finished: @escaping (Bool, String?) -> Void)
+
     func getSymptomCategories(with params: [String: String], finished: @escaping RegularSymptomCategoriesBlock)
     func getSymptoms(with params: [String: String], finished: @escaping SymptomsBlock)
     func loadFlagImage(with params: [String: String], finished: @escaping DataBlock)
+    func getVisitsDetail(with params: [String: String], finished: @escaping VisitDetailBlock)
   }
 
 class ModelLayerImpl: ModelLayer {
@@ -225,12 +242,100 @@ extension ModelLayerImpl {
       finished(symptoms)
     }
   }
+
+  func loadUcaf(with params: [String: String], finished: @escaping (UCAFLoadData?, UCAFCTASServer?) -> Void) {
+    networkLayer.loadUcaf(with: params) { data in
+      let ucaf = self.translationLayer.getLoadUcafFromJson(data)
+      let ctas = self.translationLayer.getLoadUcafCTASFromJson(data)
+      finished(ucaf, ctas)
+    }
+  }
+
+  func loadSpecialHabits(with params: [String: String], finished: @escaping (SpecialHabitsData?) -> Void) {
+    networkLayer.loadSpecialHabits(with: params) { data in
+      let habits = self.translationLayer.getSpecialHabitsFromJson(data)
+      finished(habits)
+    }
+  }
+
+  func saveSpecialHabits(body: [String: Any], finished: @escaping (Bool, String?) -> Void) {
+    networkLayer.saveSpecialHabits(body: body) { data in
+      // Response: {"code":1,"message":"Save Success"}
+      // code 1 = success, anything else = failure.
+      guard let json = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any] else {
+        finished(false, nil); return
+      }
+      let code    = json["code"]    as? Int ?? 0
+      let message = json["message"] as? String
+      finished(code == 1, message)
+    }
+  }
+
+  func saveUcaf(body: [String: Any], finished: @escaping (Bool, String?) -> Void) {
+    networkLayer.saveUcaf(body: body) { data in
+      guard let json = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any] else {
+        finished(false, nil); return
+      }
+      let code    = json["code"]    as? Int ?? 0
+      let message = json["message"] as? String
+      finished(code == 1, message)
+    }
+  }
+
+  func loadDoctorNurseNotes(with params: [String: String],
+                            finished: @escaping (DoctorNurseNotesData) -> Void) {
+    networkLayer.loadDoctorNurseNotes(with: params) { data in
+      let result = self.translationLayer.getDoctorNurseNotesFromJson(data)
+      finished(result)
+    }
+  }
+
+  func saveDoctorNurseNotes(with params: [String: String],
+                            finished: @escaping (Bool, String?) -> Void) {
+    networkLayer.saveDoctorNurseNotes(with: params) { data in
+      // Server returns `{"message":"Save Success"}` on success, other message on failure.
+      guard let json = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any] else {
+        finished(false, nil); return
+      }
+      let message = json["message"] as? String
+      let success = (message ?? "").lowercased().contains("success")
+      finished(success, message)
+    }
+  }
+
+  func saveDoctorNurseReply(with params: [String: String],
+                            finished: @escaping (Bool, String?) -> Void) {
+    networkLayer.saveDoctorNurseReply(with: params) { data in
+      // Same response shape as saveDoctorNurseNotes — `{"message":"Save Success"}`
+      // on success, anything else on failure.
+      guard let json = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any] else {
+        finished(false, nil); return
+      }
+      let message = json["message"] as? String
+      let success = (message ?? "").lowercased().contains("success")
+      finished(success, message)
+    }
+  }
+
+  // NOTE: There is no separate `deleteDoctorNurseNote` here on purpose. The
+  // server uses a single endpoint for both create and soft-delete; the caller
+  // sets `BUFFER_STATUS=3` (plus PROCESS_ID=4179, TRACER_PLACE_ID=298) inside
+  // the params and routes through `saveDoctorNurseNotes` above.
 }
 
 extension ModelLayerImpl {
   func loadFlagImage(with params: [String: String], finished: @escaping DataBlock) {
     networkLayer.loadFlagImage(with: params) { data in
       finished(data)
+    }
+  }
+}
+
+extension ModelLayerImpl {
+  func getVisitsDetail(with params: [String: String], finished: @escaping VisitDetailBlock) {
+    networkLayer.getVisitsDetail(with: params) { data in
+      let visitDetail = self.translationLayer.getVisitDetailDTOFromJson(data)
+      finished(visitDetail)
     }
   }
 }

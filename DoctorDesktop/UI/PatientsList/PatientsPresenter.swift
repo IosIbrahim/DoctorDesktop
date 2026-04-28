@@ -166,7 +166,8 @@ extension PatientsPresenterImpl {
     ]
     
     modelLayer.getOutpatientClinics(with: params) { outpatientClinics in
-      self.patientUnits = outpatientClinics
+      // Only keep clinics that have at least one patient waiting
+      self.patientUnits = outpatientClinics.filter { $0.patientsCount != "0" }
       finished()
     }
   }
