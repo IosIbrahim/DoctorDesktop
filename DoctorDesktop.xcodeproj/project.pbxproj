@@ -20,6 +20,7 @@
 		0EC28D0723364347004C4890 /* prescriptionDeatilsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EC28D0623364347004C4890 /* prescriptionDeatilsModel.swift */; };
 		0EC54F3F233B764C00DF9B58 /* editVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EC54F3E233B764C00DF9B58 /* editVC.swift */; };
 		0EC54F41233B767200DF9B58 /* editCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EC54F40233B767200DF9B58 /* editCell.swift */; };
+		0F1A2B3C4D5E6F7A8B9C0D1E /* VisitDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F1A2B3C4D5E6F7A8B9C0D1F /* VisitDetail.swift */; };
 		0F362BD82F5D6EFC00D5F0CF /* PermissionModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F362BD72F5D6EED00D5F0CF /* PermissionModel.swift */; };
 		0F36CE3C2F69514E00C3D3ED /* NotesCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0F36CE3B2F69514E00C3D3ED /* NotesCell.xib */; };
 		0F36CE3D2F69514E00C3D3ED /* NotesCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F36CE3A2F69514E00C3D3ED /* NotesCell.swift */; };
@@ -84,8 +85,6 @@
 		363768AB2091C5C400CE45D8 /* OverviewSectionCellPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 363768852091C5C400CE45D8 /* OverviewSectionCellPresenter.swift */; };
 		363768AC2091C5C400CE45D8 /* OverviewCollectionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 363768872091C5C400CE45D8 /* OverviewCollectionViewController.swift */; };
 		363768AD2091C5C400CE45D8 /* OverviewPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 363768882091C5C400CE45D8 /* OverviewPresenter.swift */; };
-		519C8271AA69611CACC50198 /* PatientHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AF146219F22A176451A1643 /* PatientHeaderView.swift */; };
-		B7439885627E40A0B3F9FE6A /* LiteOverviewViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEB106436EB84471B1620ABE /* LiteOverviewViewController.swift */; };
 		36393C9F20894E85008410FD /* ClinicalAlertCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 36393C9720894E85008410FD /* ClinicalAlertCell.xib */; };
 		36393CA020894E85008410FD /* ClinicalAlertCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36393C9820894E85008410FD /* ClinicalAlertCell.swift */; };
 		36393CA120894E85008410FD /* ClinicalInfoPopup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36393C9A20894E85008410FD /* ClinicalInfoPopup.swift */; };
@@ -138,7 +137,6 @@
 		3660ADD6200CBE3F0089ADEF /* OrderServiceCellPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3660ADD5200CBE3F0089ADEF /* OrderServiceCellPresenter.swift */; };
 		366350C5201A646E0072C049 /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = 366350C4201A646E0072C049 /* Message.swift */; };
 		366C28B220407FA400FA4E3A /* PatientSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 366C28B120407FA400FA4E3A /* PatientSummary.swift */; };
-		0F1A2B3C4D5E6F7A8B9C0D1E /* VisitDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F1A2B3C4D5E6F7A8B9C0D1F /* VisitDetail.swift */; };
 		366D85FA2087E76C008B16BF /* EmergencyTriage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 366D85F92087E76C008B16BF /* EmergencyTriage.swift */; };
 		366D85FC2087E77E008B16BF /* Patient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 366D85FB2087E77E008B16BF /* Patient.swift */; };
 		366D86322087E97A008B16BF /* DiagnosisCategoryPopUpCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 366D86102087E97A008B16BF /* DiagnosisCategoryPopUpCell.xib */; };
@@ -149,19 +147,6 @@
 		366D86372087E97A008B16BF /* DiagnosisCategoryPopUp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 366D86162087E97A008B16BF /* DiagnosisCategoryPopUp.swift */; };
 		366D86382087E97A008B16BF /* EmergencyTriageView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 366D86172087E97A008B16BF /* EmergencyTriageView.xib */; };
 		366D863C2087E97A008B16BF /* EmergencyTriagePresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 366D861C2087E97A008B16BF /* EmergencyTriagePresenter.swift */; };
-		AABBCC010000000000000001 /* VitalSignsEntryPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCC010000000000000003 /* VitalSignsEntryPresenter.swift */; };
-		AABBCC010000000000000002 /* VitalSignsEntryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCC010000000000000004 /* VitalSignsEntryViewController.swift */; };
-		AABBCC010000000000000006 /* UCAFLoadData.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCC010000000000000007 /* UCAFLoadData.swift */; };
-		AABBCC010000000000000008 /* SpecialHabitsData.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCC010000000000000009 /* SpecialHabitsData.swift */; };
-		AABBCC020000000000000001 /* ProgressNotesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCC020000000000000101 /* ProgressNotesViewController.swift */; };
-		AABBCC020000000000000002 /* ProgressNotesPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCC020000000000000102 /* ProgressNotesPresenter.swift */; };
-		AABBCC020000000000000003 /* ProgressNoteRowCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCC020000000000000103 /* ProgressNoteRowCell.swift */; };
-		AABBCC020000000000000008 /* ProgressNoteReplyCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCC020000000000000108 /* ProgressNoteReplyCell.swift */; };
-		AABBCC020000000000000009 /* ReplyComposerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCC020000000000000109 /* ReplyComposerViewController.swift */; };
-		AABBCC020000000000000004 /* VoiceNoteRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCC020000000000000104 /* VoiceNoteRecorder.swift */; };
-		AABBCC020000000000000005 /* DoctorNurseNotesData.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCC020000000000000105 /* DoctorNurseNotesData.swift */; };
-		AABBCC020000000000000006 /* ProgressNotesFilterSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCC020000000000000106 /* ProgressNotesFilterSheet.swift */; };
-		AABBCC020000000000000007 /* SpeechDictation.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCC020000000000000107 /* SpeechDictation.swift */; };
 		366D863D2087E97A008B16BF /* PediatricsScorePopUpView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 366D861E2087E97A008B16BF /* PediatricsScorePopUpView.xib */; };
 		366D863E2087E97A008B16BF /* PediatricsScorePopUp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 366D861F2087E97A008B16BF /* PediatricsScorePopUp.swift */; };
 		366D863F2087E97A008B16BF /* PediatricsScorePopUpPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 366D86202087E97A008B16BF /* PediatricsScorePopUpPresenter.swift */; };
@@ -238,7 +223,22 @@
 		46B646AF1FD2E44100D8D340 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 46B646AD1FD2E44100D8D340 /* Main.storyboard */; };
 		46B646B41FD2E44100D8D340 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 46B646B31FD2E44100D8D340 /* Assets.xcassets */; };
 		46B646B71FD2E44100D8D340 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 46B646B51FD2E44100D8D340 /* LaunchScreen.storyboard */; };
+		519C8271AA69611CACC50198 /* PatientHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AF146219F22A176451A1643 /* PatientHeaderView.swift */; };
+		AABBCC010000000000000001 /* VitalSignsEntryPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCC010000000000000003 /* VitalSignsEntryPresenter.swift */; };
+		AABBCC010000000000000002 /* VitalSignsEntryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCC010000000000000004 /* VitalSignsEntryViewController.swift */; };
+		AABBCC010000000000000006 /* UCAFLoadData.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCC010000000000000007 /* UCAFLoadData.swift */; };
+		AABBCC010000000000000008 /* SpecialHabitsData.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCC010000000000000009 /* SpecialHabitsData.swift */; };
+		AABBCC020000000000000001 /* ProgressNotesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCC020000000000000101 /* ProgressNotesViewController.swift */; };
+		AABBCC020000000000000002 /* ProgressNotesPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCC020000000000000102 /* ProgressNotesPresenter.swift */; };
+		AABBCC020000000000000003 /* ProgressNoteRowCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCC020000000000000103 /* ProgressNoteRowCell.swift */; };
+		AABBCC020000000000000004 /* VoiceNoteRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCC020000000000000104 /* VoiceNoteRecorder.swift */; };
+		AABBCC020000000000000005 /* DoctorNurseNotesData.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCC020000000000000105 /* DoctorNurseNotesData.swift */; };
+		AABBCC020000000000000006 /* ProgressNotesFilterSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCC020000000000000106 /* ProgressNotesFilterSheet.swift */; };
+		AABBCC020000000000000007 /* SpeechDictation.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCC020000000000000107 /* SpeechDictation.swift */; };
+		AABBCC020000000000000008 /* ProgressNoteReplyCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCC020000000000000108 /* ProgressNoteReplyCell.swift */; };
+		AABBCC020000000000000009 /* ReplyComposerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCC020000000000000109 /* ReplyComposerViewController.swift */; };
 		AD3239FA22C791F00088E176 /* OperationPatient.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD3239F922C791F00088E176 /* OperationPatient.swift */; };
+		B7439885627E40A0B3F9FE6A /* LiteOverviewViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEB106436EB84471B1620ABE /* LiteOverviewViewController.swift */; };
 		F1A73B93E409D36BDF031D87 /* Pods_DoctorDesktop.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C9590EB2216C59251F58A578 /* Pods_DoctorDesktop.framework */; };
 /* End PBXBuildFile section */
 
@@ -271,6 +271,7 @@
 		0EC28D0623364347004C4890 /* prescriptionDeatilsModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = prescriptionDeatilsModel.swift; sourceTree = "<group>"; };
 		0EC54F3E233B764C00DF9B58 /* editVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = editVC.swift; sourceTree = "<group>"; };
 		0EC54F40233B767200DF9B58 /* editCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = editCell.swift; sourceTree = "<group>"; };
+		0F1A2B3C4D5E6F7A8B9C0D1F /* VisitDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisitDetail.swift; sourceTree = "<group>"; };
 		0F362BD72F5D6EED00D5F0CF /* PermissionModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionModel.swift; sourceTree = "<group>"; };
 		0F36CE3A2F69514E00C3D3ED /* NotesCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotesCell.swift; sourceTree = "<group>"; };
 		0F36CE3B2F69514E00C3D3ED /* NotesCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = NotesCell.xib; sourceTree = "<group>"; };
@@ -334,8 +335,6 @@
 		363768852091C5C400CE45D8 /* OverviewSectionCellPresenter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OverviewSectionCellPresenter.swift; sourceTree = "<group>"; };
 		363768872091C5C400CE45D8 /* OverviewCollectionViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OverviewCollectionViewController.swift; sourceTree = "<group>"; };
 		363768882091C5C400CE45D8 /* OverviewPresenter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OverviewPresenter.swift; sourceTree = "<group>"; };
-		5AF146219F22A176451A1643 /* PatientHeaderView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PatientHeaderView.swift; sourceTree = "<group>"; };
-		CEB106436EB84471B1620ABE /* LiteOverviewViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LiteOverviewViewController.swift; sourceTree = "<group>"; };
 		36393C9720894E85008410FD /* ClinicalAlertCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ClinicalAlertCell.xib; sourceTree = "<group>"; };
 		36393C9820894E85008410FD /* ClinicalAlertCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClinicalAlertCell.swift; sourceTree = "<group>"; };
 		36393C9A20894E85008410FD /* ClinicalInfoPopup.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClinicalInfoPopup.swift; sourceTree = "<group>"; };
@@ -388,7 +387,6 @@
 		3660ADD5200CBE3F0089ADEF /* OrderServiceCellPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrderServiceCellPresenter.swift; sourceTree = "<group>"; };
 		366350C4201A646E0072C049 /* Message.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Message.swift; sourceTree = "<group>"; };
 		366C28B120407FA400FA4E3A /* PatientSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PatientSummary.swift; sourceTree = "<group>"; };
-		0F1A2B3C4D5E6F7A8B9C0D1F /* VisitDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisitDetail.swift; sourceTree = "<group>"; };
 		366D85F92087E76C008B16BF /* EmergencyTriage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmergencyTriage.swift; sourceTree = "<group>"; };
 		366D85FB2087E77E008B16BF /* Patient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Patient.swift; sourceTree = "<group>"; };
 		366D86102087E97A008B16BF /* DiagnosisCategoryPopUpCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = DiagnosisCategoryPopUpCell.xib; sourceTree = "<group>"; };
@@ -399,19 +397,6 @@
 		366D86162087E97A008B16BF /* DiagnosisCategoryPopUp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DiagnosisCategoryPopUp.swift; sourceTree = "<group>"; };
 		366D86172087E97A008B16BF /* EmergencyTriageView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = EmergencyTriageView.xib; sourceTree = "<group>"; };
 		366D861C2087E97A008B16BF /* EmergencyTriagePresenter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmergencyTriagePresenter.swift; sourceTree = "<group>"; };
-		AABBCC010000000000000003 /* VitalSignsEntryPresenter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VitalSignsEntryPresenter.swift; sourceTree = "<group>"; };
-		AABBCC010000000000000004 /* VitalSignsEntryViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VitalSignsEntryViewController.swift; sourceTree = "<group>"; };
-		AABBCC020000000000000101 /* ProgressNotesViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProgressNotesViewController.swift; sourceTree = "<group>"; };
-		AABBCC020000000000000102 /* ProgressNotesPresenter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProgressNotesPresenter.swift; sourceTree = "<group>"; };
-		AABBCC020000000000000103 /* ProgressNoteRowCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProgressNoteRowCell.swift; sourceTree = "<group>"; };
-		AABBCC020000000000000108 /* ProgressNoteReplyCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProgressNoteReplyCell.swift; sourceTree = "<group>"; };
-		AABBCC020000000000000109 /* ReplyComposerViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReplyComposerViewController.swift; sourceTree = "<group>"; };
-		AABBCC020000000000000104 /* VoiceNoteRecorder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VoiceNoteRecorder.swift; sourceTree = "<group>"; };
-		AABBCC020000000000000105 /* DoctorNurseNotesData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DoctorNurseNotesData.swift; sourceTree = "<group>"; };
-		AABBCC020000000000000106 /* ProgressNotesFilterSheet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProgressNotesFilterSheet.swift; sourceTree = "<group>"; };
-		AABBCC020000000000000107 /* SpeechDictation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpeechDictation.swift; sourceTree = "<group>"; };
-		AABBCC010000000000000007 /* UCAFLoadData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UCAFLoadData.swift; sourceTree = "<group>"; };
-		AABBCC010000000000000009 /* SpecialHabitsData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpecialHabitsData.swift; sourceTree = "<group>"; };
 		366D861E2087E97A008B16BF /* PediatricsScorePopUpView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PediatricsScorePopUpView.xib; sourceTree = "<group>"; };
 		366D861F2087E97A008B16BF /* PediatricsScorePopUp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PediatricsScorePopUp.swift; sourceTree = "<group>"; };
 		366D86202087E97A008B16BF /* PediatricsScorePopUpPresenter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PediatricsScorePopUpPresenter.swift; sourceTree = "<group>"; };
@@ -490,9 +475,24 @@
 		46B646B31FD2E44100D8D340 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		46B646B61FD2E44100D8D340 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		46B646B81FD2E44100D8D340 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		5AF146219F22A176451A1643 /* PatientHeaderView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PatientHeaderView.swift; sourceTree = "<group>"; };
 		6C678557DF1A3DB295ACB068 /* Pods-DoctorDesktop.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DoctorDesktop.debug.xcconfig"; path = "Pods/Target Support Files/Pods-DoctorDesktop/Pods-DoctorDesktop.debug.xcconfig"; sourceTree = "<group>"; };
+		AABBCC010000000000000003 /* VitalSignsEntryPresenter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VitalSignsEntryPresenter.swift; sourceTree = "<group>"; };
+		AABBCC010000000000000004 /* VitalSignsEntryViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VitalSignsEntryViewController.swift; sourceTree = "<group>"; };
+		AABBCC010000000000000007 /* UCAFLoadData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UCAFLoadData.swift; sourceTree = "<group>"; };
+		AABBCC010000000000000009 /* SpecialHabitsData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpecialHabitsData.swift; sourceTree = "<group>"; };
+		AABBCC020000000000000101 /* ProgressNotesViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProgressNotesViewController.swift; sourceTree = "<group>"; };
+		AABBCC020000000000000102 /* ProgressNotesPresenter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProgressNotesPresenter.swift; sourceTree = "<group>"; };
+		AABBCC020000000000000103 /* ProgressNoteRowCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProgressNoteRowCell.swift; sourceTree = "<group>"; };
+		AABBCC020000000000000104 /* VoiceNoteRecorder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VoiceNoteRecorder.swift; sourceTree = "<group>"; };
+		AABBCC020000000000000105 /* DoctorNurseNotesData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DoctorNurseNotesData.swift; sourceTree = "<group>"; };
+		AABBCC020000000000000106 /* ProgressNotesFilterSheet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProgressNotesFilterSheet.swift; sourceTree = "<group>"; };
+		AABBCC020000000000000107 /* SpeechDictation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpeechDictation.swift; sourceTree = "<group>"; };
+		AABBCC020000000000000108 /* ProgressNoteReplyCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProgressNoteReplyCell.swift; sourceTree = "<group>"; };
+		AABBCC020000000000000109 /* ReplyComposerViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReplyComposerViewController.swift; sourceTree = "<group>"; };
 		AD3239F922C791F00088E176 /* OperationPatient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OperationPatient.swift; sourceTree = "<group>"; };
 		C9590EB2216C59251F58A578 /* Pods_DoctorDesktop.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_DoctorDesktop.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		CEB106436EB84471B1620ABE /* LiteOverviewViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LiteOverviewViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -674,14 +674,6 @@
 				C1A4B341972C44D58979B892 /* LiteOverview */,
 			);
 			path = Overview;
-			sourceTree = "<group>";
-		};
-		C1A4B341972C44D58979B892 /* LiteOverview */ = {
-			isa = PBXGroup;
-			children = (
-				CEB106436EB84471B1620ABE /* LiteOverviewViewController.swift */,
-			);
-			path = LiteOverview;
 			sourceTree = "<group>";
 		};
 		363768552091C5C400CE45D8 /* PatientHistoryFiltrationCell */ = {
@@ -1050,32 +1042,6 @@
 			path = EmergencyTriage;
 			sourceTree = "<group>";
 		};
-		AABBCC010000000000000005 /* VitalSignsEntry */ = {
-			isa = PBXGroup;
-			children = (
-				AABBCC010000000000000003 /* VitalSignsEntryPresenter.swift */,
-				AABBCC010000000000000004 /* VitalSignsEntryViewController.swift */,
-				AABBCC010000000000000007 /* UCAFLoadData.swift */,
-				AABBCC010000000000000009 /* SpecialHabitsData.swift */,
-			);
-			path = VitalSignsEntry;
-			sourceTree = "<group>";
-		};
-		AABBCC020000000000000100 /* ProgressNotes */ = {
-			isa = PBXGroup;
-			children = (
-				AABBCC020000000000000101 /* ProgressNotesViewController.swift */,
-				AABBCC020000000000000102 /* ProgressNotesPresenter.swift */,
-				AABBCC020000000000000103 /* ProgressNoteRowCell.swift */,
-				AABBCC020000000000000108 /* ProgressNoteReplyCell.swift */,
-				AABBCC020000000000000109 /* ReplyComposerViewController.swift */,
-				AABBCC020000000000000104 /* VoiceNoteRecorder.swift */,
-				AABBCC020000000000000106 /* ProgressNotesFilterSheet.swift */,
-				AABBCC020000000000000107 /* SpeechDictation.swift */,
-			);
-			path = ProgressNotes;
-			sourceTree = "<group>";
-		};
 		366D860F2087E97A008B16BF /* DiagnosisCategoryPopUpCell */ = {
 			isa = PBXGroup;
 			children = (
@@ -1398,6 +1364,40 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		AABBCC010000000000000005 /* VitalSignsEntry */ = {
+			isa = PBXGroup;
+			children = (
+				AABBCC010000000000000003 /* VitalSignsEntryPresenter.swift */,
+				AABBCC010000000000000004 /* VitalSignsEntryViewController.swift */,
+				AABBCC010000000000000007 /* UCAFLoadData.swift */,
+				AABBCC010000000000000009 /* SpecialHabitsData.swift */,
+			);
+			path = VitalSignsEntry;
+			sourceTree = "<group>";
+		};
+		AABBCC020000000000000100 /* ProgressNotes */ = {
+			isa = PBXGroup;
+			children = (
+				AABBCC020000000000000101 /* ProgressNotesViewController.swift */,
+				AABBCC020000000000000102 /* ProgressNotesPresenter.swift */,
+				AABBCC020000000000000103 /* ProgressNoteRowCell.swift */,
+				AABBCC020000000000000108 /* ProgressNoteReplyCell.swift */,
+				AABBCC020000000000000109 /* ReplyComposerViewController.swift */,
+				AABBCC020000000000000104 /* VoiceNoteRecorder.swift */,
+				AABBCC020000000000000106 /* ProgressNotesFilterSheet.swift */,
+				AABBCC020000000000000107 /* SpeechDictation.swift */,
+			);
+			path = ProgressNotes;
+			sourceTree = "<group>";
+		};
+		C1A4B341972C44D58979B892 /* LiteOverview */ = {
+			isa = PBXGroup;
+			children = (
+				CEB106436EB84471B1620ABE /* LiteOverviewViewController.swift */,
+			);
+			path = LiteOverview;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -1570,6 +1570,12 @@
 				"${BUILT_PRODUCTS_DIR}/Alamofire/Alamofire.framework",
 				"${BUILT_PRODUCTS_DIR}/DropDown/DropDown.framework",
 				"${BUILT_PRODUCTS_DIR}/DynamicBlurView/DynamicBlurView.framework",
+				"${BUILT_PRODUCTS_DIR}/FirebaseCore/FirebaseCore.framework",
+				"${BUILT_PRODUCTS_DIR}/FirebaseCoreInternal/FirebaseCoreInternal.framework",
+				"${BUILT_PRODUCTS_DIR}/FirebaseInstallations/FirebaseInstallations.framework",
+				"${BUILT_PRODUCTS_DIR}/FirebaseMessaging/FirebaseMessaging.framework",
+				"${BUILT_PRODUCTS_DIR}/GoogleDataTransport/GoogleDataTransport.framework",
+				"${BUILT_PRODUCTS_DIR}/GoogleUtilities/GoogleUtilities.framework",
 				"${BUILT_PRODUCTS_DIR}/IQKeyboardManagerSwift/IQKeyboardManagerSwift.framework",
 				"${BUILT_PRODUCTS_DIR}/KMPlaceholderTextView/KMPlaceholderTextView.framework",
 				"${BUILT_PRODUCTS_DIR}/Kingfisher/Kingfisher.framework",
@@ -1585,6 +1591,7 @@
 				"${BUILT_PRODUCTS_DIR}/OhhAuth/OhhAuth.framework",
 				"${BUILT_PRODUCTS_DIR}/PocketSVG/PocketSVG.framework",
 				"${BUILT_PRODUCTS_DIR}/PopupDialog/PopupDialog.framework",
+				"${BUILT_PRODUCTS_DIR}/PromisesObjC/FBLPromises.framework",
 				"${BUILT_PRODUCTS_DIR}/Reachability/Reachability.framework",
 				"${BUILT_PRODUCTS_DIR}/SCLAlertView/SCLAlertView.framework",
 				"${BUILT_PRODUCTS_DIR}/SearchTextField/SearchTextField.framework",
@@ -1597,12 +1604,19 @@
 				"${BUILT_PRODUCTS_DIR}/Toast-Swift/Toast_Swift.framework",
 				"${BUILT_PRODUCTS_DIR}/UICollectionViewLeftAlignedLayout/UICollectionViewLeftAlignedLayout.framework",
 				"${BUILT_PRODUCTS_DIR}/VHBoomMenuButton/VHBoomMenuButton.framework",
+				"${BUILT_PRODUCTS_DIR}/nanopb/nanopb.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Alamofire.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/DropDown.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/DynamicBlurView.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FirebaseCore.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FirebaseCoreInternal.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FirebaseInstallations.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FirebaseMessaging.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/GoogleDataTransport.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/GoogleUtilities.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/IQKeyboardManagerSwift.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/KMPlaceholderTextView.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Kingfisher.framework",
@@ -1618,6 +1632,7 @@
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/OhhAuth.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/PocketSVG.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/PopupDialog.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FBLPromises.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Reachability.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SCLAlertView.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SearchTextField.framework",
@@ -1630,6 +1645,7 @@
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Toast_Swift.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/UICollectionViewLeftAlignedLayout.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/VHBoomMenuButton.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/nanopb.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
