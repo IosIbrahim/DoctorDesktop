@@ -17,8 +17,8 @@ enum ComponentType: Int {
     case ICU = 2284 // 2665 X
     case operations = 70 // 70 X
     case nicu = 2260
-    case notifications = 1
-    case search = 72
+ //   case notifications = 1
+ //   case search = 72
  // case nurseTL = 1478
 }
 
