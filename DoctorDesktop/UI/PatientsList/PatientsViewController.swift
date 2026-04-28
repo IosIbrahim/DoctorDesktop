@@ -81,6 +81,7 @@ class PatientsViewController: UIViewController, NVActivityIndicatorViewable {
   override func viewDidLoad() {
     super.viewDidLoad()
     self.title = presenter.title
+    tableView.estimatedRowHeight = 130
     registerCell()
       
   //  navigationController?.navigationBar.largeTitleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.black]
@@ -437,7 +438,7 @@ extension PatientsViewController:OutpatientStatus {
 extension PatientsViewController: UITableViewDelegate {
   func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
     switch presenter.componentType {
-    case .emergency:    return 75
+    case .emergency:    return UITableViewAutomaticDimension
     case .clinicalAlert: return 100
     case .inpatient, .ICU, .nicu, .operations: return 110
     case .outpatient:   return 150
