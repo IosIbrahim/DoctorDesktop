@@ -34,6 +34,7 @@ target 'DoctorDesktop' do
   pod 'OAuthSwift', '~> 1.2.0'
   pod 'Stuff/Codable'
   pod 'PopupDialog'
+  pod 'Firebase/Messaging'
 end
 post_install do |installer|
   installer.pods_project.targets.each do |target|

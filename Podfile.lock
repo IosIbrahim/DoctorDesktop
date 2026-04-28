@@ -2,6 +2,58 @@ PODS:
   - Alamofire (5.11.0)
   - DropDown (2.3.1)
   - DynamicBlurView (2.0.2)
+  - Firebase/CoreOnly (12.12.0):
+    - FirebaseCore (~> 12.12.0)
+  - Firebase/Messaging (12.12.0):
+    - Firebase/CoreOnly
+    - FirebaseMessaging (~> 12.12.0)
+  - FirebaseCore (12.12.0):
+    - FirebaseCoreInternal (~> 12.12.0)
+    - GoogleUtilities/Environment (~> 8.1)
+    - GoogleUtilities/Logger (~> 8.1)
+  - FirebaseCoreInternal (12.12.0):
+    - "GoogleUtilities/NSData+zlib (~> 8.1)"
+  - FirebaseInstallations (12.12.0):
+    - FirebaseCore (~> 12.12.0)
+    - GoogleUtilities/Environment (~> 8.1)
+    - GoogleUtilities/UserDefaults (~> 8.1)
+    - PromisesObjC (~> 2.4)
+  - FirebaseMessaging (12.12.0):
+    - FirebaseCore (~> 12.12.0)
+    - FirebaseInstallations (~> 12.12.0)
+    - GoogleDataTransport (~> 10.1)
+    - GoogleUtilities/AppDelegateSwizzler (~> 8.1)
+    - GoogleUtilities/Environment (~> 8.1)
+    - GoogleUtilities/Reachability (~> 8.1)
+    - GoogleUtilities/UserDefaults (~> 8.1)
+    - nanopb (~> 3.30910.0)
+  - GoogleDataTransport (10.1.0):
+    - nanopb (~> 3.30910.0)
+    - PromisesObjC (~> 2.4)
+  - GoogleUtilities/AppDelegateSwizzler (8.1.0):
+    - GoogleUtilities/Environment
+    - GoogleUtilities/Logger
+    - GoogleUtilities/Network
+    - GoogleUtilities/Privacy
+  - GoogleUtilities/Environment (8.1.0):
+    - GoogleUtilities/Privacy
+  - GoogleUtilities/Logger (8.1.0):
+    - GoogleUtilities/Environment
+    - GoogleUtilities/Privacy
+  - GoogleUtilities/Network (8.1.0):
+    - GoogleUtilities/Logger
+    - "GoogleUtilities/NSData+zlib"
+    - GoogleUtilities/Privacy
+    - GoogleUtilities/Reachability
+  - "GoogleUtilities/NSData+zlib (8.1.0)":
+    - GoogleUtilities/Privacy
+  - GoogleUtilities/Privacy (8.1.0)
+  - GoogleUtilities/Reachability (8.1.0):
+    - GoogleUtilities/Logger
+    - GoogleUtilities/Privacy
+  - GoogleUtilities/UserDefaults (8.1.0):
+    - GoogleUtilities/Logger
+    - GoogleUtilities/Privacy
   - IQKeyboardManagerSwift (6.5.16)
   - Kingfisher (4.7.0)
   - KMPlaceholderTextView (1.3.0)
@@ -52,6 +104,11 @@ PODS:
     - MZFormSheetController/Core (= 3.1.3)
   - MZFormSheetController/Core (3.1.3):
     - MZAppearance
+  - nanopb (3.30910.0):
+    - nanopb/decode (= 3.30910.0)
+    - nanopb/encode (= 3.30910.0)
+  - nanopb/decode (3.30910.0)
+  - nanopb/encode (3.30910.0)
   - NVActivityIndicatorView (4.1.1):
     - NVActivityIndicatorView/Presenter (= 4.1.1)
   - NVActivityIndicatorView/Presenter (4.1.1)
@@ -61,6 +118,7 @@ PODS:
   - PocketSVG (2.4.0)
   - PopupDialog (0.7.1):
     - DynamicBlurView (~> 2.0)
+  - PromisesObjC (2.4.0)
   - Reachability (3.2)
   - SCLAlertView (0.8.1)
   - SearchTextField (1.2.0)
@@ -78,6 +136,7 @@ PODS:
 DEPENDENCIES:
   - Alamofire
   - DropDown
+  - Firebase/Messaging
   - IQKeyboardManagerSwift
   - Kingfisher
   - KMPlaceholderTextView
@@ -108,6 +167,13 @@ SPEC REPOS:
     - Alamofire
     - DropDown
     - DynamicBlurView
+    - Firebase
+    - FirebaseCore
+    - FirebaseCoreInternal
+    - FirebaseInstallations
+    - FirebaseMessaging
+    - GoogleDataTransport
+    - GoogleUtilities
     - IQKeyboardManagerSwift
     - Kingfisher
     - KMPlaceholderTextView
@@ -117,12 +183,14 @@ SPEC REPOS:
     - MOLH
     - MZAppearance
     - MZFormSheetController
+    - nanopb
     - NVActivityIndicatorView
     - OAuthSwift
     - ObjectMapper
     - OhhAuth
     - PocketSVG
     - PopupDialog
+    - PromisesObjC
     - Reachability
     - SearchTextField
     - SideMenu
@@ -148,6 +216,13 @@ SPEC CHECKSUMS:
   Alamofire: bd5e7b23a1a750975288482c1831d71e74415f86
   DropDown: 20499c7b2731b0d21609af924e47c7677a2be50d
   DynamicBlurView: aa6db4defc6e537eb86fc5e58dd3991666178399
+  Firebase: aa154fee4e9b8eac17aa42344988865b3e857d33
+  FirebaseCore: f28af0427998cd53f8d4826bce17260e33224053
+  FirebaseCoreInternal: 7c12fc3011d889085e765e317d7b9fd1cef97af9
+  FirebaseInstallations: 4e6e162aa4abaaeeeb01dd00179dfc5ad9c2194e
+  FirebaseMessaging: 341004946fa7ffc741344b20f1b667514fc93e31
+  GoogleDataTransport: aae35b7ea0c09004c3797d53c8c41f66f219d6a7
+  GoogleUtilities: 00c88b9a86066ef77f0da2fab05f65d7768ed8e1
   IQKeyboardManagerSwift: 12d89768845bb77b55cc092ecc2b1f9370f06b76
   Kingfisher: da6b005aa96d37698e3e4f1ccfe96a5b9bbf27d6
   KMPlaceholderTextView: 2bbcd19a273648a80a61e1e48f9743a24d8930e3
@@ -157,12 +232,14 @@ SPEC CHECKSUMS:
   MOLH: e45827d200aeb1310641090fd8cd03ad2b42ae72
   MZAppearance: 0c06d3fa9cc55142f1da14bc8631fbe8fd6e19d5
   MZFormSheetController: da2df509805d757e04b052915057d8e1a338b050
+  nanopb: fad817b59e0457d11a5dfbde799381cd727c1275
   NVActivityIndicatorView: 60109b9bf46efc2e71ab81453196ccdfdfeea870
   OAuthSwift: 27b34fe80b76b67cd8f45571e0be2432bc9f6de1
   ObjectMapper: 1eb41f610210777375fa806bf161dc39fb832b81
   OhhAuth: 0c43cb209df11abaeced699b08508fe9f577ff0b
   PocketSVG: 8ac7b20a881ca1a3d46ba1e54ee2b0f2307c3d48
   PopupDialog: 39598b7d41719f5c025b4b70e62728bae7734fef
+  PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
   Reachability: 33e18b67625424e47b6cde6d202dce689ad7af96
   SCLAlertView: 776813fb1f62248965f37cb7edf4088ee6394460
   SearchTextField: a5bb7e4c33affadb115afdbe8100d84ef10a8024
@@ -176,6 +253,6 @@ SPEC CHECKSUMS:
   UICollectionViewLeftAlignedLayout: 830bf6fa5bab9f9b464f62e3384f9d2e00b3c0f6
   VHBoomMenuButton: 77a7ae6742220b57b54eec28183fc123a3dd98ed
 
-PODFILE CHECKSUM: 6cc21b33e8ed4fdedfb54bdf3dd2c88adc900ef2
+PODFILE CHECKSUM: 9a1d8e6db379f647c8e777b2c98e99e6770fc7ba
 
 COCOAPODS: 1.15.2
