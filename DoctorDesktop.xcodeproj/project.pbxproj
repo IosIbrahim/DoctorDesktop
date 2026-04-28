@@ -34,6 +34,7 @@
 		0FC00F692F32426300223775 /* NewOrderCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0FC00F672F32426300223775 /* NewOrderCell.xib */; };
 		0FC00F6D2F32491300223775 /* InnerServiceCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FC00F6B2F32491300223775 /* InnerServiceCell.swift */; };
 		0FC00F6E2F32491300223775 /* InnerServiceCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0FC00F6C2F32491300223775 /* InnerServiceCell.xib */; };
+		0FC7B2BF2FA0D3FA00CDE3E9 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 0FC7B2BE2FA0D3FA00CDE3E9 /* GoogleService-Info.plist */; };
 		0FE935D12F44C0E8008CB2B5 /* LabsCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FE935CF2F44C0E8008CB2B5 /* LabsCell.swift */; };
 		0FE935D22F44C0E8008CB2B5 /* LabsCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0FE935D02F44C0E8008CB2B5 /* LabsCell.xib */; };
 		0FE935D42F44C17D008CB2B5 /* LabPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FE935D32F44C172008CB2B5 /* LabPresenter.swift */; };
@@ -284,6 +285,7 @@
 		0FC00F672F32426300223775 /* NewOrderCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = NewOrderCell.xib; sourceTree = "<group>"; };
 		0FC00F6B2F32491300223775 /* InnerServiceCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InnerServiceCell.swift; sourceTree = "<group>"; };
 		0FC00F6C2F32491300223775 /* InnerServiceCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = InnerServiceCell.xib; sourceTree = "<group>"; };
+		0FC7B2BE2FA0D3FA00CDE3E9 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		0FE935CF2F44C0E8008CB2B5 /* LabsCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabsCell.swift; sourceTree = "<group>"; };
 		0FE935D02F44C0E8008CB2B5 /* LabsCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = LabsCell.xib; sourceTree = "<group>"; };
 		0FE935D32F44C172008CB2B5 /* LabPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabPresenter.swift; sourceTree = "<group>"; };
@@ -1349,6 +1351,7 @@
 				361B27242020DDEE00D8215D /* Utility.swift */,
 				46B646AD1FD2E44100D8D340 /* Main.storyboard */,
 				46B646B51FD2E44100D8D340 /* LaunchScreen.storyboard */,
+				0FC7B2BE2FA0D3FA00CDE3E9 /* GoogleService-Info.plist */,
 				46B646B31FD2E44100D8D340 /* Assets.xcassets */,
 				368604CA2017AEC3004A6D0B /* Roboto */,
 				46B646B81FD2E44100D8D340 /* Info.plist */,
@@ -1501,6 +1504,7 @@
 				363D1F93208F48E900CF163D /* scoring.svg in Resources */,
 				3637689E2091C5C400CE45D8 /* DietaryCell.xib in Resources */,
 				366D86442087E97A008B16BF /* SymptomCategoryCell.xib in Resources */,
+				0FC7B2BF2FA0D3FA00CDE3E9 /* GoogleService-Info.plist in Resources */,
 				363D1F98208F48E900CF163D /* endoscopy.svg in Resources */,
 				363D1F9F208F48FD00CF163D /* vital.svg in Resources */,
 				3656DD02274BC3A1008DC057 /* NotesViewController.xib in Resources */,
@@ -1960,7 +1964,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 3;
-				DEVELOPMENT_TEAM = WZC66X64NZ;
+				DEVELOPMENT_TEAM = W8QAC6TS8B;
 				INFOPLIST_FILE = DoctorDesktop/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1968,7 +1972,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.khabeer.doctor.desktop.new;
+				PRODUCT_BUNDLE_IDENTIFIER = com.khabeer.doctor.desktop.new.BGH;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
@@ -1985,7 +1989,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 3;
-				DEVELOPMENT_TEAM = WZC66X64NZ;
+				DEVELOPMENT_TEAM = W8QAC6TS8B;
 				INFOPLIST_FILE = DoctorDesktop/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1993,7 +1997,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.khabeer.doctor.desktop.new;
+				PRODUCT_BUNDLE_IDENTIFIER = com.khabeer.doctor.desktop.new.BGH;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
