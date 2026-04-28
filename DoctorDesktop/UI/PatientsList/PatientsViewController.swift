@@ -436,15 +436,13 @@ extension PatientsViewController:OutpatientStatus {
 
 extension PatientsViewController: UITableViewDelegate {
   func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-//    switch presenter.componentType {
-//    case .inpatient, .ICU , .nicu,.operations: return 110
-//    case .outpatient: return 150
-//    case .emergency: return 75
-//    case .clinicalAlert: return 100
-//    
-//    default: return UITableViewAutomaticDimension
-//    }
-      return UITableViewAutomaticDimension
+    switch presenter.componentType {
+    case .emergency:    return 75
+    case .clinicalAlert: return 100
+    case .inpatient, .ICU, .nicu, .operations: return 110
+    case .outpatient:   return 150
+    default:            return UITableViewAutomaticDimension
+    }
   }
   
   func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
