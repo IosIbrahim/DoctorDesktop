@@ -133,16 +133,24 @@ class ComponentCollectionViewController: UIViewController {
 }
 
 extension ComponentCollectionViewController: UICollectionViewDataSource {
-  func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-    return isFinishedLoadingCounts ? presenter.components.count : 0
+
+  /// Components visible in the grid — search and notifications are hidden.
+  private var visibleComponents: [Component] {
+    return presenter.components.filter {
+      let type = ComponentType(rawValue: $0.processInfoCode)
+      return type != .notifications && type != .search
+    }
   }
-  
+
+  func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+    return isFinishedLoadingCounts ? visibleComponents.count : 0
+  }
+
   func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-      let componentType = ComponentType(rawValue: presenter.components[indexPath.row].processInfoCode) ?? .operations
+    let component = visibleComponents[indexPath.row]
+    let componentType = ComponentType(rawValue: component.processInfoCode) ?? .operations
     let colorAndImageTuble = getComponentBackgroundColorAndImage(componentType: componentType)
-    return componentCellMaker(collectionView, indexPath,
-                              presenter.components[indexPath.row],
-                              colorAndImageTuble)
+    return componentCellMaker(collectionView, indexPath, component, colorAndImageTuble)
   }
 }
 
@@ -168,9 +176,11 @@ extension ComponentCollectionViewController: UICollectionViewDelegateFlowLayout 
 extension ComponentCollectionViewController: UICollectionViewDelegate {
   func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
       navigationCoordinator?.setNavigationStatus(.atComponentCollection)
-      guard let componentType = presenter.components[indexPath.row].type else { return }
-      let permission = presenter.permissions[indexPath.row]
-      let args = ["componentType": componentType, "user": presenter.user,"permission":permission] as [String : Any]
+      let component = visibleComponents[indexPath.row]
+      guard let componentType = component.type else { return }
+      let originalIndex = presenter.components.firstIndex(where: { $0.processInfoCode == component.processInfoCode }) ?? indexPath.row
+      let permission = presenter.permissions[originalIndex]
+      let args = ["componentType": componentType, "user": presenter.user, "permission": permission] as [String : Any]
       navigationCoordinator?.next(arguments: args)
   }
 }
