@@ -106,26 +106,26 @@ class ComponentCollectionViewController: UIViewController {
       image = UIImage(named: "emergency") ?? .init()
       startColor = #colorLiteral(red: 0.9254901961, green: 0.2901960784, blue: 0.2666666667, alpha: 1)
       endColor = #colorLiteral(red: 0.8588235294, green: 0.1529411765, blue: 0.1098039216, alpha: 1)
-    case .operations:
-        startColor = #colorLiteral(red: 0.9058823529, green: 0.5882352941, blue: 0.1254901961, alpha: 1)
-        endColor = #colorLiteral(red: 0.8039215686, green: 0.4431372549, blue: 0.1215686275, alpha: 1)
-        image = UIImage(named:"ic-operation") ?? .init()
+//    case .operations:
+//        startColor = #colorLiteral(red: 0.9058823529, green: 0.5882352941, blue: 0.1254901961, alpha: 1)
+//        endColor = #colorLiteral(red: 0.8039215686, green: 0.4431372549, blue: 0.1215686275, alpha: 1)
+//        image = UIImage(named:"ic-operation") ?? .init()
     case .consultation:
       startColor = #colorLiteral(red: 0.3490196078, green: 0.7568627451, blue: 0.2901960784, alpha: 1)
       endColor = #colorLiteral(red: 0.262745098, green: 0.4588235294, blue: 0.2156862745, alpha: 1)
-    case .clinicalAlert:
-     // image = #imageLiteral(resourceName: "clinical alerts")
-      image = UIImage(named: "clinical alerts") ?? .init()
-      startColor = #colorLiteral(red: 0.3921568627, green: 0.4980392157, blue: 0.7882352941, alpha: 1)
-      endColor = #colorLiteral(red: 0.1568627451, green: 0.3137254902, blue: 0.5176470588, alpha: 1)
-    case .notifications:
-        startColor = #colorLiteral(red: 0.9058823529, green: 0.5882352941, blue: 0.1254901961, alpha: 1)
-        endColor = #colorLiteral(red: 0.8039215686, green: 0.4431372549, blue: 0.1215686275, alpha: 1)
-        image = UIImage(named:"ic-bell") ?? .init()
-    case .search:
-        image = UIImage(named: "inpatients") ?? .init()
-        startColor = #colorLiteral(red: 0.6274509804, green: 0.4196078431, blue: 0.631372549, alpha: 1)
-        endColor = #colorLiteral(red: 0.537254902, green: 0.3411764706, blue: 0.6274509804, alpha: 1)
+//    case .clinicalAlert:
+//     // image = #imageLiteral(resourceName: "clinical alerts")
+//      image = UIImage(named: "clinical alerts") ?? .init()
+//      startColor = #colorLiteral(red: 0.3921568627, green: 0.4980392157, blue: 0.7882352941, alpha: 1)
+//      endColor = #colorLiteral(red: 0.1568627451, green: 0.3137254902, blue: 0.5176470588, alpha: 1)
+//    case .notifications:
+//        startColor = #colorLiteral(red: 0.9058823529, green: 0.5882352941, blue: 0.1254901961, alpha: 1)
+//        endColor = #colorLiteral(red: 0.8039215686, green: 0.4431372549, blue: 0.1215686275, alpha: 1)
+//        image = UIImage(named:"ic-bell") ?? .init()
+//    case .search:
+//        image = UIImage(named: "inpatients") ?? .init()
+//        startColor = #colorLiteral(red: 0.6274509804, green: 0.4196078431, blue: 0.631372549, alpha: 1)
+//        endColor = #colorLiteral(red: 0.537254902, green: 0.3411764706, blue: 0.6274509804, alpha: 1)
     }
       
     return ColorAndImageTuple(startColor, endColor, image)
@@ -136,9 +136,10 @@ extension ComponentCollectionViewController: UICollectionViewDataSource {
 
   /// Components visible in the grid — search and notifications are hidden.
   private var visibleComponents: [Component] {
+//      return presenter.components
     return presenter.components.filter {
       let type = ComponentType(rawValue: $0.processInfoCode)
-      return type != .notifications && type != .search
+      return type != .ICU && type != .nicu
     }
   }
 
@@ -148,7 +149,7 @@ extension ComponentCollectionViewController: UICollectionViewDataSource {
 
   func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
     let component = visibleComponents[indexPath.row]
-    let componentType = ComponentType(rawValue: component.processInfoCode) ?? .operations
+    let componentType = ComponentType(rawValue: component.processInfoCode) ?? .inpatient
     let colorAndImageTuble = getComponentBackgroundColorAndImage(componentType: componentType)
     return componentCellMaker(collectionView, indexPath, component, colorAndImageTuble)
   }

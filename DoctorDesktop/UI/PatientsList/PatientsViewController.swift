@@ -115,9 +115,11 @@ class PatientsViewController: UIViewController, NVActivityIndicatorViewable {
     }
 
     switch presenter.componentType {
-    case .emergency, .clinicalAlert:
+  //  case .emergency, .clinicalAlert:
+    case .emergency :
       getPatientsDetails(withSelectedUnitIndex: -1)
-    case .outpatient, .inpatient, .ICU, .nicu:
+  //  case .outpatient, .inpatient, .ICU, .nicu:
+    case .outpatient, .inpatient:
       // Hide content — UnitsPopup is about to be pushed immediately on top.
       setContentVisible(false)
       getPatientsUnits()
@@ -253,10 +255,11 @@ extension PatientsViewController {
   
   fileprivate func registerCell() {
     switch presenter.componentType {
-    case .inpatient, .ICU ,.nicu, .operations: InpatientCell.register(with: tableView)
+  //  case .inpatient, .ICU ,.nicu, .operations: InpatientCell.register(with: tableView)
+    case .inpatient: InpatientCell.register(with: tableView)
     case .outpatient: OutpatientCell.register(with: tableView)
     case .emergency: EmergencyCell.register(with: tableView)
-    case .clinicalAlert: ClinicalAlertCell.register(with: tableView)
+  //  case .clinicalAlert: ClinicalAlertCell.register(with: tableView)
     default: break
     }
   }
@@ -269,12 +272,12 @@ extension PatientsViewController {
         self.setupDropDownMenu(dropDown: self.dropDown)
         popup.reloadWith(units: self.presenter.patientUnits)
       }
-    case .ICU:
-      let popup = showUnitsPopupDialog()
-      presenter.getInpatientUnits(isICU: 1) {
-        self.setupDropDownMenu(dropDown: self.dropDown)
-        popup.reloadWith(units: self.presenter.patientUnits)
-      }
+//    case .ICU:
+//      let popup = showUnitsPopupDialog()
+//      presenter.getInpatientUnits(isICU: 1) {
+//        self.setupDropDownMenu(dropDown: self.dropDown)
+//        popup.reloadWith(units: self.presenter.patientUnits)
+//      }
     case .outpatient:
       // Push UnitsPopup immediately (shows spinner) — no waiting, no white flash.
       // Populate it once the API responds.
@@ -283,20 +286,20 @@ extension PatientsViewController {
         self.setupDropDownMenu(dropDown: self.dropDown)
         popup.reloadWith(units: self.presenter.patientUnits)
       }
-    case .operations:
-        presenter.getOperationPatients(withDate: selectedDate) {
-            self.tableView.reloadData()
-        }
+//    case .operations:
+//        presenter.getOperationPatients(withDate: selectedDate) {
+//            self.tableView.reloadData()
+//        }
     case .emergency:
       getPatientsDetails(withSelectedUnitIndex: -1)
-    case .clinicalAlert:
-      break
-    case .nicu:
-      let popup = showUnitsPopupDialog()
-      presenter.getInpatientUnits(isICU: 2) {
-        self.setupDropDownMenu(dropDown: self.dropDown)
-        popup.reloadWith(units: self.presenter.patientUnits)
-      }
+//    case .clinicalAlert:
+//      break
+//    case .nicu:
+//      let popup = showUnitsPopupDialog()
+//      presenter.getInpatientUnits(isICU: 2) {
+//        self.setupDropDownMenu(dropDown: self.dropDown)
+//        popup.reloadWith(units: self.presenter.patientUnits)
+//      }
     default: break
     }
   }
@@ -305,21 +308,21 @@ extension PatientsViewController {
     startAnimating(message: "Load Patients Details...")
     
     switch presenter.componentType {
-    case .nicu:
-        presenter.getInpatientPatients(withSelectedUnitIndex: index, isICU: 2) {
-          self.stopAnimating()
-          self.tableView.reloadData()
-        }
+//    case .nicu:
+//        presenter.getInpatientPatients(withSelectedUnitIndex: index, isICU: 2) {
+//          self.stopAnimating()
+//          self.tableView.reloadData()
+//        }
     case .inpatient:
       presenter.getInpatientPatients(withSelectedUnitIndex: index, isICU: 0) {
         self.stopAnimating()
         self.tableView.reloadData()
       }
-    case .ICU:
-      presenter.getInpatientPatients(withSelectedUnitIndex: index, isICU: 1) {
-        self.stopAnimating()
-        self.tableView.reloadData()
-      }
+//    case .ICU:
+//      presenter.getInpatientPatients(withSelectedUnitIndex: index, isICU: 1) {
+//        self.stopAnimating()
+//        self.tableView.reloadData()
+//      }
     case .outpatient:
       presenter.getOutpatientPatients(withDate: selectedDate, selectedClinicIndex: index) {
         self.stopAnimating()
@@ -332,16 +335,16 @@ extension PatientsViewController {
         self.notTriagedCountLabel.text = "\(self.presenter.notTriagedEmergencyPatients.count)"
         self.tableView.reloadData()
       }
-    case .clinicalAlert:
-      presenter.getClinicalPatients(date: Date(), finished: {
-        self.stopAnimating()
-        self.tableView.reloadData()
-      })
-    case .operations:
-        presenter.getOperationPatients(withDate: Date(), finished: {
-            self.stopAnimating()
-            self.tableView.reloadData()
-        })
+//    case .clinicalAlert:
+//      presenter.getClinicalPatients(date: Date(), finished: {
+//        self.stopAnimating()
+//        self.tableView.reloadData()
+//      })
+//    case .operations:
+//        presenter.getOperationPatients(withDate: Date(), finished: {
+//            self.stopAnimating()
+//            self.tableView.reloadData()
+//        })
     default: break
     }
   }
@@ -382,7 +385,8 @@ extension PatientsViewController {
 extension PatientsViewController: UITableViewDataSource {
   func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
     switch presenter.componentType {
-    case .inpatient,.nicu, .ICU: return presenter.inpatientPatients.count
+   // case .inpatient,.nicu, .ICU: return presenter.inpatientPatients.count
+    case .inpatient: return presenter.inpatientPatients.count
     case .outpatient: return presenter.outpatientPatients.count
     case .emergency:
       if self.isTriagedSelected {
@@ -390,8 +394,8 @@ extension PatientsViewController: UITableViewDataSource {
       } else {
         return presenter.notTriagedEmergencyPatients.count
       }
-    case .clinicalAlert: return presenter.clinicalPatients.count
-    case .operations: return presenter.operationPatients.count
+ //   case .clinicalAlert: return presenter.clinicalPatients.count
+ //   case .operations: return presenter.operationPatients.count
 
     default: return 0
     }
@@ -399,7 +403,8 @@ extension PatientsViewController: UITableViewDataSource {
   
   func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
     switch presenter.componentType {
-    case .inpatient,.nicu, .ICU:
+ //   case .inpatient,.nicu, .ICU:
+    case .inpatient:
       return self.inpatientCellMaker(tableView, indexPath, self.presenter.inpatientPatients[indexPath.row])
     case .outpatient:
         let cell = outpatientCellMaker(tableView, indexPath, presenter.outpatientPatients[indexPath.row])
@@ -411,13 +416,13 @@ extension PatientsViewController: UITableViewDataSource {
         EmergencyCellPresenterImpl(with: presenter.triagedEmergencyPatients[indexPath.row]) :
         EmergencyCellPresenterImpl(with: presenter.notTriagedEmergencyPatients[indexPath.row])
       return EmergencyCell.dequeue(from: tableView, for: indexPath, with: emergencyCellPresenter)
-    case .clinicalAlert :
-      return clinicalAlertCellMaker(tableView, indexPath, presenter.clinicalPatients[indexPath.row])
-    case .operations:
-        let cell = UITableViewCell()
-        cell.backgroundColor = .black
-        cell.frame = CGRect(x: 0, y: 0, width: 250, height: 100)
-        return cell
+//    case .clinicalAlert :
+//      return clinicalAlertCellMaker(tableView, indexPath, presenter.clinicalPatients[indexPath.row])
+//    case .operations:
+//        let cell = UITableViewCell()
+//        cell.backgroundColor = .black
+//        cell.frame = CGRect(x: 0, y: 0, width: 250, height: 100)
+//        return cell
     default:
         
       return UITableViewCell()
@@ -439,8 +444,9 @@ extension PatientsViewController: UITableViewDelegate {
   func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
     switch presenter.componentType {
     case .emergency:    return UITableViewAutomaticDimension
-    case .clinicalAlert: return 100
-    case .inpatient, .ICU, .nicu, .operations: return 110
+  //  case .clinicalAlert: return 100
+  //  case .inpatient, .ICU, .nicu, .operations: return 110
+    case .inpatient: return 110
     case .outpatient:   return 150
     default:            return UITableViewAutomaticDimension
     }
@@ -465,8 +471,8 @@ extension PatientsViewController: UITableViewDelegate {
        
         navigationCoordinator?.next(arguments: args)
         
-    case .inpatient,.nicu, .ICU:
-        
+ //   case .inpatient,.nicu, .ICU:
+    case .inpatient:
         UserDefaults.standard.set(presenter.inpatientPatients[indexPath.row].id, forKey: "patient_id") //setObject
 
           UserDefaults.standard.set(presenter.inpatientPatients[indexPath.row].visitId, forKey: "visit_id") //setObject
@@ -490,12 +496,12 @@ extension PatientsViewController: UITableViewDelegate {
         args["permission"] = presenter.permission
       navigationCoordinator?.next(arguments: args)
       //present(SideMenuManager.default.menuLeftNavigationController!, animated: true, completion: nil)
-    case .clinicalAlert:
-      let clinicalInfoPopup = clinicalInfoPopupMaker(presenter.clinicalPatients[indexPath.row])
-      let popupDialog = PopupDialog(viewController: clinicalInfoPopup)
-      let cancelButton = PopupDialogButton(title: "Cancel", action: nil)
-      popupDialog.addButtons([cancelButton])
-      present(popupDialog, animated: true, completion: nil)
+//    case .clinicalAlert:
+//      let clinicalInfoPopup = clinicalInfoPopupMaker(presenter.clinicalPatients[indexPath.row])
+//      let popupDialog = PopupDialog(viewController: clinicalInfoPopup)
+//      let cancelButton = PopupDialogButton(title: "Cancel", action: nil)
+//      popupDialog.addButtons([cancelButton])
+//      present(popupDialog, animated: true, completion: nil)
     default: break
     }
   }

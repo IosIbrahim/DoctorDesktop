@@ -99,23 +99,17 @@ class PatientsPresenterImpl: PatientsPresenter {
 
   var title: String {
     switch componentType {
-    case .nicu:
-        return "NICU"
-    case .inpatient:
-      return "Inpatients"
-    case .ICU:
-      return "ICU"
-    case .outpatient:
-      return "Outpatients"
-    case .emergency:
-      return "Emergency"
-    case .consultation:
-      return "Consultations"
-    case .clinicalAlert:
-      return "Clinical Alerts"
-    case .operations:
-        return "Operations"
-    default: return ""
+    case .nicu: return "NICU"
+    case .ICU: return "ICU"
+    case .inpatient:return "Inpatients"
+    case .outpatient: return "Outpatients"
+    case .emergency:return "Emergency"
+    case .consultation: return "Consultations"
+//    case .clinicalAlert:
+//      return "Clinical Alerts"
+//    case .operations:
+//        return "Operations"
+ //   default: return ""
     }
   }
   
