@@ -86,7 +86,11 @@ For details on using Firebase from a Framework or a library, refer to [firebase_
 To develop Firebase software in this repository, ensure that you have at least
 the following software:
 
+<<<<<<< HEAD
+* Xcode 16.2 (or later)
+=======
 * Xcode 26.2 (or later)
+>>>>>>> 01a0ce04a47f62e29d6244926ad70ed7e09fe1b8
 
 CocoaPods is still the canonical way to develop, but much of the repo now supports
 development with Swift Package Manager.
@@ -153,7 +157,11 @@ GitHub Actions will verify that any code changes are done in a style-compliant
 way. Install `clang-format` and `mint`:
 
 ```console
+<<<<<<< HEAD
+brew install clang-format@21
+=======
 brew install clang-format@22
+>>>>>>> 01a0ce04a47f62e29d6244926ad70ed7e09fe1b8
 brew install mint
 ```
 
