@@ -2,25 +2,25 @@ PODS:
   - Alamofire (5.11.0)
   - DropDown (2.3.1)
   - DynamicBlurView (2.0.2)
-  - Firebase/CoreOnly (12.7.0):
-    - FirebaseCore (~> 12.7.0)
-  - Firebase/Messaging (12.7.0):
+  - Firebase/CoreOnly (12.12.0):
+    - FirebaseCore (~> 12.12.0)
+  - Firebase/Messaging (12.12.0):
     - Firebase/CoreOnly
-    - FirebaseMessaging (~> 12.7.0)
-  - FirebaseCore (12.7.0):
-    - FirebaseCoreInternal (~> 12.7.0)
+    - FirebaseMessaging (~> 12.12.0)
+  - FirebaseCore (12.12.0):
+    - FirebaseCoreInternal (~> 12.12.0)
     - GoogleUtilities/Environment (~> 8.1)
     - GoogleUtilities/Logger (~> 8.1)
-  - FirebaseCoreInternal (12.7.0):
+  - FirebaseCoreInternal (12.12.0):
     - "GoogleUtilities/NSData+zlib (~> 8.1)"
-  - FirebaseInstallations (12.7.0):
-    - FirebaseCore (~> 12.7.0)
+  - FirebaseInstallations (12.12.0):
+    - FirebaseCore (~> 12.12.0)
     - GoogleUtilities/Environment (~> 8.1)
     - GoogleUtilities/UserDefaults (~> 8.1)
     - PromisesObjC (~> 2.4)
-  - FirebaseMessaging (12.7.0):
-    - FirebaseCore (~> 12.7.0)
-    - FirebaseInstallations (~> 12.7.0)
+  - FirebaseMessaging (12.12.0):
+    - FirebaseCore (~> 12.12.0)
+    - FirebaseInstallations (~> 12.12.0)
     - GoogleDataTransport (~> 10.1)
     - GoogleUtilities/AppDelegateSwizzler (~> 8.1)
     - GoogleUtilities/Environment (~> 8.1)
@@ -55,7 +55,7 @@ PODS:
     - GoogleUtilities/Logger
     - GoogleUtilities/Privacy
   - IQKeyboardManagerSwift (6.5.16)
-  - Kingfisher (8.6.2)
+  - Kingfisher (4.7.0)
   - KMPlaceholderTextView (1.3.0)
   - MaterialComponents/AnimationTiming (124.2.0)
   - MaterialComponents/Availability (124.2.0)
@@ -216,15 +216,15 @@ SPEC CHECKSUMS:
   Alamofire: bd5e7b23a1a750975288482c1831d71e74415f86
   DropDown: 20499c7b2731b0d21609af924e47c7677a2be50d
   DynamicBlurView: aa6db4defc6e537eb86fc5e58dd3991666178399
-  Firebase: 2d19a10c9a2e48ac532a4303115d3fc9b2798396
-  FirebaseCore: c7b57863ce0859281a66d16ca36d665c45d332b5
-  FirebaseCoreInternal: 571a2dd8c975410966199623351db3a3265c874d
-  FirebaseInstallations: 6d05424a046b68ca146b4de4376f05b4e9262fc3
-  FirebaseMessaging: b5f7bdc62b91b6102015991fb7bc6fa75f643908
+  Firebase: aa154fee4e9b8eac17aa42344988865b3e857d33
+  FirebaseCore: f28af0427998cd53f8d4826bce17260e33224053
+  FirebaseCoreInternal: 7c12fc3011d889085e765e317d7b9fd1cef97af9
+  FirebaseInstallations: 4e6e162aa4abaaeeeb01dd00179dfc5ad9c2194e
+  FirebaseMessaging: 341004946fa7ffc741344b20f1b667514fc93e31
   GoogleDataTransport: aae35b7ea0c09004c3797d53c8c41f66f219d6a7
   GoogleUtilities: 00c88b9a86066ef77f0da2fab05f65d7768ed8e1
   IQKeyboardManagerSwift: 12d89768845bb77b55cc092ecc2b1f9370f06b76
-  Kingfisher: 23d18f54677d973b713e54ce6a8f5eef6e7056ba
+  Kingfisher: da6b005aa96d37698e3e4f1ccfe96a5b9bbf27d6
   KMPlaceholderTextView: 2bbcd19a273648a80a61e1e48f9743a24d8930e3
   MaterialComponents: 1a9b2d9d45b1601ae544de85089adc4c464306d4
   MDFInternationalization: d697c55307816222a55685c4ccb1044ffb030c12
@@ -255,4 +255,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: c7a56e5259ca584a0ca1752e06dde7c6a9ebc1ac
 
-COCOAPODS: 1.16.2
+COCOAPODS: 1.15.2

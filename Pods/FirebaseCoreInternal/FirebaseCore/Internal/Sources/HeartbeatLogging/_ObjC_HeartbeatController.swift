@@ -50,8 +50,11 @@ public class _ObjC_HeartbeatController: NSObject {
   /// - Note: This API is thread-safe.
   /// - Returns: A heartbeats payload for the flushed heartbeat(s).
   public func flushAsync(completionHandler: @escaping @Sendable (_ObjC_HeartbeatsPayload) -> Void) {
+<<<<<<< HEAD
     // TODO: When minimum version moves to iOS 13.0, restore the async version
     // removed in #13952.
+=======
+>>>>>>> 01a0ce04a47f62e29d6244926ad70ed7e09fe1b8
     heartbeatController.flushAsync { heartbeatsPayload in
       completionHandler(_ObjC_HeartbeatsPayload(heartbeatsPayload))
     }
