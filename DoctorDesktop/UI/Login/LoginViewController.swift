@@ -33,6 +33,8 @@ class LoginViewController: UIViewController, NVActivityIndicatorViewable {
       #if DEBUG
       userName.text = "KHABEER"
       passWord.text = "920250270"
+      userName.text = "khabeer"
+      passWord.text = "P@P@ssw0rd123"
       #endif
   }
   
