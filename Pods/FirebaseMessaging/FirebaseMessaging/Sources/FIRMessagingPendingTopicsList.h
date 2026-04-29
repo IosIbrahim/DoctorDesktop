@@ -108,11 +108,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property(nonatomic, readonly, strong, nullable) NSDate *archiveDate;
 @property(nonatomic, readonly) NSUInteger numberOfBatches;
 
-<<<<<<< HEAD
 - (instancetype)init NS_DESIGNATED_INITIALIZER;
-=======
-- (instancetype)init;
->>>>>>> 01a0ce04a47f62e29d6244926ad70ed7e09fe1b8
 - (void)addOperationForTopic:(NSString *)topic
                   withAction:(FIRMessagingTopicAction)action
                   completion:(nullable FIRMessagingTopicOperationCompletion)completion;
