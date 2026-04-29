@@ -65,7 +65,7 @@ class LoginViewController: UIViewController, NVActivityIndicatorViewable {
       }
     startAnimating(message: "Login...")
     let pushToken = UserDefaults.standard.string(forKey: "pushToken") ?? ""
-    let params = ["USER_ID": username, "USERPASSWORD": password, "pushToken": pushToken, "MOBILEAPP_KEY": "MOBILEAPP_KEY"]
+    let params = ["USER_ID": username, "USERPASSWORD": password, "MOBILEAPP_KEY": "pushToken"]
     presenter.login(with: params) { [weak self] in
       self?.stopAnimating()
         if self?.presenter.error != "" {
