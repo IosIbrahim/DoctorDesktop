@@ -14,7 +14,11 @@ import CommonCrypto
 typealias DataBlock = ((Data) -> Void)
 
 struct AppURLS {
-    static let ip       = "http://41.33.82.156:29804"
+//    static let ip       = "http://41.33.82.156:29804"
+//    static let mobileApi = "MobileApi/api/"
+//    static let imageApi  = "primecare/Hospital%20Images/"
+    
+    static let ip       = "https://pr-h1services04.sherafia.bhg.com.sa"
     static let mobileApi = "MobileApi/api/"
     static let imageApi  = "primecare/Hospital%20Images/"
 }
