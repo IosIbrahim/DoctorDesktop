@@ -330,13 +330,13 @@ class NetworkLayerImpl: NetworkLayer {
 
     func saveUcaf(body: [String: Any], finished: @escaping DataBlock) {
         // Confirmed from Android network logs: MedicalRecord (no "Controller"), UCAF uppercase.
-        postJSON(AppURLS.ip + "MedicalRecord/saveUCAF",
+        postJSON(AppURLS.ip + AppURLS.mobileApi + "MedicalRecord/saveUCAF",
                  body: body, finished: finished)
     }
 
     func loadDoctorNurseNotes(with params: [String: String], finished: @escaping DataBlock) {
         // OAuth params go in the URL query string (same as Android, NOT Authorization header).
-        let base = AppURLS.ip + "MedicalRcordController/DDDocNurseNotesLoad"
+        let base = AppURLS.ip + AppURLS.mobileApi + "MedicalRcordController/DDDocNurseNotesLoad"
         guard let (signedURL, baseString) = NetworkLayerImpl.buildOAuthURL(base: base, params: params) else {
             print("❌ [NurseNotes] buildOAuthURL returned nil — HMAC failed")
             return
@@ -402,7 +402,7 @@ class NetworkLayerImpl: NetworkLayer {
         // which by setting BUFFER_STATUS (1=save, 3=delete) inside
         // DOCTOR_NURSE_REMARKS plus the matching PROCESS_ID/TRACER_PLACE_ID in
         // DD_UC_PARMS.
-        let base = AppURLS.ip + "MedicalRcordController/DDDocNurseNotesSave"
+        let base = AppURLS.ip + AppURLS.mobileApi + "MedicalRcordController/DDDocNurseNotesSave"
         signedFormPOST(base: base, tag: "NurseNotesSave", params: params, finished: finished)
     }
 
@@ -410,7 +410,7 @@ class NetworkLayerImpl: NetworkLayer {
         // Replies have a dedicated endpoint distinct from notes save/delete.
         // Same auth/body machinery as `saveDoctorNurseNotes` though, so we
         // route through the same signed-form-POST helper.
-        let base = AppURLS.ip + "MedicalRcordController/DDDocNurseReplySave"
+        let base = AppURLS.ip + AppURLS.mobileApi + "MedicalRcordController/DDDocNurseReplySave"
         signedFormPOST(base: base, tag: "NurseReplySave", params: params, finished: finished)
     }
 
