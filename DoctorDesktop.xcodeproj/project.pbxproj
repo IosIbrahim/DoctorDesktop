@@ -44,6 +44,7 @@
 		3615BBA22000CE0400A56F9E /* OrderCollectionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3615BBA12000CE0400A56F9E /* OrderCollectionViewController.swift */; };
 		3615BBA42000CE1400A56F9E /* OrderCollectionPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3615BBA32000CE1400A56F9E /* OrderCollectionPresenter.swift */; };
 		361B27252020DDEE00D8215D /* Utility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 361B27242020DDEE00D8215D /* Utility.swift */; };
+		AA0000001111222233335555 /* NVActivityIndicatorViewableCompat.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000001111222233334444 /* NVActivityIndicatorViewableCompat.swift */; };
 		362EDC5D200B8F0B004777EE /* OrderServiceCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 362EDC5B200B8F0B004777EE /* OrderServiceCell.swift */; };
 		362EDC5E200B8F0B004777EE /* OrderServiceCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 362EDC5C200B8F0B004777EE /* OrderServiceCell.xib */; };
 		362EDC61200B924D004777EE /* OrderServiceList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 362EDC60200B924D004777EE /* OrderServiceList.swift */; };
@@ -295,6 +296,7 @@
 		3615BBA12000CE0400A56F9E /* OrderCollectionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrderCollectionViewController.swift; sourceTree = "<group>"; };
 		3615BBA32000CE1400A56F9E /* OrderCollectionPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrderCollectionPresenter.swift; sourceTree = "<group>"; };
 		361B27242020DDEE00D8215D /* Utility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utility.swift; sourceTree = "<group>"; };
+		AA0000001111222233334444 /* NVActivityIndicatorViewableCompat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NVActivityIndicatorViewableCompat.swift; sourceTree = "<group>"; };
 		362EDC5B200B8F0B004777EE /* OrderServiceCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrderServiceCell.swift; sourceTree = "<group>"; };
 		362EDC5C200B8F0B004777EE /* OrderServiceCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = OrderServiceCell.xib; sourceTree = "<group>"; };
 		362EDC60200B924D004777EE /* OrderServiceList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrderServiceList.swift; sourceTree = "<group>"; };
@@ -1349,6 +1351,7 @@
 				36BCD4A81FDBEA0400DE0A72 /* UI */,
 				46B646A91FD2E44100D8D340 /* AppDelegate.swift */,
 				361B27242020DDEE00D8215D /* Utility.swift */,
+				AA0000001111222233334444 /* NVActivityIndicatorViewableCompat.swift */,
 				46B646AD1FD2E44100D8D340 /* Main.storyboard */,
 				46B646B51FD2E44100D8D340 /* LaunchScreen.storyboard */,
 				0FC7B2BE2FA0D3FA00CDE3E9 /* GoogleService-Info.plist */,
@@ -1580,7 +1583,14 @@
 				"${BUILT_PRODUCTS_DIR}/FirebaseMessaging/FirebaseMessaging.framework",
 				"${BUILT_PRODUCTS_DIR}/GoogleDataTransport/GoogleDataTransport.framework",
 				"${BUILT_PRODUCTS_DIR}/GoogleUtilities/GoogleUtilities.framework",
+				"${BUILT_PRODUCTS_DIR}/IQKeyboardCore/IQKeyboardCore.framework",
 				"${BUILT_PRODUCTS_DIR}/IQKeyboardManagerSwift/IQKeyboardManagerSwift.framework",
+				"${BUILT_PRODUCTS_DIR}/IQKeyboardNotification/IQKeyboardNotification.framework",
+				"${BUILT_PRODUCTS_DIR}/IQKeyboardReturnManager/IQKeyboardReturnManager.framework",
+				"${BUILT_PRODUCTS_DIR}/IQKeyboardToolbar/IQKeyboardToolbar.framework",
+				"${BUILT_PRODUCTS_DIR}/IQKeyboardToolbarManager/IQKeyboardToolbarManager.framework",
+				"${BUILT_PRODUCTS_DIR}/IQTextInputViewNotification/IQTextInputViewNotification.framework",
+				"${BUILT_PRODUCTS_DIR}/IQTextView/IQTextView.framework",
 				"${BUILT_PRODUCTS_DIR}/KMPlaceholderTextView/KMPlaceholderTextView.framework",
 				"${BUILT_PRODUCTS_DIR}/Kingfisher/Kingfisher.framework",
 				"${BUILT_PRODUCTS_DIR}/MDFInternationalization/MDFInternationalization.framework",
@@ -1621,7 +1631,14 @@
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FirebaseMessaging.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/GoogleDataTransport.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/GoogleUtilities.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/IQKeyboardCore.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/IQKeyboardManagerSwift.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/IQKeyboardNotification.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/IQKeyboardReturnManager.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/IQKeyboardToolbar.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/IQKeyboardToolbarManager.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/IQTextInputViewNotification.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/IQTextView.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/KMPlaceholderTextView.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Kingfisher.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/MDFInternationalization.framework",
@@ -1692,6 +1709,7 @@
 				3656DD06274BC6D9008DC057 /* ChatCell.swift in Sources */,
 				3643438E1FE98A83002C1FF0 /* UnitsPopupCellPresenter.swift in Sources */,
 				361B27252020DDEE00D8215D /* Utility.swift in Sources */,
+				AA0000001111222233335555 /* NVActivityIndicatorViewableCompat.swift in Sources */,
 				368A79B82009242700962DDD /* PatientOverviewPresenter.swift in Sources */,
 				367D48112089D67600347AE5 /* ClinicalAlertPresenter.swift in Sources */,
 				3650EEDD1FDC6935000A349C /* DataLayer.swift in Sources */,
