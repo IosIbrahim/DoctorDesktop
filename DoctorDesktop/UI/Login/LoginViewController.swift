@@ -9,7 +9,6 @@
 import UIKit
 import Alamofire
 import Stuff
-import Toastlity
 import NVActivityIndicatorView
 
 class LoginViewController: UIViewController, NVActivityIndicatorViewable {

@@ -8,7 +8,6 @@
 
 import UIKit
 import SideMenu
-import Toastlity
 import NVActivityIndicatorView
 
 class OverviewCollectionViewController: UIViewController, NVActivityIndicatorViewable {

@@ -8,7 +8,6 @@
 
 import Foundation
 import Alamofire
-import Toastlity
 typealias Components = [Component]
 typealias ComponentsBlock = ((Components) -> Void)
 typealias UserAndComponentsBlock = ((User, Components) -> Void)

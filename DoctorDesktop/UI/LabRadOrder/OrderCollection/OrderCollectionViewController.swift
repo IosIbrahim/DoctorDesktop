@@ -9,7 +9,6 @@
 import UIKit
 import DropDown
 import SideMenu
-import Toastlity
 import NVActivityIndicatorView
 
 class OrderCollectionViewController: UIViewController, NVActivityIndicatorViewable {

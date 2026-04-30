@@ -7,7 +7,6 @@
 //
 
 import UIKit
-import Toastlity
 
 typealias ColorAndImageTuple = (startColor: UIColor, endColor: UIColor, image: UIImage)
 
