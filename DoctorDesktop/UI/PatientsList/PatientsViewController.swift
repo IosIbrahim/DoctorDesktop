@@ -447,7 +447,7 @@ extension PatientsViewController: UITableViewDelegate {
   //  case .clinicalAlert: return 100
   //  case .inpatient, .ICU, .nicu, .operations: return 110
     case .inpatient: return 110
-    case .outpatient:   return 150
+    case .outpatient:   return 160
     default:            return UITableViewAutomaticDimension
     }
   }
