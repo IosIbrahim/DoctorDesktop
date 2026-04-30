@@ -7,6 +7,11 @@
 //
 
 import Swinject
+#if canImport(UIKit)
+    import UIKit
+#elseif canImport(Cocoa)
+    import Cocoa
+#endif
 
 #if os(iOS) || os(tvOS) || os(OSX)
 
@@ -22,6 +27,7 @@ import Swinject
 /// in User Defined Runtime Attributes section on Indentity Inspector pane.
 /// If no name is supplied to the registration, no runtime attribute should be specified.
 @objcMembers
+@objc(SwinjectStoryboard)
 public class SwinjectStoryboard: _SwinjectStoryboardBase, SwinjectStoryboardProtocol {
     /// A shared container used by SwinjectStoryboard instances that are instantiated without specific containers.
     ///
@@ -110,9 +116,15 @@ public class SwinjectStoryboard: _SwinjectStoryboardBase, SwinjectStoryboardProt
             fatalError("A type conforming Resolver protocol must conform _Resolver protocol too.")
         }
 
-        for child in viewController.childViewControllers {
-            injectDependency(to: child)
-        }
+#if swift(>=4.2)
+            for child in viewController.children {
+                injectDependency(to: child)
+            }
+#else
+            for child in viewController.childViewControllers {
+                injectDependency(to: child)
+            }
+#endif
     }
     
 #elseif os(OSX)
@@ -170,10 +182,8 @@ public class SwinjectStoryboard: _SwinjectStoryboardBase, SwinjectStoryboardProt
     }
     
     private func injectDependency(to controller: Container.Controller) {
-        if let controller = controller as? InjectionVerifiable {
-            guard !controller.wasInjected else { return }
-            defer { controller.wasInjected = true }
-        }
+        guard let controller = controller as? InjectionVerifiable, !controller.wasInjected else { return }
+        defer { controller.wasInjected = true }
 
         let registrationName = (controller as? RegistrationNameAssociatable)?.swinjectRegistrationName
         
@@ -191,9 +201,15 @@ public class SwinjectStoryboard: _SwinjectStoryboardBase, SwinjectStoryboardProt
             injectDependency(to: viewController)
 		}
         if let viewController = controller as? NSViewController {
+#if swift(>=4.2)
+            for child in viewController.children {
+                injectDependency(to: child)
+            }
+#else
             for child in viewController.childViewControllers {
                 injectDependency(to: child)
             }
+#endif
         }
     }
 #endif
