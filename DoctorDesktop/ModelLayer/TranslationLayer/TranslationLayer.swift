@@ -58,8 +58,17 @@ class TranslationLayerImpl: TranslationLayer {
     func createComponentDTOsFromJsonData(_ data: Data) -> Components {
         print("date")
         print(data)
-        
-        guard let components = try? Components (data: data, keyPath: "userComponent") else {
+
+        // IMPORTANT: pass .useDefaultKeys explicitly. The Stuff pod defaults
+        // to .convertFromSnakeCase, which mangles UPPER_SNAKE_CASE JSON keys
+        // (e.g. PROCESS_INFO_CODE → pROCESSINFOCODE) so they no longer match
+        // the explicit CodingKeys. Result: every field except `ID` decodes
+        // as empty/0.
+        guard let components = try? Components(
+            data: data,
+            keyPath: "userComponent",
+            keyDecodingStrategy: .useDefaultKeys
+        ) else {
             return []
         }
         print(components)
@@ -67,7 +76,11 @@ class TranslationLayerImpl: TranslationLayer {
     }
     
     func createUserDTOFromJsonData(_ data: Data) -> User {
-        let user = try? User (data: data, keyPath: "OUTPARAMS.OUTPARAMS_ROW")
+        // .useDefaultKeys — see createComponentDTOsFromJsonData for rationale.
+        // Without this, EMP_AR_NAME / EMP_EN_NAME get mangled by
+        // .convertFromSnakeCase and arrive as nil. (Also fixes id, branch, etc.)
+        let user = try? User(data: data, keyPath: "OUTPARAMS.OUTPARAMS_ROW",
+                             keyDecodingStrategy: .useDefaultKeys)
         if let branch = user?.branch {
             UserDefaults.standard.set(branch, forKey: "branch_id") //setObject
         }
@@ -93,21 +106,33 @@ extension TranslationLayerImpl {
     func getCountsFromJson(_ data: Data) -> PatientCount {
         print(data.toJsonString() ?? "")
 
-        if var patientCount = try? PatientCount(data: data, keyPath: "Root.OUT_PARMS.OUT_PARMS_ROW") {
-            if let com = try? DoctorPermissions(data: data, keyPath: "userComponent") {
+        // .useDefaultKeys — see createComponentDTOsFromJsonData for rationale
+        // (UPPER_SNAKE_CASE JSON keys get mangled by .convertFromSnakeCase).
+        if var patientCount = try? PatientCount(
+            data: data,
+            keyPath: "Root.OUT_PARMS.OUT_PARMS_ROW",
+            keyDecodingStrategy: .useDefaultKeys
+        ) {
+            if let com = try? DoctorPermissions(
+                data: data,
+                keyPath: "userComponent",
+                keyDecodingStrategy: .useDefaultKeys
+            ) {
                 patientCount.permissions = com
             }
             return patientCount
         }
 
         // Only surface an error when the server explicitly sends a Message key.
-        // If the path was simply missing (e.g. different server response shape),
-        // return empty counts silently — tiles still appear with count "0".
         var emp = PatientCount()
         if let errorModel = try? ErrorModel(data: data), let msg = errorModel.error {
             emp.error = msg
         }
-        if let com = try? DoctorPermissions(data: data, keyPath: "userComponent") {
+        if let com = try? DoctorPermissions(
+            data: data,
+            keyPath: "userComponent",
+            keyDecodingStrategy: .useDefaultKeys
+        ) {
             emp.permissions = com
         }
         return emp
