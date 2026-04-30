@@ -49,13 +49,13 @@ protocol NetworkLayer {
     func loadUcaf(with params: [String: String], finished: @escaping DataBlock)
     func loadSpecialHabits(with params: [String: String], finished: @escaping DataBlock)
     func saveSpecialHabits(body: [String: Any], finished: @escaping DataBlock)
-    /// POST /MobileApi/api/MedicalRecordController/saveUcaf — saves vitals + special-needs flags.
+    /// POST MedicalRecordController/saveUcaf — saves vitals + special-needs flags.
     func saveUcaf(body: [String: Any], finished: @escaping DataBlock)
-    /// GET /MobileApi/api/MedicalRcordController/DDDocNurseNotesLoad — loads the
+    /// GET MedicalRcordController/DDDocNurseNotesLoad — loads the
     /// progress-notes screen (notes list + priority/visit-type/show-to/filter lookups).
     /// Endpoint name preserves the server typo "MedicalRcordController".
     func loadDoctorNurseNotes(with params: [String: String], finished: @escaping DataBlock)
-    /// POST /MobileApi/api/MedicalRcordController/DDDocNurseNotesSave — saves a
+    /// POST MedicalRcordController/DDDocNurseNotesSave — saves a
     /// new progress note (BUFFER_STATUS=1) OR soft-deletes one (BUFFER_STATUS=3).
     /// Both operations hit the same endpoint; the server distinguishes them by
     /// BUFFER_STATUS inside DOCTOR_NURSE_REMARKS plus PROCESS_ID/TRACER_PLACE_ID
@@ -66,7 +66,7 @@ protocol NetworkLayer {
     /// JSON-string fields: SI, DOCTOR_NURSE_REMARKS, DD_UC_PARMS.
     /// Response: `{"message":"Save Success"}`.
     func saveDoctorNurseNotes(with params: [String: String], finished: @escaping DataBlock)
-    /// POST /MobileApi/api/MedicalRcordController/DDDocNurseReplySave — appends a
+    /// POST MedicalRcordController/DDDocNurseReplySave — appends a
     /// reply to an existing progress note. Same auth + body shape as save:
     /// form-urlencoded with three JSON-string fields (SI, DOCTOR_NURSE_REMARKS,
     /// DD_UC_PARMS). DOCTOR_NURSE_REMARKS is a single-row array of
@@ -201,7 +201,7 @@ class NetworkLayerImpl: NetworkLayer {
     // MARK: - NetworkLayer
 
     func login(with params: [String: String], finished: @escaping DataBlock) {
-        let url = AppURLS.ip + "/MobileApi/api/Authenticate"
+        let url = AppURLS.ip + AppURLS.mobileApi + "Authenticate"
         APILogger.logRequest(method: "POST", url: url, params: params)
         let start = Date()
         NetworkLayerImpl.session
@@ -220,118 +220,118 @@ class NetworkLayerImpl: NetworkLayer {
     }
 
     func getPatientsCount(with params: [String: String], finished: @escaping DataBlock) {
-        get(AppURLS.ip + "/MobileApi/api/get_patients_counts", params: params, finished: finished)
+        get(AppURLS.ip + AppURLS.mobileApi + "get_patients_counts", params: params, finished: finished)
     }
 
     func getDoctorPermission(with params: [String: String], finished: @escaping DataBlock) {
-        get(AppURLS.ip + "/MobileApi/api/WorkFlowController/workflow", params: params, finished: finished)
+        get(AppURLS.ip + AppURLS.mobileApi +  "WorkFlowController/workflow", params: params, finished: finished)
     }
 
     func getInpatientUnits(with params: [String: String], finished: @escaping DataBlock) {
-        get(AppURLS.ip + "/MobileApi/api/get_inpatient_units", params: params, finished: finished)
+        get(AppURLS.ip + AppURLS.mobileApi +  "get_inpatient_units", params: params, finished: finished)
     }
 
     func getInpatientPatients(with params: [String: String], finished: @escaping DataBlock) {
-        get(AppURLS.ip + "/MobileApi/api/get_inpatient_patients", params: params, finished: finished)
+        get(AppURLS.ip +  AppURLS.mobileApi +  "get_inpatient_patients", params: params, finished: finished)
     }
 
     func getOutpatientClinics(with params: [String: String], finished: @escaping DataBlock) {
-        get(AppURLS.ip + "/MobileApi/api/get_outpatients_clinic", params: params, finished: finished)
+        get(AppURLS.ip + AppURLS.mobileApi +  "get_outpatients_clinic", params: params, finished: finished)
     }
 
     func getOperationPatients(with params: [String: String], finished: @escaping DataBlock) {
-        get(AppURLS.ip + "/MobileApi/api/get_or_patients", params: params, finished: finished)
+        get(AppURLS.ip + AppURLS.mobileApi +  "get_or_patients", params: params, finished: finished)
     }
 
     func getOutpatientPatients(with params: [String: String], finished: @escaping DataBlock) {
-        get(AppURLS.ip + "/MobileApi/api/get_outpatients_patients", params: params, finished: finished)
+        get(AppURLS.ip +  AppURLS.mobileApi + "get_outpatients_patients", params: params, finished: finished)
     }
 
     func changePatientStatus(with params: [String: String], finished: @escaping DataBlock) {
         let serv = params["SER"]
         let url: String
         switch serv {
-        case "B": url = AppURLS.ip + "/MobileApi/api/OutpatientController/arrivalResrvation"
-        case "A": url = AppURLS.ip + "/MobileApi/api/OutpatientController/startResrvation"
-        case "S": url = AppURLS.ip + "/MobileApi/api/OutpatientController/performResrvation"
-        default:  url = AppURLS.ip + "/MobileApi/api/get_outpatients_patients"
+        case "B": url = AppURLS.ip + AppURLS.mobileApi +  "OutpatientController/arrivalResrvation"
+        case "A": url = AppURLS.ip + AppURLS.mobileApi +  "OutpatientController/startResrvation"
+        case "S": url = AppURLS.ip + AppURLS.mobileApi +  "OutpatientController/performResrvation"
+        default:  url = AppURLS.ip + AppURLS.mobileApi +  "get_outpatients_patients"
         }
         get(url, params: params, finished: finished)
     }
 
     func getEmergencyPatients(with params: [String: String], finished: @escaping DataBlock) {
-        get(AppURLS.ip + "/MobileApi/api/get_er_patients", params: params, finished: finished)
+        get(AppURLS.ip + AppURLS.mobileApi +  "get_er_patients", params: params, finished: finished)
     }
 
     func getClinicalPatients(with params: [String: String], finished: @escaping DataBlock) {
-        get(AppURLS.ip + "/MobileApi/api/get_critical_result", params: params, finished: finished)
+        get(AppURLS.ip +  AppURLS.mobileApi +  "get_critical_result", params: params, finished: finished)
     }
 
     func getTemplate(with params: [String: String], finished: @escaping DataBlock) {
-        get(AppURLS.ip + "/MobileApi/api/get_template_data", params: params, finished: finished)
+        get(AppURLS.ip + AppURLS.mobileApi +  "get_template_data", params: params, finished: finished)
     }
 
     func validateServiceRow(with params: [String: String], finished: @escaping DataBlock) {
-        post(AppURLS.ip + "/MobileApi/api/ServiceRowValidate", params: params, finished: finished)
+        post(AppURLS.ip + AppURLS.mobileApi +  "ServiceRowValidate", params: params, finished: finished)
     }
 
     func getLabServices(with params: [String: String], finished: @escaping DataBlock) {
-        get(AppURLS.ip + "/MobileApi/api/GetServiceLab", params: params, finished: finished)
+        get(AppURLS.ip + AppURLS.mobileApi +  "GetServiceLab", params: params, finished: finished)
     }
 
     func getRadServices(with params: [String: String], finished: @escaping DataBlock) {
         guard let sessionInfo = params["GetSessionInfo"] else { return }
-        let url = AppURLS.ip + "/MobileApi/api/GetServiceRad?RadType=1&ParentServ=0&GetSessionInfo=\(sessionInfo)"
+        let url = AppURLS.ip + AppURLS.mobileApi +  "GetServiceRad?RadType=1&ParentServ=0&GetSessionInfo=\(sessionInfo)"
         get(url, params: params, finished: finished)
     }
 
     func saveOrder(with params: [String: String], orderType: TemplateType, finished: @escaping DataBlock) {
         let api = orderType == .labOrder ? "saveLabOrders" : "RadOrderSave"
-        post(AppURLS.ip + "/MobileApi/api/" + api, params: params, finished: finished)
+        post(AppURLS.ip + AppURLS.mobileApi  + api, params: params, finished: finished)
     }
 
     func getPatientHistory(with params: [String: String], finished: @escaping DataBlock) {
-        get(AppURLS.ip + "/MobileApi/api/LoadPatientEpisodes", params: params, finished: finished)
+        get(AppURLS.ip + AppURLS.mobileApi + "LoadPatientEpisodes", params: params, finished: finished)
     }
 
     func getPatientSummary(with params: [String: String], finished: @escaping DataBlock) {
-        get(AppURLS.ip + "/MobileApi/api/GetPatCustomizedSummary", params: params, finished: finished)
+        get(AppURLS.ip + AppURLS.mobileApi + "GetPatCustomizedSummary", params: params, finished: finished)
     }
 
     func getPacksURL(with params: [String: String], finished: @escaping DataBlock) {
-        get(AppURLS.ip + "/mobileapi/api/getPacsUrl/", params: params, finished: finished)
+        get(AppURLS.ip + AppURLS.mobileApi + "getPacsUrl/", params: params, finished: finished)
     }
 
     func getTriageInfo(with params: [String: String], finished: @escaping DataBlock) {
-        get(AppURLS.ip + "/MobileApi/api/loadTrige", params: params, finished: finished)
+        get(AppURLS.ip + AppURLS.mobileApi + "loadTrige", params: params, finished: finished)
     }
 
     func loadUcaf(with params: [String: String], finished: @escaping DataBlock) {
-        get(AppURLS.ip + "/MobileApi/api/MedicalRecord/loadUcaf", params: params, finished: finished)
+        get(AppURLS.ip + AppURLS.mobileApi + "MedicalRecord/loadUcaf", params: params, finished: finished)
     }
 
     func loadSpecialHabits(with params: [String: String], finished: @escaping DataBlock) {
         // This endpoint requires OAuth 1.0 signing — not Bearer auth.
         // Endpoint name intentionally matches the server typo "loadSpecialHappits".
-        signedGet(AppURLS.ip + "/MobileApi/api/MedicalRecord/loadSpecialHappits",
+        signedGet(AppURLS.ip + AppURLS.mobileApi + "MedicalRecord/loadSpecialHappits",
                   params: params, finished: finished)
     }
 
     func saveSpecialHabits(body: [String: Any], finished: @escaping DataBlock) {
         // Save uses Bearer auth (no OAuth). Body is nested JSON, not form-encoded.
-        postJSON(AppURLS.ip + "/MobileApi/api/MedicalRecordController/saveSpecialHabits",
+        postJSON(AppURLS.ip + AppURLS.mobileApi +  "MedicalRecordController/saveSpecialHabits",
                  body: body, finished: finished)
     }
 
     func saveUcaf(body: [String: Any], finished: @escaping DataBlock) {
         // Confirmed from Android network logs: MedicalRecord (no "Controller"), UCAF uppercase.
-        postJSON(AppURLS.ip + "/MobileApi/api/MedicalRecord/saveUCAF",
+        postJSON(AppURLS.ip + "MedicalRecord/saveUCAF",
                  body: body, finished: finished)
     }
 
     func loadDoctorNurseNotes(with params: [String: String], finished: @escaping DataBlock) {
         // OAuth params go in the URL query string (same as Android, NOT Authorization header).
-        let base = AppURLS.ip + "/MobileApi/api/MedicalRcordController/DDDocNurseNotesLoad"
+        let base = AppURLS.ip + "MedicalRcordController/DDDocNurseNotesLoad"
         guard let (signedURL, baseString) = NetworkLayerImpl.buildOAuthURL(base: base, params: params) else {
             print("❌ [NurseNotes] buildOAuthURL returned nil — HMAC failed")
             return
@@ -397,7 +397,7 @@ class NetworkLayerImpl: NetworkLayer {
         // which by setting BUFFER_STATUS (1=save, 3=delete) inside
         // DOCTOR_NURSE_REMARKS plus the matching PROCESS_ID/TRACER_PLACE_ID in
         // DD_UC_PARMS.
-        let base = AppURLS.ip + "/MobileApi/api/MedicalRcordController/DDDocNurseNotesSave"
+        let base = AppURLS.ip + "MedicalRcordController/DDDocNurseNotesSave"
         signedFormPOST(base: base, tag: "NurseNotesSave", params: params, finished: finished)
     }
 
@@ -405,7 +405,7 @@ class NetworkLayerImpl: NetworkLayer {
         // Replies have a dedicated endpoint distinct from notes save/delete.
         // Same auth/body machinery as `saveDoctorNurseNotes` though, so we
         // route through the same signed-form-POST helper.
-        let base = AppURLS.ip + "/MobileApi/api/MedicalRcordController/DDDocNurseReplySave"
+        let base = AppURLS.ip + "MedicalRcordController/DDDocNurseReplySave"
         signedFormPOST(base: base, tag: "NurseReplySave", params: params, finished: finished)
     }
 
@@ -481,16 +481,16 @@ class NetworkLayerImpl: NetworkLayer {
     }
 
     func getSymptoms(with params: [String: String], finished: @escaping DataBlock) {
-        get(AppURLS.ip + "/MobileApi/api/cot_child", params: params, finished: finished)
+        get(AppURLS.ip + AppURLS.mobileApi + "cot_child", params: params, finished: finished)
     }
 
     func saveTriage(with params: [String: String], finished: @escaping DataBlock) {
-        post(AppURLS.ip + "/MobileApi/api/save_dataTR", params: params, finished: finished)
+        post(AppURLS.ip + AppURLS.mobileApi +  "save_dataTR", params: params, finished: finished)
     }
 
     func loadFlagImage(with params: [String: String], finished: @escaping DataBlock) {
         guard let flagImagePath = params["flagImageName"] else { return }
-        let url = AppURLS.ip + "/primecare/Hospital%20Images/" + flagImagePath
+        let url = AppURLS.ip + AppURLS.mobileApi + "primecare/Hospital%20Images/" + flagImagePath
         APILogger.logRequest(method: "GET", url: url)
         let start = Date()
         NetworkLayerImpl.session
@@ -509,7 +509,7 @@ class NetworkLayerImpl: NetworkLayer {
     }
 
     func getVisitsDetail(with params: [String: String], finished: @escaping DataBlock) {
-        get(AppURLS.ip + "/MobileApi/api/PatientController/GetVisitsDetail",
+        get(AppURLS.ip + AppURLS.mobileApi + "PatientController/GetVisitsDetail",
             params: params, finished: finished)
     }
 
