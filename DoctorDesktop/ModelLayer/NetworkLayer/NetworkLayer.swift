@@ -19,7 +19,7 @@ struct AppURLS {
 //    static let imageApi  = "primecare/Hospital%20Images/"
     
     static let ip       = "https://pr-h1services04.sherafia.bhg.com.sa"
-    static let mobileApi = "MobileApi/api/"
+    static let mobileApi = "MobileApitest/api/"
     static let imageApi  = "primecare/Hospital%20Images/"
 }
 
