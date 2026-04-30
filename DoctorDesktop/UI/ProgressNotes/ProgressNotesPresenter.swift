@@ -194,6 +194,24 @@ final class ProgressNotesPresenterImpl: ProgressNotesPresenter {
         self.visitIdArray = visitIdArray
     }
 
+    /// Visit ID to attach to a saved note / reply.
+    ///
+    /// `patient.visitId` is sometimes "0" or empty (e.g. when the patient was
+    /// passed in from a list view that doesn't carry the visit context). The
+    /// load query filters notes by `VISIT_ID_ARRAY` (the patient's actual
+    /// visits), so saving with VISIT_ID=0 makes the note vanish on reload —
+    /// the server stores it but the next load request filters it out.
+    /// Fall back to the first visit in `visitIdArray` in that case.
+    private var effectiveVisitId: String {
+        let pv = patient.visitId.trimmingCharacters(in: .whitespaces)
+        if !pv.isEmpty && pv != "0" { return pv }
+        if let first = visitIdArray.split(separator: ",").first {
+            let v = first.trimmingCharacters(in: .whitespaces)
+            if !v.isEmpty { return v }
+        }
+        return pv   // last-resort: keep whatever we had
+    }
+
     // MARK: Binding
 
     func attach(view: ProgressNotesView) { self.view = view }
@@ -280,7 +298,7 @@ final class ProgressNotesPresenterImpl: ProgressNotesPresenter {
             "BUFFER_STATUS": "1",
             "PRIORITY_TYPE": Int(draftPriorityId) ?? 1,
             "SHOW_D_N":      Int(draftShowToId)   ?? 3,
-            "VISIT_ID":      patient.visitId,
+            "VISIT_ID":      effectiveVisitId,
             "DESC_EN":       trimmed
         ]
 
@@ -288,7 +306,7 @@ final class ProgressNotesPresenterImpl: ProgressNotesPresenter {
         // flow on the server (matching the values used by Android + Postman).
         let ucParms: [String: Any] = [
             "PATIENT_ID":      patient.id,
-            "VISIT_ID":        patient.visitId,
+            "VISIT_ID":        effectiveVisitId,
             "PROCESS_ID":      "994",
             "TRACER_PLACE_ID": "9",
             "USER_OPEN_FLAG":  "D"
@@ -443,7 +461,7 @@ final class ProgressNotesPresenterImpl: ProgressNotesPresenter {
         ]
         let ucParms: [String: Any] = [
             "PATIENT_ID":      patient.id,
-            "VISIT_ID":        patient.visitId,
+            "VISIT_ID":        effectiveVisitId,
             "PROCESS_ID":      "2064",
             "TRACER_PLACE_ID": "9",
             "USER_OPEN_FLAG":  "D"
@@ -547,14 +565,14 @@ final class ProgressNotesPresenterImpl: ProgressNotesPresenter {
         let remark: [String: Any] = [
             "BUFFER_STATUS": "3",
             "SER":           target.ser ?? "",
-            "VISIT_ID":      target.visitId ?? patient.visitId
+            "VISIT_ID":      target.visitId ?? effectiveVisitId
         ]
 
         // Distinct process IDs route the request to the delete handler on the
         // server side (different from save's 994 / 9).
         let ucParms: [String: Any] = [
             "PATIENT_ID":      patient.id,
-            "VISIT_ID":        patient.visitId,
+            "VISIT_ID":        effectiveVisitId,
             "PROCESS_ID":      "4179",
             "TRACER_PLACE_ID": "298",
             "USER_OPEN_FLAG":  "D"
