@@ -309,16 +309,6 @@ extension KingfisherWrapper where Base: KFCrossPlatformImageView {
         let issuedIdentifier = Source.Identifier.next()
         mutatingSelf.taskIdentifier = issuedIdentifier
 
-<<<<<<< HEAD
-=======
-        // Create a thread-safe cancellation token for background checks.
-        // This avoids reading the view's taskIdentifier associated object
-        // from non-main threads (e.g., the disk cache ioQueue).
-        let token = CancellationToken()
-        mutatingSelf.cancellationToken?.cancel()
-        mutatingSelf.cancellationToken = token
-
->>>>>>> ede0891d7937aff1066126b682ba54f3a353cd13
         if base.shouldPreloadAllAnimation() {
             options.preloadAllAnimationData = true
         }
@@ -334,11 +324,7 @@ extension KingfisherWrapper where Base: KFCrossPlatformImageView {
                 Task { @MainActor in mutatingSelf.imageTask = task }
             },
             progressiveImageSetter: { self.base.image = $0 },
-<<<<<<< HEAD
             referenceTaskIdentifierChecker: { issuedIdentifier == self.taskIdentifier },
-=======
-            referenceTaskIdentifierChecker: { !token.isCancelled },
->>>>>>> ede0891d7937aff1066126b682ba54f3a353cd13
             completionHandler: { result in
                 CallbackQueueMain.currentOrAsync {
                     maybeIndicator?.stopAnimatingView()
@@ -392,10 +378,6 @@ extension KingfisherWrapper where Base: KFCrossPlatformImageView {
     /// Nothing will happen if the downloading has already finished.
     public func cancelDownloadTask() {
         imageTask?.cancel()
-<<<<<<< HEAD
-=======
-        cancellationToken?.cancel()
->>>>>>> ede0891d7937aff1066126b682ba54f3a353cd13
     }
 
     private func needsTransition(options: KingfisherParsedOptionsInfo, cacheType: CacheType) -> Bool {
@@ -445,10 +427,6 @@ extension KingfisherWrapper where Base: KFCrossPlatformImageView {
 
 // MARK: - Associated Object
 @MainActor private var taskIdentifierKey: Void?
-<<<<<<< HEAD
-=======
-@MainActor private var cancellationTokenKey: Void?
->>>>>>> ede0891d7937aff1066126b682ba54f3a353cd13
 @MainActor private var indicatorKey: Void?
 @MainActor private var indicatorTypeKey: Void?
 @MainActor private var placeholderKey: Void?
@@ -469,14 +447,6 @@ extension KingfisherWrapper where Base: KFCrossPlatformImageView {
         }
     }
 
-<<<<<<< HEAD
-=======
-    var cancellationToken: CancellationToken? {
-        get { getAssociatedObject(base, &cancellationTokenKey) }
-        set { setRetainedAssociatedObject(base, &cancellationTokenKey, newValue) }
-    }
-
->>>>>>> ede0891d7937aff1066126b682ba54f3a353cd13
     /// Specifies which indicator type is going to be used.
     ///
     /// The default is ``IndicatorType/none``, which means no indicator will be shown while downloading.

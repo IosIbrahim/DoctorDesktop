@@ -115,10 +115,6 @@ extension KingfisherWrapper where Base: UIButton {
         completionHandler: (@MainActor @Sendable (Result<RetrieveImageResult, KingfisherError>) -> Void)? = nil) -> DownloadTask?
     {
         var mutatingSelf = self
-<<<<<<< HEAD
-=======
-        let previousToken = mutatingSelf.imageCancellationToken
->>>>>>> ede0891d7937aff1066126b682ba54f3a353cd13
         return setImage(
             with: source,
             imageAccessor: ImagePropertyAccessor(
@@ -130,11 +126,6 @@ extension KingfisherWrapper where Base: UIButton {
                 getTaskIdentifier: { taskIdentifier(for: state) },
                 setTask: { mutatingSelf.imageTask = $0 }
             ),
-<<<<<<< HEAD
-=======
-            previousCancellationToken: previousToken,
-            setCancellationToken: { mutatingSelf.imageCancellationToken = $0 },
->>>>>>> ede0891d7937aff1066126b682ba54f3a353cd13
             placeholder: placeholder,
             parsedOptions: parsedOptions,
             progressBlock: progressBlock,
@@ -148,10 +139,6 @@ extension KingfisherWrapper where Base: UIButton {
     /// Nothing will happen if the downloading has already finished.
     public func cancelImageDownloadTask() {
         imageTask?.cancel()
-<<<<<<< HEAD
-=======
-        imageCancellationToken?.cancel()
->>>>>>> ede0891d7937aff1066126b682ba54f3a353cd13
     }
 
     // MARK: Setting Background Image
@@ -237,10 +224,6 @@ extension KingfisherWrapper where Base: UIButton {
         completionHandler: (@MainActor @Sendable (Result<RetrieveImageResult, KingfisherError>) -> Void)? = nil) -> DownloadTask?
     {
         var mutatingSelf = self
-<<<<<<< HEAD
-=======
-        let previousToken = mutatingSelf.backgroundImageCancellationToken
->>>>>>> ede0891d7937aff1066126b682ba54f3a353cd13
         return setImage(
             with: source,
             imageAccessor: ImagePropertyAccessor(
@@ -256,11 +239,6 @@ extension KingfisherWrapper where Base: UIButton {
                 getTaskIdentifier: { backgroundTaskIdentifier(for: state) },
                 setTask: { mutatingSelf.backgroundImageTask = $0 }
             ),
-<<<<<<< HEAD
-=======
-            previousCancellationToken: previousToken,
-            setCancellationToken: { mutatingSelf.backgroundImageCancellationToken = $0 },
->>>>>>> ede0891d7937aff1066126b682ba54f3a353cd13
             placeholder: placeholder,
             parsedOptions: parsedOptions,
             progressBlock: progressBlock,
@@ -274,20 +252,12 @@ extension KingfisherWrapper where Base: UIButton {
     /// Nothing will happen if the downloading has already finished.
     public func cancelBackgroundImageDownloadTask() {
         backgroundImageTask?.cancel()
-<<<<<<< HEAD
-=======
-        backgroundImageCancellationToken?.cancel()
->>>>>>> ede0891d7937aff1066126b682ba54f3a353cd13
     }
 }
 
 // MARK: - Associated Object
 @MainActor private var taskIdentifierKey: Void?
 @MainActor private var imageTaskKey: Void?
-<<<<<<< HEAD
-=======
-@MainActor private var imageCancellationTokenKey: Void?
->>>>>>> ede0891d7937aff1066126b682ba54f3a353cd13
 
 // MARK: Properties
 @MainActor
@@ -314,23 +284,11 @@ extension KingfisherWrapper where Base: UIButton {
         get { return getAssociatedObject(base, &imageTaskKey) }
         set { setRetainedAssociatedObject(base, &imageTaskKey, newValue)}
     }
-<<<<<<< HEAD
-=======
-
-    private var imageCancellationToken: CancellationToken? {
-        get { getAssociatedObject(base, &imageCancellationTokenKey) }
-        set { setRetainedAssociatedObject(base, &imageCancellationTokenKey, newValue) }
-    }
->>>>>>> ede0891d7937aff1066126b682ba54f3a353cd13
 }
 
 
 @MainActor private var backgroundTaskIdentifierKey: Void?
 @MainActor private var backgroundImageTaskKey: Void?
-<<<<<<< HEAD
-=======
-@MainActor private var backgroundImageCancellationTokenKey: Void?
->>>>>>> ede0891d7937aff1066126b682ba54f3a353cd13
 
 // MARK: Background Properties
 @MainActor
@@ -355,14 +313,6 @@ extension KingfisherWrapper where Base: UIButton {
         get { return getAssociatedObject(base, &backgroundImageTaskKey) }
         mutating set { setRetainedAssociatedObject(base, &backgroundImageTaskKey, newValue) }
     }
-<<<<<<< HEAD
-=======
-
-    private var backgroundImageCancellationToken: CancellationToken? {
-        get { getAssociatedObject(base, &backgroundImageCancellationTokenKey) }
-        set { setRetainedAssociatedObject(base, &backgroundImageCancellationTokenKey, newValue) }
-    }
->>>>>>> ede0891d7937aff1066126b682ba54f3a353cd13
 }
 #endif
 

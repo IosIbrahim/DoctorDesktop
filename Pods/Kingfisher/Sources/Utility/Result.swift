@@ -1,15 +1,8 @@
 //
-<<<<<<<< HEAD:Pods/Kingfisher/Sources/Utility/Result.swift
 //  Result.swift
 //  Kingfisher
 //
 //  Created by onevcat on 2018/09/22.
-========
-//  Runtime.swift
-//  Kingfisher
-//
-//  Created by Wei Wang on 2018/10/12.
->>>>>>>> ede0891d7937aff1066126b682ba54f3a353cd13:Pods/Kingfisher/Sources/Utility/Runtime.swift
 //
 //  Copyright (c) 2019 Wei Wang <onevcat@gmail.com>
 //
@@ -33,7 +26,6 @@
 
 import Foundation
 
-<<<<<<<< HEAD:Pods/Kingfisher/Sources/Utility/Result.swift
 // These helper methods are not public since we do not want them to be exposed or cause any conflicting.
 // However, they are just wrapper of `ResultUtil` static methods.
 extension Result where Failure: Error {
@@ -55,16 +47,4 @@ extension Result where Failure: Error {
             return onFailure(error)
         }
     }
-========
-func getAssociatedObject<T>(_ object: Any, _ key: UnsafeRawPointer) -> T? {
-    if #available(iOS 14, macOS 11, watchOS 7, tvOS 14, *) { // swift 5.3 fixed this issue (https://github.com/swiftlang/swift/issues/46456)
-        return objc_getAssociatedObject(object, key) as? T
-    } else {
-        return objc_getAssociatedObject(object, key) as AnyObject as? T
-    }
-}
-
-func setRetainedAssociatedObject<T>(_ object: Any, _ key: UnsafeRawPointer, _ value: T) {
-    objc_setAssociatedObject(object, key, value, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
->>>>>>>> ede0891d7937aff1066126b682ba54f3a353cd13:Pods/Kingfisher/Sources/Utility/Runtime.swift
 }

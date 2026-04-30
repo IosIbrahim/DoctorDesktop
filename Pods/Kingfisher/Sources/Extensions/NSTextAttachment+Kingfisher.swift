@@ -188,13 +188,6 @@ extension KingfisherWrapper where Base: NSTextAttachment {
         let issuedIdentifier = Source.Identifier.next()
         mutatingSelf.taskIdentifier = issuedIdentifier
 
-<<<<<<< HEAD
-=======
-        let token = CancellationToken()
-        mutatingSelf.cancellationToken?.cancel()
-        mutatingSelf.cancellationToken = token
-
->>>>>>> ede0891d7937aff1066126b682ba54f3a353cd13
         if let block = progressBlock {
             options.onDataReceived = (options.onDataReceived ?? []) + [ImageLoadingProgressSideEffect(block)]
         }
@@ -203,11 +196,7 @@ extension KingfisherWrapper where Base: NSTextAttachment {
             with: source,
             options: options,
             progressiveImageSetter: { self.base.image = $0 },
-<<<<<<< HEAD
             referenceTaskIdentifierChecker: { issuedIdentifier == self.taskIdentifier },
-=======
-            referenceTaskIdentifierChecker: { !token.isCancelled },
->>>>>>> ede0891d7937aff1066126b682ba54f3a353cd13
             completionHandler: { result in
                 CallbackQueueMain.currentOrAsync {
                     guard issuedIdentifier == self.taskIdentifier else {
@@ -256,18 +245,10 @@ extension KingfisherWrapper where Base: NSTextAttachment {
     /// Nothing will happen if the downloading has already finished.
     public func cancelDownloadTask() {
         imageTask?.cancel()
-<<<<<<< HEAD
-=======
-        cancellationToken?.cancel()
->>>>>>> ede0891d7937aff1066126b682ba54f3a353cd13
     }
 }
 
 @MainActor private var taskIdentifierKey: Void?
-<<<<<<< HEAD
-=======
-@MainActor private var cancellationTokenKey: Void?
->>>>>>> ede0891d7937aff1066126b682ba54f3a353cd13
 @MainActor private var imageTaskKey: Void?
 
 // MARK: Properties
@@ -285,14 +266,6 @@ extension KingfisherWrapper where Base: NSTextAttachment {
         }
     }
 
-<<<<<<< HEAD
-=======
-    var cancellationToken: CancellationToken? {
-        get { getAssociatedObject(base, &cancellationTokenKey) }
-        set { setRetainedAssociatedObject(base, &cancellationTokenKey, newValue) }
-    }
-
->>>>>>> ede0891d7937aff1066126b682ba54f3a353cd13
     private var imageTask: DownloadTask? {
         get { return getAssociatedObject(base, &imageTaskKey) }
         set { setRetainedAssociatedObject(base, &imageTaskKey, newValue)}

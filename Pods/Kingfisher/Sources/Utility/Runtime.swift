@@ -1,16 +1,10 @@
 //
-<<<<<<<< HEAD:Pods/Kingfisher/Sources/Utility/Runtime.swift
 //  Runtime.swift
 //  Kingfisher
 //
 //  Created by Wei Wang on 2018/10/12.
 //
 //  Copyright (c) 2019 Wei Wang <onevcat@gmail.com>
-========
-//  IQKeyboardConstants.swift
-//  https://github.com/hackiftekhar/IQKeyboardCore
-//  Copyright (c) 2013-24 Iftekhar Qurashi.
->>>>>>>> ede0891d7937aff1066126b682ba54f3a353cd13:Pods/IQKeyboardCore/IQKeyboardCore/Classes/Constants/IQKeyboardConstants.swift
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -32,30 +26,12 @@
 
 import Foundation
 
-<<<<<<<< HEAD:Pods/Kingfisher/Sources/Utility/Runtime.swift
 func getAssociatedObject<T>(_ object: Any, _ key: UnsafeRawPointer) -> T? {
     if #available(iOS 14, macOS 11, watchOS 7, tvOS 14, *) { // swift 5.3 fixed this issue (https://github.com/swiftlang/swift/issues/46456)
         return objc_getAssociatedObject(object, key) as? T
     } else {
         return objc_getAssociatedObject(object, key) as AnyObject as? T
     }
-========
-/**
- `IQEnableModeDefault`
- Pick default settings.
- 
- `IQEnableModeEnabled`
- setting is enabled.
- 
- `IQEnableModeDisabled`
- setting is disabled.
- */
-@available(iOSApplicationExtension, unavailable)
-@objc public enum IQEnableMode: Int {
-    case `default`
-    case enabled
-    case disabled
->>>>>>>> ede0891d7937aff1066126b682ba54f3a353cd13:Pods/IQKeyboardCore/IQKeyboardCore/Classes/Constants/IQKeyboardConstants.swift
 }
 
 func setRetainedAssociatedObject<T>(_ object: Any, _ key: UnsafeRawPointer, _ value: T) {
