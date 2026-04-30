@@ -9,69 +9,115 @@
 import Foundation
 
 struct ErrorModel: Decodable {
-    var error:String?
+    var error: String?
     enum CodingKeys: String, CodingKey {
-      case error = "Message"
+        case error = "Message"
     }
 }
+
 struct PatientCount: Decodable {
-  var inpatientFloor: String = ""
-  var inpatientCare: String = ""
-  var outpatient: String = ""
-  var emergency: String = ""
-  var emergencyOverstaying: String = ""
-  var operation: String = ""
-  var physiology: String = ""
-  var triage: String = ""
-  var cosultationFromDoctor: String = ""
-  var cosultationToDoctor: String = ""
-  var clinicalAlert: String = ""
-  var doctorRemarks: String = ""
-  var notSeenResults: String = ""
-  var pendingOrders: String = ""
-  var pendingDosages: String = ""
-  var rejectionCount: String = ""
-  var sickLeave: String = ""
-  var dischargeRequest: String = ""
-  var planFollowupChemo: String = ""
-  var planFollowupRad: String = ""
-  var planFollowupRenal: String = ""
-  var notSampledOrder: String = ""
-  var patientVentilator: String = ""
-  var pendingAdverseEvents: String = ""
-  var inpatientNICU: String = ""
-  var ClinicPharmacy: String = ""
-    var error:String? = nil
+    var inpatientFloor: String = ""
+    var inpatientCare: String = ""
+    var outpatient: String = ""
+    var emergency: String = ""
+    var emergencyOverstaying: String = ""
+    var operation: String = ""
+    var physiology: String = ""
+    var triage: String = ""
+    var cosultationFromDoctor: String = ""
+    var cosultationToDoctor: String = ""
+    var clinicalAlert: String = ""
+    var doctorRemarks: String = ""
+    var notSeenResults: String = ""
+    var pendingOrders: String = ""
+    var pendingDosages: String = ""
+    var rejectionCount: String = ""
+    var sickLeave: String = ""
+    var dischargeRequest: String = ""
+    var planFollowupChemo: String = ""
+    var planFollowupRad: String = ""
+    var planFollowupRenal: String = ""
+    var notSampledOrder: String = ""
+    var patientVentilator: String = ""
+    var pendingAdverseEvents: String = ""
+    var inpatientNICU: String = ""
+    var ClinicPharmacy: String = ""
+    var error: String? = nil
     var permissions: DoctorPermissions?
 
-  enum CodingKeys: String, CodingKey {
-    case inpatientFloor = "INPAT_FLOOR"
-    case inpatientCare = "INPAT_CARE"
-    case outpatient = "OUTPAT"
-    case emergency = "ER"
-    case emergencyOverstaying = "ER_OVERSTAYING_COUNT"
-    case operation = "OPER"
-    case physiology = "PHYSIO"
-    case triage = "TR"
-    case cosultationFromDoctor = "V_CONSULTATION_FROM_DOC_COUNT"
-    case cosultationToDoctor = "V_CONSULTATION_TO_DOC_COUNT"
-    case clinicalAlert = "CLINICAL_ALERTS"
-    case doctorRemarks = "DOC_REMARKS"
-    case notSeenResults = "NOT_SEEN_RESULT"
-    case pendingOrders = "PENDING_ORDERS"
-    case pendingDosages = "PENDING_DOSAGES"
-    case rejectionCount = "REJECTION_COUNT"
-    case sickLeave = "SICK_LEAVE"
-    case dischargeRequest = "OUTPATIENT_DISCHARGE_REQUEST"
-    case planFollowupChemo = "PLAN_FOLLOWUP_CHEMO"
-    case planFollowupRad = "PLAN_FOLLOWUP_RAD"
-    case planFollowupRenal = "PLAN_FOLLOWUP_RENAL"
-    case notSampledOrder = "NOT_SAMPLED_ORDER"
-    case patientVentilator = "PAT_VENTILATOR_COUNT"
-    case pendingAdverseEvents = "PENDING_ADVERSE_EVENTS"
-    case inpatientNICU = "INPAT_NICU_COUNT"
-    case ClinicPharmacy = "COUNT_CLINIC_PHARM"
-    case error = "Error"
-      case permissions = "Permissions"
-  }
+    enum CodingKeys: String, CodingKey {
+        case inpatientFloor       = "INPAT_FLOOR"
+        case inpatientCare        = "INPAT_CARE"
+        case outpatient           = "OUTPAT"
+        case emergency            = "ER"
+        case emergencyOverstaying = "ER_OVERSTAYING_COUNT"
+        case operation            = "OPER"
+        case physiology           = "PHYSIO"
+        case triage               = "TR"
+        case cosultationFromDoctor = "V_CONSULTATION_FROM_DOC_COUNT"
+        case cosultationToDoctor   = "V_CONSULTATION_TO_DOC_COUNT"
+        case clinicalAlert        = "CLINICAL_ALERTS"
+        case doctorRemarks        = "DOC_REMARKS"
+        case notSeenResults       = "NOT_SEEN_RESULT"
+        case pendingOrders        = "PENDING_ORDERS"
+        case pendingDosages       = "PENDING_DOSAGES"
+        case rejectionCount       = "REJECTION_COUNT"
+        case sickLeave            = "SICK_LEAVE"
+        case dischargeRequest     = "OUTPATIENT_DISCHARGE_REQUEST"
+        case planFollowupChemo    = "PLAN_FOLLOWUP_CHEMO"
+        case planFollowupRad      = "PLAN_FOLLOWUP_RAD"
+        case planFollowupRenal    = "PLAN_FOLLOWUP_RENAL"
+        case notSampledOrder      = "NOT_SAMPLED_ORDER"
+        case patientVentilator    = "PAT_VENTILATOR_COUNT"
+        case pendingAdverseEvents = "PENDING_ADVERSE_EVENTS"
+        case inpatientNICU        = "INPAT_NICU_COUNT"
+        case ClinicPharmacy       = "COUNT_CLINIC_PHARM"
+        case error                = "Error"
+        case permissions          = "Permissions"
+    }
+
+    init() {}
+
+    // Tolerant decoding: the server sometimes returns counts as Int instead of
+    // String (or omits a field entirely). Use try? for every field so one bad
+    // value doesn't drop the entire response.
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+
+        func str(_ key: CodingKeys) -> String {
+            if let s = try? c.decode(String.self, forKey: key) { return s }
+            if let n = try? c.decode(Int.self,    forKey: key) { return "\(n)" }
+            if let d = try? c.decode(Double.self, forKey: key) { return "\(Int(d))" }
+            return ""
+        }
+
+        inpatientFloor       = str(.inpatientFloor)
+        inpatientCare        = str(.inpatientCare)
+        outpatient           = str(.outpatient)
+        emergency            = str(.emergency)
+        emergencyOverstaying = str(.emergencyOverstaying)
+        operation            = str(.operation)
+        physiology           = str(.physiology)
+        triage               = str(.triage)
+        cosultationFromDoctor = str(.cosultationFromDoctor)
+        cosultationToDoctor   = str(.cosultationToDoctor)
+        clinicalAlert        = str(.clinicalAlert)
+        doctorRemarks        = str(.doctorRemarks)
+        notSeenResults       = str(.notSeenResults)
+        pendingOrders        = str(.pendingOrders)
+        pendingDosages       = str(.pendingDosages)
+        rejectionCount       = str(.rejectionCount)
+        sickLeave            = str(.sickLeave)
+        dischargeRequest     = str(.dischargeRequest)
+        planFollowupChemo    = str(.planFollowupChemo)
+        planFollowupRad      = str(.planFollowupRad)
+        planFollowupRenal    = str(.planFollowupRenal)
+        notSampledOrder      = str(.notSampledOrder)
+        patientVentilator    = str(.patientVentilator)
+        pendingAdverseEvents = str(.pendingAdverseEvents)
+        inpatientNICU        = str(.inpatientNICU)
+        ClinicPharmacy       = str(.ClinicPharmacy)
+        error                = try? c.decode(String.self, forKey: .error)
+        permissions          = try? c.decode(DoctorPermissions.self, forKey: .permissions)
+    }
 }

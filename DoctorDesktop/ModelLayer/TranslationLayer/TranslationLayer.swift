@@ -92,24 +92,25 @@ class TranslationLayerImpl: TranslationLayer {
 extension TranslationLayerImpl {
     func getCountsFromJson(_ data: Data) -> PatientCount {
         print(data.toJsonString() ?? "")
-        
-        if var patientCount = try? PatientCount (data: data, keyPath: "Root.OUT_PARMS.OUT_PARMS_ROW") {
-            if let com = try? DoctorPermissions (data: data, keyPath: "userComponent") {
+
+        if var patientCount = try? PatientCount(data: data, keyPath: "Root.OUT_PARMS.OUT_PARMS_ROW") {
+            if let com = try? DoctorPermissions(data: data, keyPath: "userComponent") {
                 patientCount.permissions = com
             }
             return patientCount
-        }else {
-            var emp :PatientCount = .init()
-            if let error = try? ErrorModel(data:data) {
-                if let err = error.error {
-                    emp.error = err
-                }else {
-                    emp.error = "An error has occurred."
-                }
-                
-            }
-            return emp
         }
+
+        // Only surface an error when the server explicitly sends a Message key.
+        // If the path was simply missing (e.g. different server response shape),
+        // return empty counts silently — tiles still appear with count "0".
+        var emp = PatientCount()
+        if let errorModel = try? ErrorModel(data: data), let msg = errorModel.error {
+            emp.error = msg
+        }
+        if let com = try? DoctorPermissions(data: data, keyPath: "userComponent") {
+            emp.permissions = com
+        }
+        return emp
     }
     
     
