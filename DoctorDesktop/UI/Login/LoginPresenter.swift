@@ -38,13 +38,14 @@ extension LoginPresenterImpl {
             self?.user = user
             self?.components = components
             
-            self?.components = components.filter({ component in
-              if let mobileFlag = component.mobileFlag {
-                  return mobileFlag == 1
-              } else {
-                return false
-              }
-            })
+            // Filter by whether the component maps to a known ComponentType
+            // rather than the server's MOBILE_FLAG value. The test server
+            // (MobileApitest) returns MOBILE_FLAG=0 for the same modules
+            // that the live server returns MOBILE_FLAG=1 — relying on the
+            // flag means tiles disappear when switching environments.
+            self?.components = components.filter { component in
+                ComponentType(rawValue: component.processInfoCode) != nil
+            }
 //            var not:Component?
 //            var search:Component?
 //
