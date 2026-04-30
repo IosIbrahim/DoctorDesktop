@@ -13,12 +13,12 @@ enum ComponentType: Int {
     case outpatient = 69 // 69
     case emergency = 71
     case consultation = 576
-    case clinicalAlert = 1020 // 1020  X
+//    case clinicalAlert = 1020 // 1020  X
     case ICU = 2284 // 2665 X
-    case operations = 70 // 70 X
+ //   case operations = 70 // 70 X
     case nicu = 2260
-    case notifications = 1
-    case search = 72
+//    case notifications = 1
+//    case search = 72
  // case nurseTL = 1478
 }
 
