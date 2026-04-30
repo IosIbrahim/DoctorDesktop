@@ -1,6 +1,14 @@
 # PocketSVG
 
-[![CocoaPods](https://img.shields.io/cocoapods/p/PocketSVG.svg?maxAge=3601)](#) [![Build Status](https://travis-ci.org/pocketsvg/PocketSVG.svg?branch=master)](https://travis-ci.org/pocketsvg/PocketSVG) [![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage) [![Code Coverage](https://img.shields.io/cocoapods/metrics/doc-percent/PocketSVG.svg)](http://cocoadocs.org/docsets/PocketSVG)
+[![Platforms](https://img.shields.io/badge/Platforms-macOS_iOS_tvOS_watchOS-green?style=flat-square)](https://img.shields.io/badge/Platforms-macOS_iOS_tvOS_watchOS-green?style=flat-square)
+[![Build Status](https://github.com/pocketsvg/pocketsvg/workflows/CI/badge.svg)](https://github.com/pocketsvg/PocketSVG/actions) 
+[![Swift Package Manager](https://img.shields.io/badge/Swift_Package_Manager-compatible-orange?style=flat-square)](https://img.shields.io/badge/Swift_Package_Manager-compatible-orange?style=flat-square)
+[![CocoaPods Compatible](https://img.shields.io/cocoapods/v/PocketSVG.svg)](https://cocoapods.org/pods/PocketSVG) 
+[![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage) 
+[![Code Coverage](https://img.shields.io/cocoapods/metrics/doc-percent/PocketSVG.svg)](http://cocoadocs.org/docsets/PocketSVG) 
+[![code size](https://img.shields.io/github/languages/code-size/pocketsvg/pocketsvg.svg)](#) 
+[![license](https://img.shields.io/github/license/pocketsvg/pocketsvg.svg)](https://github.com/pocketsvg/PocketSVG/blob/master/LICENSE)
+[![Swift Forums](https://img.shields.io/badge/Swift_Forums-PocketSVG-orange?style=flat-square)](https://youtu.be/iik25wqIuFo)
 
 
 A simple toolkit for displaying and manipulating SVGs on iOS and macOS in a performant manner.
@@ -11,7 +19,7 @@ Thoroughly documented.
 
 ## Features
 
-* Support for SVG elements: `path`, `polyline`, `polygon`, `rect`, `circle`, `ellipse`
+* Support for SVG elements: `path`, `line`, `polyline`, `polygon`, `rect`, `circle`, `ellipse`
 * Support for SVG named colors.
 * Fully working iOS and macOS demos.
 * Straightforward API for typical SVG rendering as a `UIImageView`/`NSImageView` or `CALayer` subclass.
@@ -20,12 +28,19 @@ Thoroughly documented.
 
 ## Installation
 
+### Swift Package Manager
+
+```swift
+dependencies: [
+    .package(url: "https://github.com/pocketsvg/PocketSVG.git", .upToNextMajor(from: "2.6.0"))
+]
+```
+
 ### Cocoapods
 
 Add this to your Podfile:
-
-```
-pod 'PocketSVG', '~> 2.0'
+```ruby
+pod 'PocketSVG', '~> 2.6'
 ```
 
 Then run `pod install`
@@ -34,19 +49,14 @@ Then run `pod install`
 
 Add this to your Cartfile:
 ```
-github "pocketsvg/PocketSVG" ~> 2.0
+github "pocketsvg/PocketSVG" >= 2.7.2
 ```
 
-Then run `carthage update`
-
-### Manual
-
-Drag and drop `PocketSVG.xcodeproj` into your Xcode project. In your project settings, add PocketSVG.framework in **Link Binary With Libraries**.
-
+Then run `carthage update --use-xcframeworks`
 
 ## Usage
 
-Render an SVG file using `SVGImageView`:
+### Render an SVG file using `SVGImageView`
 
 ```swift
 let url = Bundle.main.url(forResource: "tiger", withExtension: "svg")!
@@ -59,8 +69,10 @@ view.addSubview(svgImageView)
 **Output**
 ![image](https://user-images.githubusercontent.com/1756909/38315263-6664fe64-3828-11e8-8d49-1e0c52f3d4e2.png)
 
+Note: By default, SVGLayer has `shouldRasterize` set to `YES` when running on iOS. If you need to animate changes to the layer's transform you might want to reset that to `NO`.
 
-Manually render each path of an SVG file into using CAShapeLayers:
+
+### Manually render each path of an SVG file using `CAShapeLayer`
 
 ```swift
 view.backgroundColor = .white

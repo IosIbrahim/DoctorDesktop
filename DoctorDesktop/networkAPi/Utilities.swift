@@ -79,7 +79,7 @@ class Utilities: NSObject {
         
         
        
-        SCLAlertView().showTitle("Note", subTitle: messageToDisplay, style: .info, closeButtonTitle:  "Ok", timeout: nil, colorStyle: 0x3788B0, colorTextButton: 0xFFFFFF, circleIconImage: nil, animationStyle: .topToBottom)
+        SCLAlertView().showTitle("Note", subTitle: messageToDisplay, style: .info, closeButtonTitle: "Ok", timeout: nil, colorStyle: UIColor(red: 0x37/255.0, green: 0x88/255.0, blue: 0xB0/255.0, alpha: 1), colorTextButton: .white, circleIconImage: nil, animationStyle: .topToBottom)
         
         //        let alertController = UIAlertController(title: "", message: messageToDisplay, preferredStyle: .alert)
         //
@@ -97,7 +97,7 @@ class Utilities: NSObject {
 //            vc.GoToLoginView(nav: vc)
         }
         
-        alertView.showTitle( "Note", subTitle: "You have to login first", style: .notice, closeButtonTitle: "Dismiss", timeout: nil, colorStyle: 0x3788B0, colorTextButton: 0xFFFFFF, circleIconImage: nil, animationStyle: .topToBottom)
+        alertView.showTitle("Note", subTitle: "You have to login first", style: .notice, closeButtonTitle: "Dismiss", timeout: nil, colorStyle: UIColor(red: 0x37/255.0, green: 0x88/255.0, blue: 0xB0/255.0, alpha: 1), colorTextButton: .white, circleIconImage: nil, animationStyle: .topToBottom)
     }
     
     
@@ -105,7 +105,7 @@ class Utilities: NSObject {
     static func showSuccessAlert(_ viewController : UIViewController,messageToDisplay : String ) -> Void
     {
         
-        SCLAlertView().showTitle( "Success", subTitle: messageToDisplay, style: .success, closeButtonTitle:  "Ok", timeout: nil, colorStyle: 0x3788B0, colorTextButton: 0xFFFFFF, circleIconImage: nil, animationStyle: .topToBottom)
+        SCLAlertView().showTitle("Success", subTitle: messageToDisplay, style: .success, closeButtonTitle: "Ok", timeout: nil, colorStyle: UIColor(red: 0x37/255.0, green: 0x88/255.0, blue: 0xB0/255.0, alpha: 1), colorTextButton: .white, circleIconImage: nil, animationStyle: .topToBottom)
 //        SCLAlertView().showTitle(
 //            !Languages.isArabic() ? "تم بنجاح" : "Success",
 //            subTitle: messageToDisplay,

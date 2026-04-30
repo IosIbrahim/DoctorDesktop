@@ -25,7 +25,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate ,MessagingDelegate,UNUserN
   func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
     initSwiftyBeaver()
     AppDelegate.enableScreenLogging()
-    IQKeyboardManager.shared.enable = true
+    IQKeyboardManager.shared.isEnabled = true
       
     initFirebase(application)
     Messaging.messaging().delegate = self

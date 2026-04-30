@@ -1,26 +1,26 @@
 PODS:
-  - Alamofire (5.11.0)
-  - DropDown (2.3.1)
-  - DynamicBlurView (2.0.2)
-  - Firebase/CoreOnly (12.7.0):
-    - FirebaseCore (~> 12.7.0)
-  - Firebase/Messaging (12.7.0):
+  - Alamofire (5.11.2)
+  - DropDown (2.3.13)
+  - DynamicBlurView (4.1.0)
+  - Firebase/CoreOnly (12.12.1):
+    - FirebaseCore (~> 12.12.1)
+  - Firebase/Messaging (12.12.1):
     - Firebase/CoreOnly
-    - FirebaseMessaging (~> 12.7.0)
-  - FirebaseCore (12.7.0):
-    - FirebaseCoreInternal (~> 12.7.0)
+    - FirebaseMessaging (~> 12.12.0)
+  - FirebaseCore (12.12.1):
+    - FirebaseCoreInternal (~> 12.12.0)
     - GoogleUtilities/Environment (~> 8.1)
     - GoogleUtilities/Logger (~> 8.1)
-  - FirebaseCoreInternal (12.7.0):
+  - FirebaseCoreInternal (12.12.0):
     - "GoogleUtilities/NSData+zlib (~> 8.1)"
-  - FirebaseInstallations (12.7.0):
-    - FirebaseCore (~> 12.7.0)
+  - FirebaseInstallations (12.12.0):
+    - FirebaseCore (~> 12.12.0)
     - GoogleUtilities/Environment (~> 8.1)
     - GoogleUtilities/UserDefaults (~> 8.1)
     - PromisesObjC (~> 2.4)
-  - FirebaseMessaging (12.7.0):
-    - FirebaseCore (~> 12.7.0)
-    - FirebaseInstallations (~> 12.7.0)
+  - FirebaseMessaging (12.12.0):
+    - FirebaseCore (~> 12.12.0)
+    - FirebaseInstallations (~> 12.12.0)
     - GoogleDataTransport (~> 10.1)
     - GoogleUtilities/AppDelegateSwizzler (~> 8.1)
     - GoogleUtilities/Environment (~> 8.1)
@@ -54,9 +54,46 @@ PODS:
   - GoogleUtilities/UserDefaults (8.1.0):
     - GoogleUtilities/Logger
     - GoogleUtilities/Privacy
-  - IQKeyboardManagerSwift (6.5.16)
-  - Kingfisher (8.6.2)
-  - KMPlaceholderTextView (1.3.0)
+  - IQKeyboardCore (1.0.8)
+  - IQKeyboardManagerSwift (8.0.1):
+    - IQKeyboardManagerSwift/Appearance (= 8.0.1)
+    - IQKeyboardManagerSwift/Core (= 8.0.1)
+    - IQKeyboardManagerSwift/IQKeyboardReturnManager (= 8.0.1)
+    - IQKeyboardManagerSwift/IQKeyboardToolbarManager (= 8.0.1)
+    - IQKeyboardManagerSwift/IQTextView (= 8.0.1)
+    - IQKeyboardManagerSwift/Resign (= 8.0.1)
+  - IQKeyboardManagerSwift/Appearance (8.0.1):
+    - IQKeyboardManagerSwift/Core
+  - IQKeyboardManagerSwift/Core (8.0.1):
+    - IQKeyboardNotification
+    - IQTextInputViewNotification
+  - IQKeyboardManagerSwift/IQKeyboardReturnManager (8.0.1):
+    - IQKeyboardReturnManager
+  - IQKeyboardManagerSwift/IQKeyboardToolbarManager (8.0.1):
+    - IQKeyboardManagerSwift/Core
+    - IQKeyboardToolbarManager
+  - IQKeyboardManagerSwift/IQTextView (8.0.1):
+    - IQTextView
+  - IQKeyboardManagerSwift/Resign (8.0.1):
+    - IQKeyboardManagerSwift/Core
+  - IQKeyboardNotification (1.0.6)
+  - IQKeyboardReturnManager (1.0.6):
+    - IQKeyboardCore
+  - IQKeyboardToolbar (1.1.3):
+    - IQKeyboardToolbar/Core (= 1.1.3)
+  - IQKeyboardToolbar/Core (1.1.3):
+    - IQKeyboardCore
+    - IQKeyboardToolbar/Placeholderable
+  - IQKeyboardToolbar/Placeholderable (1.1.3)
+  - IQKeyboardToolbarManager (1.1.5):
+    - IQKeyboardToolbar
+    - IQTextInputViewNotification
+  - IQTextInputViewNotification (1.0.9):
+    - IQKeyboardCore
+  - IQTextView (1.0.5):
+    - IQKeyboardToolbar/Placeholderable
+  - Kingfisher (8.8.1)
+  - KMPlaceholderTextView (1.4.0)
   - MaterialComponents/AnimationTiming (124.2.0)
   - MaterialComponents/Availability (124.2.0)
   - MaterialComponents/Elevation (124.2.0):
@@ -109,28 +146,28 @@ PODS:
     - nanopb/encode (= 3.30910.0)
   - nanopb/decode (3.30910.0)
   - nanopb/encode (3.30910.0)
-  - NVActivityIndicatorView (4.1.1):
-    - NVActivityIndicatorView/Presenter (= 4.1.1)
-  - NVActivityIndicatorView/Presenter (4.1.1)
+  - NVActivityIndicatorView (5.2.0):
+    - NVActivityIndicatorView/Base (= 5.2.0)
+  - NVActivityIndicatorView/Base (5.2.0)
   - OAuthSwift (1.2.2)
-  - ObjectMapper (4.2.0)
-  - OhhAuth (1.1.0)
-  - PocketSVG (2.4.0)
-  - PopupDialog (0.7.1):
-    - DynamicBlurView (~> 2.0)
+  - ObjectMapper (4.4.2)
+  - OhhAuth (1.2.0)
+  - PocketSVG (2.7.3)
+  - PopupDialog (1.1.1):
+    - DynamicBlurView (~> 4.0)
   - PromisesObjC (2.4.0)
-  - Reachability (3.7.6)
+  - Reachability (3.7.7)
   - SCLAlertView (0.8.1)
-  - SearchTextField (1.2.0)
+  - SearchTextField (1.2.4)
   - SideMenu (6.5.0)
-  - Stuff/Codable (0.6.0)
-  - SwiftyBeaver (1.5.2)
+  - Stuff/Codable (1.1.3)
+  - SwiftyBeaver (2.1.1)
   - SwiftyJSON (5.0.2)
-  - Swinject (2.4.0)
-  - SwinjectStoryboard (2.0.2):
-    - Swinject (~> 2.4)
-  - Toast-Swift (3.0.1)
-  - UICollectionViewLeftAlignedLayout (1.0.2)
+  - Swinject (2.7.1)
+  - SwinjectStoryboard (2.2.2):
+    - Swinject (~> 2.7.1)
+  - Toast-Swift (5.1.1)
+  - UICollectionViewLeftAlignedLayout (1.1.0)
   - VHBoomMenuButton/Swift (2.0.0)
 
 DEPENDENCIES:
@@ -174,7 +211,14 @@ SPEC REPOS:
     - FirebaseMessaging
     - GoogleDataTransport
     - GoogleUtilities
+    - IQKeyboardCore
     - IQKeyboardManagerSwift
+    - IQKeyboardNotification
+    - IQKeyboardReturnManager
+    - IQKeyboardToolbar
+    - IQKeyboardToolbarManager
+    - IQTextInputViewNotification
+    - IQTextView
     - Kingfisher
     - KMPlaceholderTextView
     - MaterialComponents
@@ -209,23 +253,30 @@ EXTERNAL SOURCES:
 
 CHECKOUT OPTIONS:
   SCLAlertView:
-    :commit: f08ec93c299a221210e59462c84c79410050e5b7
+    :commit: 2148ecd7b96899b48f41147e2acaad875711dd61
     :git: https://github.com/vikmeup/SCLAlertView-Swift
 
 SPEC CHECKSUMS:
-  Alamofire: bd5e7b23a1a750975288482c1831d71e74415f86
-  DropDown: 20499c7b2731b0d21609af924e47c7677a2be50d
-  DynamicBlurView: aa6db4defc6e537eb86fc5e58dd3991666178399
-  Firebase: 2d19a10c9a2e48ac532a4303115d3fc9b2798396
-  FirebaseCore: c7b57863ce0859281a66d16ca36d665c45d332b5
-  FirebaseCoreInternal: 571a2dd8c975410966199623351db3a3265c874d
-  FirebaseInstallations: 6d05424a046b68ca146b4de4376f05b4e9262fc3
-  FirebaseMessaging: b5f7bdc62b91b6102015991fb7bc6fa75f643908
+  Alamofire: 400275dd1c6d87d95a041861d2a59da4b520a203
+  DropDown: 8a2116376c1981888557f72ec2ffc9a5e0e456ec
+  DynamicBlurView: 58e18fae80bb614e34681a4486870e7d257b62e8
+  Firebase: 14f11e91129d246a8a6166b4c1c2ea61b56806ec
+  FirebaseCore: 86241206e656f5c80c995e370e6c975913b9b284
+  FirebaseCoreInternal: 7c12fc3011d889085e765e317d7b9fd1cef97af9
+  FirebaseInstallations: 4e6e162aa4abaaeeeb01dd00179dfc5ad9c2194e
+  FirebaseMessaging: 341004946fa7ffc741344b20f1b667514fc93e31
   GoogleDataTransport: aae35b7ea0c09004c3797d53c8c41f66f219d6a7
   GoogleUtilities: 00c88b9a86066ef77f0da2fab05f65d7768ed8e1
-  IQKeyboardManagerSwift: 12d89768845bb77b55cc092ecc2b1f9370f06b76
-  Kingfisher: 23d18f54677d973b713e54ce6a8f5eef6e7056ba
-  KMPlaceholderTextView: 2bbcd19a273648a80a61e1e48f9743a24d8930e3
+  IQKeyboardCore: 8652977ec919cf5351aa2977fedd1a6546476fbc
+  IQKeyboardManagerSwift: 835fc9c6e4732398113406d84900ad2e8f141218
+  IQKeyboardNotification: eb4910401f5a0e68f97e71c62f8a0c5b7e9d535c
+  IQKeyboardReturnManager: fcbf51fc68d7536fc1fbcca5231c4e82576b12ac
+  IQKeyboardToolbar: 9fe900f8e7def414be4025af0ca098df764d4fe3
+  IQKeyboardToolbarManager: d449479b5843d4a3fb902d03bf62d6ca031ac20e
+  IQTextInputViewNotification: 3b9fb27a16e7ee8958cc9092cfb07a1a9e1fd559
+  IQTextView: ae13b4922f22e6f027f62c557d9f4f236b19d5c7
+  Kingfisher: b6c16059112dd6bdadf3d7ae01472ea1ef01a6b8
+  KMPlaceholderTextView: 2206c3df39979e9396e2d96fa9f427a8951121b0
   MaterialComponents: 1a9b2d9d45b1601ae544de85089adc4c464306d4
   MDFInternationalization: d697c55307816222a55685c4ccb1044ffb030c12
   MDFTextAccessibility: f4bb4cc2194286651b59a215fdeaa0e05dc90ba5
@@ -233,26 +284,26 @@ SPEC CHECKSUMS:
   MZAppearance: 0c06d3fa9cc55142f1da14bc8631fbe8fd6e19d5
   MZFormSheetController: da2df509805d757e04b052915057d8e1a338b050
   nanopb: fad817b59e0457d11a5dfbde799381cd727c1275
-  NVActivityIndicatorView: 60109b9bf46efc2e71ab81453196ccdfdfeea870
+  NVActivityIndicatorView: fe52a6a68664c2df8991d7d9e3d86d8d19453c53
   OAuthSwift: 27b34fe80b76b67cd8f45571e0be2432bc9f6de1
-  ObjectMapper: 1eb41f610210777375fa806bf161dc39fb832b81
-  OhhAuth: 0c43cb209df11abaeced699b08508fe9f577ff0b
-  PocketSVG: 8ac7b20a881ca1a3d46ba1e54ee2b0f2307c3d48
-  PopupDialog: 39598b7d41719f5c025b4b70e62728bae7734fef
+  ObjectMapper: e6e4d91ff7f2861df7aecc536c92d8363f4c9677
+  OhhAuth: 142510709eccbfaae6c16b74b7fc96438b2ca825
+  PocketSVG: ca3bc53ea8d68336ba830c47b2e547790507b901
+  PopupDialog: 720c92befd8bc23c13442254945213db5612f149
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
-  Reachability: fd0ecd23705e2599e4cceeb943222ae02296cbc6
+  Reachability: 8bf74b755b2993968c344b465c13e602db2b1044
   SCLAlertView: 776813fb1f62248965f37cb7edf4088ee6394460
-  SearchTextField: a5bb7e4c33affadb115afdbe8100d84ef10a8024
+  SearchTextField: 40dc3cc57def5a211f263cac263622c163bbc25a
   SideMenu: f583187d21c5b1dd04c72002be544b555a2627a2
-  Stuff: 1fc2acb281c8a89d7c6bcf89dcdaa8bd29c5ae68
-  SwiftyBeaver: 85daaaa2b3ae6e31b7b55c99430e8b91dac088af
+  Stuff: f8cd876576ca7cef621c755ff837461a57db5321
+  SwiftyBeaver: ade157e4f857812e7d7f15f2e3396bb8733f8a1c
   SwiftyJSON: f5b1bf1cd8dd53cd25887ac0eabcfd92301c6a5a
-  Swinject: a1364b0f66c2736bb03c1c7cab54809e16df25da
-  SwinjectStoryboard: 365698aec11b57c6b14a3c1f52d0308759d377bf
-  Toast-Swift: ba0b01b095aada709d915f9beb1d38184a2721c3
-  UICollectionViewLeftAlignedLayout: 830bf6fa5bab9f9b464f62e3384f9d2e00b3c0f6
+  Swinject: ddf78b8486dd9b71a667b852cad919ab4484478e
+  SwinjectStoryboard: 240ce371396da09a4c43c72ee5c148108500e184
+  Toast-Swift: 7a03a532afe3a560d4044bc7c237e2864d295173
+  UICollectionViewLeftAlignedLayout: 7ac8b0a34e5c8cf41445b2dd19438c8e9aeca521
   VHBoomMenuButton: 77a7ae6742220b57b54eec28183fc123a3dd98ed
 
-PODFILE CHECKSUM: 35d115ee8a054e5a1b88396c442a26d332f8ba40
+PODFILE CHECKSUM: c7a56e5259ca584a0ca1752e06dde7c6a9ebc1ac
 
-COCOAPODS: 1.16.2
+COCOAPODS: 1.15.2

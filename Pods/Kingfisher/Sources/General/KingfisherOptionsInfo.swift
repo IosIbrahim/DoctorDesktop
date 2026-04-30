@@ -286,9 +286,28 @@ public enum KingfisherOptionsInfoItem: Sendable {
     /// Determines the queue on which image processing should occur.
     ///
     /// By default, Kingfisher uses an internal pre-defined serial queue to process images. Use this option to modify
+<<<<<<< HEAD
     /// this behavior. For instance, you can specify ``CallbackQueue/mainCurrentOrAsync`` to process the image on the
     /// main queue, preventing potential flickering (but with the risk of blocking the UI, especially if the processor
     /// is time-consuming).
+=======
+    /// this behavior.
+    ///
+    /// For instance, you can specify ``CallbackQueue/mainCurrentOrAsync`` to process the image on the main queue,
+    /// preventing potential flickering (but with the risk of blocking the UI, especially if the processor is
+    /// time-consuming).
+    ///
+    /// If you need more control over scheduling (such as limiting concurrency, changing priority, or using a LIFO
+    /// strategy), you can provide an operation queue by using ``CallbackQueue/operationQueue(_:)``.
+    ///
+    /// ```swift
+    /// let queue = OperationQueue()
+    /// // Configure `queue` as needed.
+    /// options = [.processingQueue(.operationQueue(queue))]
+    /// ```
+    ///
+    /// - Note: The execution order depends on the provided queue.
+>>>>>>> ede0891d7937aff1066126b682ba54f3a353cd13
     case processingQueue(CallbackQueue)
     
     /// Enables progressive image loading.
@@ -405,7 +424,13 @@ public struct KingfisherParsedOptionsInfo: Sendable {
     public var forcedExtension: String? = nil
 
     var onDataReceived: [any DataReceivingSideEffect]? = nil
+<<<<<<< HEAD
     
+=======
+    var sourceTaskIdentifierChecker: (@Sendable () -> Bool)? = nil
+    var isSourceTaskStale: Bool { sourceTaskIdentifierChecker.map { !$0() } ?? false }
+
+>>>>>>> ede0891d7937aff1066126b682ba54f3a353cd13
     public init(_ info: KingfisherOptionsInfo?) {
         guard let info = info else { return }
         for option in info {

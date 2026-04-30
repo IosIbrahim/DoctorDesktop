@@ -110,6 +110,10 @@ extension KingfisherWrapper where Base: CPListItem {
         completionHandler: (@MainActor @Sendable (Result<RetrieveImageResult, KingfisherError>) -> Void)? = nil) -> DownloadTask?
     {
         var mutatingSelf = self
+<<<<<<< HEAD
+=======
+        let previousToken = mutatingSelf.cancellationToken
+>>>>>>> ede0891d7937aff1066126b682ba54f3a353cd13
         return setImage(
             with: source,
             imageAccessor: ImagePropertyAccessor(
@@ -138,6 +142,11 @@ extension KingfisherWrapper where Base: CPListItem {
                 getTaskIdentifier: { mutatingSelf.taskIdentifier },
                 setTask: { mutatingSelf.imageTask = $0 }
             ),
+<<<<<<< HEAD
+=======
+            previousCancellationToken: previousToken,
+            setCancellationToken: { mutatingSelf.cancellationToken = $0 },
+>>>>>>> ede0891d7937aff1066126b682ba54f3a353cd13
             placeholder: placeholder,
             parsedOptions: parsedOptions,
             progressBlock: progressBlock,
@@ -151,10 +160,18 @@ extension KingfisherWrapper where Base: CPListItem {
     /// Nothing will happen if the downloading has already finished.
     public func cancelDownloadTask() {
         imageTask?.cancel()
+<<<<<<< HEAD
+=======
+        cancellationToken?.cancel()
+>>>>>>> ede0891d7937aff1066126b682ba54f3a353cd13
     }
 }
 
 @MainActor private var taskIdentifierKey: Void?
+<<<<<<< HEAD
+=======
+@MainActor private var cancellationTokenKey: Void?
+>>>>>>> ede0891d7937aff1066126b682ba54f3a353cd13
 @MainActor private var imageTaskKey: Void?
 
 // MARK: Properties
@@ -172,6 +189,14 @@ extension KingfisherWrapper where Base: CPListItem {
         }
     }
 
+<<<<<<< HEAD
+=======
+    var cancellationToken: CancellationToken? {
+        get { getAssociatedObject(base, &cancellationTokenKey) }
+        set { setRetainedAssociatedObject(base, &cancellationTokenKey, newValue) }
+    }
+
+>>>>>>> ede0891d7937aff1066126b682ba54f3a353cd13
     private var imageTask: DownloadTask? {
         get { return getAssociatedObject(base, &imageTaskKey) }
         set { setRetainedAssociatedObject(base, &imageTaskKey, newValue)}

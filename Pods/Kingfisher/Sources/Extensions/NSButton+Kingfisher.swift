@@ -108,6 +108,10 @@ extension KingfisherWrapper where Base: NSButton {
     ) -> DownloadTask?
     {
         var mutatingSelf = self
+<<<<<<< HEAD
+=======
+        let previousToken = mutatingSelf.imageCancellationToken
+>>>>>>> ede0891d7937aff1066126b682ba54f3a353cd13
         return setImage(
             with: source,
             imageAccessor: ImagePropertyAccessor(
@@ -120,6 +124,11 @@ extension KingfisherWrapper where Base: NSButton {
                 setTaskIdentifier: { mutatingSelf.taskIdentifier = $0 },
                 getTaskIdentifier: { mutatingSelf.taskIdentifier }, 
                 setTask: { mutatingSelf.imageTask = $0 }),
+<<<<<<< HEAD
+=======
+            previousCancellationToken: previousToken,
+            setCancellationToken: { mutatingSelf.imageCancellationToken = $0 },
+>>>>>>> ede0891d7937aff1066126b682ba54f3a353cd13
             placeholder: placeholder,
             parsedOptions: parsedOptions,
             progressBlock: progressBlock,
@@ -133,6 +142,10 @@ extension KingfisherWrapper where Base: NSButton {
     /// Nothing will happen if the downloading has already finished.
     public func cancelImageDownloadTask() {
         imageTask?.cancel()
+<<<<<<< HEAD
+=======
+        imageCancellationToken?.cancel()
+>>>>>>> ede0891d7937aff1066126b682ba54f3a353cd13
     }
 
     // MARK: Setting Alternate Image
@@ -197,6 +210,10 @@ extension KingfisherWrapper where Base: NSButton {
     ) -> DownloadTask?
     {
         var mutatingSelf = self
+<<<<<<< HEAD
+=======
+        let previousToken = mutatingSelf.alternateImageCancellationToken
+>>>>>>> ede0891d7937aff1066126b682ba54f3a353cd13
         return setImage(
             with: source,
             imageAccessor: ImagePropertyAccessor(
@@ -210,6 +227,11 @@ extension KingfisherWrapper where Base: NSButton {
                 getTaskIdentifier: { mutatingSelf.alternateTaskIdentifier },
                 setTask: { mutatingSelf.alternateImageTask = $0 }
             ),
+<<<<<<< HEAD
+=======
+            previousCancellationToken: previousToken,
+            setCancellationToken: { mutatingSelf.alternateImageCancellationToken = $0 },
+>>>>>>> ede0891d7937aff1066126b682ba54f3a353cd13
             placeholder: placeholder,
             parsedOptions: parsedOptions,
             progressBlock: progressBlock,
@@ -224,6 +246,10 @@ extension KingfisherWrapper where Base: NSButton {
     /// Nothing will happen if the downloading has already finished.
     public func cancelAlternateImageDownloadTask() {
         alternateImageTask?.cancel()
+<<<<<<< HEAD
+=======
+        alternateImageCancellationToken?.cancel()
+>>>>>>> ede0891d7937aff1066126b682ba54f3a353cd13
     }
 }
 
@@ -231,9 +257,17 @@ extension KingfisherWrapper where Base: NSButton {
 // MARK: - Associated Object
 @MainActor private var taskIdentifierKey: Void?
 @MainActor private var imageTaskKey: Void?
+<<<<<<< HEAD
 
 @MainActor private var alternateTaskIdentifierKey: Void?
 @MainActor private var alternateImageTaskKey: Void?
+=======
+@MainActor private var imageCancellationTokenKey: Void?
+
+@MainActor private var alternateTaskIdentifierKey: Void?
+@MainActor private var alternateImageTaskKey: Void?
+@MainActor private var alternateImageCancellationTokenKey: Void?
+>>>>>>> ede0891d7937aff1066126b682ba54f3a353cd13
 
 @MainActor
 extension KingfisherWrapper where Base: NSButton {
@@ -256,6 +290,14 @@ extension KingfisherWrapper where Base: NSButton {
         set { setRetainedAssociatedObject(base, &imageTaskKey, newValue)}
     }
 
+<<<<<<< HEAD
+=======
+    private var imageCancellationToken: CancellationToken? {
+        get { getAssociatedObject(base, &imageCancellationTokenKey) }
+        set { setRetainedAssociatedObject(base, &imageCancellationTokenKey, newValue) }
+    }
+
+>>>>>>> ede0891d7937aff1066126b682ba54f3a353cd13
     public private(set) var alternateTaskIdentifier: Source.Identifier.Value? {
         get {
             let box: Box<Source.Identifier.Value>? = getAssociatedObject(base, &alternateTaskIdentifierKey)
@@ -271,5 +313,13 @@ extension KingfisherWrapper where Base: NSButton {
         get { return getAssociatedObject(base, &alternateImageTaskKey) }
         set { setRetainedAssociatedObject(base, &alternateImageTaskKey, newValue)}
     }
+<<<<<<< HEAD
+=======
+
+    private var alternateImageCancellationToken: CancellationToken? {
+        get { getAssociatedObject(base, &alternateImageCancellationTokenKey) }
+        set { setRetainedAssociatedObject(base, &alternateImageCancellationTokenKey, newValue) }
+    }
+>>>>>>> ede0891d7937aff1066126b682ba54f3a353cd13
 }
 #endif
