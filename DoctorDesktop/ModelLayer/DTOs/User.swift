@@ -14,19 +14,32 @@ struct User: Decodable {
   var id: String?
   var userName: String?
   var branch: String?
-  var group:String?
+  var group: String?
   var name: String? { return englishName }
 
   enum CodingKeys: String, CodingKey {
-    case id = "EMPID"
-    case userName = "CUSTOM_USERNAME"
-    case arabicName = "EMP_AR_NAME"
-    case englishName = "EMP_EN_NAME"
-    case branch = "DEFAULTBRANCH"
-    case group = "DEFAULTGROUP"
+    case id           = "EMPID"
+    case userName     = "CUSTOM_USERNAME"
+    case loginName    = "NAME"          // fallback used by BHG server
+    case arabicName   = "EMP_AR_NAME"
+    case englishName  = "EMP_EN_NAME"
+    case branch       = "DEFAULTBRANCH"
+    case group        = "DEFAULTGROUP"
   }
-    
-    
+
+  init() {}
+
+  init(from decoder: Decoder) throws {
+    let c         = try decoder.container(keyedBy: CodingKeys.self)
+    id            = try? c.decode(String.self, forKey: .id)
+    arabicName    = try? c.decode(String.self, forKey: .arabicName)
+    englishName   = try? c.decode(String.self, forKey: .englishName)
+    branch        = try? c.decode(String.self, forKey: .branch)
+    group         = try? c.decode(String.self, forKey: .group)
+    // Prefer CUSTOM_USERNAME; fall back to NAME (used by BHG server)
+    userName      = (try? c.decode(String.self, forKey: .userName))
+                 ?? (try? c.decode(String.self, forKey: .loginName))
+  }
 }
 //{
 //    CASHIER = 1;
