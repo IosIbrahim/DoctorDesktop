@@ -12,7 +12,11 @@ target 'DoctorDesktop' do
   pod 'Alamofire'
   pod 'MaterialComponents/Tabs'
   pod 'SwinjectStoryboard'
-
+  
+  pod 'Kingfisher'
+  pod 'SwiftyJSON'
+  pod 'Reachability'
+  
   pod 'DropDown'
   pod 'SCLAlertView' , :git => 'https://github.com/vikmeup/SCLAlertView-Swift'
   pod 'ObjectMapper'
@@ -23,11 +27,9 @@ target 'DoctorDesktop' do
   pod 'VHBoomMenuButton/Swift'
   pod 'Swinject'
   pod 'UICollectionViewLeftAlignedLayout'
-  pod 'Kingfisher'
   pod 'PocketSVG', :inhibit_warnings => true
   pod 'SwiftyBeaver'
-  pod 'SwiftyJSON'
-  pod 'Reachability'
+ 
   pod 'MZFormSheetController', '~> 3.1'
   pod 'MOLH'
   pod 'OhhAuth'
