@@ -138,7 +138,7 @@ extension ComponentCollectionViewController: UICollectionViewDataSource {
 //      return presenter.components
     return presenter.components.filter {
       let type = ComponentType(rawValue: $0.processInfoCode)
-      return type != .ICU && type != .nicu
+      return type != .ICU && type != .nicu && type != .consultation
     }
   }
 
