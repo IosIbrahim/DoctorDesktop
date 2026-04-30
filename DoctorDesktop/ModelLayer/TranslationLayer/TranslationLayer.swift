@@ -141,9 +141,9 @@ extension TranslationLayerImpl {
     
     func getDoctorPermissionsFromJson(_ data: Data) -> DoctorPermissions {
         print(data.toJsonString() ?? "")
-        if let patientCount = try? DoctorPermissions (data: data, keyPath: "Root") {
+        if let patientCount = try? DoctorPermissions (data: data, keyPath: "Root", keyDecodingStrategy: .useDefaultKeys) {
             return patientCount
-        }else if let patientCount = try? PermissionModel (data: data, keyPath: "Root") {
+        }else if let patientCount = try? PermissionModel (data: data, keyPath: "Root", keyDecodingStrategy: .useDefaultKeys) {
             return [patientCount]
         }
         return []
@@ -152,8 +152,8 @@ extension TranslationLayerImpl {
     func getInpatientUnitDTOsFromJson(_ data: Data) -> PatientUnits {
         guard let json = String(data: data, encoding: .utf8), json.contains("UNIT_ROW") else { return [] }
         let keyPath = "Root.UNIT.UNIT_ROW"
-        guard let inpatientUnits = try? PatientUnits (data: data, keyPath: keyPath) else {
-            if let inpatientUnit = try? PatientUnit (data: data, keyPath: keyPath) {
+        guard let inpatientUnits = try? PatientUnits (data: data, keyPath: keyPath, keyDecodingStrategy: .useDefaultKeys) else {
+            if let inpatientUnit = try? PatientUnit (data: data, keyPath: keyPath, keyDecodingStrategy: .useDefaultKeys) {
                 return [inpatientUnit]
             } else {
                 return []
@@ -165,8 +165,8 @@ extension TranslationLayerImpl {
     func getInpatientPatientsDTOsFromJson(_ data: Data) -> InpatientPatients {
         guard let json = String(data: data, encoding: .utf8), json.contains("PATIENT_ROW") else { return [] }
         let keyPath = "Root.UNIT.UNIT_ROW.PATIENT.PATIENT_ROW"
-        guard let inpatientPatients = try? InpatientPatients (data: data, keyPath: keyPath) else {
-            if let inpatientPatient = try? InpatientPatient (data: data, keyPath: keyPath) {
+        guard let inpatientPatients = try? InpatientPatients (data: data, keyPath: keyPath, keyDecodingStrategy: .useDefaultKeys) else {
+            if let inpatientPatient = try? InpatientPatient (data: data, keyPath: keyPath, keyDecodingStrategy: .useDefaultKeys) {
                 return [inpatientPatient]
             } else {
                 return []
@@ -180,8 +180,8 @@ extension TranslationLayerImpl {
     func getOutpatientClinicDTOsFromJson(_ data: Data) -> OutpatientClinics {
         guard let json = String(data: data, encoding: .utf8), json.contains("CLINIC_ROW") else { return [] }
         let keyPath = "Root.CLINIC.CLINIC_ROW"
-        guard let outpatientClinics = try? OutpatientClinics (data: data, keyPath: keyPath) else {
-            if let outpatientClinic = try? OutpatientClinic (data: data, keyPath: keyPath) {
+        guard let outpatientClinics = try? OutpatientClinics (data: data, keyPath: keyPath, keyDecodingStrategy: .useDefaultKeys) else {
+            if let outpatientClinic = try? OutpatientClinic (data: data, keyPath: keyPath, keyDecodingStrategy: .useDefaultKeys) {
                 return [outpatientClinic]
             } else {
                 return []
@@ -195,11 +195,11 @@ extension TranslationLayerImpl {
         print(json)
         let keyPath = "Root.CLINIC_PATIENTS.CLINIC_PATIENTS_ROW"
         
-        guard let outpatientPatients = try? OutpatientPatients (data: data, keyPath: keyPath) else {
-            if let outpatientPatient = try? OutpatientPatient (data: data, keyPath: keyPath) {
+        guard let outpatientPatients = try? OutpatientPatients (data: data, keyPath: keyPath, keyDecodingStrategy: .useDefaultKeys) else {
+            if let outpatientPatient = try? OutpatientPatient (data: data, keyPath: keyPath, keyDecodingStrategy: .useDefaultKeys) {
                 return [outpatientPatient]
             } else {
-                if let outpatientPatients = try? [OutpatientPatient] (data: data, keyPath: keyPath) {
+                if let outpatientPatients = try? [OutpatientPatient] (data: data, keyPath: keyPath, keyDecodingStrategy: .useDefaultKeys) {
                     return outpatientPatients
                 }else {
                     
@@ -238,8 +238,8 @@ extension TranslationLayerImpl {
     func getEmergencyPatientsDTOsFromJson(_ data: Data) -> EmergencyPatients {
         guard let json = String(data: data, encoding: .utf8), json.contains("ER_PATIENTS_ROW") else { return [] }
         let keyPath = "Root.ER_PATIENTS.ER_PATIENTS_ROW"
-        guard let emergencyPatients = try? EmergencyPatients (data: data, keyPath: keyPath) else {
-            if let emergencyPatient = try? EmergencyPatient (data: data, keyPath: keyPath) {
+        guard let emergencyPatients = try? EmergencyPatients (data: data, keyPath: keyPath, keyDecodingStrategy: .useDefaultKeys) else {
+            if let emergencyPatient = try? EmergencyPatient (data: data, keyPath: keyPath, keyDecodingStrategy: .useDefaultKeys) {
                 return [emergencyPatient]
             } else {
                 return []
@@ -251,8 +251,8 @@ extension TranslationLayerImpl {
 
 extension TranslationLayerImpl {
     func getClinicalPatientDTOFromJsonData(_ data: Data) -> [ClinicalPatient] {
-        let clinicalPatient = try? [ClinicalPatient] (data: data, keyPath: "Root.PATIENT.PATIENT_ROW")
-        let clinicalPatientObj = try? ClinicalPatient(data: data, keyPath: "Root.PATIENT.PATIENT_ROW")
+        let clinicalPatient = try? [ClinicalPatient] (data: data, keyPath: "Root.PATIENT.PATIENT_ROW", keyDecodingStrategy: .useDefaultKeys)
+        let clinicalPatientObj = try? ClinicalPatient(data: data, keyPath: "Root.PATIENT.PATIENT_ROW", keyDecodingStrategy: .useDefaultKeys)
         var finallArray = [ClinicalPatient]()
         if clinicalPatient != nil
         {
@@ -268,7 +268,7 @@ extension TranslationLayerImpl {
         
         
         let clinicalPatient = try? Root (data: data , keyPath: "Root")
-        //        let clinicalPatientObj = try? OperationPatient(data: data, keyPath: "Root.OR_PATIENTS.OR_PATIENTS_ROW")
+        //        let clinicalPatientObj = try? OperationPatient(data: data, keyPath: "Root.OR_PATIENTS.OR_PATIENTS_ROW", keyDecodingStrategy: .useDefaultKeys)
         var finallArray = [OperationPatient]()
         if clinicalPatient != nil && clinicalPatient!.oR_PATIENTS != nil
         {
@@ -287,7 +287,7 @@ extension TranslationLayerImpl {
         let serviceTemplates = (try? [GeneralObejct].decode(data, keyPath: "Root.STP_SERVICE_TEMPLATE.STP_SERVICE_TEMPLATE_ROW")) ?? [GeneralObejct]()
 //        let serviceCategories = try! [ServiceCategory].decode(data, keyPath: "Root.PARENT_SERVICE.PARENT_SERVICE_ROW") //?? [ServiceCategory]()
         let serviceCategories = getServices(data)
-        let generalParams = (try! GeneralParams(data: data, keyPath: "Root.GENERAL_PARMS.GENERAL_PARMS_ROW"))
+        let generalParams = (try! GeneralParams(data: data, keyPath: "Root.GENERAL_PARMS.GENERAL_PARMS_ROW", keyDecodingStrategy: .useDefaultKeys))
         let frequency = (try? [GeneralObejct].decode(data, keyPath: "Root.MPFREQUENCY.MPFREQUENCY_ROW")) ?? [GeneralObejct]()
         let labIntervalUnits = (try? [GeneralObejct].decode(data, keyPath: "Root.LAB_INTERV_UNIT.LAB_INTERV_UNIT_ROW")) ?? [GeneralObejct]()
         let verbalOrderTypes = (try? [GeneralObejct].decode(data, keyPath: "Root.VERBAL_ORDER_TYPE.VERBAL_ORDER_TYPE_ROW")) ?? [GeneralObejct]()
@@ -399,8 +399,8 @@ extension TranslationLayerImpl {
 
 extension TranslationLayerImpl {
     func getPatientHistoryDTOFromJson(_ data: Data) -> PatientHistory {
-        var patientHistory = try! PatientHistory(data: data, keyPath: "Root")
-        if let message = try? String(data: data, keyPath: "message") {
+        var patientHistory = try! PatientHistory(data: data, keyPath: "Root", keyDecodingStrategy: .useDefaultKeys)
+        if let message = try? String(data: data, keyPath: "message", keyDecodingStrategy: .useDefaultKeys) {
             patientHistory.error = message
         }
         return patientHistory
@@ -413,8 +413,8 @@ extension TranslationLayerImpl{
         guard let json = String(data: data, encoding: .utf8), json.contains("VISIT_MEDICATIONS_ROW") else { return []
         }
         let keyPath = "Root.PATIENT.PATIENT_ROW.VISIT_MEDICATIONS.VISIT_MEDICATIONS_ROW"
-        guard let Medications = try? medictions (data: data, keyPath: keyPath) else {
-            if let medication = try? Medication (data: data, keyPath: keyPath) {
+        guard let Medications = try? medictions (data: data, keyPath: keyPath, keyDecodingStrategy: .useDefaultKeys) else {
+            if let medication = try? Medication (data: data, keyPath: keyPath, keyDecodingStrategy: .useDefaultKeys) {
                 return [medication]
             } else {
                 
@@ -429,8 +429,8 @@ extension TranslationLayerImpl{
         guard let json = String(data: data, encoding: .utf8), json.contains("VISIT_MEDICATIONS_ROW") else { return []
         }
         let keyPath = "Root.PATIENT.PATIENT_ROW.VISIT_MEDICATIONS.VISIT_MEDICATIONS_ROW"
-        guard let rads = try? [Rad] (data: data, keyPath: keyPath) else {
-            if let rad = try? Rad (data: data, keyPath: keyPath) {
+        guard let rads = try? [Rad] (data: data, keyPath: keyPath, keyDecodingStrategy: .useDefaultKeys) else {
+            if let rad = try? Rad (data: data, keyPath: keyPath, keyDecodingStrategy: .useDefaultKeys) {
                 return [rad]
             } else {
                 
@@ -573,7 +573,7 @@ extension TranslationLayerImpl {
     func getVitalsDTOsFromJson (_ data:Data) -> UCAFData? {
         guard let json = String(data: data, encoding: .utf8), json.contains("UCAF_DATA_ROW") else { return nil }
         let keyPath = "Root.UCAF_DATA.UCAF_DATA_ROW"
-        guard let ucafdata = try? UCAFData (data: data, keyPath: keyPath) else {
+        guard let ucafdata = try? UCAFData (data: data, keyPath: keyPath, keyDecodingStrategy: .useDefaultKeys) else {
             return nil
         }
         return ucafdata
@@ -584,7 +584,7 @@ extension TranslationLayerImpl {
         guard let json = String(data: data, encoding: .utf8),
               json.contains("UCAF_DATA_ROW") else { return nil }
         let keyPath = "Root.UCAF_DATA.UCAF_DATA_ROW"
-        return try? UCAFLoadData(data: data, keyPath: keyPath)
+        return try? UCAFLoadData(data: data, keyPath: keyPath, keyDecodingStrategy: .useDefaultKeys)
     }
 
     // Server-computed CTAS block (may be absent).
@@ -592,7 +592,7 @@ extension TranslationLayerImpl {
         guard let json = String(data: data, encoding: .utf8),
               json.contains("CTAS_DATA_ROW") else { return nil }
         let keyPath = "Root.CTAS.CTAS_DATA.CTAS_DATA_ROW"
-        return try? UCAFCTASServer(data: data, keyPath: keyPath)
+        return try? UCAFCTASServer(data: data, keyPath: keyPath, keyDecodingStrategy: .useDefaultKeys)
     }
 
     // VitalSignsEntry: /MedicalRecord/loadSpecialHappits — special habits payload.
@@ -601,7 +601,7 @@ extension TranslationLayerImpl {
         guard let json = String(data: data, encoding: .utf8),
               json.contains("SPECIAL_HABITS") else { return nil }
         let keyPath = "Root.SPECIAL_HABITS"
-        return try? SpecialHabitsData(data: data, keyPath: keyPath)
+        return try? SpecialHabitsData(data: data, keyPath: keyPath, keyDecodingStrategy: .useDefaultKeys)
     }
 
     // ProgressNotes: /MedicalRcordController/DDDocNurseNotesLoad (server typo preserved).
@@ -669,8 +669,8 @@ extension TranslationLayerImpl {
     func getDiagnosisCategoriesDTOsFromJson (_ data:Data) -> DiagnosisCategories {
         guard let json = String(data: data, encoding: .utf8), json.contains("COT_LV_1_ROW") else { return [] }
         let keyPath = "Root.COT_LV_1.COT_LV_1_ROW"
-        guard let diagnosisCategories = try? DiagnosisCategories (data: data, keyPath: keyPath) else {
-            if let diagnosisCategory = try? DiagnosisCategory (data: data, keyPath: keyPath) {
+        guard let diagnosisCategories = try? DiagnosisCategories (data: data, keyPath: keyPath, keyDecodingStrategy: .useDefaultKeys) else {
+            if let diagnosisCategory = try? DiagnosisCategory (data: data, keyPath: keyPath, keyDecodingStrategy: .useDefaultKeys) {
                 return [diagnosisCategory]
             } else {
                 return []
@@ -683,8 +683,8 @@ extension TranslationLayerImpl {
     func getHistorySymptomsDTOsFromJson(_ data:Data) -> HistorySymptomCategories {
         guard let json = String(data: data, encoding: .utf8), json.contains("COT_H_ROW") else { return [] }
         let keyPath = "Root.COT_H.COT_H_ROW"
-        guard let historySymptomCategories = try? HistorySymptomCategories (data: data, keyPath: keyPath) else {
-            if let historySymptomCategory = try? HistorySymptomCategory (data: data, keyPath: keyPath) {
+        guard let historySymptomCategories = try? HistorySymptomCategories (data: data, keyPath: keyPath, keyDecodingStrategy: .useDefaultKeys) else {
+            if let historySymptomCategory = try? HistorySymptomCategory (data: data, keyPath: keyPath, keyDecodingStrategy: .useDefaultKeys) {
                 return [historySymptomCategory]
             } else {
                 return []
@@ -697,8 +697,8 @@ extension TranslationLayerImpl {
     func getPainScoresDTOsFromJson(_ data:Data) -> Scores {
         guard let json = String(data: data, encoding: .utf8), json.contains("SCORE_DETAILS") else { return [] }
         let keyPath = "Root.SCORE_DETAILS"
-        guard let scores = try? Scores (data: data, keyPath: keyPath) else {
-            if let score = try? Score (data: data, keyPath: keyPath) {
+        guard let scores = try? Scores (data: data, keyPath: keyPath, keyDecodingStrategy: .useDefaultKeys) else {
+            if let score = try? Score (data: data, keyPath: keyPath, keyDecodingStrategy: .useDefaultKeys) {
                 return [score]
             } else {
                 return []
@@ -711,8 +711,8 @@ extension TranslationLayerImpl {
     func getSymptomCategoriesDTOsFromJson(_ data:Data) -> RegularSymptomCategories {
         guard let json = String(data: data, encoding: .utf8), json.contains("COT_CHILD_ROW") else { return [] }
         let keyPath = "Root.COT_CHILD.COT_CHILD_ROW"
-        guard let symptomCategories = try? RegularSymptomCategories (data: data, keyPath: keyPath) else {
-            if let symptomCategory = try? RegularSymptomCategory (data: data, keyPath: keyPath) {
+        guard let symptomCategories = try? RegularSymptomCategories (data: data, keyPath: keyPath, keyDecodingStrategy: .useDefaultKeys) else {
+            if let symptomCategory = try? RegularSymptomCategory (data: data, keyPath: keyPath, keyDecodingStrategy: .useDefaultKeys) {
                 return [symptomCategory]
             } else {
                 return []
@@ -725,8 +725,8 @@ extension TranslationLayerImpl {
     func getSymptomsDTOsFromJson(_ data:Data) -> Symptoms {
         guard let json = String(data: data, encoding: .utf8), json.contains("COT_CHILD_ROW") else { return [] }
         let keyPath = "Root.COT_CHILD.COT_CHILD_ROW"
-        guard let symptoms = try? Symptoms (data: data, keyPath: keyPath) else {
-            if let symptom = try? Symptom (data: data, keyPath: keyPath) {
+        guard let symptoms = try? Symptoms (data: data, keyPath: keyPath, keyDecodingStrategy: .useDefaultKeys) else {
+            if let symptom = try? Symptom (data: data, keyPath: keyPath, keyDecodingStrategy: .useDefaultKeys) {
                 return [symptom]
             } else {
                 return []
@@ -738,7 +738,7 @@ extension TranslationLayerImpl {
     // get visit detail (blood type, phone, allergy, etc.)
     func getVisitDetailDTOFromJson(_ data: Data) -> VisitDetail? {
         let keyPath = "Root.PV.PV_R"
-        return try? VisitDetail(data: data, keyPath: keyPath)
+        return try? VisitDetail(data: data, keyPath: keyPath, keyDecodingStrategy: .useDefaultKeys)
     }
 }
 
