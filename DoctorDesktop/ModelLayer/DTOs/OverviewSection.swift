@@ -30,19 +30,39 @@ struct PatientHistory: Decodable {
 }
 
 extension PatientHistory {
+  /// Empty fallback so callers don't crash when decoding fails entirely.
+  init() {
+    self.init(patientVisits: [],
+              currentSpeciality: GeneralObejct(),
+              currentDoctor: GeneralObejct())
+  }
+
   init(from decoder: Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
-    let patientVisitsRow = try container.nestedContainer(keyedBy: CodingKeysRows.self, forKey: .patientVisits)
+
+    // Visits — already tolerant.
     var visits: [PatientVisit] = []
-    if let decodedPatientVisits = try? patientVisitsRow.decode([PatientVisit].self, forKey: .patientVisitsRow) {
-      visits = decodedPatientVisits
-    } else if let decodedPatientVisit = try? patientVisitsRow.decode(PatientVisit.self, forKey: .patientVisitsRow) {
-      visits = [decodedPatientVisit]
+    if let patientVisitsRow = try? container.nestedContainer(keyedBy: CodingKeysRows.self, forKey: .patientVisits) {
+      if let decodedPatientVisits = try? patientVisitsRow.decode([PatientVisit].self, forKey: .patientVisitsRow) {
+        visits = decodedPatientVisits
+      } else if let decodedPatientVisit = try? patientVisitsRow.decode(PatientVisit.self, forKey: .patientVisitsRow) {
+        visits = [decodedPatientVisit]
+      }
     }
-    let currentSpecialityRow = try container.nestedContainer(keyedBy: CodingKeysRows.self, forKey: .currentSpeciality)
-    let currentSpeciality = try currentSpecialityRow.decode(GeneralObejct.self, forKey: .currentSpecialityRow)
-    let currentDoctorRow = try container.nestedContainer(keyedBy: CodingKeysRows.self, forKey: .currentDoctor)
-    let currentDoctor = try currentDoctorRow.decode(GeneralObejct.self, forKey: .currentDoctorRow)
+
+    // CURRENT_SPECIALITY / CURRENT_DOCTOR are absent on BHG test server —
+    // fall back to empty GeneralObejct rather than throwing.
+    var currentSpeciality = GeneralObejct()
+    if let row = try? container.nestedContainer(keyedBy: CodingKeysRows.self, forKey: .currentSpeciality),
+       let decoded = try? row.decode(GeneralObejct.self, forKey: .currentSpecialityRow) {
+      currentSpeciality = decoded
+    }
+    var currentDoctor = GeneralObejct()
+    if let row = try? container.nestedContainer(keyedBy: CodingKeysRows.self, forKey: .currentDoctor),
+       let decoded = try? row.decode(GeneralObejct.self, forKey: .currentDoctorRow) {
+      currentDoctor = decoded
+    }
+
     self.init(patientVisits: visits, currentSpeciality: currentSpeciality, currentDoctor: currentDoctor)
   }
 }

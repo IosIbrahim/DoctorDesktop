@@ -399,7 +399,14 @@ extension TranslationLayerImpl {
 
 extension TranslationLayerImpl {
     func getPatientHistoryDTOFromJson(_ data: Data) -> PatientHistory {
-        var patientHistory = try! PatientHistory(data: data, keyPath: "Root", keyDecodingStrategy: .useDefaultKeys)
+        // Use try? not try! — the BHG test server omits some fields like
+        // CURRENT_SPECIALITY that the synthesized decoder treats as required,
+        // which crashed the app when tapping a patient.
+        var patientHistory = (try? PatientHistory(
+            data: data,
+            keyPath: "Root",
+            keyDecodingStrategy: .useDefaultKeys
+        )) ?? PatientHistory()
         if let message = try? String(data: data, keyPath: "message", keyDecodingStrategy: .useDefaultKeys) {
             patientHistory.error = message
         }

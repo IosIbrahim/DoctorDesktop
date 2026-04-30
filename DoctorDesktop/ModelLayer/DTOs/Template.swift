@@ -40,15 +40,20 @@ struct GeneralObejct: Decodable {
 }
 
 extension GeneralObejct {
+    /// Empty fallback used when the server omits the field entirely.
+    init() {
+        self.init(id: "", arabicName: "", englishName: "")
+    }
+
     init(from decoder: Decoder) throws {
        let container = try decoder.container(keyedBy: CodingKeys.self)
        var id = try? container.decode(String.self, forKey: .id)
        if id == nil {
          id = try? container.decode(String.self, forKey: .customId)
        }
-       let arabicName = try container.decode(String.self, forKey: .arabicName)
-       let englishName = try container.decode(String.self, forKey: .englishName)
-       // let template = try container.decode(String.self, forKey: .template)
+       // Tolerant: BHG test server may omit NAME_AR/NAME_EN.
+       let arabicName  = (try? container.decode(String.self, forKey: .arabicName))  ?? ""
+       let englishName = (try? container.decode(String.self, forKey: .englishName)) ?? ""
         self.init(id: id ?? "", arabicName: arabicName, englishName: englishName)
     }
 }
