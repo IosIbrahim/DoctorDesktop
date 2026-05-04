@@ -124,7 +124,10 @@ final class ProgressNotesPresenterImpl: ProgressNotesPresenter {
     private var allNotes: [DoctorNurseNote] = []
 
     /// Filtered view of `allNotes` — what the table actually displays.
-    var notes: [DoctorNurseNote] { applyClientFilter(to: allNotes) }
+    /// Reversed so the newest note appears at the top of the list.
+    var notes: [DoctorNurseNote] {
+        Array(applyClientFilter(to: allNotes).reversed())
+    }
 
     /// Local-only replies composed on this device. Keyed by parent note SER.
     /// Wiped on every `load()` (until the server API is wired the new
