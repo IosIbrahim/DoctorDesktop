@@ -60,20 +60,60 @@ class ComponentCollectionViewController: UIViewController {
     }
   }
 
+  /// Pull-to-refresh control wired to the collection view in viewDidLoad.
+  private let refreshControl = UIRefreshControl()
+
+  /// Re-entrancy guard so a tap-back + pull-down can't fire two parallel
+  /// `getPatientsCount` requests against the server.
+  private var isRefreshing = false
+
   override func viewDidLoad() {
     super.viewDidLoad()
     self.navigationItem.setHidesBackButton(true, animated:false)
-    
+
     ComponentCell.register(with: collectionView)
-    //  presenter.getDoctorPermission {
-          self.presenter.getPatientsCount() {
-              if !self.presenter.error.isEmpty {
-                  self.toastBar.show(with: self.presenter.error)
-              }
-              self.isFinishedLoadingCounts = true
-              self.collectionView.reloadData()
-          }
-     // }
+
+    // Pull-to-refresh.
+    collectionView.alwaysBounceVertical = true
+    refreshControl.addTarget(self, action: #selector(refreshTriggered), for: .valueChanged)
+    if #available(iOS 10.0, *) {
+        collectionView.refreshControl = refreshControl
+    } else {
+        collectionView.addSubview(refreshControl)
+    }
+
+    loadCounts()
+  }
+
+  override func viewWillAppear(_ animated: Bool) {
+    super.viewWillAppear(animated)
+    // Refresh when popping back from a child screen — but skip the very
+    // first appearance (already kicked off in viewDidLoad).
+    if isFinishedLoadingCounts {
+        loadCounts()
+    }
+  }
+
+  @objc private func refreshTriggered() {
+    loadCounts()
+  }
+
+  /// Single entry point for fetching tile counts. Used by viewDidLoad,
+  /// viewWillAppear (pop-back), and the pull-to-refresh control.
+  private func loadCounts() {
+    guard !isRefreshing else { return }
+    isRefreshing = true
+
+    presenter.getPatientsCount { [weak self] in
+        guard let self = self else { return }
+        self.isRefreshing = false
+        self.refreshControl.endRefreshing()
+        if !self.presenter.error.isEmpty {
+            self.toastBar.show(with: self.presenter.error)
+        }
+        self.isFinishedLoadingCounts = true
+        self.collectionView.reloadData()
+    }
   }
   
   func getComponentBackgroundColorAndImage(componentType: ComponentType) -> ColorAndImageTuple {
