@@ -110,8 +110,10 @@ struct OutpatientPatient: Decodable, Patient {
     var clinitLetter:String?
     var clinicNameAr:String?
     var clinicNameEN:String?
-    private let nameInEnglish: String
-    private let nameInArabic: String
+    // Tolerate null name fields (BHG test sends COMPLETEPATNAME / _EN as null
+    // for some appointments). Computed accessors fall back to "".
+    private let nameInEnglish: String?
+    private let nameInArabic: String?
     var convReq:String?
     var convConsultionID:String?
     var convRemark:String?
@@ -123,7 +125,7 @@ struct OutpatientPatient: Decodable, Patient {
     var empNameEn:String?
     var erFlag:String?
     var expectedDate:String?
-    var genderAGE: String
+    var genderAGE: String?
     var genderAgeNameAr:String?
     var genderAgeNameEn:String?
     var genderNameAr:String?
@@ -133,8 +135,10 @@ struct OutpatientPatient: Decodable, Patient {
     var mappedClinicID:String?
     var motherPatientID:String?
     var motherVisitID:String?
-    private let nationalityInEnglish: String
-    private let nationalityInArabic: String
+    // Tolerate null nationality (NAT_NAME_EN / NAT_NAME_AR are null
+    // for unregistered nationalities).
+    private let nationalityInEnglish: String?
+    private let nationalityInArabic: String?
     var newBornIn:String?
     var newBornOut:String?
     var noSpecialConsution:String?
@@ -143,7 +147,7 @@ struct OutpatientPatient: Decodable, Patient {
     var overBook:String?
     var painAssessValue:String?
     var patFinanCount:String?
-    var patID: String
+    var patID: String?
     var patMobile:String?
     var patClinicFlag:String?
     var patNoteDesc:String?
@@ -182,7 +186,7 @@ struct OutpatientPatient: Decodable, Patient {
 //    var panicRadResults: [ClinicalPatientPanicLabRadResult]?
 
 
-    var id: String { return patID }
+    var id: String { return patID ?? "" }
     var genderAge: String { return genderAgeNameEn ?? "" }
     var visitId: String { return visitID ?? "0" }
     var placeId: String { return placeID ?? "" }
@@ -190,8 +194,8 @@ struct OutpatientPatient: Decodable, Patient {
     var financialAccount: String { return patFinanCount ?? "" }
     var flagImageName: String { return patImage ?? "" }
     var countyFlag: UIImage?
-    var name: String { return nameInEnglish }
-    var nationality: String { return nationalityInEnglish }
+    var name: String { return nameInEnglish ?? "" }
+    var nationality: String { return nationalityInEnglish ?? "" }
     var bloodType: String { return "" }
     var age: String { return ageDec ?? "" }
 
@@ -344,7 +348,7 @@ struct EmergencyPatient: Decodable, Patient {
 }
 
 struct ClinicalPatient: Decodable, Patient {
-    private let ageDec: String
+    private let ageDec: String?
     var walkFlag :String?
     var assistantDocID:String?
     var btnCategory:String?
@@ -353,8 +357,10 @@ struct ClinicalPatient: Decodable, Patient {
     var clinitLetter:String?
     var clinicNameAr:String?
     var clinicNameEN:String?
-    private let nameInEnglish: String
-    private let nameInArabic: String
+    // Tolerate null name fields (BHG test sends COMPLETEPATNAME / _EN as null
+    // for some appointments). Computed accessors fall back to "".
+    private let nameInEnglish: String?
+    private let nameInArabic: String?
     var convReq:String?
     var convConsultionID:String?
     var convRemark:String?
@@ -366,7 +372,7 @@ struct ClinicalPatient: Decodable, Patient {
     var empNameEn:String?
     var erFlag:String?
     var expectedDate:String?
-    var genderAGE: String
+    var genderAGE: String?
     var genderAgeNameAr:String?
     var genderAgeNameEn:String?
     var genderNameAr:String?
@@ -376,8 +382,10 @@ struct ClinicalPatient: Decodable, Patient {
     var mappedClinicID:String?
     var motherPatientID:String?
     var motherVisitID:String?
-    private let nationalityInEnglish: String
-    private let nationalityInArabic: String
+    // Tolerate null nationality (NAT_NAME_EN / NAT_NAME_AR are null
+    // for unregistered nationalities).
+    private let nationalityInEnglish: String?
+    private let nationalityInArabic: String?
     var newBornIn:String?
     var newBornOut:String?
     var noSpecialConsution:String?
@@ -386,7 +394,7 @@ struct ClinicalPatient: Decodable, Patient {
     var overBook:String?
     var painAssessValue:String?
     var patFinanCount:String?
-    var patID: String
+    var patID: String?
     var patMobile:String?
     var patClinicFlag:String?
     var patNoteDesc:String?
@@ -423,7 +431,7 @@ struct ClinicalPatient: Decodable, Patient {
     var panicRadResults: [ClinicalPatientPanicLabRadResult]?
 
 
-    var id: String { return patID }
+    var id: String { return patID ?? "" }
     var genderAge: String { return genderAgeNameEn ?? "" }
     var visitId: String { return visitID ?? "0" }
     var placeId: String { return placeID ?? "" }
@@ -431,10 +439,10 @@ struct ClinicalPatient: Decodable, Patient {
     var financialAccount: String { return patFinanCount ?? "" }
     var flagImageName: String { return patImage ?? "" }
     var countyFlag: UIImage?
-    var name: String { return nameInEnglish }
-    var nationality: String { return nationalityInEnglish }
+    var name: String { return nameInEnglish ?? "" }
+    var nationality: String { return nationalityInEnglish ?? "" }
     var bloodType: String { return "" }
-    var age: String { return ageDec }
+    var age: String { return ageDec ?? "" }
 
 
   enum CodingKeys: String, CodingKey {
@@ -528,84 +536,84 @@ struct ClinicalPatient: Decodable, Patient {
 extension ClinicalPatient {
   init(from decoder: Decoder) throws {
       let container = try decoder.container(keyedBy: CodingKeys.self)
-      let ageDec = try container.decode(String.self, forKey: .ageDec)
-      let walkFlag = try container.decode(String.self, forKey: .walkFlag)
-      let assistantDocID = try container.decode(String.self, forKey: .assistantDocID)
-      let btnCategory = try container.decode(String.self, forKey: .btnCategory)
-      let cashierFlag = try container.decode(String.self, forKey: .cashierFlag)
-      let checkPatHasOPD = try container.decode(String.self, forKey: .checkPatHasOPD)
-      let clinitLetter = try container.decode(String.self, forKey: .clinitLetter)
-      let clinicNameAr = try container.decode(String.self, forKey: .clinicNameAr)
-      let clinicNameEN = try container.decode(String.self, forKey: .clinicNameEN)
-      let nameInEnglish = try container.decode(String.self, forKey: .nameInEnglish)
-      let nameInArabic = try container.decode(String.self, forKey: .nameInArabic)
+      let ageDec = try? container.decode(String.self, forKey: .ageDec)
+      let walkFlag = try? container.decode(String.self, forKey: .walkFlag)
+      let assistantDocID = try? container.decode(String.self, forKey: .assistantDocID)
+      let btnCategory = try? container.decode(String.self, forKey: .btnCategory)
+      let cashierFlag = try? container.decode(String.self, forKey: .cashierFlag)
+      let checkPatHasOPD = try? container.decode(String.self, forKey: .checkPatHasOPD)
+      let clinitLetter = try? container.decode(String.self, forKey: .clinitLetter)
+      let clinicNameAr = try? container.decode(String.self, forKey: .clinicNameAr)
+      let clinicNameEN = try? container.decode(String.self, forKey: .clinicNameEN)
+      let nameInEnglish = try? container.decode(String.self, forKey: .nameInEnglish)
+      let nameInArabic = try? container.decode(String.self, forKey: .nameInArabic)
       
-      let convReq = try container.decode(String.self, forKey: .convReq)
-      let convConsultionID = try container.decode(String.self, forKey: .convConsultionID)
-      let convRemark = try container.decode(String.self, forKey: .convRemark)
-      let ctasScore = try container.decode(String.self, forKey: .ctasScore)
-      let dischargeFlag = try container.decode(String.self, forKey: .dischargeFlag)
-      let dsiplayMode = try container.decode(String.self, forKey: .dsiplayMode)
-      let doneDoctorId = try container.decode(String.self, forKey: .doneDoctorId)
-      let empNameAr = try container.decode(String.self, forKey: .empNameAr)
-      let empNameEn = try container.decode(String.self, forKey: .empNameEn)
-      let erFlag = try container.decode(String.self, forKey: .erFlag)
-      let expectedDate = try container.decode(String.self, forKey: .expectedDate)
+      let convReq = try? container.decode(String.self, forKey: .convReq)
+      let convConsultionID = try? container.decode(String.self, forKey: .convConsultionID)
+      let convRemark = try? container.decode(String.self, forKey: .convRemark)
+      let ctasScore = try? container.decode(String.self, forKey: .ctasScore)
+      let dischargeFlag = try? container.decode(String.self, forKey: .dischargeFlag)
+      let dsiplayMode = try? container.decode(String.self, forKey: .dsiplayMode)
+      let doneDoctorId = try? container.decode(String.self, forKey: .doneDoctorId)
+      let empNameAr = try? container.decode(String.self, forKey: .empNameAr)
+      let empNameEn = try? container.decode(String.self, forKey: .empNameEn)
+      let erFlag = try? container.decode(String.self, forKey: .erFlag)
+      let expectedDate = try? container.decode(String.self, forKey: .expectedDate)
       
-      let genderAGE = try container.decode(String.self, forKey: .genderAGE)
-      let genderAgeNameAr = try container.decode(String.self, forKey: .genderAgeNameAr)
-      let genderAgeNameEn = try container.decode(String.self, forKey: .genderAgeNameEn)
-      let genderNameAr = try container.decode(String.self, forKey: .genderNameAr)
-      let genderNameEn = try container.decode(String.self, forKey: .genderNameEn)
-      let highLightFlag = try container.decode(String.self, forKey: .highLightFlag)
-      let homeVisitFlag = try container.decode(String.self, forKey: .homeVisitFlag)
-      let mappedClinicID = try container.decode(String.self, forKey: .mappedClinicID)
-      let motherPatientID = try container.decode(String.self, forKey: .motherPatientID)
-      let motherVisitID = try container.decode(String.self, forKey: .motherVisitID)
-      let nationalityInEnglish = try container.decode(String.self, forKey: .nationalityInEnglish)
+      let genderAGE = try? container.decode(String.self, forKey: .genderAGE)
+      let genderAgeNameAr = try? container.decode(String.self, forKey: .genderAgeNameAr)
+      let genderAgeNameEn = try? container.decode(String.self, forKey: .genderAgeNameEn)
+      let genderNameAr = try? container.decode(String.self, forKey: .genderNameAr)
+      let genderNameEn = try? container.decode(String.self, forKey: .genderNameEn)
+      let highLightFlag = try? container.decode(String.self, forKey: .highLightFlag)
+      let homeVisitFlag = try? container.decode(String.self, forKey: .homeVisitFlag)
+      let mappedClinicID = try? container.decode(String.self, forKey: .mappedClinicID)
+      let motherPatientID = try? container.decode(String.self, forKey: .motherPatientID)
+      let motherVisitID = try? container.decode(String.self, forKey: .motherVisitID)
+      let nationalityInEnglish = try? container.decode(String.self, forKey: .nationalityInEnglish)
       
-      let nationalityInArabic = try container.decode(String.self, forKey: .nationalityInArabic)
-      let newBornIn = try container.decode(String.self, forKey: .newBornIn)
-      let newBornOut = try container.decode(String.self, forKey: .newBornOut)
-      let noSpecialConsution = try container.decode(String.self, forKey: .noSpecialConsution)
-      let opCallArrivalDate = try container.decode(String.self, forKey: .opCallArrivalDate)
-      let outNoofPats = try container.decode(String.self, forKey: .outNoofPats)
-      let overBook = try container.decode(String.self, forKey: .overBook)
-      let painAssessValue = try container.decode(String.self, forKey: .painAssessValue)
-      let patFinanCount = try container.decode(String.self, forKey: .patFinanCount)
-      let patID = try container.decode(String.self, forKey: .patID)
-      let patMobile = try container.decode(String.self, forKey: .patMobile)
+      let nationalityInArabic = try? container.decode(String.self, forKey: .nationalityInArabic)
+      let newBornIn = try? container.decode(String.self, forKey: .newBornIn)
+      let newBornOut = try? container.decode(String.self, forKey: .newBornOut)
+      let noSpecialConsution = try? container.decode(String.self, forKey: .noSpecialConsution)
+      let opCallArrivalDate = try? container.decode(String.self, forKey: .opCallArrivalDate)
+      let outNoofPats = try? container.decode(String.self, forKey: .outNoofPats)
+      let overBook = try? container.decode(String.self, forKey: .overBook)
+      let painAssessValue = try? container.decode(String.self, forKey: .painAssessValue)
+      let patFinanCount = try? container.decode(String.self, forKey: .patFinanCount)
+      let patID = try? container.decode(String.self, forKey: .patID)
+      let patMobile = try? container.decode(String.self, forKey: .patMobile)
       
-      let patClinicFlag = try container.decode(String.self, forKey: .patClinicFlag)
-      let patNoteDesc = try container.decode(String.self, forKey: .patNoteDesc)
-      let patStatusNameAr = try container.decode(String.self, forKey: .patStatusNameAr)
-      let patStatusNameEn = try container.decode(String.self, forKey: .patStatusNameEn)
-      let patImage = try container.decode(String.self, forKey: .patImage)
-      let placeID = try container.decode(String.self, forKey: .placeID)
-      let queueMappedID = try container.decode(String.self, forKey: .queueMappedID)
-      let queueScreenCalled = try container.decode(String.self, forKey: .queueScreenCalled)
-      let queSer = try container.decode(String.self, forKey: .queSer)
-      let queSysSer = try container.decode(String.self, forKey: .queSysSer)
-      let recallStatus = try container.decode(String.self, forKey: .recallStatus)
+      let patClinicFlag = try? container.decode(String.self, forKey: .patClinicFlag)
+      let patNoteDesc = try? container.decode(String.self, forKey: .patNoteDesc)
+      let patStatusNameAr = try? container.decode(String.self, forKey: .patStatusNameAr)
+      let patStatusNameEn = try? container.decode(String.self, forKey: .patStatusNameEn)
+      let patImage = try? container.decode(String.self, forKey: .patImage)
+      let placeID = try? container.decode(String.self, forKey: .placeID)
+      let queueMappedID = try? container.decode(String.self, forKey: .queueMappedID)
+      let queueScreenCalled = try? container.decode(String.self, forKey: .queueScreenCalled)
+      let queSer = try? container.decode(String.self, forKey: .queSer)
+      let queSysSer = try? container.decode(String.self, forKey: .queSysSer)
+      let recallStatus = try? container.decode(String.self, forKey: .recallStatus)
       
-      let resDate = try container.decode(String.self, forKey: .resDate)
-      let resType = try container.decode(String.self, forKey: .resType)
-      let schedSerial = try container.decode(String.self, forKey: .schedSerial)
-      let ser = try container.decode(String.self, forKey: .ser)
-      let serColor = try container.decode(String.self, forKey: .serColor)
-      let serviceNameAr = try container.decode(String.self, forKey: .serviceNameAr)
-      let serviceNameEn = try container.decode(String.self, forKey: .serviceNameEn)
-      let serviceTime = try container.decode(String.self, forKey: .serviceTime)
-      let serVStatus = try container.decode(String.self, forKey: .serVStatus)
-      let serVStatusNameEn = try container.decode(String.self, forKey: .serVStatusNameEn)
-      let serVStatusNameAr = try container.decode(String.self, forKey: .serVStatusNameAr)
+      let resDate = try? container.decode(String.self, forKey: .resDate)
+      let resType = try? container.decode(String.self, forKey: .resType)
+      let schedSerial = try? container.decode(String.self, forKey: .schedSerial)
+      let ser = try? container.decode(String.self, forKey: .ser)
+      let serColor = try? container.decode(String.self, forKey: .serColor)
+      let serviceNameAr = try? container.decode(String.self, forKey: .serviceNameAr)
+      let serviceNameEn = try? container.decode(String.self, forKey: .serviceNameEn)
+      let serviceTime = try? container.decode(String.self, forKey: .serviceTime)
+      let serVStatus = try? container.decode(String.self, forKey: .serVStatus)
+      let serVStatusNameEn = try? container.decode(String.self, forKey: .serVStatusNameEn)
+      let serVStatusNameAr = try? container.decode(String.self, forKey: .serVStatusNameAr)
       
-      let shiftID = try container.decode(String.self, forKey: .shiftID)
-      let sigQueueID = try container.decode(String.self, forKey: .sigQueueID)
-      let spec = try container.decode(String.self, forKey: .spec)
-      let vip = try container.decode(String.self, forKey: .vip)
-      let vipLevel = try container.decode(String.self, forKey: .vipLevel)
-      let virology = try container.decode(String.self, forKey: .virology)
+      let shiftID = try? container.decode(String.self, forKey: .shiftID)
+      let sigQueueID = try? container.decode(String.self, forKey: .sigQueueID)
+      let spec = try? container.decode(String.self, forKey: .spec)
+      let vip = try? container.decode(String.self, forKey: .vip)
+      let vipLevel = try? container.decode(String.self, forKey: .vipLevel)
+      let virology = try? container.decode(String.self, forKey: .virology)
       let visitID = try? container.decode(String.self, forKey: .visitID)
       
 //    var scores: [ClinicalPatientScore]?
