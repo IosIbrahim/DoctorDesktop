@@ -240,10 +240,18 @@ extension OutpatientCell {
         nameLabel.text = presenter.patientName
         doctorLabel.text = "DR/ \(presenter.doctorName)"
 
+        // Age line — only show "Age:" prefix when there's an actual numeric
+        // age string. The BHG test server omits AGE_DESC and only sends
+        // GENDER_AGE_NAME_EN ("Old Woman", "Man", "Child"), in which case
+        // "Age: Old Woman" reads weirdly — show the gender bare instead.
         let ageText = presenter.age.trimmingCharacters(in: .whitespaces)
         let genderText = presenter.gender.trimmingCharacters(in: .whitespaces)
-        let parts = [ageText, genderText].filter { !$0.isEmpty }
-        ageLabel.text = parts.isEmpty ? "" : "Age: " + parts.joined(separator: " · ")
+        if !ageText.isEmpty {
+            let suffix = genderText.isEmpty ? "" : " · \(genderText)"
+            ageLabel.text = "Age: \(ageText)\(suffix)"
+        } else {
+            ageLabel.text = genderText
+        }
 
         queueBadge.text = "  \(selectIndex + 1)  "
         mobile = presenter.patMobile
@@ -252,35 +260,36 @@ extension OutpatientCell {
 
     private func applyStatus(_ status: String, scheduled: String) {
         // Arrival(B)=green, Check In(A)=baby blue, Check Out(S)=red, Done(D)=green
-        switch status {
+        // BHG test server sends an empty status for fresh visits — default to
+        // Arrival so the doctor can drive the workflow from the very first tap.
+        let effective = status.trimmingCharacters(in: .whitespaces).isEmpty ? "B" : status
+
+        statusButton.isHidden = false
+        statusButton.isUserInteractionEnabled = true
+
+        switch effective {
         case "B":
-            statusButton.isHidden = false
             statusButton.setTitle("Arrival", for: .normal)
             statusButton.backgroundColor = UIColor(red: 37/255, green: 182/255, blue: 110/255, alpha: 1)
-            statusButton.isUserInteractionEnabled = true
         case "A":
-            statusButton.isHidden = false
             statusButton.setTitle("Check In", for: .normal)
             statusButton.backgroundColor = UIColor(red: 28/255, green: 170/255, blue: 222/255, alpha: 1)
-            statusButton.isUserInteractionEnabled = true
         case "S":
-            statusButton.isHidden = false
             statusButton.setTitle("Check Out", for: .normal)
             statusButton.backgroundColor = UIColor(red: 248/255, green: 38/255, blue: 7/255, alpha: 1)
-            statusButton.isUserInteractionEnabled = true
         case "D":
-            statusButton.isHidden = false
             statusButton.setTitle("✓ Done", for: .normal)
             statusButton.backgroundColor = UIColor(red: 37/255, green: 182/255, blue: 110/255, alpha: 1)
             statusButton.isUserInteractionEnabled = false
         default:
+            // Truly unknown status string — hide as a last resort.
             statusButton.isHidden = true
         }
 
         // "1 hours" style waiting hint — show only for not-yet-arrived patients
-        // and only when scheduled time is in the future.
+        // when scheduled time is in the future.
         waitingTimeLabel.text = nil
-        if status == "B", let wait = humanWaitingTime(scheduled: scheduled) {
+        if effective == "B", let wait = humanWaitingTime(scheduled: scheduled) {
             waitingTimeLabel.text = wait
         }
     }
