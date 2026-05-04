@@ -132,9 +132,16 @@ final class SpeechDictation {
                 if result.isFinal { self.cancelInternal() }
             }
             if let error = error {
-                // "No speech detected" arrives as error 1110 — silent no-op.
+                // Silent no-op for normal-flow "errors" — these fire when the
+                // recognizer is stopped mid-session (e.g. user taps Send before
+                // tapping Stop) or when no speech is detected. Treat as success.
+                //   1110 — "No speech detected"
+                //    216 — kAFAssistantErrorDomain "operation cancelled"
+                //    203 — "Recognition Request Was Canceled"
+                //   1101 — "Connection invalidated"
                 let code = (error as NSError).code
-                if code != 1110 {
+                let silent: Set<Int> = [1110, 216, 203, 1101]
+                if !silent.contains(code) {
                     DispatchQueue.main.async {
                         self.delegate?.speechDictation(self,
                                                        didFailWith: error.localizedDescription)
