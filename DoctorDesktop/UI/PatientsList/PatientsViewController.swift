@@ -199,6 +199,7 @@ extension PatientsViewController {
     let unitsPopup = unitsPopupMaker(presenter.title, self.presenter.patientUnits)
     unitsPopup.delegate = self
     unitsPopup.selectedDate = selectedDate
+    unitsPopup.isInpatient = (presenter.componentType == .inpatient)
 
     unitsPopup.onDateChanged = { [weak self, weak unitsPopup] newDate in
       guard let self = self, let popup = unitsPopup else { return }
