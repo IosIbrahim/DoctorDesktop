@@ -2,8 +2,15 @@
 //  OutpatientCell.swift
 //  DoctorDesktop
 //
-//  Programmatic redesign — replaces the XIB-based layout that had
-//  overlapping "Call Patient" button and empty Age field.
+//  Programmatic redesign matching the Android reference:
+//  ┌─────────────────────────────────────────────────────┐
+//  │ ╭──╮  Patient name                          [ 1 ]   │
+//  │ │A │  DR/ Doctor name                    1 hours    │
+//  │ ╰──╯  Age · Gender                  $   [ Arrival ] │
+//  └─────────────────────────────────────────────────────┘
+//  - No "Call Patient" button (removed per design).
+//  - Status pill changes color: Arrival=green, Check In=baby blue,
+//    Check Out=red, ✓ Done=green (disabled).
 //
 
 import UIKit
@@ -28,12 +35,12 @@ class OutpatientCell: UITableViewCell {
         return v
     }()
 
-    // MARK: - Avatar / queue badge
+    // MARK: - Avatar
 
     private let avatarView: UIView = {
         let v = UIView()
         v.backgroundColor = UIColor(red: 64/255, green: 178/255, blue: 178/255, alpha: 1)
-        v.layer.cornerRadius = 24
+        v.layer.cornerRadius = 26
         v.translatesAutoresizingMaskIntoConstraints = false
         return v
     }()
@@ -46,9 +53,11 @@ class OutpatientCell: UITableViewCell {
         return i
     }()
 
+    // MARK: - Top right (queue badge + waiting time)
+
     private let queueBadge: UILabel = {
         let l = UILabel()
-        l.backgroundColor = UIColor(red: 1, green: 0.78, blue: 0.0, alpha: 1)   // amber
+        l.backgroundColor = UIColor(red: 1, green: 0.78, blue: 0.0, alpha: 1)
         l.textColor = .white
         l.textAlignment = .center
         l.font = UIFont.systemFont(ofSize: 13, weight: .bold)
@@ -58,7 +67,17 @@ class OutpatientCell: UITableViewCell {
         return l
     }()
 
-    // MARK: - Text
+    private let waitingTimeLabel: UILabel = {
+        let l = UILabel()
+        l.font = UIFont.systemFont(ofSize: 13, weight: .semibold)
+        l.textColor = UIColor(red: 1.0, green: 0.20, blue: 0.16, alpha: 1)  // red
+        l.textAlignment = .right
+        l.translatesAutoresizingMaskIntoConstraints = false
+        l.setContentHuggingPriority(.required, for: .horizontal)
+        return l
+    }()
+
+    // MARK: - Text stack
 
     private let nameLabel: UILabel = {
         let l = UILabel()
@@ -78,15 +97,6 @@ class OutpatientCell: UITableViewCell {
         return l
     }()
 
-    private let clinicLabel: UILabel = {
-        let l = UILabel()
-        l.font = UIFont.systemFont(ofSize: 12, weight: .regular)
-        l.textColor = UIColor(white: 0.45, alpha: 1)
-        l.numberOfLines = 1
-        l.translatesAutoresizingMaskIntoConstraints = false
-        return l
-    }()
-
     private let ageLabel: UILabel = {
         let l = UILabel()
         l.font = UIFont.systemFont(ofSize: 12, weight: .regular)
@@ -95,28 +105,26 @@ class OutpatientCell: UITableViewCell {
         return l
     }()
 
-    // MARK: - Buttons
+    // MARK: - Right side icons / button
+
+    private let payIconLabel: UILabel = {
+        let l = UILabel()
+        l.text = "$"
+        l.font = UIFont.systemFont(ofSize: 22, weight: .bold)
+        l.textColor = UIColor(white: 0.55, alpha: 1)
+        l.textAlignment = .center
+        l.translatesAutoresizingMaskIntoConstraints = false
+        return l
+    }()
 
     private let statusButton: UIButton = {
         let b = UIButton(type: .system)
         b.titleLabel?.font = UIFont.systemFont(ofSize: 13, weight: .semibold)
         b.layer.cornerRadius = 6
         b.setTitleColor(.white, for: .normal)
-        b.contentEdgeInsets = UIEdgeInsets(top: 6, left: 12, bottom: 6, right: 12)
+        b.contentEdgeInsets = UIEdgeInsets(top: 6, left: 14, bottom: 6, right: 14)
         b.translatesAutoresizingMaskIntoConstraints = false
         b.addTarget(self, action: #selector(checkoutOnTap), for: .touchUpInside)
-        return b
-    }()
-
-    private let callButton: UIButton = {
-        let b = UIButton(type: .system)
-        b.setTitle("Call Patient", for: .normal)
-        b.titleLabel?.font = UIFont.systemFont(ofSize: 14, weight: .semibold)
-        b.setTitleColor(.white, for: .normal)
-        b.backgroundColor = UIColor(red: 0.2, green: 0.55, blue: 0.95, alpha: 1)
-        b.layer.cornerRadius = 8
-        b.translatesAutoresizingMaskIntoConstraints = false
-        b.addTarget(self, action: #selector(callOnTap), for: .touchUpInside)
         return b
     }()
 
@@ -148,10 +156,10 @@ class OutpatientCell: UITableViewCell {
         card.addSubview(queueBadge)
         card.addSubview(nameLabel)
         card.addSubview(doctorLabel)
-        card.addSubview(clinicLabel)
         card.addSubview(ageLabel)
+        card.addSubview(payIconLabel)
         card.addSubview(statusButton)
-        card.addSubview(callButton)
+        card.addSubview(waitingTimeLabel)
 
         NSLayoutConstraint.activate([
             // Card
@@ -160,52 +168,52 @@ class OutpatientCell: UITableViewCell {
             card.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 12),
             card.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -12),
 
-            // Avatar
+            // Avatar — vertically centered in the card
             avatarView.leadingAnchor.constraint(equalTo: card.leadingAnchor, constant: 12),
-            avatarView.topAnchor.constraint(equalTo: card.topAnchor, constant: 12),
-            avatarView.widthAnchor.constraint(equalToConstant: 48),
-            avatarView.heightAnchor.constraint(equalToConstant: 48),
+            avatarView.centerYAnchor.constraint(equalTo: card.centerYAnchor),
+            avatarView.widthAnchor.constraint(equalToConstant: 52),
+            avatarView.heightAnchor.constraint(equalToConstant: 52),
 
             avatarImageView.centerXAnchor.constraint(equalTo: avatarView.centerXAnchor),
             avatarImageView.centerYAnchor.constraint(equalTo: avatarView.centerYAnchor),
-            avatarImageView.widthAnchor.constraint(equalToConstant: 28),
-            avatarImageView.heightAnchor.constraint(equalToConstant: 28),
+            avatarImageView.widthAnchor.constraint(equalToConstant: 30),
+            avatarImageView.heightAnchor.constraint(equalToConstant: 30),
 
-            // Queue badge — top right
+            // Queue badge — top-right
             queueBadge.topAnchor.constraint(equalTo: card.topAnchor, constant: 12),
             queueBadge.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -12),
-            queueBadge.widthAnchor.constraint(greaterThanOrEqualToConstant: 24),
+            queueBadge.widthAnchor.constraint(greaterThanOrEqualToConstant: 26),
             queueBadge.heightAnchor.constraint(equalToConstant: 22),
 
-            // Name + doctor + clinic stack — right of avatar
-            nameLabel.topAnchor.constraint(equalTo: avatarView.topAnchor),
+            // Name — top, between avatar and queue badge
+            nameLabel.topAnchor.constraint(equalTo: card.topAnchor, constant: 12),
             nameLabel.leadingAnchor.constraint(equalTo: avatarView.trailingAnchor, constant: 12),
             nameLabel.trailingAnchor.constraint(equalTo: queueBadge.leadingAnchor, constant: -8),
 
+            // Doctor
             doctorLabel.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 4),
             doctorLabel.leadingAnchor.constraint(equalTo: nameLabel.leadingAnchor),
-            doctorLabel.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -12),
+            doctorLabel.trailingAnchor.constraint(lessThanOrEqualTo: waitingTimeLabel.leadingAnchor, constant: -8),
 
-            clinicLabel.topAnchor.constraint(equalTo: doctorLabel.bottomAnchor, constant: 2),
-            clinicLabel.leadingAnchor.constraint(equalTo: nameLabel.leadingAnchor),
-            clinicLabel.trailingAnchor.constraint(equalTo: statusButton.leadingAnchor, constant: -8),
-
-            // Age — bottom-left of text section
-            ageLabel.topAnchor.constraint(equalTo: clinicLabel.bottomAnchor, constant: 4),
+            // Age
+            ageLabel.topAnchor.constraint(equalTo: doctorLabel.bottomAnchor, constant: 4),
             ageLabel.leadingAnchor.constraint(equalTo: nameLabel.leadingAnchor),
+            ageLabel.bottomAnchor.constraint(lessThanOrEqualTo: card.bottomAnchor, constant: -12),
 
-            // Status button — right of card, vertically centered with clinic line
-            statusButton.centerYAnchor.constraint(equalTo: clinicLabel.centerYAnchor),
+            // $ icon — left of status button on the bottom-right
+            payIconLabel.centerYAnchor.constraint(equalTo: statusButton.centerYAnchor),
+            payIconLabel.trailingAnchor.constraint(equalTo: statusButton.leadingAnchor, constant: -10),
+            payIconLabel.widthAnchor.constraint(equalToConstant: 18),
+
+            // Waiting time — above status button (where Android puts "1 hours")
+            waitingTimeLabel.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -12),
+            waitingTimeLabel.bottomAnchor.constraint(equalTo: statusButton.topAnchor, constant: -4),
+
+            // Status button — bottom-right
             statusButton.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -12),
-            statusButton.heightAnchor.constraint(equalToConstant: 28),
-            statusButton.widthAnchor.constraint(greaterThanOrEqualToConstant: 80),
-
-            // Call button — full width along bottom, well below text
-            callButton.topAnchor.constraint(greaterThanOrEqualTo: ageLabel.bottomAnchor, constant: 8),
-            callButton.leadingAnchor.constraint(equalTo: card.leadingAnchor, constant: 12),
-            callButton.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -12),
-            callButton.bottomAnchor.constraint(equalTo: card.bottomAnchor, constant: -12),
-            callButton.heightAnchor.constraint(equalToConstant: 36),
+            statusButton.bottomAnchor.constraint(equalTo: card.bottomAnchor, constant: -12),
+            statusButton.heightAnchor.constraint(equalToConstant: 30),
+            statusButton.widthAnchor.constraint(greaterThanOrEqualToConstant: 90),
         ])
     }
 
@@ -213,19 +221,14 @@ class OutpatientCell: UITableViewCell {
         super.prepareForReuse()
         nameLabel.text = ""
         doctorLabel.text = ""
-        clinicLabel.text = ""
         ageLabel.text = ""
         avatarImageView.image = nil
+        waitingTimeLabel.text = nil
         statusButton.isUserInteractionEnabled = true
     }
 
     @objc private func checkoutOnTap() {
         delegade?.changeStatus(selectIndex)
-    }
-
-    @objc private func callOnTap() {
-        guard !mobile.isEmpty, let url = URL(string: "tel://\(mobile)") else { return }
-        UIApplication.shared.open(url, options: [:], completionHandler: nil)
     }
 }
 
@@ -236,35 +239,62 @@ extension OutpatientCell {
         avatarImageView.image = presenter.genderAgeImage
         nameLabel.text = presenter.patientName
         doctorLabel.text = "DR/ \(presenter.doctorName)"
-        clinicLabel.text = presenter.clinicTitle
+
         let ageText = presenter.age.trimmingCharacters(in: .whitespaces)
         let genderText = presenter.gender.trimmingCharacters(in: .whitespaces)
         let parts = [ageText, genderText].filter { !$0.isEmpty }
         ageLabel.text = parts.isEmpty ? "" : "Age: " + parts.joined(separator: " · ")
+
         queueBadge.text = "  \(selectIndex + 1)  "
         mobile = presenter.patMobile
-        applyStatus(presenter.servStatus)
+        applyStatus(presenter.servStatus, scheduled: presenter.time)
     }
 
-    private func applyStatus(_ status: String) {
-        statusButton.isHidden = false
+    private func applyStatus(_ status: String, scheduled: String) {
+        // Arrival(B)=green, Check In(A)=baby blue, Check Out(S)=red, Done(D)=green
         switch status {
         case "B":
+            statusButton.isHidden = false
             statusButton.setTitle("Arrival", for: .normal)
             statusButton.backgroundColor = UIColor(red: 37/255, green: 182/255, blue: 110/255, alpha: 1)
+            statusButton.isUserInteractionEnabled = true
         case "A":
+            statusButton.isHidden = false
             statusButton.setTitle("Check In", for: .normal)
             statusButton.backgroundColor = UIColor(red: 28/255, green: 170/255, blue: 222/255, alpha: 1)
+            statusButton.isUserInteractionEnabled = true
         case "S":
+            statusButton.isHidden = false
             statusButton.setTitle("Check Out", for: .normal)
             statusButton.backgroundColor = UIColor(red: 248/255, green: 38/255, blue: 7/255, alpha: 1)
+            statusButton.isUserInteractionEnabled = true
         case "D":
+            statusButton.isHidden = false
             statusButton.setTitle("✓ Done", for: .normal)
             statusButton.backgroundColor = UIColor(red: 37/255, green: 182/255, blue: 110/255, alpha: 1)
             statusButton.isUserInteractionEnabled = false
         default:
             statusButton.isHidden = true
         }
+
+        // "1 hours" style waiting hint — show only for not-yet-arrived patients
+        // and only when scheduled time is in the future.
+        waitingTimeLabel.text = nil
+        if status == "B", let wait = humanWaitingTime(scheduled: scheduled) {
+            waitingTimeLabel.text = wait
+        }
+    }
+
+    /// Returns "Xm" or "X hours" if scheduled time is in the future, else nil.
+    private func humanWaitingTime(scheduled: String) -> String? {
+        let date = scheduled.ConvertToDate
+        let diff = date.timeIntervalSinceNow
+        guard diff > 30 else { return nil }
+        let hrs = Int(diff / 3600)
+        let mins = Int(diff / 60) % 60
+        if hrs > 0 { return "\(hrs) hours" }
+        if mins > 0 { return "\(mins) min" }
+        return nil
     }
 }
 
@@ -285,7 +315,7 @@ extension OutpatientCell {
     }
 }
 
-// MARK: - Helpers (kept from old file)
+// MARK: - Helpers
 
 extension UIColor {
     class func fromHex(hex: String) -> UIColor {
@@ -321,7 +351,6 @@ extension UIColor {
 
 extension String {
     var ConvertToDate: Date {
-        let dateString = self
         let f = DateFormatter()
         let formats = [
             "yyyy-MM-dd'T'HH:mm:ss.SSSZ",
@@ -339,7 +368,7 @@ extension String {
         ]
         for fmt in formats {
             f.dateFormat = fmt
-            if let d = f.date(from: dateString) { return d }
+            if let d = f.date(from: self) { return d }
         }
         return Date()
     }
