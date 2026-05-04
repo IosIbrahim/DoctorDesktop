@@ -155,6 +155,14 @@ class PatientsViewController: UIViewController, NVActivityIndicatorViewable {
     // refreshes its data from the server.
     selectedUnitIndex = nil
     presenter.clearData()
+    // CRITICAL: reload BEFORE the next floor selection re-shows the table.
+    // Without this, the tableView keeps the previous floor's row-count
+    // cache (e.g. 5 rows) while `inpatientPatients` is now empty —
+    // the brief window between popping UnitsPopup and the next
+    // `getPatientsDetails` callback triggers a layout pass that asks for
+    // `cellForRowAt` rows that no longer exist, crashing on
+    // `inpatientPatients[indexPath.row]` (Index out of range).
+    tableView.reloadData()
     setContentVisible(false)
     getPatientsUnits()
   }
@@ -363,6 +371,13 @@ extension PatientsViewController {
     case .emergency:
       presenter.getEmergencyPatients(withDate: selectedDate) {
         self.stopAnimating()
+        // Defensive: ensure the table is unhidden when fresh emergency
+        // data arrives. If any prior code path (e.g. an earlier
+        // `didSelectDate`) hid the content area, the user would see the
+        // tab counts update but the rows would never appear because no
+        // emergency path calls `setContentVisible(true)`. Re-asserting
+        // visibility on every reload keeps the contract simple.
+        self.setContentVisible(true)
         self.triagedCountLabel.text = "\(self.presenter.triagedEmergencyPatients.count)"
         self.notTriagedCountLabel.text = "\(self.presenter.notTriagedEmergencyPatients.count)"
         self.tableView.reloadData()
@@ -409,7 +424,19 @@ extension PatientsViewController {
     selectedDate = date
     selectedUnitIndex = nil   // allow re-selection of same clinic index on new date
     presenter.clearData()
-    setContentVisible(false)  // hide content — UnitsPopup is about to appear again
+    // Same staleness fix as `backToClinics()` — pair `clearData()` with a
+    // reload so the table never sees a row-count > array-count.
+    tableView.reloadData()
+    // Only hide content for clinic/floor flows (a UnitsPopup is about to be
+    // pushed and we don't want the stale table peeking under it). The
+    // emergency flow has NO UnitsPopup — it goes straight from date change
+    // to fetch-and-reload — so hiding the table here would leave it
+    // permanently hidden because no code path on the emergency side calls
+    // `setContentVisible(true)`. That's the bug where the patient count
+    // updated to 45/3 but the table stayed empty after picking a date.
+    if presenter.componentType != .emergency {
+      setContentVisible(false)
+    }
     getPatientsUnits()
   }
 }
@@ -434,19 +461,30 @@ extension PatientsViewController: UITableViewDataSource {
   }
   
   func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    // Defensive bounds checks. UITableView caches the row count returned by
+    // `numberOfRowsInSection` at the last `reloadData()`, so any mutation of
+    // the underlying array without a paired reload can leave the table asking
+    // for indexes that no longer exist (see `backToClinics()` / `didSelectDate`).
+    // The concrete fix lives in those callers; this guard is a safety net so
+    // a future code path with the same shape returns an empty cell instead of
+    // crashing on `Index out of range`.
     switch presenter.componentType {
  //   case .inpatient,.nicu, .ICU:
     case .inpatient:
+      guard indexPath.row < presenter.inpatientPatients.count else { return UITableViewCell() }
       return self.inpatientCellMaker(tableView, indexPath, self.presenter.inpatientPatients[indexPath.row])
     case .outpatient:
+        guard indexPath.row < presenter.outpatientPatients.count else { return UITableViewCell() }
         let cell = outpatientCellMaker(tableView, indexPath, presenter.outpatientPatients[indexPath.row])
         cell.selectIndex = indexPath.row
         cell.delegade = self
       return cell
     case .emergency:
-      let emergencyCellPresenter = self.isTriagedSelected ?
-        EmergencyCellPresenterImpl(with: presenter.triagedEmergencyPatients[indexPath.row]) :
-        EmergencyCellPresenterImpl(with: presenter.notTriagedEmergencyPatients[indexPath.row])
+      let source = self.isTriagedSelected
+        ? presenter.triagedEmergencyPatients
+        : presenter.notTriagedEmergencyPatients
+      guard indexPath.row < source.count else { return UITableViewCell() }
+      let emergencyCellPresenter = EmergencyCellPresenterImpl(with: source[indexPath.row])
       return EmergencyCell.dequeue(from: tableView, for: indexPath, with: emergencyCellPresenter)
 //    case .clinicalAlert :
 //      return clinicalAlertCellMaker(tableView, indexPath, presenter.clinicalPatients[indexPath.row])
@@ -486,8 +524,11 @@ extension PatientsViewController: UITableViewDelegate {
   
   func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
     tableView.deselectRow(at: indexPath, animated: true)
+    // Same staleness concern as `cellForRowAt` — bail early if the tap somehow
+    // lands on a row that has already been removed from the data source.
     switch presenter.componentType {
     case .outpatient:
+        guard indexPath.row < presenter.outpatientPatients.count else { return }
         self.initializePatientOverviewSideMenu(patient: presenter.outpatientPatients[indexPath.row])
         let args = ["viewType":"overview",
                     "patient":presenter.outpatientPatients[indexPath.row],
@@ -505,6 +546,7 @@ extension PatientsViewController: UITableViewDelegate {
         
  //   case .inpatient,.nicu, .ICU:
     case .inpatient:
+        guard indexPath.row < presenter.inpatientPatients.count else { return }
         UserDefaults.standard.set(presenter.inpatientPatients[indexPath.row].id, forKey: "patient_id") //setObject
 
           UserDefaults.standard.set(presenter.inpatientPatients[indexPath.row].visitId, forKey: "visit_id") //setObject
@@ -516,15 +558,14 @@ extension PatientsViewController: UITableViewDelegate {
                   "user":presenter.user] as [String : Any]
       navigationCoordinator?.next(arguments: args)
     case .emergency:
+      let source = self.isTriagedSelected
+        ? presenter.triagedEmergencyPatients
+        : presenter.notTriagedEmergencyPatients
+      guard indexPath.row < source.count else { return }
       var args = ["viewType":"overview",
                   "user":presenter.user] as [String : Any]
-      if self.isTriagedSelected {
-        self.initializePatientOverviewSideMenu(patient: self.presenter.triagedEmergencyPatients[indexPath.row])
-        args["patient"] = presenter.triagedEmergencyPatients[indexPath.row]
-      } else {
-        self.initializePatientOverviewSideMenu(patient: self.presenter.notTriagedEmergencyPatients[indexPath.row])
-        args["patient"] = presenter.notTriagedEmergencyPatients[indexPath.row]
-      }
+      self.initializePatientOverviewSideMenu(patient: source[indexPath.row])
+      args["patient"] = source[indexPath.row]
         args["permission"] = presenter.permission
       navigationCoordinator?.next(arguments: args)
       //present(SideMenuManager.default.menuLeftNavigationController!, animated: true, completion: nil)

@@ -300,8 +300,8 @@ struct EmergencyPatient: Decodable, Patient {
   var financialAccount: String
   var flagImageName: String
   var countyFlag: UIImage?
-  var name: String { return nameInEnglish }
-  var nationality: String { return nationalityInEnglish }
+  var name: String { return nameInEnglish.isEmpty ? nameInArabic : nameInEnglish }
+  var nationality: String { return nationalityInEnglish.isEmpty ? nationalityInArabic : nationalityInEnglish }
   var bloodType: String { return "" }
 
   var arrivalMethod: String? { return arrivalMethodInEnglish }
@@ -323,6 +323,40 @@ struct EmergencyPatient: Decodable, Patient {
     case placeId = "PLACE_ID"
     case financialAccount = "PATFINANACCOUNT"
     case flagImageName = "PIC_PATH"
+  }
+
+  // Tolerant decoder.
+  //
+  // Why hand-rolled instead of synthesized Decodable:
+  // The server's get_er_patients response sends several fields as `null`
+  // (PAIN_ASSESMENT_VALUE, UCAF_DATE, CTAS_SCORE_VALUE, ARRIVAL_TYPE_NAME_EN…)
+  // and occasionally omits ITEM_DESC_EN / NAT_NAME_EN when only the Arabic
+  // pair is populated. Synthesised Decodable threw on the very first such
+  // row, which made the OUTER `[EmergencyPatient]` decode fail entirely —
+  // the translation layer's `try?` silently swallowed the error and returned
+  // [], so the UI showed no rows even though the JSON clearly had patients.
+  //
+  // `try?` on every field plus a "" fallback means a single missing/null
+  // string can never drop the row. This mirrors the same defensive pattern
+  // documented in CLAUDE.md and used by DoctorNurseNote.
+  init(from decoder: Decoder) throws {
+    let c = try decoder.container(keyedBy: CodingKeys.self)
+    nameInEnglish          = (try? c.decode(String.self, forKey: .nameInEnglish))         ?? ""
+    nameInArabic           = (try? c.decode(String.self, forKey: .nameInArabic))          ?? ""
+    nationalityInEnglish   = (try? c.decode(String.self, forKey: .nationalityInEnglish))  ?? ""
+    nationalityInArabic    = (try? c.decode(String.self, forKey: .nationalityInArabic))   ?? ""
+    arrivalMethodInEnglish = (try? c.decode(String.self, forKey: .arrivalMethodInEnglish))
+    arrivalMethodInArabic  = (try? c.decode(String.self, forKey: .arrivalMethodInArabic))
+    visitStartDate         = (try? c.decode(String.self, forKey: .visitStartDate))        ?? ""
+    triaged                = (try? c.decode(String.self, forKey: .triaged))               ?? "0"
+    accuteCondition        = (try? c.decode(String.self, forKey: .accuteCondition))
+    id                     = (try? c.decode(String.self, forKey: .id))                    ?? ""
+    genderAge              = (try? c.decode(String.self, forKey: .genderAge))             ?? ""
+    visitId                = (try? c.decode(String.self, forKey: .visitId))               ?? ""
+    placeId                = (try? c.decode(String.self, forKey: .placeId))               ?? ""
+    financialAccount       = (try? c.decode(String.self, forKey: .financialAccount))      ?? ""
+    flagImageName          = (try? c.decode(String.self, forKey: .flagImageName))         ?? ""
+    countyFlag             = nil
   }
 
   /// Bridge any Patient (e.g. from the Overview screen) into an EmergencyPatient

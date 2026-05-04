@@ -238,14 +238,22 @@ extension TranslationLayerImpl {
     func getEmergencyPatientsDTOsFromJson(_ data: Data) -> EmergencyPatients {
         guard let json = String(data: data, encoding: .utf8), json.contains("ER_PATIENTS_ROW") else { return [] }
         let keyPath = "Root.ER_PATIENTS.ER_PATIENTS_ROW"
-        guard let emergencyPatients = try? EmergencyPatients (data: data, keyPath: keyPath, keyDecodingStrategy: .useDefaultKeys) else {
-            if let emergencyPatient = try? EmergencyPatient (data: data, keyPath: keyPath, keyDecodingStrategy: .useDefaultKeys) {
-                return [emergencyPatient]
-            } else {
-                return []
-            }
+        // Try the array shape first (ER_PATIENTS_ROW with 2+ rows).
+        if let emergencyPatients = try? EmergencyPatients(data: data, keyPath: keyPath, keyDecodingStrategy: .useDefaultKeys) {
+            return emergencyPatients
         }
-        return emergencyPatients
+        // Fall back to the single-object shape (ER_PATIENTS_ROW with exactly 1 row —
+        // the server collapses 1-element arrays to objects, same pattern as REPLY_ROW).
+        if let emergencyPatient = try? EmergencyPatient(data: data, keyPath: keyPath, keyDecodingStrategy: .useDefaultKeys) {
+            return [emergencyPatient]
+        }
+        // Both decode paths failed even though the JSON contained ER_PATIENTS_ROW —
+        // this means a required field on EmergencyPatient was missing or a `null`
+        // tripped a non-optional. Log loudly so the next decode mismatch is
+        // diagnosable from the console (silently returning [] is what hid the
+        // null-name regression in the first place).
+        print("⚠️ [Emergency] decode failed for ER_PATIENTS_ROW — returning []. Body=\(json.prefix(800))…")
+        return []
     }
 }
 
