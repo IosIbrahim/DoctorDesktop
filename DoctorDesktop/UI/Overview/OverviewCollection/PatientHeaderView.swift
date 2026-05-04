@@ -14,7 +14,9 @@ final class PatientHeaderView: UIView {
 
     // MARK: - Constants
 
-    static let preferredHeight: CGFloat = 212
+    /// Tall enough to fit a 2-line patient name without overlapping the
+    /// blood-type / allergy row (some BHG records wrap to two lines).
+    static let preferredHeight: CGFloat = 232
 
     // MARK: - Background
 
@@ -594,9 +596,13 @@ final class PatientHeaderView: UIView {
             infoRowStack.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 6),
 
             // Row 2: Blood | Allergy  (full-width — spanning under avatar too)
+            // Anchor below BOTH the avatar and the info-chip row so a
+            // 2-line patient name (which pushes infoRowStack down) doesn't
+            // overlap the medical row.
             medicalRowStack.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
             medicalRowStack.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
-            medicalRowStack.topAnchor.constraint(equalTo: avatarContainer.bottomAnchor, constant: 8),
+            medicalRowStack.topAnchor.constraint(greaterThanOrEqualTo: avatarContainer.bottomAnchor, constant: 8),
+            medicalRowStack.topAnchor.constraint(greaterThanOrEqualTo: infoRowStack.bottomAnchor, constant: 8),
 
             // Divider top
             dividerTop.topAnchor.constraint(equalTo: medicalRowStack.bottomAnchor, constant: 8),
