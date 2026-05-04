@@ -173,15 +173,18 @@ struct OutpatientPatient: Decodable, Patient {
     var vip:String?
     var vipLevel:String?
     var virology:String?
-    var visitID: String
+    // BHG test server occasionally returns VISIT_ID as null for fresh
+    // appointments — make optional so the synthesized Decodable init
+    // tolerates the null instead of dropping the entire array.
+    var visitID: String?
 //    var scores: [ClinicalPatientScore]?
 //    var panicLabResults: [ClinicalPatientPanicLabRadResult]?
 //    var panicRadResults: [ClinicalPatientPanicLabRadResult]?
-    
-    
+
+
     var id: String { return patID }
     var genderAge: String { return genderAgeNameEn ?? "" }
-    var visitId: String { return visitID }
+    var visitId: String { return visitID ?? "0" }
     var placeId: String { return placeID ?? "" }
     var date: String { return expectedDate ?? ""  }
     var financialAccount: String { return patFinanCount ?? "" }
@@ -413,15 +416,16 @@ struct ClinicalPatient: Decodable, Patient {
     var vip:String?
     var vipLevel:String?
     var virology:String?
-    var visitID: String
+    // Tolerate null VISIT_ID (BHG test server sometimes omits it).
+    var visitID: String?
     var scores: [ClinicalPatientScore]?
     var panicLabResults: [ClinicalPatientPanicLabRadResult]?
     var panicRadResults: [ClinicalPatientPanicLabRadResult]?
-    
-    
+
+
     var id: String { return patID }
     var genderAge: String { return genderAgeNameEn ?? "" }
-    var visitId: String { return visitID }
+    var visitId: String { return visitID ?? "0" }
     var placeId: String { return placeID ?? "" }
     var date: String { return expectedDate ?? ""  }
     var financialAccount: String { return patFinanCount ?? "" }
@@ -602,7 +606,7 @@ extension ClinicalPatient {
       let vip = try container.decode(String.self, forKey: .vip)
       let vipLevel = try container.decode(String.self, forKey: .vipLevel)
       let virology = try container.decode(String.self, forKey: .virology)
-      let visitID = try container.decode(String.self, forKey: .visitID)
+      let visitID = try? container.decode(String.self, forKey: .visitID)
       
 //    var scores: [ClinicalPatientScore]?
 //    var panicLabResults: [ClinicalPatientPanicLabRadResult]?

@@ -123,9 +123,40 @@ class PatientsViewController: UIViewController, NVActivityIndicatorViewable {
       // Hide content — UnitsPopup is about to be pushed immediately on top.
       setContentVisible(false)
       getPatientsUnits()
+      // Replace the default back button so pressing back from the patient
+      // list returns to the clinics popup (re-pushed + refreshed) instead
+      // of popping all the way to the home grid.
+      installClinicsBackButton()
     default:
       getPatientsUnits()
     }
+  }
+
+  /// Custom back button for the outpatient/inpatient flow: re-pushes
+  /// UnitsPopup (with a fresh fetch) so the user can pick a different
+  /// clinic / floor without leaving the screen.
+  private func installClinicsBackButton() {
+    let title: String
+    switch presenter.componentType {
+    case .inpatient: title = "Floors"
+    default:         title = "Clinics"
+    }
+    navigationItem.leftBarButtonItem = UIBarButtonItem(
+      title: "‹ \(title)",
+      style: .plain,
+      target: self,
+      action: #selector(backToClinics)
+    )
+  }
+
+  @objc private func backToClinics() {
+    // Reset selection state so the same clinic can be picked again, then
+    // re-push UnitsPopup. getPatientsUnits() pushes it immediately and
+    // refreshes its data from the server.
+    selectedUnitIndex = nil
+    presenter.clearData()
+    setContentVisible(false)
+    getPatientsUnits()
   }
 
   // MARK: - Content visibility helper
