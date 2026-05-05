@@ -464,6 +464,15 @@ class NetworkLayerImpl: NetworkLayer {
         print("║")
         print("║ OAuth base string:")
         print("║ \(baseString)")
+        print("║")
+        print("║ Postman curl (paste into Import → Raw text):")
+        // The signed URL already carries oauth_* as query params, so the
+        // curl below is byte-for-byte what Alamofire is about to send.
+        // Replay window is short (~5 min before nonce/timestamp expire) —
+        // for a slower replay, strip oauth_* from the URL and configure
+        // Postman's "OAuth 1.0" Auth tab instead (consumer_key=khaber_1,
+        // consumer_secret=…, signature_method=HMAC-SHA1).
+        print("║ \(NetworkLayerImpl.buildSignedCurl(url: signedURL, body: formBody, bearer: bearerToken))")
         print("╚══════════════════════════════════════════════════════════════════════")
 
         let start = Date()
@@ -569,6 +578,22 @@ class NetworkLayerImpl: NetworkLayer {
     /// the signature base string alongside the oauth_* parameters. The URL only
     /// carries the oauth_* params; the form fields stay in the request body.
     ///
+    /// Builds a one-line `curl` for the signed POST so it can be pasted into
+    /// Postman's "Import → Raw text" dialog. The URL already carries oauth_*
+    /// in the query string and `body` is the form body — both go straight in
+    /// without further encoding. Single quotes inside values are escaped per
+    /// POSIX (`'` → `'\''`).
+    static func buildSignedCurl(url: String, body: String, bearer: String?) -> String {
+        func esc(_ s: String) -> String { s.replacingOccurrences(of: "'", with: "'\\''") }
+        var parts = ["curl", "-X", "POST", "'\(esc(url))'"]
+        parts.append("-H"); parts.append("'Content-Type: application/x-www-form-urlencoded'")
+        if let token = bearer, !token.isEmpty {
+            parts.append("-H"); parts.append("'Authorization: Bearer \(esc(token))'")
+        }
+        parts.append("--data"); parts.append("'\(esc(body))'")
+        return parts.joined(separator: " ")
+    }
+
     /// Returns (urlWithOAuth, formBody, baseString) or nil on HMAC failure.
     static func buildOAuthPOST(base: String,
                                formParams: [String: String])

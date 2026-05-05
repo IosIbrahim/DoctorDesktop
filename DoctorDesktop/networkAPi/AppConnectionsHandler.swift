@@ -243,12 +243,24 @@ class AppConnectionsHandler {
 
 struct APILogger {
 
-    static func logRequest(method: String, url: String, params: Any? = nil) {
+    static func logRequest(method: String,
+                           url: String,
+                           params: Any? = nil,
+                           extraHeaders: [String: String]? = nil) {
         let path = shortPath(url)
         var message = "🌐 \(method.uppercased())  \(path)"
         if let params = params, !isEmpty(params) {
             message += "\n       Params │ \(formatted(params))"
         }
+        // Copy-pastable curl command — paste it into Postman via
+        // `Import → Raw text` and it'll auto-fill URL, method, headers,
+        // and body in one shot. The Authorization header (Bearer token
+        // from UserDefaults) is included by default so most endpoints
+        // run as-is. OAuth1-signed endpoints carry an expiring nonce in
+        // the body, so re-sign via Postman's "OAuth 1.0" Auth tab
+        // (consumer_key=khaber_1 / signature_method=HMAC-SHA1) when
+        // replaying after a few minutes.
+        message += "\n       Curl   │ \(curlSnippet(method: method, url: url, params: params, extraHeaders: extraHeaders))"
         SwiftyBeaver.debug(message)
     }
 
@@ -307,6 +319,83 @@ struct APILogger {
         if let data = try? JSONSerialization.data(withJSONObject: obj, options: [.sortedKeys]),
            let str = String(data: data, encoding: .utf8) { return str }
         return "\(params)"
+    }
+
+    // MARK: Postman-friendly curl builder
+    //
+    // Generates a single-line curl command that Postman's "Import → Raw text"
+    // dialog can parse directly. We deliberately keep it on one line (no `\`
+    // continuations) so the user can triple-click to select the whole thing
+    // from the Xcode console.
+
+    /// Public so OAuth-signed paths (which build the request manually) can
+    /// reuse it to emit a one-line curl from their already-signed URL/body.
+    static func curlSnippet(method: String,
+                            url: String,
+                            params: Any?,
+                            extraHeaders: [String: String]?) -> String {
+        let m = method.uppercased()
+
+        // ── Body / query string ─────────────────────────────────────────────
+        // Normalise params into [String: String] so we can urlencode them.
+        var pairs: [(String, String)] = []
+        if let d = params as? [String: String] {
+            pairs = d.map { ($0.key, $0.value) }
+        } else if let d = params as? [String: Any] {
+            pairs = d.map { ($0.key, "\($0.value)") }
+        }
+        let encoded = pairs
+            .map { "\(percent($0.0))=\(percent($0.1))" }
+            .sorted()
+            .joined(separator: "&")
+
+        // ── URL: GET appends params as query string, POST puts them in body ─
+        var fullURL = url
+        if m == "GET", !encoded.isEmpty {
+            fullURL += url.contains("?") ? "&\(encoded)" : "?\(encoded)"
+        }
+
+        // ── Headers ─────────────────────────────────────────────────────────
+        // Default headers cover the common case (Bearer auth + form POST).
+        // Callers can pass `extraHeaders` to override (e.g. the OAuth-signed
+        // endpoints pass their computed `Authorization: OAuth …` header).
+        var headers: [String: String] = [:]
+        if m == "POST" {
+            headers["Content-Type"] = "application/x-www-form-urlencoded"
+        }
+        if let token = UserDefaults.standard.string(forKey: "auth_token") {
+            headers["Authorization"] = "Bearer \(token)"
+        }
+        if let extra = extraHeaders {
+            for (k, v) in extra { headers[k] = v }
+        }
+
+        // ── Compose ─────────────────────────────────────────────────────────
+        var parts = ["curl", "-X", m, "'\(shellEscape(fullURL))'"]
+        for (k, v) in headers.sorted(by: { $0.key < $1.key }) {
+            parts.append("-H")
+            parts.append("'\(shellEscape("\(k): \(v)"))'")
+        }
+        if m != "GET", !encoded.isEmpty {
+            parts.append("--data")
+            parts.append("'\(shellEscape(encoded))'")
+        }
+        return parts.joined(separator: " ")
+    }
+
+    /// Percent-encodes a string for inclusion as a query/form value.
+    /// Uses `urlQueryAllowed` minus `&=+` (standard form-encoding rules).
+    private static func percent(_ s: String) -> String {
+        var allowed = CharacterSet.urlQueryAllowed
+        allowed.remove(charactersIn: "&=+?#")
+        return s.addingPercentEncoding(withAllowedCharacters: allowed) ?? s
+    }
+
+    /// Escapes a string so it survives single-quote wrapping in a shell.
+    /// `'foo'\''bar'` is the canonical POSIX way to embed a single quote
+    /// inside a single-quoted string.
+    private static func shellEscape(_ s: String) -> String {
+        return s.replacingOccurrences(of: "'", with: "'\\''")
     }
 
     private static func prettyData(_ data: Data, cap: Int = 800) -> String {
