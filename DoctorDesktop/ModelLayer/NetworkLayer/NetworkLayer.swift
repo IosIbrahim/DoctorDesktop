@@ -109,6 +109,8 @@ class NetworkLayerImpl: NetworkLayer {
                      params: [String: String],
                      finished: @escaping DataBlock) {
         APILogger.logRequest(method: "GET", url: url, params: params)
+        print("URL:\(url)")
+        print("Params:\(params)")
         let start = Date()
         NetworkLayerImpl.session
             .request(url, parameters: params, headers: authHeaders)
