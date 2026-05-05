@@ -74,6 +74,16 @@ class PatientsViewController: UIViewController, NVActivityIndicatorViewable {
   override func viewWillDisappear(_ animated: Bool) {
     super.viewWillDisappear(true)
     if isMovingFromParentViewController {
+      // CRITICAL: detach the data source BEFORE the back-pop animation
+      // begins. UITableView keeps re-requesting cells during the slide-out
+      // and a parallel viewWillAppear on the destination VC may already be
+      // mutating presenter.inpatientPatients (e.g. clearData() in
+      // backToClinics / didSelectDate), which crashes the in-flight
+      // cellForRowAt call with "Index out of range" on
+      // inpatientPatients[indexPath.row]. With dataSource = nil the table
+      // no longer asks for any more rows during dismissal.
+      tableView.dataSource = nil
+      tableView.delegate   = nil
       navigationCoordinator?.movingBack()
     }
   }

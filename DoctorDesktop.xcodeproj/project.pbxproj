@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 54;
+	objectVersion = 48;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -42,8 +42,6 @@
 		3615BBA22000CE0400A56F9E /* OrderCollectionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3615BBA12000CE0400A56F9E /* OrderCollectionViewController.swift */; };
 		3615BBA42000CE1400A56F9E /* OrderCollectionPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3615BBA32000CE1400A56F9E /* OrderCollectionPresenter.swift */; };
 		361B27252020DDEE00D8215D /* Utility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 361B27242020DDEE00D8215D /* Utility.swift */; };
-		AA0000001111222233335555 /* NVActivityIndicatorViewableCompat.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000001111222233334444 /* NVActivityIndicatorViewableCompat.swift */; };
-		AA0000001111222233337777 /* ToastBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000001111222233336666 /* ToastBar.swift */; };
 		362EDC5D200B8F0B004777EE /* OrderServiceCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 362EDC5B200B8F0B004777EE /* OrderServiceCell.swift */; };
 		362EDC5E200B8F0B004777EE /* OrderServiceCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 362EDC5C200B8F0B004777EE /* OrderServiceCell.xib */; };
 		362EDC61200B924D004777EE /* OrderServiceList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 362EDC60200B924D004777EE /* OrderServiceList.swift */; };
@@ -225,6 +223,8 @@
 		46B646B41FD2E44100D8D340 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 46B646B31FD2E44100D8D340 /* Assets.xcassets */; };
 		46B646B71FD2E44100D8D340 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 46B646B51FD2E44100D8D340 /* LaunchScreen.storyboard */; };
 		519C8271AA69611CACC50198 /* PatientHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AF146219F22A176451A1643 /* PatientHeaderView.swift */; };
+		AA0000001111222233335555 /* NVActivityIndicatorViewableCompat.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000001111222233334444 /* NVActivityIndicatorViewableCompat.swift */; };
+		AA0000001111222233337777 /* ToastBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000001111222233336666 /* ToastBar.swift */; };
 		AABBCC010000000000000001 /* VitalSignsEntryPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCC010000000000000003 /* VitalSignsEntryPresenter.swift */; };
 		AABBCC010000000000000002 /* VitalSignsEntryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCC010000000000000004 /* VitalSignsEntryViewController.swift */; };
 		AABBCC010000000000000006 /* UCAFLoadData.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCC010000000000000007 /* UCAFLoadData.swift */; };
@@ -293,8 +293,6 @@
 		3615BBA12000CE0400A56F9E /* OrderCollectionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrderCollectionViewController.swift; sourceTree = "<group>"; };
 		3615BBA32000CE1400A56F9E /* OrderCollectionPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrderCollectionPresenter.swift; sourceTree = "<group>"; };
 		361B27242020DDEE00D8215D /* Utility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utility.swift; sourceTree = "<group>"; };
-		AA0000001111222233334444 /* NVActivityIndicatorViewableCompat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NVActivityIndicatorViewableCompat.swift; sourceTree = "<group>"; };
-		AA0000001111222233336666 /* ToastBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastBar.swift; sourceTree = "<group>"; };
 		362EDC5B200B8F0B004777EE /* OrderServiceCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrderServiceCell.swift; sourceTree = "<group>"; };
 		362EDC5C200B8F0B004777EE /* OrderServiceCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = OrderServiceCell.xib; sourceTree = "<group>"; };
 		362EDC60200B924D004777EE /* OrderServiceList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrderServiceList.swift; sourceTree = "<group>"; };
@@ -479,6 +477,8 @@
 		46B646B81FD2E44100D8D340 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		5AF146219F22A176451A1643 /* PatientHeaderView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PatientHeaderView.swift; sourceTree = "<group>"; };
 		6C678557DF1A3DB295ACB068 /* Pods-DoctorDesktop.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DoctorDesktop.debug.xcconfig"; path = "Pods/Target Support Files/Pods-DoctorDesktop/Pods-DoctorDesktop.debug.xcconfig"; sourceTree = "<group>"; };
+		AA0000001111222233334444 /* NVActivityIndicatorViewableCompat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NVActivityIndicatorViewableCompat.swift; sourceTree = "<group>"; };
+		AA0000001111222233336666 /* ToastBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastBar.swift; sourceTree = "<group>"; };
 		AABBCC010000000000000003 /* VitalSignsEntryPresenter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VitalSignsEntryPresenter.swift; sourceTree = "<group>"; };
 		AABBCC010000000000000004 /* VitalSignsEntryViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VitalSignsEntryViewController.swift; sourceTree = "<group>"; };
 		AABBCC010000000000000007 /* UCAFLoadData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UCAFLoadData.swift; sourceTree = "<group>"; };
@@ -1966,9 +1966,8 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 11.1;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
-				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_ENFORCE_EXCLUSIVE_ACCESS = none;
-				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
@@ -1979,14 +1978,11 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 4;
+				CURRENT_PROJECT_VERSION = 5;
 				DEVELOPMENT_TEAM = W8QAC6TS8B;
 				INFOPLIST_FILE = DoctorDesktop/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.khabeer.doctor.desktop.new.BGH;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -2004,14 +2000,11 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 4;
+				CURRENT_PROJECT_VERSION = 5;
 				DEVELOPMENT_TEAM = W8QAC6TS8B;
 				INFOPLIST_FILE = DoctorDesktop/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.khabeer.doctor.desktop.new.BGH;
 				PRODUCT_NAME = "$(TARGET_NAME)";

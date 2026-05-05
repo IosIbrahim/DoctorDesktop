@@ -11,7 +11,7 @@ This is an iOS app (`DoctorDesktop`) built with CocoaPods. There is no `package.
 - Build / run via Xcode (⌘R). Command-line equivalent:
   `xcodebuild -workspace DoctorDesktop.xcworkspace -scheme DoctorDesktop -configuration Debug -destination 'platform=iOS Simulator,name=iPhone 15' build`
 
-The default API host is hard-coded as `http://41.33.82.156:29804` in `DoctorDesktop/ModelLayer/NetworkLayer/NetworkLayer.swift` (`AppURLS.ip`). A duplicate copy exists in `DoctorDesktop/networkAPi/Constants.swift` (`Constants.APIProvider.baseIP`) — keep them aligned when changing environments.
+The default API host on `Lite-APP` is `https://pr-h1services04.sherafia.bhg.com.sa` in `DoctorDesktop/ModelLayer/NetworkLayer/NetworkLayer.swift` (`AppURLS.ip`). The path prefix is split into `AppURLS.mobileApi`, currently `/MobileApitest/api/` (test) — a `/MobileApi/api/` (live) version is commented next to it. **Every endpoint must be built as `AppURLS.ip + AppURLS.mobileApi + "endpoint"`** — bypassing `mobileApi` produces malformed URLs like `bhg.com.saMedicalRcordController/...`. A duplicate copy of the host lives in `DoctorDesktop/networkAPi/Constants.swift` (`Constants.APIProvider.baseIP`); keep them aligned when changing environments.
 
 ## High-level architecture
 
@@ -88,6 +88,25 @@ PatientsList → LiteOverviewViewController → ProgressNotesViewController
 - Redesigned: initials badge, inline date, outlined priority chip, lighter shadow/border.
 - Left accent bar removed (was teal/red strip signalling priority — user-requested removal).
 - Reply bubble (`ProgressNoteReplyCell`) unchanged.
+- **Notes are reversed (newest first)** at the view-facing accessor — `ProgressNotesPresenter.notes` returns `applyClientFilter(...).reversed()`. `allNotes` keeps server order so dedup and reply-matching are unaffected.
+
+**Home-grid behavior (`ComponentCollectionViewController`)**
+- Visible tiles filter to `inpatient` / `outpatient` / `emergency` only (ICU, NICU, Consultations are hidden in `visibleComponents`).
+- Refreshes on every `viewWillAppear` after the first (so popping back from a child screen re-fetches counts).
+- Pull-to-refresh `UIRefreshControl` is wired to the same `loadCounts()` entry point. An `isRefreshing` re-entrancy flag prevents pop-back + pull-down from firing two parallel `get_patients_counts` requests.
+
+**`UnitsPopup` adapts to inpatient vs outpatient**
+- `isInpatient` flag set by `PatientsViewController` before pushing.
+- Inpatient: calendar button hidden from nav bar, header label "Clinics" → "Floors", empty-state "No clinics available" → "No floors available". Inpatient floors are not date-scoped.
+- Outpatient: full date picker + "Clinics" header.
+
+**`OutpatientCell` (programmatic, no XIB)**
+- Layout matches Android: avatar (left) → name + DR + age (middle) → queue badge top-right + colored status pill bottom-right. No "Call Patient" button.
+- Status pill is always shown — empty / unknown `serVStatus` defaults to `"B"` (Arrival). Codes `B` / `0` → green Arrival, `A` / `1` → blue Check In, `S` / `2` → red Check Out, `D` / `3` → green ✓ Done (disabled). Tap fires the existing `OutpatientStatus.changeStatus(_:)` delegate, which routes through the existing server `OutpatientController/{arrival,start,perform}Resrvation` endpoints.
+
+**`PatientsViewController` back-pop safety**
+- `viewWillDisappear` sets `tableView.dataSource = nil` and `tableView.delegate = nil` when `isMovingFromParentViewController == true` — stops in-flight `cellForRowAt` calls during the slide-out animation. See the back-pop crash entry under Pitfalls.
+- Custom Back button on the patients screen re-pushes the refreshed `UnitsPopup` instead of falling through to the home grid (`backToClinics()`), so the doctor can pick a different clinic / floor without redoing the date selection.
 
 ## Pitfalls / repeat-incident notes
 
@@ -95,3 +114,10 @@ PatientsList → LiteOverviewViewController → ProgressNotesViewController
 - **Two parallel network stacks coexist.** `DoctorDesktop/networkAPi/` is the legacy direct-Alamofire layer; `DoctorDesktop/ModelLayer/NetworkLayer/` is the newer OAuth-signed layer. New endpoints go in `NetworkLayer.swift`. The legacy `Constants.APIProvider.*` URL strings are still referenced from older screens — do not delete them blindly.
 - **Tolerant decoding is mandatory.** Every DTO field uses `try?` because a single mistyped/missing field server-side has historically dropped entire response arrays. Don't switch to the synthesized `Decodable` init.
 - **OAuth param signing.** `oauthEncode` is the percent-encoder that matches the server's RFC 5849 expectations. Encoding the param string twice produces a 401 — the symptom is "auth was working yesterday and now isn't on a new endpoint."
+- **`.useDefaultKeys` is required for every Stuff-pod decode.** The `Stuff` pod's `init(data:keyPath:)` defaults to `keyDecodingStrategy: .convertFromSnakeCase`, which mangles the BHG server's UPPER_SNAKE_CASE keys (`PROCESS_INFO_CODE` → `pROCESSINFOCODE`) before matching them against explicit `CodingKeys`. Result: every multi-word field decodes as nil/empty and only `ID` survives. Always pass `keyDecodingStrategy: .useDefaultKeys` at every call site in `TranslationLayer.swift`. ~40 sites currently do this.
+- **Patient DTOs must tolerate null `NAT_NAME_EN` / `COMPLETEPATNAME` / `VISIT_ID` / `PATIENTID` / `AGE_DESC`.** Live BHG fills these for most rows; BHG test (`MobileApitest/api/`) returns `null` for at least one row in any multi-patient response. Because Swift array decoding is all-or-nothing, one null in one row drops the entire `CLINIC_PATIENTS_ROW` array — the symptom is "single-patient clinics work but multi-patient clinics show empty." All four fields must be `String?` with `?? ""` accessors across `OutpatientPatient`, `EmergencyPatient`, and `ClinicalPatient`. The custom `init(from:)` in `ClinicalPatient` uses `try?` (not `try`) for every field for the same reason.
+- **Back-pop crash on `inpatientPatients[indexPath.row]`.** When the user pops back from a Patients list, `viewWillAppear` on the destination VC may already call `presenter.clearData()` while the dismissing PatientsViewController's table view is still answering `cellForRowAt`. The result is `Index out of range` even though `numberOfRowsInSection` was correct at the previous reload. Fix lives in `PatientsViewController.viewWillDisappear`: when `isMovingFromParentViewController == true`, set `tableView.dataSource = nil` and `tableView.delegate = nil` so the table stops asking for cells during the slide-out. There are also defensive `guard indexPath.row < array.count` guards in `cellForRowAt` and `didSelectRowAt` as a safety net.
+- **Progress note `VISIT_ID` must come from `visitIdArray`, not `patient.visitId`.** When a patient is constructed from a list row that doesn't carry visit context, `patient.visitId` can be empty or `"0"`. Saving with `VISIT_ID="0"` succeeds (server returns `{"message":"Save Success"}`) but the next `DDDocNurseNotesLoad` query filters by `VISIT_ID_ARRAY=1..N` so the saved note vanishes. `ProgressNotesPresenter.effectiveVisitId` is the canonical source for save / reply / delete — falls back to the first id in `visitIdArray` whenever `patient.visitId` is empty/`"0"`.
+- **Components on the home grid are filtered by `ComponentType` enum, not `MOBILE_FLAG`.** The live BHG server returned `MOBILE_FLAG=1` for tile-eligible modules; the test BHG server returns `MOBILE_FLAG=0` for the same modules. The old `mobileFlag == 1` filter dropped every tile when switching environments. The current filter (`LoginPresenterImpl.login`) is `ComponentType(rawValue: $0.processInfoCode) != nil` — environment-agnostic. The home grid further hides ICU, NICU, and Consultations in `ComponentCollectionViewController.visibleComponents`.
+- **Toastlity removed in favor of in-project `ToastBar.swift`.** The old `Toastlity.xcframework` was a prebuilt binary with no dSYM and triggered "Upload Symbols Failed" on every TestFlight upload. The replacement preserves the public API (`ToastBar(settings: .agent, in:)` / `.show(with:)`) so call sites compile unchanged. There is no longer an `import Toastlity` in any Swift file.
+- **Speech recognition silent-error allow-list.** `SpeechDictation` filters error codes `[1110, 216, 203, 1101]` from the failure path — these are normal-flow cancellations (no speech / operation cancelled / connection invalidated) that fire when the user taps Send while the mic is still recording. Note saves fine; suppressing the alert keeps the UI clean.

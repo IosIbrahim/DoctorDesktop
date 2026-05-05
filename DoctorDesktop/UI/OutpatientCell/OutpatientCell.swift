@@ -55,8 +55,23 @@ class OutpatientCell: UITableViewCell {
 
     // MARK: - Top right (queue badge + waiting time)
 
-    private let queueBadge: UILabel = {
-        let l = UILabel()
+    /// Insets-aware UILabel so the queue badge has proper horizontal padding
+    /// without the old hack of wrapping the digits in spaces (`"  4  "`).
+    /// `intrinsicContentSize` includes the insets so auto-layout can hug it.
+    private final class BadgeLabel: UILabel {
+        var insets = UIEdgeInsets(top: 2, left: 10, bottom: 2, right: 10)
+        override func drawText(in rect: CGRect) {
+            super.drawText(in: UIEdgeInsetsInsetRect(rect, insets))
+        }
+        override var intrinsicContentSize: CGSize {
+            let s = super.intrinsicContentSize
+            return CGSize(width:  s.width  + insets.left + insets.right,
+                          height: s.height + insets.top  + insets.bottom)
+        }
+    }
+
+    private let queueBadge: BadgeLabel = {
+        let l = BadgeLabel()
         l.backgroundColor = UIColor(red: 1, green: 0.78, blue: 0.0, alpha: 1)
         l.textColor = .white
         l.textAlignment = .center
@@ -64,6 +79,13 @@ class OutpatientCell: UITableViewCell {
         l.layer.cornerRadius = 6
         l.layer.masksToBounds = true
         l.translatesAutoresizingMaskIntoConstraints = false
+        // Badge sizes itself to fit its digits + horizontal padding.  Pinning
+        // hugging + compression-resistance to required prevents the layout
+        // engine from stretching the badge to fill the gap between a short
+        // name and the card's trailing edge — the bug from the screenshot
+        // where the "4" badge for "AMINAH AHMED ALOMR" filled the row.
+        l.setContentHuggingPriority(.required, for: .horizontal)
+        l.setContentCompressionResistancePriority(.required, for: .horizontal)
         return l
     }()
 
@@ -84,7 +106,13 @@ class OutpatientCell: UITableViewCell {
         l.font = UIFont.systemFont(ofSize: 15, weight: .semibold)
         l.textColor = .black
         l.numberOfLines = 1
+        l.lineBreakMode = .byTruncatingTail
         l.translatesAutoresizingMaskIntoConstraints = false
+        // Counterpart to the badge's `.required` hugging — the name is the
+        // flexible item that absorbs leftover horizontal space (and truncates
+        // with "…" when there isn't enough).
+        l.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        l.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         return l
     }()
 
@@ -179,10 +207,11 @@ class OutpatientCell: UITableViewCell {
             avatarImageView.widthAnchor.constraint(equalToConstant: 30),
             avatarImageView.heightAnchor.constraint(equalToConstant: 30),
 
-            // Queue badge — top-right
+            // Queue badge — top-right.  Width is driven by the badge's own
+            // intrinsic content size (digits + 10px horizontal padding via
+            // BadgeLabel.insets); no explicit width constraint needed.
             queueBadge.topAnchor.constraint(equalTo: card.topAnchor, constant: 12),
             queueBadge.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -12),
-            queueBadge.widthAnchor.constraint(greaterThanOrEqualToConstant: 26),
             queueBadge.heightAnchor.constraint(equalToConstant: 22),
 
             // Name — top, between avatar and queue badge
@@ -253,7 +282,7 @@ extension OutpatientCell {
             ageLabel.text = genderText
         }
 
-        queueBadge.text = "  \(selectIndex + 1)  "
+        queueBadge.text = "\(selectIndex + 1)"
         mobile = presenter.patMobile
         applyStatus(presenter.servStatus, scheduled: presenter.time)
     }
