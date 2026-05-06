@@ -178,12 +178,29 @@ class EmergencyCell: UITableViewCell {
 
     // MARK: - Configure
     func configure(with presenter: EmergencyCellPresenter) {
-        timeLabel.text      = "[ \(presenter.visitStartDate) ]  \(presenter.mrn)"
-        nameLabel.text      = presenter.patientName
+        timeLabel.text       = "[ \(presenter.visitStartDate) ]  \(presenter.mrn)"
+        nameLabel.text       = presenter.patientName
         arrivalValLabel.text = presenter.arrivalMethod?.isEmpty == false
             ? presenter.arrivalMethod
             : "—"
-        genderValLabel.text = presenter.ageGenderText.isEmpty ? "—" : presenter.ageGenderText
+        genderValLabel.text  = presenter.ageGenderText.isEmpty ? "—" : presenter.ageGenderText
+
+        // Avatar — gender icon when available, default person silhouette otherwise.
+        if let img = presenter.genderAgeImage {
+            avatarImageView.image = img
+        }
+        // Tint the avatar circle by gender for quick visual scanning.
+        switch presenter.ageGenderText {
+        case "Male":
+            avatarCircle.backgroundColor = UIColor(red: 0.36, green: 0.62, blue: 0.95, alpha: 1)
+            genderValLabel.textColor = UIColor(red: 0.18, green: 0.49, blue: 0.90, alpha: 1)
+        case "Female":
+            avatarCircle.backgroundColor = UIColor(red: 0.95, green: 0.50, blue: 0.66, alpha: 1)
+            genderValLabel.textColor = UIColor(red: 0.91, green: 0.30, blue: 0.50, alpha: 1)
+        default:
+            avatarCircle.backgroundColor = Self.teal
+            genderValLabel.textColor = UIColor(white: 0.25, alpha: 1)
+        }
     }
 
     // MARK: - Reuse

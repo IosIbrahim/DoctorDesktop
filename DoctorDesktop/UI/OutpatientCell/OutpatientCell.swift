@@ -2,15 +2,17 @@
 //  OutpatientCell.swift
 //  DoctorDesktop
 //
-//  Programmatic redesign matching the Android reference:
-//  ┌─────────────────────────────────────────────────────┐
-//  │ ╭──╮  Patient name                          [ 1 ]   │
-//  │ │A │  DR/ Doctor name                    1 hours    │
-//  │ ╰──╯  Age · Gender                  $   [ Arrival ] │
-//  └─────────────────────────────────────────────────────┘
-//  - No "Call Patient" button (removed per design).
-//  - Status pill changes color: Arrival=green, Check In=baby blue,
-//    Check Out=red, ✓ Done=green (disabled).
+//  Visual layout aligned with InpatientCell:
+//  ┌─────────────────────────────────────────────────────────┐
+//  │ │ ╭──╮  Patient name                       👥 #1         │
+//  │ │ │A │  DR/ Doctor name                     1 hours      │
+//  │ │ ╰──╯  Age · Gender                $   [ Arrival ]      │
+//  └─────────────────────────────────────────────────────────┘
+//  - Optional left accent strip (reserved for future flag).
+//  - Queue badge: soft-tinted pill (matches inpatient bed badge style).
+//  - Waiting time stacked under the queue badge (matches inpatient date).
+//  - Status pill: Arrival=green, Check In=baby blue, Check Out=red,
+//    ✓ Done=green (disabled).
 //
 
 import UIKit
@@ -70,33 +72,43 @@ class OutpatientCell: UITableViewCell {
         }
     }
 
+    /// Queue badge — exact same visual language as InpatientCell's bed badge:
+    /// light blue background, dark blue text, radius 11.
     private let queueBadge: BadgeLabel = {
         let l = BadgeLabel()
-        l.backgroundColor = UIColor(red: 1, green: 0.78, blue: 0.0, alpha: 1)
-        l.textColor = .white
-        l.textAlignment = .center
-        l.font = UIFont.systemFont(ofSize: 13, weight: .bold)
-        l.layer.cornerRadius = 6
+        l.backgroundColor = UIColor(red: 0.93, green: 0.96, blue: 0.99, alpha: 1)
+        l.textColor       = UIColor(red: 0.04, green: 0.42, blue: 0.65, alpha: 1)
+        l.textAlignment   = .center
+        l.font            = UIFont.systemFont(ofSize: 12, weight: .semibold)
+        l.layer.cornerRadius = 11
         l.layer.masksToBounds = true
         l.translatesAutoresizingMaskIntoConstraints = false
-        // Badge sizes itself to fit its digits + horizontal padding.  Pinning
-        // hugging + compression-resistance to required prevents the layout
-        // engine from stretching the badge to fill the gap between a short
-        // name and the card's trailing edge — the bug from the screenshot
-        // where the "4" badge for "AMINAH AHMED ALOMR" filled the row.
         l.setContentHuggingPriority(.required, for: .horizontal)
         l.setContentCompressionResistancePriority(.required, for: .horizontal)
         return l
     }()
 
+    /// Waiting time — shown right under the queue badge, mirroring the
+    /// "date under bed badge" placement in InpatientCell.
     private let waitingTimeLabel: UILabel = {
         let l = UILabel()
-        l.font = UIFont.systemFont(ofSize: 13, weight: .semibold)
-        l.textColor = UIColor(red: 1.0, green: 0.20, blue: 0.16, alpha: 1)  // red
+        l.font          = UIFont.systemFont(ofSize: 11, weight: .regular)
+        l.textColor     = UIColor(white: 0.55, alpha: 1)
         l.textAlignment = .right
         l.translatesAutoresizingMaskIntoConstraints = false
         l.setContentHuggingPriority(.required, for: .horizontal)
         return l
+    }()
+
+    /// Optional accent strip on the leading edge — kept hidden for now,
+    /// matches InpatientCell's `highlightStrip` so both cells share the
+    /// same metric on the avatar offset.
+    private let highlightStrip: UIView = {
+        let v = UIView()
+        v.backgroundColor = .clear
+        v.layer.cornerRadius = 3
+        v.translatesAutoresizingMaskIntoConstraints = false
+        return v
     }()
 
     // MARK: - Text stack
@@ -105,12 +117,9 @@ class OutpatientCell: UITableViewCell {
         let l = UILabel()
         l.font = UIFont.systemFont(ofSize: 15, weight: .semibold)
         l.textColor = .black
-        l.numberOfLines = 1
-        l.lineBreakMode = .byTruncatingTail
+        l.numberOfLines = 2
+        l.lineBreakMode = .byWordWrapping
         l.translatesAutoresizingMaskIntoConstraints = false
-        // Counterpart to the badge's `.required` hugging — the name is the
-        // flexible item that absorbs leftover horizontal space (and truncates
-        // with "…" when there isn't enough).
         l.setContentHuggingPriority(.defaultLow, for: .horizontal)
         l.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         return l
@@ -148,9 +157,13 @@ class OutpatientCell: UITableViewCell {
     private let statusButton: UIButton = {
         let b = UIButton(type: .system)
         b.titleLabel?.font = UIFont.systemFont(ofSize: 13, weight: .semibold)
-        b.layer.cornerRadius = 6
+        b.layer.cornerRadius = 15
         b.setTitleColor(.white, for: .normal)
-        b.contentEdgeInsets = UIEdgeInsets(top: 6, left: 14, bottom: 6, right: 14)
+        b.contentEdgeInsets = UIEdgeInsets(top: 6, left: 16, bottom: 6, right: 16)
+        b.layer.shadowColor = UIColor.black.cgColor
+        b.layer.shadowOpacity = 0.10
+        b.layer.shadowRadius = 3
+        b.layer.shadowOffset = CGSize(width: 0, height: 1)
         b.translatesAutoresizingMaskIntoConstraints = false
         b.addTarget(self, action: #selector(checkoutOnTap), for: .touchUpInside)
         return b
@@ -179,15 +192,16 @@ class OutpatientCell: UITableViewCell {
         selectionStyle = .none
 
         contentView.addSubview(card)
+        card.addSubview(highlightStrip)
         card.addSubview(avatarView)
         avatarView.addSubview(avatarImageView)
         card.addSubview(queueBadge)
+        card.addSubview(waitingTimeLabel)
         card.addSubview(nameLabel)
         card.addSubview(doctorLabel)
         card.addSubview(ageLabel)
         card.addSubview(payIconLabel)
         card.addSubview(statusButton)
-        card.addSubview(waitingTimeLabel)
 
         NSLayoutConstraint.activate([
             // Card
@@ -196,8 +210,14 @@ class OutpatientCell: UITableViewCell {
             card.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 12),
             card.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -12),
 
-            // Avatar — vertically centered in the card
-            avatarView.leadingAnchor.constraint(equalTo: card.leadingAnchor, constant: 12),
+            // Highlight strip (mirrors InpatientCell)
+            highlightStrip.topAnchor.constraint(equalTo: card.topAnchor, constant: 12),
+            highlightStrip.bottomAnchor.constraint(equalTo: card.bottomAnchor, constant: -12),
+            highlightStrip.leadingAnchor.constraint(equalTo: card.leadingAnchor, constant: 6),
+            highlightStrip.widthAnchor.constraint(equalToConstant: 4),
+
+            // Avatar — sits to the right of the strip, vertically centered
+            avatarView.leadingAnchor.constraint(equalTo: highlightStrip.trailingAnchor, constant: 10),
             avatarView.centerYAnchor.constraint(equalTo: card.centerYAnchor),
             avatarView.widthAnchor.constraint(equalToConstant: 52),
             avatarView.heightAnchor.constraint(equalToConstant: 52),
@@ -207,20 +227,22 @@ class OutpatientCell: UITableViewCell {
             avatarImageView.widthAnchor.constraint(equalToConstant: 30),
             avatarImageView.heightAnchor.constraint(equalToConstant: 30),
 
-            // Queue badge — top-right.  Width is driven by the badge's own
-            // intrinsic content size (digits + 10px horizontal padding via
-            // BadgeLabel.insets); no explicit width constraint needed.
+            // Queue badge — top-right (same metric as inpatient bed badge)
             queueBadge.topAnchor.constraint(equalTo: card.topAnchor, constant: 12),
             queueBadge.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -12),
             queueBadge.heightAnchor.constraint(equalToConstant: 22),
 
-            // Name — top, between avatar and queue badge
+            // Waiting time — directly under the queue badge
+            waitingTimeLabel.topAnchor.constraint(equalTo: queueBadge.bottomAnchor, constant: 6),
+            waitingTimeLabel.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -12),
+
+            // Name
             nameLabel.topAnchor.constraint(equalTo: card.topAnchor, constant: 12),
             nameLabel.leadingAnchor.constraint(equalTo: avatarView.trailingAnchor, constant: 12),
             nameLabel.trailingAnchor.constraint(equalTo: queueBadge.leadingAnchor, constant: -8),
 
             // Doctor
-            doctorLabel.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 4),
+            doctorLabel.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 8),
             doctorLabel.leadingAnchor.constraint(equalTo: nameLabel.leadingAnchor),
             doctorLabel.trailingAnchor.constraint(lessThanOrEqualTo: waitingTimeLabel.leadingAnchor, constant: -8),
 
@@ -229,20 +251,16 @@ class OutpatientCell: UITableViewCell {
             ageLabel.leadingAnchor.constraint(equalTo: nameLabel.leadingAnchor),
             ageLabel.bottomAnchor.constraint(lessThanOrEqualTo: card.bottomAnchor, constant: -12),
 
-            // $ icon — left of status button on the bottom-right
+            // $ icon — left of status button
             payIconLabel.centerYAnchor.constraint(equalTo: statusButton.centerYAnchor),
             payIconLabel.trailingAnchor.constraint(equalTo: statusButton.leadingAnchor, constant: -10),
             payIconLabel.widthAnchor.constraint(equalToConstant: 18),
 
-            // Waiting time — above status button (where Android puts "1 hours")
-            waitingTimeLabel.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -12),
-            waitingTimeLabel.bottomAnchor.constraint(equalTo: statusButton.topAnchor, constant: -4),
-
             // Status button — bottom-right
             statusButton.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -12),
             statusButton.bottomAnchor.constraint(equalTo: card.bottomAnchor, constant: -12),
-            statusButton.heightAnchor.constraint(equalToConstant: 30),
-            statusButton.widthAnchor.constraint(greaterThanOrEqualToConstant: 90),
+            statusButton.heightAnchor.constraint(equalToConstant: 32),
+            statusButton.widthAnchor.constraint(greaterThanOrEqualToConstant: 100),
         ])
     }
 
@@ -251,9 +269,12 @@ class OutpatientCell: UITableViewCell {
         nameLabel.text = ""
         doctorLabel.text = ""
         ageLabel.text = ""
+        ageLabel.attributedText = nil
         avatarImageView.image = nil
         waitingTimeLabel.text = nil
         statusButton.isUserInteractionEnabled = true
+        highlightStrip.backgroundColor = .clear
+        card.backgroundColor = .white
     }
 
     @objc private func checkoutOnTap() {
@@ -265,26 +286,57 @@ class OutpatientCell: UITableViewCell {
 
 extension OutpatientCell {
     func configure(with presenter: OutpatientCellPresenter) {
-        avatarImageView.image = presenter.genderAgeImage
+        // Force `.alwaysOriginal` so the bitmap's own colors show through
+        // — `tintColor = .white` on the imageView would otherwise paint a
+        // white silhouette over template-rendered assets.
+        avatarImageView.image = presenter.genderAgeImage?.withRenderingMode(.alwaysOriginal)
+        avatarView.backgroundColor = presenter.avatarTint
         nameLabel.text = presenter.patientName
         doctorLabel.text = "DR/ \(presenter.doctorName)"
 
-        // Age line — only show "Age:" prefix when there's an actual numeric
-        // age string. The BHG test server omits AGE_DESC and only sends
-        // GENDER_AGE_NAME_EN ("Old Woman", "Man", "Child"), in which case
-        // "Age: Old Woman" reads weirdly — show the gender bare instead.
-        let ageText = presenter.age.trimmingCharacters(in: .whitespaces)
+        // Age + Gender line. Gender uses GENDER_NAME_EN ("Male"/"Female") with color.
+        let ageText    = presenter.age.trimmingCharacters(in: .whitespaces)
         let genderText = presenter.gender.trimmingCharacters(in: .whitespaces)
-        if !ageText.isEmpty {
-            let suffix = genderText.isEmpty ? "" : " · \(genderText)"
-            ageLabel.text = "Age: \(ageText)\(suffix)"
+        if !ageText.isEmpty && !genderText.isEmpty {
+            let base = NSMutableAttributedString(
+                string: "Age: \(ageText) · ",
+                attributes: [.foregroundColor: UIColor(white: 0.45, alpha: 1)]
+            )
+            base.append(NSAttributedString(
+                string: genderText,
+                attributes: [.foregroundColor: presenter.genderColor]
+            ))
+            ageLabel.attributedText = base
+        } else if !ageText.isEmpty {
+            ageLabel.attributedText = nil
+            ageLabel.text = "Age: \(ageText)"
+            ageLabel.textColor = UIColor(white: 0.45, alpha: 1)
         } else {
+            ageLabel.attributedText = nil
             ageLabel.text = genderText
+            ageLabel.textColor = presenter.genderColor
         }
 
-        queueBadge.text = "\(selectIndex + 1)"
+        // $ icon: green when cashier confirmed, gray otherwise
+        payIconLabel.textColor = presenter.cashierFlag == "1"
+            ? UIColor(red: 0.13, green: 0.69, blue: 0.30, alpha: 1)
+            : UIColor(white: 0.72, alpha: 1)
+
+        // Match the InpatientCell bed-badge text format: "🛏 [ value ]".
+        queueBadge.text = "👥 [ #\(selectIndex + 1) ]"
         mobile = presenter.patMobile
         applyStatus(presenter.servStatus, scheduled: presenter.time)
+
+        // Red accent strip + soft pink card when payment isn't confirmed —
+        // mirrors InpatientCell's `highLight == "1"` treatment so unpaid
+        // outpatients are visually flagged before the doctor taps in.
+        if presenter.cashierFlag != "1" {
+            highlightStrip.backgroundColor = UIColor(red: 0.91, green: 0.30, blue: 0.34, alpha: 1)
+            card.backgroundColor = UIColor(red: 1.0, green: 0.96, blue: 0.97, alpha: 1)
+        } else {
+            highlightStrip.backgroundColor = .clear
+            card.backgroundColor = .white
+        }
     }
 
     private func applyStatus(_ status: String, scheduled: String) {

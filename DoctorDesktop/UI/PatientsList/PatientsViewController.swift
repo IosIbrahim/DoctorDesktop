@@ -92,6 +92,12 @@ class PatientsViewController: UIViewController, NVActivityIndicatorViewable {
     super.viewDidLoad()
     self.title = presenter.title
     tableView.estimatedRowHeight = 130
+    // Modern card-on-canvas look: soft gray background lets the white
+    // cards "float" with their drop shadows; default separator lines
+    // would clash with the rounded card edges.
+    tableView.backgroundColor = UIColor(red: 0.95, green: 0.96, blue: 0.97, alpha: 1)
+    tableView.separatorStyle = .none
+    view.backgroundColor = UIColor(red: 0.95, green: 0.96, blue: 0.97, alpha: 1)
     registerCell()
       
   //  navigationController?.navigationBar.largeTitleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.black]
@@ -100,7 +106,6 @@ class PatientsViewController: UIViewController, NVActivityIndicatorViewable {
     navigationController?.navigationBar.titleTextAttributes = textAttributes
 
     self.navigationController?.navigationBar.tintColor = UIColor.green
-    //self.navigationController?.navigationBar.backgroundColor = UIColor.blue
     countView.layer.cornerRadius = countView.bounds.width/2
     dropDownView.layer.cornerRadius = 10
     dateView.layer.cornerRadius = 10
@@ -268,14 +273,23 @@ extension PatientsViewController {
   fileprivate func showDatePopupDialog() {
     let datePopup = DatePopup()
     self.popupDialog = PopupDialog(viewController: datePopup)
-    
+
     let doneButton = PopupDialogButton(title: "Done") {
       self.didSelectDate(date: datePopup.datePicker.date)
     }
     let cancelButton = PopupDialogButton(title: "Cancel", action: nil)
-    
+
     self.popupDialog?.addButtons([doneButton, cancelButton])
     self.present(popupDialog!, animated: true, completion: nil)
+  }
+
+  fileprivate func showPaymentRequiredPopup() {
+    let popup = PopupDialog(
+      title: "Payment Required",
+      message: "This patient has not completed payment yet. Please confirm payment with the cashier before opening the overview."
+    )
+    popup.addButton(PopupDialogButton(title: "OK", action: nil))
+    present(popup, animated: true, completion: nil)
   }
   
   fileprivate func setupDropDownMenu(dropDown: DropDown) {
@@ -526,8 +540,8 @@ extension PatientsViewController: UITableViewDelegate {
     case .emergency:    return UITableViewAutomaticDimension
   //  case .clinicalAlert: return 100
   //  case .inpatient, .ICU, .nicu, .operations: return 110
-    case .inpatient: return 110
-    case .outpatient:   return 120
+    case .inpatient:    return 124
+    case .outpatient:   return 134
     default:            return UITableViewAutomaticDimension
     }
   }
@@ -539,19 +553,23 @@ extension PatientsViewController: UITableViewDelegate {
     switch presenter.componentType {
     case .outpatient:
         guard indexPath.row < presenter.outpatientPatients.count else { return }
-        self.initializePatientOverviewSideMenu(patient: presenter.outpatientPatients[indexPath.row])
+        let patient = presenter.outpatientPatients[indexPath.row]
+
+        // Block overview when payment isn't confirmed (gray $ icon).
+        if (patient.cashierFlag ?? "0") != "1" {
+            showPaymentRequiredPopup()
+            return
+        }
+
+        self.initializePatientOverviewSideMenu(patient: patient)
         let args = ["viewType":"overview",
-                    "patient":presenter.outpatientPatients[indexPath.row],
+                    "patient": patient,
                     "permission":presenter.permission,
                     "user":presenter.user] as [String : Any]
-        
-        print(presenter.outpatientPatients[indexPath.row].id)
-        
-        UserDefaults.standard.set(presenter.outpatientPatients[indexPath.row].id, forKey: "patient_id") //setObject
 
-          UserDefaults.standard.set(presenter.outpatientPatients[indexPath.row].visitId, forKey: "visit_id") //setObject
-        
-       
+        UserDefaults.standard.set(patient.id, forKey: "patient_id")
+        UserDefaults.standard.set(patient.visitId, forKey: "visit_id")
+
         navigationCoordinator?.next(arguments: args)
         
  //   case .inpatient,.nicu, .ICU:
