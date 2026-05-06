@@ -243,6 +243,8 @@ class AppConnectionsHandler {
 
 struct APILogger {
 
+    private static let separator = "       ─────────────────────────────────────────────────────────────"
+
     static func logRequest(method: String,
                            url: String,
                            params: Any? = nil,
@@ -252,14 +254,6 @@ struct APILogger {
         if let params = params, !isEmpty(params) {
             message += "\n       Params │ \(formatted(params))"
         }
-        // Copy-pastable curl command — paste it into Postman via
-        // `Import → Raw text` and it'll auto-fill URL, method, headers,
-        // and body in one shot. The Authorization header (Bearer token
-        // from UserDefaults) is included by default so most endpoints
-        // run as-is. OAuth1-signed endpoints carry an expiring nonce in
-        // the body, so re-sign via Postman's "OAuth 1.0" Auth tab
-        // (consumer_key=khaber_1 / signature_method=HMAC-SHA1) when
-        // replaying after a few minutes.
         message += "\n       Curl   │ \(curlSnippet(method: method, url: url, params: params, extraHeaders: extraHeaders))"
         SwiftyBeaver.debug(message)
     }
@@ -271,19 +265,20 @@ struct APILogger {
         if let data = data, !data.isEmpty {
             message += "\n       Body   │ \(prettyData(data))"
         }
+        message += "\n\(separator)"
         SwiftyBeaver.debug(message)
     }
 
     static func logFailure(method: String, url: String, error: String, duration: TimeInterval) {
         let path = shortPath(url)
         let time = String(format: "%.2fs", duration)
-        SwiftyBeaver.error("❌ FAILED  \(path)  (\(time))\n       Error  │ \(error)")
+        SwiftyBeaver.error("❌ FAILED  \(path)  (\(time))\n       Error  │ \(error)\n\(separator)")
     }
 
     static func logHTTPError(method: String, url: String, statusCode: Int, message: String, duration: TimeInterval) {
         let path = shortPath(url)
         let time = String(format: "%.2fs", duration)
-        SwiftyBeaver.error("❌ \(statusCode)  \(path)  (\(time))\n       Error  │ \(message)")
+        SwiftyBeaver.error("❌ \(statusCode)  \(path)  (\(time))\n       Error  │ \(message)\n\(separator)")
     }
 
     static func logDecodeError(url: String, error: Error) {

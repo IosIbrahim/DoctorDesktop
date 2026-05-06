@@ -33,7 +33,6 @@ class ComponentCollectionPresenterImpl: ComponentCollectionPresenter {
       self.components = components
       self.user = user
       self.permissions = []
-    print("com")
   }
 }
 
@@ -78,7 +77,6 @@ extension ComponentCollectionPresenterImpl {
         }else {
             for (i,component) in self.components.enumerated() {
               
-              print(component.processInfoCode)
 //                if component.type == .notifications {
 //                    self.components[i].patientsCount = "2762"
 //                    self.components[i].updateName("Notifications")
@@ -90,10 +88,7 @@ extension ComponentCollectionPresenterImpl {
                     self.components[i].patientsCount = patientCounts.inpatientFloor
              //   case .ICU: self.components[i].patientsCount = patientCounts.inpatientCare
                 case .outpatient:
-                  print("asfafadsfa")
                     self.components[i].patientsCount = patientCounts.outpatient
-                  print(processInfoCode)
-                  print(component.patientsCount)
                 case .emergency:
                     self.components[i].patientsCount = patientCounts.emergency
              //   case .operations: self.components[i].patientsCount = patientCounts.operation

@@ -56,9 +56,6 @@ class TranslationLayerImpl: TranslationLayer {
     }
     
     func createComponentDTOsFromJsonData(_ data: Data) -> Components {
-        print("date")
-        print(data)
-
         // IMPORTANT: pass .useDefaultKeys explicitly. The Stuff pod defaults
         // to .convertFromSnakeCase, which mangles UPPER_SNAKE_CASE JSON keys
         // (e.g. PROCESS_INFO_CODE → pROCESSINFOCODE) so they no longer match
@@ -71,7 +68,6 @@ class TranslationLayerImpl: TranslationLayer {
         ) else {
             return []
         }
-        print(components)
         return components
     }
     
@@ -93,7 +89,6 @@ class TranslationLayerImpl: TranslationLayer {
                 // try to read out a string array
                 let token = json["token"] as? String
                 UserDefaults.standard.set(token ?? "", forKey: "auth_token") //setObject
-                print(json)
             }
         } catch let error as NSError {
             print("Failed to load: \(error.localizedDescription)")
@@ -104,8 +99,6 @@ class TranslationLayerImpl: TranslationLayer {
 
 extension TranslationLayerImpl {
     func getCountsFromJson(_ data: Data) -> PatientCount {
-        print(data.toJsonString() ?? "")
-
         // .useDefaultKeys — see createComponentDTOsFromJsonData for rationale
         // (UPPER_SNAKE_CASE JSON keys get mangled by .convertFromSnakeCase).
         if var patientCount = try? PatientCount(
@@ -140,7 +133,6 @@ extension TranslationLayerImpl {
     
     
     func getDoctorPermissionsFromJson(_ data: Data) -> DoctorPermissions {
-        print(data.toJsonString() ?? "")
         if let patientCount = try? DoctorPermissions (data: data, keyPath: "Root", keyDecodingStrategy: .useDefaultKeys) {
             return patientCount
         }else if let patientCount = try? PermissionModel (data: data, keyPath: "Root", keyDecodingStrategy: .useDefaultKeys) {
@@ -192,7 +184,6 @@ extension TranslationLayerImpl {
     
     func getOutpatientPatientsDTOsFromJson(_ data: Data) -> OutpatientPatients {
         guard let json = String(data: data, encoding: .utf8), json.contains("CLINIC_PATIENTS_ROW") else { return [] }
-        print(json)
         let keyPath = "Root.CLINIC_PATIENTS.CLINIC_PATIENTS_ROW"
         
         guard let outpatientPatients = try? OutpatientPatients (data: data, keyPath: keyPath, keyDecodingStrategy: .useDefaultKeys) else {

@@ -42,12 +42,10 @@ extension Array where Element: Decodable {
     let topLevel = try JSONSerialization.jsonObject(with: data, options: JSONSerialization.ReadingOptions.mutableContainers)
       if let nestedJson = (topLevel as AnyObject).value(forKeyPath: keyPath) {
           let nestedData = try JSONSerialization.data(withJSONObject: nestedJson)
-          print("nestedData:",String(data: nestedData, encoding: .utf8) ?? "")
           let model = try jsonDecoder.decode([Complaint].self, from: nestedData)
-          print(model)
+          _ = model
       }
-      
-      print(json)
+
     if let dataObject = try? Element(data: data, keyPath: keyPath) {
       decodedElements = [dataObject]
     }

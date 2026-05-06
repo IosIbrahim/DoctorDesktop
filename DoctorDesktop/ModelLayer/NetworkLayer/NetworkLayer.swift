@@ -109,8 +109,6 @@ class NetworkLayerImpl: NetworkLayer {
                      params: [String: String],
                      finished: @escaping DataBlock) {
         APILogger.logRequest(method: "GET", url: url, params: params)
-        print("URL:\(url)")
-        print("Params:\(params)")
         let start = Date()
         NetworkLayerImpl.session
             .request(url, parameters: params, headers: authHeaders)
@@ -364,19 +362,7 @@ class NetworkLayerImpl: NetworkLayer {
             urlRequest.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         }
 
-        print("╔══════════════════════════════════════════════════════════════════════")
-        print("║ [NurseNotes] FULL REQUEST")
-        print("║ METHOD : GET")
-        print("║ URL    : \(signedURL)")
-        if let token = bearerToken, !token.isEmpty {
-            print("║ HEADERS: Authorization: Bearer \(token)")
-        } else {
-            print("║ HEADERS: (none — no auth_token in UserDefaults ⚠️)")
-        }
-        print("║")
-        print("║ OAuth base string:")
-        print("║ \(baseString)")
-        print("╚══════════════════════════════════════════════════════════════════════")
+        APILogger.logRequest(method: "GET", url: signedURL)
 
         let start = Date()
         NetworkLayerImpl.session
@@ -384,15 +370,10 @@ class NetworkLayerImpl: NetworkLayer {
             .responseData { response in
                 let duration = Date().timeIntervalSince(start)
                 let code = response.response?.statusCode ?? 0
-                let rawBody = response.data.flatMap { String(data: $0, encoding: .utf8) } ?? "<no body>"
-
-                print("╔══════════════════════════════════════════════════════════════════════")
-                print("║ [NurseNotes] RESPONSE  status=\(code)  time=\(String(format: "%.2f", duration))s")
-                print("║ Body: \(rawBody.prefix(500))")
-                print("╚══════════════════════════════════════════════════════════════════════")
-
                 if let error = response.error {
-                    print("❌ [NurseNotes] Network error: \(error.localizedDescription)")
+                    APILogger.logFailure(method: "GET", url: signedURL, error: error.localizedDescription, duration: duration)
+                } else {
+                    APILogger.logResponse(method: "GET", url: signedURL, statusCode: code, data: response.data, duration: duration)
                 }
                 guard let data = response.data else { return }
                 finished(data)
@@ -449,31 +430,7 @@ class NetworkLayerImpl: NetworkLayer {
 
         urlRequest.httpBody = formBody.data(using: .utf8)
 
-        print("╔══════════════════════════════════════════════════════════════════════")
-        print("║ [\(tag)] FULL REQUEST")
-        print("║ METHOD : POST")
-        print("║ URL    : \(signedURL)")
-        if let token = bearerToken, !token.isEmpty {
-            print("║ HEADERS: Authorization: Bearer \(token)")
-        } else {
-            print("║ HEADERS: (no auth_token in UserDefaults ⚠️)")
-        }
-        print("║          Content-Type: application/x-www-form-urlencoded")
-        print("║")
-        print("║ BODY: \(formBody)")
-        print("║")
-        print("║ OAuth base string:")
-        print("║ \(baseString)")
-        print("║")
-        print("║ Postman curl (paste into Import → Raw text):")
-        // The signed URL already carries oauth_* as query params, so the
-        // curl below is byte-for-byte what Alamofire is about to send.
-        // Replay window is short (~5 min before nonce/timestamp expire) —
-        // for a slower replay, strip oauth_* from the URL and configure
-        // Postman's "OAuth 1.0" Auth tab instead (consumer_key=khaber_1,
-        // consumer_secret=…, signature_method=HMAC-SHA1).
-        print("║ \(NetworkLayerImpl.buildSignedCurl(url: signedURL, body: formBody, bearer: bearerToken))")
-        print("╚══════════════════════════════════════════════════════════════════════")
+        APILogger.logRequest(method: "POST", url: signedURL, params: params)
 
         let start = Date()
         NetworkLayerImpl.session
@@ -481,15 +438,11 @@ class NetworkLayerImpl: NetworkLayer {
             .responseData { response in
                 let duration = Date().timeIntervalSince(start)
                 let code = response.response?.statusCode ?? 0
-                let rawBody = response.data.flatMap { String(data: $0, encoding: .utf8) } ?? "<no body>"
-
-                print("╔══════════════════════════════════════════════════════════════════════")
-                print("║ [\(tag)] RESPONSE  status=\(code)  time=\(String(format: "%.2f", duration))s")
-                print("║ Body: \(rawBody.prefix(500))")
-                print("╚══════════════════════════════════════════════════════════════════════")
 
                 if let error = response.error {
-                    print("❌ [\(tag)] Network error: \(error.localizedDescription)")
+                    APILogger.logFailure(method: "POST", url: signedURL, error: error.localizedDescription, duration: duration)
+                } else {
+                    APILogger.logResponse(method: "POST", url: signedURL, statusCode: code, data: response.data, duration: duration)
                 }
                 guard let data = response.data else { return }
                 finished(data)
@@ -569,29 +522,6 @@ class NetworkLayerImpl: NetworkLayer {
             .map { "\(oauthEncode($0.key))=\(oauthEncode($0.value))" }            .joined(separator: "&")
 
         return ("\(base)?\(query)", baseString)
-    }
-
-    /// Builds a signed POST request for OAuth 1.0 HMAC-SHA1.
-    ///
-    /// Per RFC 5849 §3.4.1.3, when the request body is
-    /// `application/x-www-form-urlencoded` the form parameters are included in
-    /// the signature base string alongside the oauth_* parameters. The URL only
-    /// carries the oauth_* params; the form fields stay in the request body.
-    ///
-    /// Builds a one-line `curl` for the signed POST so it can be pasted into
-    /// Postman's "Import → Raw text" dialog. The URL already carries oauth_*
-    /// in the query string and `body` is the form body — both go straight in
-    /// without further encoding. Single quotes inside values are escaped per
-    /// POSIX (`'` → `'\''`).
-    static func buildSignedCurl(url: String, body: String, bearer: String?) -> String {
-        func esc(_ s: String) -> String { s.replacingOccurrences(of: "'", with: "'\\''") }
-        var parts = ["curl", "-X", "POST", "'\(esc(url))'"]
-        parts.append("-H"); parts.append("'Content-Type: application/x-www-form-urlencoded'")
-        if let token = bearer, !token.isEmpty {
-            parts.append("-H"); parts.append("'Authorization: Bearer \(esc(token))'")
-        }
-        parts.append("--data"); parts.append("'\(esc(body))'")
-        return parts.joined(separator: " ")
     }
 
     /// Returns (urlWithOAuth, formBody, baseString) or nil on HMAC failure.
