@@ -524,11 +524,24 @@ extension PatientsViewController: UITableViewDataSource {
   }
 }
 
-extension PatientsViewController:OutpatientStatus {
-    func changeStatus(_ index:Int) {
-        presenter.changePatientStatus(index: index) {
+extension PatientsViewController: OutpatientStatus {
+    func changeStatus(_ index: Int) {
+        presenter.changePatientStatus(index: index) { success, errorMessage in
             DispatchQueue.main.async {
-                self.tableView.reloadData()
+                if success {
+                    // Server confirmed → reload so the button advances to the
+                    // next stage (B → A → S → D).
+                    self.tableView.reloadData()
+                } else {
+                    // Server rejected (or network failure). Leave the row's
+                    // status untouched and surface the message to the doctor.
+                    let popup = PopupDialog(
+                        title: "Action Failed",
+                        message: errorMessage ?? "The server rejected this action. Please try again."
+                    )
+                    popup.addButton(PopupDialogButton(title: "OK", action: nil))
+                    self.present(popup, animated: true, completion: nil)
+                }
             }
         }
     }
@@ -541,7 +554,7 @@ extension PatientsViewController: UITableViewDelegate {
   //  case .clinicalAlert: return 100
   //  case .inpatient, .ICU, .nicu, .operations: return 110
     case .inpatient:    return 124
-    case .outpatient:   return 134
+    case .outpatient:   return 100
     default:            return UITableViewAutomaticDimension
     }
   }

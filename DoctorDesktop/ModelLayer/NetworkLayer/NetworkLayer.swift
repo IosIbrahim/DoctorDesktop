@@ -39,7 +39,7 @@ protocol NetworkLayer {
     func getOutpatientClinics(with params: [String: String], finished: @escaping DataBlock)
     func getOperationPatients(with params: [String: String], finished: @escaping DataBlock)
     func getOutpatientPatients(with params: [String: String], finished: @escaping DataBlock)
-    func changePatientStatus(with params: [String: String], finished: @escaping DataBlock)
+    func changePatientStatus(with params: [String: String], status: String, finished: @escaping DataBlock)
     func getClinicalPatients(with params: [String: String], finished: @escaping DataBlock)
     func getTemplate(with params: [String: String], finished: @escaping DataBlock)
     func getEmergencyPatients(with params: [String: String], finished: @escaping DataBlock)
@@ -252,14 +252,25 @@ class NetworkLayerImpl: NetworkLayer {
         get(AppURLS.ip +  AppURLS.mobileApi + "get_outpatients_patients", params: params, finished: finished)
     }
 
-    func changePatientStatus(with params: [String: String], finished: @escaping DataBlock) {
-        let serv = params["SER"]
+    /// Hits the workflow endpoint that matches `status` with the row's SER
+    /// (B=Arrival, A=Check In, S=Check Out). Mirrors the Android adapter's
+    /// dispatch table.
+    ///
+    /// IMPORTANT: these endpoints accept **GET** with form params on the
+    /// query string, NOT POST. The server returns
+    /// `405 Method Not Allowed → "The requested resource does not support
+    /// http method 'POST'."` when called with POST.
+    func changePatientStatus(with params: [String: String], status: String, finished: @escaping DataBlock) {
         let url: String
-        switch serv {
-        case "B": url = AppURLS.ip + AppURLS.mobileApi +  "OutpatientController/arrivalResrvation"
-        case "A": url = AppURLS.ip + AppURLS.mobileApi +  "OutpatientController/startResrvation"
-        case "S": url = AppURLS.ip + AppURLS.mobileApi +  "OutpatientController/performResrvation"
-        default:  url = AppURLS.ip + AppURLS.mobileApi +  "get_outpatients_patients"
+        switch status {
+        case "B": url = AppURLS.ip + AppURLS.mobileApi + "OutpatientController/arrivalResrvation"
+        case "A": url = AppURLS.ip + AppURLS.mobileApi + "OutpatientController/startResrvation"
+        case "S": url = AppURLS.ip + AppURLS.mobileApi + "OutpatientController/performResrvation"
+        default:
+            // Unknown / non-actionable status (e.g. "D", "CALL", "") — the
+            // cell hides the button for these, but guard anyway in case a
+            // future caller forgets.
+            return
         }
         get(url, params: params, finished: finished)
     }

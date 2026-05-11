@@ -66,7 +66,9 @@ protocol PatientsPresenter {
   func getOutpatientPatients(withDate: Date, selectedClinicIndex: Int, finished: @escaping EmptyBlock)
   func getEmergencyPatients(withDate: Date, finished: @escaping EmptyBlock)
   func getOperationPatients(withDate: Date, finished: @escaping EmptyBlock)
-  func changePatientStatus(index: Int, finished: @escaping EmptyBlock)
+  /// Reports `(success, errorMessage)` so the caller only refreshes the UI
+  /// when the server confirms — and can show the message on failure.
+  func changePatientStatus(index: Int, finished: @escaping (Bool, String?) -> Void)
 
   func getClinicalPatients(date: Date, finished: @escaping EmptyBlock)
   func loadFlagImage(flageImageName: String, finished: @escaping ImageBlock)
@@ -234,28 +236,42 @@ extension PatientsPresenterImpl {
         }
     }
     
-    func changePatientStatus(index: Int, finished: @escaping EmptyBlock) {
-        var model = outpatientPatients[index]
-        if model.serVStatus != "D" {
-            let params = [
-                "BRANCH_ID": user.branch ?? "",
-                "USER_ID": user.userName ?? "",
-                "COMPUTER_NAME": "iOS",
-                "LAN": "0",
-                "SER": model.serVStatus ?? ""
-            ]
-            
-            modelLayer.changePatientStatus(with: params) { _ in
-                if model.serVStatus == "B"{
-                    self.outpatientPatients[index].serVStatus = "A"
-                }else if model.serVStatus == "A"{
-                    self.outpatientPatients[index].serVStatus = "S"
-                }else if model.serVStatus == "S" {
-                    self.outpatientPatients[index].serVStatus = "D"
-                }
-                finished()
-            }
+    func changePatientStatus(index: Int, finished: @escaping (Bool, String?) -> Void) {
+        let model = outpatientPatients[index]
+        // Only B (Arrival) → A (Check In) → S (Check Out) drive a server call.
+        // D (Done) is terminal; anything else (CALL, C, "") has no endpoint.
+        guard let status = model.serVStatus,
+              ["B", "A", "S"].contains(status) else {
+            finished(false, nil)
+            return
+        }
 
+        // Param shape mirrors the Android adapter (`lan` lowercase, SER is
+        // the row's visit/reservation serial — NOT the status code).
+        let params: [String: String] = [
+            "BRANCH_ID": user.branch ?? "",
+            "USER_ID":   user.userName ?? "",
+            "SER":       model.ser ?? "",
+            "lan":       "0",
+        ]
+
+        modelLayer.changePatientStatus(with: params, status: status) { success, errorMessage in
+            // CRITICAL: only advance the local state when the server confirms.
+            // If we advanced optimistically on every callback, a 4xx/5xx (e.g.
+            // 405 Method Not Allowed, 401 Unauthorized) would still flip the
+            // button to the next stage and the doctor would think the action
+            // succeeded.
+            guard success else {
+                finished(false, errorMessage)
+                return
+            }
+            switch status {
+            case "B": self.outpatientPatients[index].serVStatus = "A"
+            case "A": self.outpatientPatients[index].serVStatus = "S"
+            case "S": self.outpatientPatients[index].serVStatus = "D"
+            default: break
+            }
+            finished(true, nil)
         }
     }
 }
