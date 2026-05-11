@@ -613,8 +613,14 @@ extension DependencyRegistryImpl {
     container.register(LiteOverviewViewController.self) { (r, patient: Patient, user: User, permission: PermissionModel) in
       let overviewPresenter = r.resolve(OverviewPresenter.self, arguments: patient, user, permission)!
       let vc = LiteOverviewViewController()
+      // Inject a maker so the Lite VC can build its embedded ProgressNotes
+      // child without having to know about the Swinject container.
+      let progressNotesMaker: (String) -> ProgressNotesViewController = { visitIdArray in
+        return self.makeProgressNotesViewController(with: patient, user: user, visitIdArray: visitIdArray)
+      }
       vc.configure(with: overviewPresenter,
-                   navigationCoordinator: self.navigationCoordinator)
+                   navigationCoordinator: self.navigationCoordinator,
+                   progressNotesMaker: progressNotesMaker)
       return vc
     }
   }

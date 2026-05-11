@@ -18,6 +18,20 @@ final class PatientHeaderView: UIView {
     /// blood-type / allergy row (some BHG records wrap to two lines).
     static let preferredHeight: CGFloat = 232
 
+    /// Compact mode: only avatar + name + ID/Phone/Nationality row + chevron.
+    /// Used by `LiteOverviewViewController` so the embedded Remarks list can
+    /// claim the rest of the screen until the user expands the header.
+    /// Sized to fit the avatar (54pt) + small bottom padding.
+    static let compactPreferredHeight: CGFloat = 100
+
+    /// Tap target on the bottom-right of the header to toggle compact↔expanded.
+    /// Set by the host view controller — the view itself just emits the event.
+    var onToggleExpand: (() -> Void)?
+
+    /// `true` when only the compact rows are visible. Bottom dividers, chip
+    /// stacks, and the doctor/room/insurance footer are hidden.
+    private(set) var isCompact: Bool = false
+
     // MARK: - Background
 
     private let gradientLayer = CAGradientLayer()
@@ -74,6 +88,8 @@ final class PatientHeaderView: UIView {
         v.layer.borderWidth = 0.5
         v.layer.borderColor = UIColor.white.withAlphaComponent(0.25).cgColor
         v.translatesAutoresizingMaskIntoConstraints = false
+        // Refuse to shrink below intrinsic size — full digits stay visible.
+        v.setContentCompressionResistancePriority(.required, for: .horizontal)
         return v
     }()
     private let phoneButton: UIButton = {
@@ -81,6 +97,11 @@ final class PatientHeaderView: UIView {
         b.tintColor = .white
         b.setTitleColor(.white, for: .normal)
         b.titleLabel?.font = .systemFont(ofSize: 12, weight: .medium)
+        // Default UIButton truncation is `.byTruncatingMiddle` which produces
+        // "50…2461". Tail truncation is more readable, and combined with the
+        // higher compression-resistance on the chip it shouldn't truncate
+        // for normal phone numbers anyway.
+        b.titleLabel?.lineBreakMode = .byTruncatingTail
         b.translatesAutoresizingMaskIntoConstraints = false
         return b
     }()
@@ -92,6 +113,10 @@ final class PatientHeaderView: UIView {
         v.layer.borderWidth = 0.5
         v.layer.borderColor = UIColor.white.withAlphaComponent(0.25).cgColor
         v.translatesAutoresizingMaskIntoConstraints = false
+        // Lowest priority so it absorbs the squeeze when the chip row
+        // doesn't fit — phone digits get to stay intact.
+        v.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        v.setContentHuggingPriority(.defaultLow, for: .horizontal)
         return v
     }()
     private let flagView: UIImageView = {
@@ -106,6 +131,7 @@ final class PatientHeaderView: UIView {
         let l = UILabel()
         l.font = .systemFont(ofSize: 12, weight: .medium)
         l.textColor = .white
+        l.lineBreakMode = .byTruncatingTail
         l.translatesAutoresizingMaskIntoConstraints = false
         return l
     }()
@@ -138,6 +164,23 @@ final class PatientHeaderView: UIView {
 
     private let dividerTop    = PatientHeaderView.makeDivider()
     private let dividerBottom = PatientHeaderView.makeDivider()
+
+    // MARK: - Expand / collapse chevron (bottom-right of compact area)
+
+    private let expandButton: UIButton = {
+        let b = UIButton(type: .system)
+        b.tintColor = .white
+        b.backgroundColor = UIColor.white.withAlphaComponent(0.18)
+        b.layer.cornerRadius = 16
+        b.layer.borderWidth = 0.5
+        b.layer.borderColor = UIColor.white.withAlphaComponent(0.30).cgColor
+        b.translatesAutoresizingMaskIntoConstraints = false
+        if #available(iOS 13.0, *) {
+            let cfg = UIImage.SymbolConfiguration(pointSize: 13, weight: .semibold)
+            b.setImage(UIImage(systemName: "chevron.down", withConfiguration: cfg), for: .normal)
+        }
+        return b
+    }()
 
     // MARK: - Row 3: Age | Adm Date | Specialty
 
@@ -240,10 +283,13 @@ final class PatientHeaderView: UIView {
             : [UIColor(red: 0.76, green: 0.22, blue: 0.54, alpha: 1).cgColor,
                UIColor(red: 0.52, green: 0.08, blue: 0.40, alpha: 1).cgColor]
 
-        // Name — strip trailing " -" artifacts from incomplete data
-        nameLabel.text = patient.name
+        // Name — strip trailing " -" artifacts from incomplete data; fall
+        // back to a placeholder so the layout never collapses to zero height
+        // (some BHG records ship `nameInEnglish=null`).
+        let displayName = patient.name
             .replacingOccurrences(of: "\\s*-\\s*$", with: "", options: .regularExpression)
             .trimmingCharacters(in: .whitespaces)
+        nameLabel.text = displayName.isEmpty ? "—" : displayName
 
         // ID
         setChipText(idChip, patient.id.trimmingCharacters(in: .whitespaces))
@@ -272,7 +318,7 @@ final class PatientHeaderView: UIView {
         if let ip = patient as? InpatientPatient        { age = ip.age }
         else if let op = patient as? OutpatientPatient  { age = op.age }
         else                                             { age = "" }
-        setChipText(ageChip, age.isEmpty ? "—" : age)
+        setChipText(ageChip, normalizeAge(age))
         setChipText(dateChip, formatAdmDate(patient.date))
         setChipText(specialtyChip, specialty ?? "—")
 
@@ -414,6 +460,29 @@ final class PatientHeaderView: UIView {
         return "\(parts[0]) \(hhmm)"
     }
 
+    /// Converts the API's free-form age string ("67سنة - 8شهر - 3يوم" or
+    /// "67Y - 8M - 3D") into a compact English form: `"67y · 8m · 3d"`.
+    /// Falls back to the original string when no numeric components can be
+    /// extracted.
+    private func normalizeAge(_ raw: String) -> String {
+        let trimmed = raw.trimmingCharacters(in: .whitespaces)
+        if trimmed.isEmpty { return "—" }
+
+        // Pull out runs of digits (Western or Arabic-Indic).
+        let pattern = "[0-9\\u0660-\\u0669]+"
+        guard let regex = try? NSRegularExpression(pattern: pattern) else { return trimmed }
+        let range = NSRange(trimmed.startIndex..., in: trimmed)
+        let nums = regex.matches(in: trimmed, range: range).compactMap {
+            Range($0.range, in: trimmed).map { String(trimmed[$0]) }
+        }
+        guard !nums.isEmpty else { return trimmed }
+
+        let suffixes = ["y", "m", "d"]
+        return nums.prefix(3).enumerated()
+            .map { i, n in "\(n)\(suffixes[i])" }
+            .joined(separator: " · ")
+    }
+
     // MARK: - Factory methods
 
     /// Standard info chip (ID / age / date / specialty).
@@ -424,6 +493,8 @@ final class PatientHeaderView: UIView {
         container.layer.borderWidth  = 0.5
         container.layer.borderColor  = UIColor.white.withAlphaComponent(0.25).cgColor
         container.translatesAutoresizingMaskIntoConstraints = false
+        // Refuse to shrink below intrinsic size so the full ID number renders.
+        container.setContentCompressionResistancePriority(.required, for: .horizontal)
 
         let icon = UIImageView()
         if #available(iOS 13.0, *) { icon.image = UIImage(systemName: sfSymbol) }
@@ -566,10 +637,17 @@ final class PatientHeaderView: UIView {
          dividerTop, chipsStack, dividerBottom,
          doctorIconView, doctorLabel,
          roomIconView, roomLabel,
-         insuranceIconView, insuranceLabel
+         insuranceIconView, insuranceLabel,
+         expandButton
         ].forEach { addSubview($0) }
 
+        expandButton.addTarget(self, action: #selector(expandTapped), for: .touchUpInside)
+
         setupConstraints()
+    }
+
+    @objc private func expandTapped() {
+        onToggleExpand?()
     }
 
     private func setupConstraints() {
@@ -587,12 +665,12 @@ final class PatientHeaderView: UIView {
 
             // Name
             nameLabel.leadingAnchor.constraint(equalTo: avatarContainer.trailingAnchor, constant: 12),
-            nameLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
+            nameLabel.trailingAnchor.constraint(equalTo: expandButton.leadingAnchor, constant: -8),
             nameLabel.topAnchor.constraint(equalTo: avatarContainer.topAnchor),
 
-            // Row 1: ID | Phone | Nat  (right of avatar)
+            // Row 1: ID | Phone | Nat  (right of avatar — stops before the chevron)
             infoRowStack.leadingAnchor.constraint(equalTo: avatarContainer.trailingAnchor, constant: 12),
-            infoRowStack.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -16),
+            infoRowStack.trailingAnchor.constraint(lessThanOrEqualTo: expandButton.leadingAnchor, constant: -8),
             infoRowStack.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 6),
 
             // Row 2: Blood | Allergy  (full-width — spanning under avatar too)
@@ -639,15 +717,78 @@ final class PatientHeaderView: UIView {
             roomLabel.centerYAnchor.constraint(equalTo: roomIconView.centerYAnchor),
             roomLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
 
-            // Insurance
+            // Insurance — NOTE: the bottom-pin is intentionally omitted from
+            // the `activate(...)` block below. It's installed separately with
+            // a low priority so it doesn't fight the external compact-height
+            // constraint set by LiteOverviewViewController.
             insuranceIconView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
             insuranceIconView.topAnchor.constraint(equalTo: roomIconView.bottomAnchor, constant: 5),
-            insuranceIconView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -8),
             insuranceIconView.widthAnchor.constraint(equalToConstant: 13),
             insuranceIconView.heightAnchor.constraint(equalToConstant: 13),
             insuranceLabel.leadingAnchor.constraint(equalTo: insuranceIconView.trailingAnchor, constant: 5),
             insuranceLabel.centerYAnchor.constraint(equalTo: insuranceIconView.centerYAnchor),
             insuranceLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
+
+            // Expand chevron — anchored to the avatar row so it stays at a
+            // fixed position regardless of name length / chip wrap. Sits to
+            // the right of the chip row, vertically centered with the avatar.
+            expandButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -12),
+            expandButton.centerYAnchor.constraint(equalTo: avatarContainer.centerYAnchor),
+            expandButton.widthAnchor.constraint(equalToConstant: 32),
+            expandButton.heightAnchor.constraint(equalToConstant: 32),
         ])
+
+        // Insurance bottom pin — installed at low priority so the external
+        // compact-height constraint (100pt, set by LiteOverviewViewController)
+        // can win without an Auto Layout conflict warning. In expanded mode
+        // (232pt) the constraint still wins over content compression.
+        let insuranceBottom = insuranceIconView.bottomAnchor
+            .constraint(lessThanOrEqualTo: bottomAnchor, constant: -8)
+        insuranceBottom.priority = .defaultLow
+        insuranceBottom.isActive = true
+    }
+
+    // MARK: - Compact / expanded mode
+
+    /// Hides everything below the avatar / name / chips row. Also hides the
+    /// nationality chip in compact mode so the ID + Phone chips have room to
+    /// display in full (otherwise three chips fight for the same row width
+    /// and all three truncate). The view's height constraint must be
+    /// updated by the host — this only flips subview visibility, rotates
+    /// the chevron, and toggles the nationality chip in the chip stack.
+    func setCompact(_ compact: Bool, animated: Bool) {
+        isCompact = compact
+        let hide = compact
+
+        // Nationality chip is in `infoRowStack`, which uses
+        // `.fillProportionally` distribution — `alpha = 0` would still
+        // reserve space, so we toggle `isHidden` instead. UIStackView
+        // animates that smoothly inside a UIView animation block.
+        natChipContainer.isHidden = hide
+
+        let updates = {
+            self.medicalRowStack.alpha   = hide ? 0 : 1
+            self.dividerTop.alpha        = hide ? 0 : 1
+            self.chipsStack.alpha        = hide ? 0 : 1
+            self.dividerBottom.alpha     = hide ? 0 : 1
+            self.doctorIconView.alpha    = hide ? 0 : 1
+            self.doctorLabel.alpha       = hide ? 0 : 1
+            self.roomIconView.alpha      = hide ? 0 : 1
+            self.roomLabel.alpha         = hide ? 0 : 1
+            self.insuranceIconView.alpha = hide ? 0 : 1
+            self.insuranceLabel.alpha    = hide ? 0 : 1
+
+            // Rotate chevron: down when compact (tap to expand), up when expanded.
+            let angle: CGFloat = hide ? 0 : .pi
+            self.expandButton.transform = CGAffineTransform(rotationAngle: angle)
+
+            self.layoutIfNeeded()
+        }
+
+        if animated {
+            UIView.animate(withDuration: 0.25, animations: updates)
+        } else {
+            updates()
+        }
     }
 }
