@@ -274,12 +274,19 @@ extension PatientsViewController {
     let datePopup = DatePopup()
     self.popupDialog = PopupDialog(viewController: datePopup)
 
-    let doneButton = PopupDialogButton(title: "Done") {
-      self.didSelectDate(date: datePopup.datePicker.date)
+    // Auto-apply: tap a date → dismiss + run `didSelectDate`. No "Done"
+    // button needed. Cancel is kept so the user can back out without
+    // changing the date (and to give the dialog a tap target so it's
+    // dismissable without an explicit picker interaction).
+    datePopup.onDateSelected = { [weak self] date in
+      guard let self = self else { return }
+      self.popupDialog?.dismiss(animated: true) {
+        self.didSelectDate(date: date)
+      }
     }
-    let cancelButton = PopupDialogButton(title: "Cancel", action: nil)
 
-    self.popupDialog?.addButtons([doneButton, cancelButton])
+    let cancelButton = PopupDialogButton(title: "Cancel", action: nil)
+    self.popupDialog?.addButton(cancelButton)
     self.present(popupDialog!, animated: true, completion: nil)
   }
 

@@ -223,12 +223,15 @@ class UnitsPopup: UIViewController {
     datePopup.datePicker.date = selectedDate
 
     let popup = PopupDialog(viewController: datePopup)
-    let doneButton = PopupDialogButton(title: "Done") { [weak self, weak datePopup] in
-      guard let self = self, let picker = datePopup?.datePicker else { return }
-      self.applyNewDate(picker.date)
+    // Auto-apply on selection — no "Done" button.
+    datePopup.onDateSelected = { [weak self, weak popup] date in
+      guard let self = self else { return }
+      popup?.dismiss(animated: true) {
+        self.applyNewDate(date)
+      }
     }
     let cancelButton = PopupDialogButton(title: "Cancel", action: nil)
-    popup.addButtons([doneButton, cancelButton])
+    popup.addButton(cancelButton)
     present(popup, animated: true)
   }
 
