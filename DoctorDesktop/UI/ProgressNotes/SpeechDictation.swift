@@ -47,6 +47,14 @@ final class SpeechDictation {
     /// True while audio is being captured and streamed to the recognizer.
     private(set) var isRunning: Bool = false
 
+    /// Set to true by `stop()` / `cancel()` / `cancelInternal()` so the
+    /// recognition-task error callback can tell "we asked for this" from
+    /// "something actually broke". Cancel-time errors arrive with several
+    /// different codes across iOS versions ("Recognition request was
+    /// canceled", "operation cancelled", "Connection invalidated", etc.),
+    /// so the code-based filter alone wasn't reliable.
+    private var isCancelling: Bool = false
+
     init(locale: Locale = Locale.current) {
         // Fall back to en-US if the preferred locale isn't supported.
         self.recognizer = SFSpeechRecognizer(locale: locale)
@@ -80,8 +88,11 @@ final class SpeechDictation {
             return
         }
 
-        // Tear down any lingering state (idempotent).
+        // Tear down any lingering state (idempotent). `cancelInternal` sets
+        // `isCancelling`; reset it once we're past the cleanup so a real
+        // mid-session failure can still surface.
         cancelInternal()
+        isCancelling = false
 
         // Configure the audio session for recording.
         let session = AVAudioSession.sharedInstance()
@@ -132,16 +143,20 @@ final class SpeechDictation {
                 if result.isFinal { self.cancelInternal() }
             }
             if let error = error {
-                // Silent no-op for normal-flow "errors" — these fire when the
-                // recognizer is stopped mid-session (e.g. user taps Send before
-                // tapping Stop) or when no speech is detected. Treat as success.
-                //   1110 — "No speech detected"
-                //    216 — kAFAssistantErrorDomain "operation cancelled"
-                //    203 — "Recognition Request Was Canceled"
-                //   1101 — "Connection invalidated"
+                // Silent no-op for normal-flow "errors":
+                //   • `isCancelling` true → stop/cancel was called from our
+                //     side (user tapped Send, mic toggle, or view dismissed),
+                //     so ANY error is expected.
+                //   • Otherwise: filter the well-known "user said nothing /
+                //     network blip" codes:
+                //       1110 — "No speech detected"
+                //        216 — kAFAssistantErrorDomain "operation cancelled"
+                //        203 — "Recognition Request Was Canceled"
+                //       1101 — "Connection invalidated"
                 let code = (error as NSError).code
-                let silent: Set<Int> = [1110, 216, 203, 1101]
-                if !silent.contains(code) {
+                let silentCodes: Set<Int> = [1110, 216, 203, 1101]
+                let isSilent = self.isCancelling || silentCodes.contains(code)
+                if !isSilent {
                     DispatchQueue.main.async {
                         self.delegate?.speechDictation(self,
                                                        didFailWith: error.localizedDescription)
@@ -155,9 +170,12 @@ final class SpeechDictation {
     }
 
     /// Stops the recognition session. The recognizer will emit a final result
-    /// via the delegate shortly after, once it has processed buffered audio.
+    /// via the delegate shortly after, once it has processed buffered audio —
+    /// and any post-stop "cancelled" error from the recognition task is
+    /// silenced via the `isCancelling` flag.
     func stop() {
         guard isRunning else { return }
+        isCancelling = true
         request?.endAudio()
         audioEngine.stop()
         audioEngine.inputNode.removeTap(onBus: 0)
@@ -173,6 +191,7 @@ final class SpeechDictation {
     // MARK: - Internal
 
     private func cancelInternal() {
+        isCancelling = true
         if audioEngine.isRunning {
             audioEngine.stop()
             audioEngine.inputNode.removeTap(onBus: 0)

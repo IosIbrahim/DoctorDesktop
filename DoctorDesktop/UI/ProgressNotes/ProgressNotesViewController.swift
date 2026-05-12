@@ -537,6 +537,15 @@ final class ProgressNotesViewController: UIViewController {
 
     @objc private func didTapSend() {
         view.endEditing(true)
+        // If the user is sending while dictation is still active, tear it
+        // down now (silently — `SpeechDictation.cancel()` flips the
+        // isCancelling flag so any post-cancel "Recognition request was
+        // canceled" error is suppressed). The mic icon flips back to its
+        // idle state straight away — no flash of "listening" after Send.
+        if dictation.isRunning {
+            dictation.cancel()
+            showDictationIdleState()
+        }
         // Snapshot the current text into the presenter BEFORE clearing the
         // field. Clearing immediately prevents the duplicate-send bug where
         // a rapid second tap would re-pull the (still-populated) field into

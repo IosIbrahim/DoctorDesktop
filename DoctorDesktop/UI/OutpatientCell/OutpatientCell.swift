@@ -150,21 +150,15 @@ class OutpatientCell: UITableViewCell {
         v.setContentCompressionResistancePriority(.required, for: .horizontal)
         return v
     }()
-    private let queueIcon: UIImageView = {
-        let i = UIImageView()
-        i.tintColor = OutpatientCell.chipText
-        i.contentMode = .scaleAspectFit
-        i.translatesAutoresizingMaskIntoConstraints = false
-        if #available(iOS 13, *) {
-            i.image = UIImage(systemName: "person.2.fill",
-                              withConfiguration: UIImage.SymbolConfiguration(pointSize: 10, weight: .semibold))
-        }
-        return i
-    }()
+    /// Slim queue badge — just "#N" centred in a pill. The previous
+    /// "[👥 [#1]]" version was ~70pt wide which crowded long Arabic
+    /// patient names against the right edge of the card. The slimmer
+    /// "#1" form is ~28pt and leaves room for full names.
     private let queueLabel: UILabel = {
         let l = UILabel()
-        l.font = UIFont.systemFont(ofSize: 12, weight: .semibold)
+        l.font = UIFont.systemFont(ofSize: 12, weight: .bold)
         l.textColor = OutpatientCell.chipText
+        l.textAlignment = .center
         l.translatesAutoresizingMaskIntoConstraints = false
         return l
     }()
@@ -233,7 +227,6 @@ class OutpatientCell: UITableViewCell {
         card.addSubview(doctorLabel)
         card.addSubview(infoStack)
         card.addSubview(queueChip)
-        queueChip.addSubview(queueIcon)
         queueChip.addSubview(queueLabel)
         card.addSubview(payChip)
         payChip.addSubview(payLabel)
@@ -261,24 +254,25 @@ class OutpatientCell: UITableViewCell {
             monogramLabel.centerXAnchor.constraint(equalTo: avatarView.centerXAnchor),
             monogramLabel.centerYAnchor.constraint(equalTo: avatarView.centerYAnchor),
 
-            // Queue chip — top-right
+            // Queue chip — slim 36×22 pill at the top-right with "#N" centred.
+            // FIXED width so the pill never stretches; combined with the
+            // `nameLabel.trailing = chip.leading - 14` constraint this keeps
+            // the chip the same size whether the patient name is short
+            // English or long Arabic.
             queueChip.topAnchor.constraint(equalTo: card.topAnchor, constant: 10),
             queueChip.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -12),
             queueChip.heightAnchor.constraint(equalToConstant: 22),
+            queueChip.widthAnchor.constraint(equalToConstant: 36),
 
-            queueIcon.leadingAnchor.constraint(equalTo: queueChip.leadingAnchor, constant: 8),
-            queueIcon.centerYAnchor.constraint(equalTo: queueChip.centerYAnchor),
-            queueIcon.widthAnchor.constraint(equalToConstant: 12),
-            queueIcon.heightAnchor.constraint(equalToConstant: 12),
-
-            queueLabel.leadingAnchor.constraint(equalTo: queueIcon.trailingAnchor, constant: 5),
-            queueLabel.trailingAnchor.constraint(equalTo: queueChip.trailingAnchor, constant: -10),
+            queueLabel.centerXAnchor.constraint(equalTo: queueChip.centerXAnchor),
             queueLabel.centerYAnchor.constraint(equalTo: queueChip.centerYAnchor),
 
-            // Name
+            // Name — bumped trailing gap from 8 → 14 so Arabic RTL text
+            // (which right-aligns its last glyph against the label's trailing
+            // edge) doesn't visually touch the queue chip.
             nameLabel.topAnchor.constraint(equalTo: card.topAnchor, constant: 11),
             nameLabel.leadingAnchor.constraint(equalTo: avatarView.trailingAnchor, constant: 12),
-            nameLabel.trailingAnchor.constraint(equalTo: queueChip.leadingAnchor, constant: -8),
+            nameLabel.trailingAnchor.constraint(equalTo: queueChip.leadingAnchor, constant: -14),
 
             // Doctor
             doctorLabel.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 4),
@@ -353,7 +347,7 @@ extension OutpatientCell {
         doctorLabel.text = "DR/ \(presenter.doctorName)"
 
         // ── Queue chip "[#N]" ──────────────────────────────────────────
-        queueLabel.text = "[#\(selectIndex + 1)]"
+        queueLabel.text = "#\(selectIndex + 1)"
 
         // ── Info row: rebuild from age components / fallback ───────────
         rebuildInfoRow(presenter: presenter)
