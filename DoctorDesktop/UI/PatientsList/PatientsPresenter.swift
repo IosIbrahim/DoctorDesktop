@@ -96,6 +96,13 @@ class PatientsPresenterImpl: PatientsPresenter {
         self.componentType = componentType
         self.user = user
         self.permission = permission
+        // CRITICAL: pin to en_US_POSIX so the formatter emits a regular space
+        // (U+0020) between time and AM/PM, Western digits, and a Gregorian
+        // calendar regardless of the user's iOS region / locale / 12-vs-24h
+        // preference. iOS 15.4+ silently inserts U+202F (narrow no-break
+        // space) on the default locale, which the .NET backend rejects with
+        // `{"message":"String was not recognized as a valid DateTime."}`.
+        formatter.locale = Locale(identifier: "en_US_POSIX")
         formatter.dateFormat = "dd/MM/yyyy HH:mm:ss"
   }
 

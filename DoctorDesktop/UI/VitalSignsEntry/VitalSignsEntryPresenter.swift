@@ -262,9 +262,14 @@ final class VitalSignsEntryPresenterImpl: VitalSignsEntryPresenter {
     let str: (String?) -> String = { $0 ?? "" }
 
     // ── Current date in both formats the server expects ──────────────────────
+    // Pin to en_US_POSIX — see PatientsPresenter for the NNBSP rationale.
     let now = Date()
-    let slashFmt  = DateFormatter(); slashFmt.dateFormat  = "dd/MM/yyyy HH:mm:ss"
-    let dashFmt   = DateFormatter(); dashFmt.dateFormat   = "dd-MM-yyyy HH:mm:ss"
+    let slashFmt  = DateFormatter()
+    slashFmt.locale = Locale(identifier: "en_US_POSIX")
+    slashFmt.dateFormat  = "dd/MM/yyyy HH:mm:ss"
+    let dashFmt   = DateFormatter()
+    dashFmt.locale = Locale(identifier: "en_US_POSIX")
+    dashFmt.dateFormat   = "dd-MM-yyyy HH:mm:ss"
     let dateSlash = slashFmt.string(from: now)   // "21/04/2026 13:46:46"
     let dateDash  = dashFmt.string(from: now)    // "21-04-2026 13:46:46"
 

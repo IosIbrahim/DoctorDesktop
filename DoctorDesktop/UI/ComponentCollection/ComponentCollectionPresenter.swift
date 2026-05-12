@@ -49,6 +49,9 @@ extension ComponentCollectionPresenterImpl {
       }
     
     let formatter = DateFormatter()
+    // en_US_POSIX → literal pattern, regular space, Western digits.
+    // Required by the .NET backend (see PatientsPresenter for the NNBSP bug).
+    formatter.locale = Locale(identifier: "en_US_POSIX")
     formatter.dateFormat = "dd/MM/yyyy HH:mm:ss"
       userNamePermission = user.userName ?? ""
       UserBranchPermission = user.branch ?? ""
