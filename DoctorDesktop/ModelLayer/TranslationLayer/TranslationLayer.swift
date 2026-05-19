@@ -264,19 +264,20 @@ extension TranslationLayerImpl {
         return finallArray
     }
     func getOperationPatientDTOFromJsonData(_ data: Data) -> [OperationPatient] {
-        
-        
-        let clinicalPatient = try? Root (data: data , keyPath: "Root")
-        //        let clinicalPatientObj = try? OperationPatient(data: data, keyPath: "Root.OR_PATIENTS.OR_PATIENTS_ROW", keyDecodingStrategy: .useDefaultKeys)
+        // CRITICAL: pass `.useDefaultKeys` explicitly. The Stuff pod's
+        // `init(data:keyPath:)` defaults to `.convertFromSnakeCase`, which
+        // mangles the server's UPPER_SNAKE_CASE keys (e.g. `OR_PATIENTS`
+        // becomes a camelCase that no longer matches our CodingKey raw
+        // values). Without this flag every field decodes as nil/empty and
+        // the table shows "No operations scheduled" even though the
+        // response body has 20+ KB of OR patient data.
+        let clinicalPatient = try? Root(data: data,
+                                        keyPath: "Root",
+                                        keyDecodingStrategy: .useDefaultKeys)
         var finallArray = [OperationPatient]()
-        if clinicalPatient != nil && clinicalPatient!.oR_PATIENTS != nil
-        {
-            finallArray.append(contentsOf: clinicalPatient!.oR_PATIENTS!.oR_PATIENTS_ROW)
+        if let or = clinicalPatient?.oR_PATIENTS {
+            finallArray.append(contentsOf: or.oR_PATIENTS_ROW)
         }
-        //        if clinicalPatientObj != nil
-        //        {
-        //            finallArray.append(clinicalPatientObj!)
-        //        }
         return finallArray
     }
 }

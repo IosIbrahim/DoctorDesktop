@@ -12,10 +12,10 @@ enum ComponentType: Int {
     case inpatient = 68 // 68
     case outpatient = 69 // 69
     case emergency = 71
+    case operations = 70 // 70 — OR (operation room) patient list, view-only
     case consultation = 576
 //    case clinicalAlert = 1020 // 1020  X
     case ICU = 2284 // 2665 X
- //   case operations = 70 // 70 X
     case nicu = 2260
 //    case notifications = 1
 //    case search = 72

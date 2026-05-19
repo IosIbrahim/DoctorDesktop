@@ -21,6 +21,7 @@ protocol DependencyRegistry {
   func makeVitalSignsEntryViewController(with patient: Patient, user: User) -> VitalSignsEntryViewController
   func makeProgressNotesViewController(with patient: Patient, user: User, visitIdArray: String) -> ProgressNotesViewController
   func makeLiteOverviewViewController(with patient: Patient, user: User, permission: PermissionModel) -> LiteOverviewViewController
+  func makeOperationsListViewController(with user: User) -> OperationsListViewController
 
   typealias rootNavigationCoordinatorMaker = (UIViewController) -> NavigationCoordinator
   typealias ComponentCellMaker = (UICollectionView, IndexPath, Component, ColorAndImageTuple) -> ComponentCell
@@ -232,6 +233,7 @@ class DependencyRegistryImpl: DependencyRegistry {
     registerVitalSignsEntryViewController()
     registerProgressNotesViewController()
     registerLiteOverviewViewController()
+    registerOperationsListViewController()
   }
   
   //MARK: - Maker Methods
@@ -627,5 +629,22 @@ extension DependencyRegistryImpl {
 
   func makeLiteOverviewViewController(with patient: Patient, user: User, permission: PermissionModel) -> LiteOverviewViewController {
     return container.resolve(LiteOverviewViewController.self, arguments: patient, user, permission)!
+  }
+}
+
+// MARK: - OperationsListViewController (view-only OR schedule)
+extension DependencyRegistryImpl {
+  func registerOperationsListViewController() {
+    container.register(OperationsListViewController.self) { (r, user: User) in
+      let presenter = OperationsListPresenterImpl(modelLayer: r.resolve(ModelLayer.self)!,
+                                                  user: user)
+      let vc = OperationsListViewController()
+      vc.configure(with: presenter, navigationCoordinator: self.navigationCoordinator)
+      return vc
+    }
+  }
+
+  func makeOperationsListViewController(with user: User) -> OperationsListViewController {
+    return container.resolve(OperationsListViewController.self, argument: user)!
   }
 }

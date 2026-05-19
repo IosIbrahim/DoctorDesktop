@@ -119,6 +119,8 @@ class PatientsPresenterImpl: PatientsPresenter {
 //    case .operations:
 //        return "Operations"
  //   default: return ""
+    case .operations:
+        return "Operations"
     }
   }
   
@@ -229,10 +231,15 @@ extension PatientsPresenterImpl {
   }
     func getOperationPatients(withDate date: Date, finished: @escaping EmptyBlock) {
         let params = [
-            "BRANCH_ID": user.branch ?? "",
-            "USER_ID": user.userName ?? "",
-            "COMPUTER_NAME": "iOS",
-            "USER_OPEN_FLAG": "D",
+            "BRANCH_ID":             user.branch ?? "",
+            "USER_ID":               user.userName ?? "",
+            "COMPUTER_NAME":         "iOS",
+            "USER_OPEN_FLAG":        "D",
+            // REQ_DOC_ID filters the OR schedule to operations where the
+            // logged-in doctor is the surgeon. Matches Android's behaviour
+            // and the URL your friend tested with (REQ_DOC_ID=43 = the
+            // user's EMPID).
+            "REQ_DOC_ID":            user.id ?? "",
             "DATE_FROM_STR_FORMATED": formatter.string(from: date)
         ]
         

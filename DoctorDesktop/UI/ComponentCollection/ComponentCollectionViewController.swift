@@ -145,10 +145,15 @@ class ComponentCollectionViewController: UIViewController {
       image = UIImage(named: "emergency") ?? .init()
       startColor = #colorLiteral(red: 0.9254901961, green: 0.2901960784, blue: 0.2666666667, alpha: 1)
       endColor = #colorLiteral(red: 0.8588235294, green: 0.1529411765, blue: 0.1098039216, alpha: 1)
-//    case .operations:
-//        startColor = #colorLiteral(red: 0.9058823529, green: 0.5882352941, blue: 0.1254901961, alpha: 1)
-//        endColor = #colorLiteral(red: 0.8039215686, green: 0.4431372549, blue: 0.1215686275, alpha: 1)
-//        image = UIImage(named:"ic-operation") ?? .init()
+    case .operations:
+        // Amber-orange gradient — distinct from inpatient blue / emergency
+        // red. Falls back to the inpatient bed icon if no operation icon
+        // ships in the asset catalog.
+        startColor = #colorLiteral(red: 0.9058823529, green: 0.5882352941, blue: 0.1254901961, alpha: 1)
+        endColor   = #colorLiteral(red: 0.8039215686, green: 0.4431372549, blue: 0.1215686275, alpha: 1)
+        image = UIImage(named: "ic-operation")
+            ?? UIImage(named: "inpatients")
+            ?? UIImage()
     case .consultation:
       startColor = #colorLiteral(red: 0.3490196078, green: 0.7568627451, blue: 0.2901960784, alpha: 1)
       endColor = #colorLiteral(red: 0.262745098, green: 0.4588235294, blue: 0.2156862745, alpha: 1)
@@ -219,7 +224,13 @@ extension ComponentCollectionViewController: UICollectionViewDelegate {
       let component = visibleComponents[indexPath.row]
       guard let componentType = component.type else { return }
       let originalIndex = presenter.components.firstIndex(where: { $0.processInfoCode == component.processInfoCode }) ?? indexPath.row
-      let permission = presenter.permissions[originalIndex]
+      // The synthetic Operations tile has no matching slot in `permissions`
+      // (the server returned permission rows only for the components it
+      // shipped in `userComponent`). Fall back to an empty PermissionModel
+      // for any out-of-range index so the tap doesn't crash.
+      let permission: PermissionModel = (originalIndex < presenter.permissions.count)
+          ? presenter.permissions[originalIndex]
+          : PermissionModel()
       let args = ["componentType": componentType, "user": presenter.user, "permission": permission] as [String : Any]
       navigationCoordinator?.next(arguments: args)
   }

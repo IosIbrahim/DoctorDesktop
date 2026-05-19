@@ -123,17 +123,26 @@ class OperationPatient : Codable {
 
 struct OR_PATIENTS : Codable {
     var oR_PATIENTS_ROW = [OperationPatient]()
-    
+
     enum CodingKeys: String, CodingKey {
-        
         case oR_PATIENTS_ROW = "OR_PATIENTS_ROW"
     }
-    
+
+    /// BHG quirk: the server returns `OR_PATIENTS_ROW` as a single object
+    /// when there's only one row, and as an array when there are multiple.
+    /// Decoding strictly as `[OperationPatient]` blows up on single-row
+    /// responses (which then surfaces as "no operations" in the UI even
+    /// though the doctor has one scheduled). Handle both shapes here.
     init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
-        oR_PATIENTS_ROW = try values.decodeIfPresent([OperationPatient].self, forKey: .oR_PATIENTS_ROW)!
+        if let arr = try? values.decode([OperationPatient].self, forKey: .oR_PATIENTS_ROW) {
+            oR_PATIENTS_ROW = arr
+        } else if let single = try? values.decode(OperationPatient.self, forKey: .oR_PATIENTS_ROW) {
+            oR_PATIENTS_ROW = [single]
+        } else {
+            oR_PATIENTS_ROW = []
+        }
     }
-    
 }
 struct Root : Codable {
     let oR_PATIENTS : OR_PATIENTS?

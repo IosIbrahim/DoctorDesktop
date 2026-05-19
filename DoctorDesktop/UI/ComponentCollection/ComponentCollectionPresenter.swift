@@ -33,6 +33,31 @@ class ComponentCollectionPresenterImpl: ComponentCollectionPresenter {
       self.components = components
       self.user = user
       self.permissions = []
+      // Operations (PROCESS_INFO_CODE = 70) is a view-only screen for the
+      // doctor's own OR schedule. The login API doesn't always return it in
+      // `userComponent` for every doctor account, so we synthesise a tile
+      // here if it isn't already present. The data is fetched per-doctor
+      // anyway (REQ_DOC_ID = user.id), so showing this tile to a user who
+      // has no scheduled operations just renders the empty state.
+      let alreadyHasOperations = components.contains { $0.processInfoCode == 70 }
+      if !alreadyHasOperations {
+          self.components.append(Self.makeOperationsComponent())
+      }
+  }
+
+  /// Synthetic Operations component. The fields match what the server
+  /// would return for `PROCESS_INFO_CODE=70` — `name`/`shortName` drive
+  /// the tile label; `type` is set so `visibleComponents` and the tap
+  /// handler resolve to `.operations`.
+  private static func makeOperationsComponent() -> Component {
+      var c = Component()
+      c.processInfoCode = 70
+      c.type = .operations
+      // The `name` / `shortName` accessors read from englishName /
+      // shortNameInEnglish, which are private. Use the public
+      // `updateName` mutator so the tile shows "Operations".
+      c.updateName("Operations")
+      return c
   }
 }
 
@@ -94,7 +119,8 @@ extension ComponentCollectionPresenterImpl {
                     self.components[i].patientsCount = patientCounts.outpatient
                 case .emergency:
                     self.components[i].patientsCount = patientCounts.emergency
-             //   case .operations: self.components[i].patientsCount = patientCounts.operation
+                case .operations:
+                    self.components[i].patientsCount = patientCounts.operation
               //  case .clinicalAlert:self.components[i].patientsCount = patientCounts.clinicalAlert
                 case .consultation:
                     self.components[i].patientsCount = patientCounts.cosultationFromDoctor
