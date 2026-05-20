@@ -37,13 +37,17 @@ class OperationCell: UITableViewCell {
     // doctor can scan the card by colour without reading every line:
     //   • Surgeon       — teal   (matches the brand stethoscope colour)
     //   • Anesthesia    — purple (matches the syringe / pharma palette)
-    //   • Suite / Room  — indigo (matches the inpatient bed badge tone)
+    //   • OR Suite/Room — indigo (the operation theatre)
+    //   • Patient bed   — slate  (where the patient is physically housed)
+    //   • Insurance     — emerald (financial / category — money association)
     //   • Expected date — amber  (calendar / time)
     //   • Duration      — green  (clock / progress)
     //   • Procedure     — coral  (the procedure name itself is the headline metric)
     private static let surgeonColor   = UIColor(red: 0.04, green: 0.51, blue: 0.61, alpha: 1)
     private static let anesthColor    = UIColor(red: 0.55, green: 0.30, blue: 0.78, alpha: 1)
     private static let roomColor      = UIColor(red: 0.27, green: 0.42, blue: 0.78, alpha: 1)
+    private static let placeColor     = UIColor(red: 0.36, green: 0.48, blue: 0.58, alpha: 1)
+    private static let insuranceColor = UIColor(red: 0.13, green: 0.55, blue: 0.45, alpha: 1)
     private static let dateColor      = UIColor(red: 0.91, green: 0.55, blue: 0.10, alpha: 1)
     private static let durationColor  = UIColor(red: 0.18, green: 0.65, blue: 0.36, alpha: 1)
     private static let procedureColor = UIColor(red: 0.86, green: 0.30, blue: 0.34, alpha: 1)
@@ -157,6 +161,17 @@ class OperationCell: UITableViewCell {
     private let roomRow     = OperationCell.makeIconRow(
         systemIcon: "bed.double.fill",
         tint: OperationCell.roomColor)
+    /// Patient's physical location (floor / room / bed) — different from
+    /// the OR suite above. Sourced from BED_FULL_DESC_EN.
+    private let placeRow    = OperationCell.makeIconRow(
+        systemIcon: "building.2.fill",
+        tint: OperationCell.placeColor)
+    /// Insurance contract / category — matches the web dashboard's
+    /// "Category" column. Falls back to PATFINANACCOUNT when no
+    /// contract name is returned.
+    private let insuranceRow = OperationCell.makeIconRow(
+        systemIcon: "creditcard.fill",
+        tint: OperationCell.insuranceColor)
     private let dateRow     = OperationCell.makeIconRow(
         systemIcon: "calendar",
         tint: OperationCell.dateColor)
@@ -206,6 +221,8 @@ class OperationCell: UITableViewCell {
         card.addSubview(anesthRow)
         card.addSubview(divider)
         card.addSubview(roomRow)
+        card.addSubview(placeRow)
+        card.addSubview(insuranceRow)
         card.addSubview(dateRow)
         card.addSubview(durationRow)
         card.addSubview(serviceRow)
@@ -259,12 +276,21 @@ class OperationCell: UITableViewCell {
             divider.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -14),
             divider.heightAnchor.constraint(equalToConstant: 0.5),
 
-            // Meta block
+            // Meta block — vertical stack: OR room → patient bed →
+            // insurance → date + duration → procedure.
             roomRow.topAnchor.constraint(equalTo: divider.bottomAnchor, constant: 8),
             roomRow.leadingAnchor.constraint(equalTo: divider.leadingAnchor),
             roomRow.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -14),
 
-            dateRow.topAnchor.constraint(equalTo: roomRow.bottomAnchor, constant: 4),
+            placeRow.topAnchor.constraint(equalTo: roomRow.bottomAnchor, constant: 4),
+            placeRow.leadingAnchor.constraint(equalTo: divider.leadingAnchor),
+            placeRow.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -14),
+
+            insuranceRow.topAnchor.constraint(equalTo: placeRow.bottomAnchor, constant: 4),
+            insuranceRow.leadingAnchor.constraint(equalTo: divider.leadingAnchor),
+            insuranceRow.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -14),
+
+            dateRow.topAnchor.constraint(equalTo: insuranceRow.bottomAnchor, constant: 4),
             dateRow.leadingAnchor.constraint(equalTo: divider.leadingAnchor),
             dateRow.trailingAnchor.constraint(lessThanOrEqualTo: durationRow.leadingAnchor, constant: -8),
 
@@ -286,12 +312,14 @@ class OperationCell: UITableViewCell {
         statusChip.text = nil
         statusChip.backgroundColor = .clear
         statusChip.textColor = .white
-        OperationCell.setText(surgeonRow,  "")
-        OperationCell.setText(anesthRow,   "")
-        OperationCell.setText(roomRow,     "")
-        OperationCell.setText(dateRow,     "")
-        OperationCell.setText(durationRow, "")
-        OperationCell.setText(serviceRow,  "")
+        OperationCell.setText(surgeonRow,    "")
+        OperationCell.setText(anesthRow,     "")
+        OperationCell.setText(roomRow,       "")
+        OperationCell.setText(placeRow,      "")
+        OperationCell.setText(insuranceRow,  "")
+        OperationCell.setText(dateRow,       "")
+        OperationCell.setText(durationRow,   "")
+        OperationCell.setText(serviceRow,    "")
     }
 }
 
@@ -339,7 +367,7 @@ extension OperationCell {
         }
         OperationCell.setText(anesthRow, anesthLine)
 
-        // Suite / Room
+        // OR Suite / Room (where the operation happens)
         let suite = (patient.sUITE_NAME_EN ?? "").trimmingCharacters(in: .whitespaces)
         let room  = (patient.rOOM_NAME_EN ?? "").trimmingCharacters(in: .whitespaces)
         let roomLine: String
@@ -348,6 +376,31 @@ extension OperationCell {
         else if !room.isEmpty              { roomLine = room }
         else                                { roomLine = "—" }
         OperationCell.setText(roomRow, roomLine)
+
+        // Patient's physical location (floor / room / bed) — different
+        // from the OR suite. BED_FULL_DESC_EN sometimes comes back with
+        // leading separators (e.g. " -  - Emergency") when only the unit
+        // is populated; trim them for a clean display.
+        let bedRaw = (patient.bED_FULL_DESC_EN ?? "").trimmingCharacters(in: .whitespaces)
+        let cleanedBed = bedRaw
+            .replacingOccurrences(of: "^[\\s\\-]+", with: "", options: .regularExpression)
+            .replacingOccurrences(of: "[\\s\\-]+$", with: "", options: .regularExpression)
+        OperationCell.setText(placeRow, cleanedBed.isEmpty ? "—" : cleanedBed)
+
+        // Insurance / Category — try multiple fields the server may use,
+        // fall back to the financial-account number when nothing else is
+        // populated.
+        let contract = (patient.cONTRACT_NAME_EN
+                        ?? patient.cATEGORY_NAME_EN
+                        ?? patient.cONTRACT_NAME_AR
+                        ?? patient.cATEGORY_NAME_AR
+                        ?? "").trimmingCharacters(in: .whitespaces)
+        let acct = (patient.pATFINANACCOUNT ?? "").trimmingCharacters(in: .whitespaces)
+        let insuranceLine: String
+        if !contract.isEmpty       { insuranceLine = contract }
+        else if !acct.isEmpty      { insuranceLine = "Account: \(acct)" }
+        else                       { insuranceLine = "—" }
+        OperationCell.setText(insuranceRow, insuranceLine)
 
         // Date + duration
         let date = (patient.eXPECTEDDONEDATE ?? "").trimmingCharacters(in: .whitespaces)

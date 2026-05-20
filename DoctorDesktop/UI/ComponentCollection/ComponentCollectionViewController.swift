@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import NVActivityIndicatorView
 
 typealias ColorAndImageTuple = (startColor: UIColor, endColor: UIColor, image: UIImage)
 
@@ -27,7 +28,7 @@ class LeftAlignedCollectionViewFlowLayout: UICollectionViewFlowLayout {
   }
 }
 
-class ComponentCollectionViewController: UIViewController {
+class ComponentCollectionViewController: UIViewController, NVActivityIndicatorViewable {
   
   @IBOutlet weak var collectionView: UICollectionView!
 
@@ -53,12 +54,8 @@ class ComponentCollectionViewController: UIViewController {
     // causing the collection view to rebuild all cells continuously.
     collectionView.collectionViewLayout.invalidateLayout()
   }
-  override func viewWillDisappear(_ animated: Bool) {
-    super.viewWillDisappear(true)
-    if isMovingFromParentViewController {
-      navigationCoordinator?.movingBack()
-    }
-  }
+  // viewWillDisappear consolidated below (after viewWillAppear) — it now
+  // also restores the nav bar that was hidden in viewDidLoad.
 
   /// Pull-to-refresh control wired to the collection view in viewDidLoad.
   private let refreshControl = UIRefreshControl()
@@ -67,9 +64,64 @@ class ComponentCollectionViewController: UIViewController {
   /// `getPatientsCount` requests against the server.
   private var isRefreshing = false
 
+  // Header card — owned by this VC so we can update the date / count
+  // labels live without rebuilding the whole hierarchy.
+  private let greetingHeader = HomeGreetingHeaderView()
+  /// Decorative background — soft gradient + ECG heartbeat line +
+  /// dot patterns. Replaces the previous "footer banner" approach with
+  /// art that lives BEHIND the cards instead of stealing screen space.
+  private let backgroundArt = HomeBackgroundView()
+
   override func viewDidLoad() {
     super.viewDidLoad()
     self.navigationItem.setHidesBackButton(true, animated:false)
+
+    // ── Medical-themed background ───────────────────────────────────────
+    // Hide the doctor-photo background that ships from the storyboard
+    // (asset "loginSreen") and install `HomeBackgroundView` BEHIND every
+    // other view. It renders a soft gradient, an ECG heartbeat line,
+    // two corner dot patterns, and organic blob shapes — gives the
+    // screen unmistakable "healthcare" identity without consuming
+    // foreground real estate.
+    view.backgroundColor = .clear
+    for sub in view.subviews where sub is UIImageView {
+        sub.isHidden = true
+    }
+    backgroundArt.translatesAutoresizingMaskIntoConstraints = false
+    view.insertSubview(backgroundArt, at: 0)
+    NSLayoutConstraint.activate([
+        backgroundArt.topAnchor.constraint(equalTo: view.topAnchor),
+        backgroundArt.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+        backgroundArt.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+        backgroundArt.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+    ])
+    collectionView.backgroundColor = .clear
+
+    // Hide the navigation bar entirely on this screen — the greeting card
+    // doubles as the screen header.
+    navigationController?.setNavigationBarHidden(true, animated: false)
+
+    // ── Greeting header (Hello, Dr. … + date + count summary) ────────────
+    greetingHeader.translatesAutoresizingMaskIntoConstraints = false
+    view.addSubview(greetingHeader)
+    NSLayoutConstraint.activate([
+        greetingHeader.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 8),
+        greetingHeader.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+        greetingHeader.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+    ])
+    greetingHeader.configure(doctorName: presenter.user.englishName ?? presenter.user.userName ?? "Doctor")
+
+    // Push the collection view's content below the header so the cards
+    // start where the header ends. We don't need a bottom inset any
+    // more — the heartbeat artwork sits BEHIND the cards.
+    view.layoutIfNeeded()
+    collectionView.contentInset = UIEdgeInsets(
+        top:    greetingHeader.frame.height + 16,
+        left:   0,
+        bottom: 32,
+        right:  0
+    )
+    collectionView.scrollIndicatorInsets = collectionView.contentInset
 
     ComponentCell.register(with: collectionView)
 
@@ -87,10 +139,22 @@ class ComponentCollectionViewController: UIViewController {
 
   override func viewWillAppear(_ animated: Bool) {
     super.viewWillAppear(animated)
+    // Always re-hide the nav bar when popping back from a child screen.
+    navigationController?.setNavigationBarHidden(true, animated: animated)
     // Refresh when popping back from a child screen — but skip the very
     // first appearance (already kicked off in viewDidLoad).
     if isFinishedLoadingCounts {
         loadCounts()
+    }
+  }
+
+  override func viewWillDisappear(_ animated: Bool) {
+    super.viewWillDisappear(animated)
+    // Restore the nav bar for downstream screens (Patients list,
+    // Operations list, etc. — they expect it visible).
+    navigationController?.setNavigationBarHidden(false, animated: animated)
+    if isMovingFromParentViewController {
+      navigationCoordinator?.movingBack()
     }
   }
 
@@ -100,14 +164,27 @@ class ComponentCollectionViewController: UIViewController {
 
   /// Single entry point for fetching tile counts. Used by viewDidLoad,
   /// viewWillAppear (pop-back), and the pull-to-refresh control.
+  ///
+  /// While the request is in flight we show a centred spinner using
+  /// `NVActivityIndicatorViewable` — the same loader the rest of the
+  /// app uses (Lite Overview, Operations list). Pull-to-refresh has
+  /// its own UIRefreshControl indicator at the top of the collection
+  /// view, so we skip the central spinner when the request was kicked
+  /// off by a pull-down (otherwise the user sees two spinners at once).
   private func loadCounts() {
     guard !isRefreshing else { return }
     isRefreshing = true
+
+    let isPullToRefresh = refreshControl.isRefreshing
+    if !isPullToRefresh {
+        startAnimating(message: "Loading...")
+    }
 
     presenter.getPatientsCount { [weak self] in
         guard let self = self else { return }
         self.isRefreshing = false
         self.refreshControl.endRefreshing()
+        self.stopAnimating()
         if !self.presenter.error.isEmpty {
             self.toastBar.show(with: self.presenter.error)
         }
@@ -200,20 +277,30 @@ extension ComponentCollectionViewController: UICollectionViewDataSource {
 }
 
 extension ComponentCollectionViewController: UICollectionViewDelegateFlowLayout {
-  func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-    let orientation = UIDevice.current.orientation
-//    let numberOfHorizontalCells: CGFloat = orientation.isPortrait || orientation.isFlat  ? 3 : 5
-//    let numberOfVerticalCells: CGFloat = orientation.isPortrait || orientation.isFlat ? 3 : 2
-    return CGSize(width: (collectionView.bounds.width / 2)-10, height: 100)
+  func collectionView(_ collectionView: UICollectionView,
+                      layout collectionViewLayout: UICollectionViewLayout,
+                      sizeForItemAt indexPath: IndexPath) -> CGSize {
+    // Full-width rows. Section insets are 16 each side, so width =
+    // bounds.width - 32. Height 116 gives the card noticeable presence
+    // (matches the user's reference screenshot — taller cards, generous
+    // vertical breathing room).
+    let width = collectionView.bounds.width - 32
+    return CGSize(width: width, height: 116)
   }
-  func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
-    return 10
+  func collectionView(_ collectionView: UICollectionView,
+                      layout collectionViewLayout: UICollectionViewLayout,
+                      minimumLineSpacingForSectionAt section: Int) -> CGFloat {
+    return 14
   }
-  func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
-    return 10
+  func collectionView(_ collectionView: UICollectionView,
+                      layout collectionViewLayout: UICollectionViewLayout,
+                      minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
+    return 0
   }
-  func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
-    return UIEdgeInsets(top: 5, left: 5, bottom: 5, right: 5)
+  func collectionView(_ collectionView: UICollectionView,
+                      layout collectionViewLayout: UICollectionViewLayout,
+                      insetForSectionAt section: Int) -> UIEdgeInsets {
+    return UIEdgeInsets(top: 8, left: 16, bottom: 16, right: 16)
   }
 }
 
