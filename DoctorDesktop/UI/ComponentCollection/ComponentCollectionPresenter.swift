@@ -33,7 +33,31 @@ class ComponentCollectionPresenterImpl: ComponentCollectionPresenter {
       self.components = components
       self.user = user
       self.permissions = []
-    print("com")
+      // Operations (PROCESS_INFO_CODE = 70) is a view-only screen for the
+      // doctor's own OR schedule. The login API doesn't always return it in
+      // `userComponent` for every doctor account, so we synthesise a tile
+      // here if it isn't already present. The data is fetched per-doctor
+      // anyway (REQ_DOC_ID = user.id), so showing this tile to a user who
+      // has no scheduled operations just renders the empty state.
+      let alreadyHasOperations = components.contains { $0.processInfoCode == 70 }
+      if !alreadyHasOperations {
+          self.components.append(Self.makeOperationsComponent())
+      }
+  }
+
+  /// Synthetic Operations component. The fields match what the server
+  /// would return for `PROCESS_INFO_CODE=70` — `name`/`shortName` drive
+  /// the tile label; `type` is set so `visibleComponents` and the tap
+  /// handler resolve to `.operations`.
+  private static func makeOperationsComponent() -> Component {
+      var c = Component()
+      c.processInfoCode = 70
+      c.type = .operations
+      // The `name` / `shortName` accessors read from englishName /
+      // shortNameInEnglish, which are private. Use the public
+      // `updateName` mutator so the tile shows "Operations".
+      c.updateName("Operations")
+      return c
   }
 }
 
@@ -50,6 +74,9 @@ extension ComponentCollectionPresenterImpl {
       }
     
     let formatter = DateFormatter()
+    // en_US_POSIX → literal pattern, regular space, Western digits.
+    // Required by the .NET backend (see PatientsPresenter for the NNBSP bug).
+    formatter.locale = Locale(identifier: "en_US_POSIX")
     formatter.dateFormat = "dd/MM/yyyy HH:mm:ss"
       userNamePermission = user.userName ?? ""
       UserBranchPermission = user.branch ?? ""
@@ -78,34 +105,27 @@ extension ComponentCollectionPresenterImpl {
         }else {
             for (i,component) in self.components.enumerated() {
               
-              print(component.processInfoCode)
-                if component.type == .notifications {
-                    self.components[i].patientsCount = "2762"
-                    self.components[i].updateName("Notifications")
-
-                }else if let componentType = ComponentType(rawValue: component.processInfoCode) {
+//                if component.type == .notifications {
+//                    self.components[i].patientsCount = "2762"
+//                    self.components[i].updateName("Notifications")
+//
+//                }else
+                if let componentType = ComponentType(rawValue: component.processInfoCode) {
                 switch(componentType) {
                 case .inpatient:
                     self.components[i].patientsCount = patientCounts.inpatientFloor
-                case .ICU:
-                    self.components[i].patientsCount = patientCounts.inpatientCare
+             //   case .ICU: self.components[i].patientsCount = patientCounts.inpatientCare
                 case .outpatient:
-                  print("asfafadsfa")
                     self.components[i].patientsCount = patientCounts.outpatient
-                  print(processInfoCode)
-                  print(component.patientsCount)
                 case .emergency:
                     self.components[i].patientsCount = patientCounts.emergency
                 case .operations:
                     self.components[i].patientsCount = patientCounts.operation
-                case .clinicalAlert:
-                    self.components[i].patientsCount = patientCounts.clinicalAlert
+              //  case .clinicalAlert:self.components[i].patientsCount = patientCounts.clinicalAlert
                 case .consultation:
                     self.components[i].patientsCount = patientCounts.cosultationFromDoctor
-                case .nicu:
-                    self.components[i].patientsCount = patientCounts.inpatientNICU
-                case .search:
-                    self.components[i].patientsCount = ""
+             //   case .nicu: self.components[i].patientsCount = patientCounts.inpatientNICU
+            //    case .search: self.components[i].patientsCount = ""
                 default: break
                 }
                     self.components[i].type = componentType

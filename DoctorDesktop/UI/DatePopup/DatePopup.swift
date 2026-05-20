@@ -22,6 +22,11 @@ class DatePopup: UIViewController {
         return picker
     }()
 
+    /// Called the moment the user taps a date on the calendar.
+    /// Removes the need for an explicit "Done" button — the host pops the
+    /// dialog and applies the date in this callback.
+    var onDateSelected: ((Date) -> Void)?
+
     // MARK: - Private UI
 
     private let cardView: UIView = {
@@ -47,6 +52,13 @@ class DatePopup: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        datePicker.addTarget(self,
+                             action: #selector(dateChanged),
+                             for: .valueChanged)
+    }
+
+    @objc private func dateChanged() {
+        onDateSelected?(datePicker.date)
     }
 
     // MARK: - Layout

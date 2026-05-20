@@ -9,7 +9,6 @@
 import UIKit
 import Alamofire
 import Stuff
-import Toastlity
 import NVActivityIndicatorView
 
 class LoginViewController: UIViewController, NVActivityIndicatorViewable {
@@ -33,6 +32,8 @@ class LoginViewController: UIViewController, NVActivityIndicatorViewable {
       #if DEBUG
       userName.text = "KHABEER"
       passWord.text = "920250270"
+      userName.text = "khabeer"
+      passWord.text = "P@P@ssw0rd123"
       #endif
   }
   
@@ -64,7 +65,8 @@ class LoginViewController: UIViewController, NVActivityIndicatorViewable {
           return
       }
     startAnimating(message: "Login...")
-    let params = ["USER_ID":username, "USERPASSWORD":password]
+    let pushToken = UserDefaults.standard.string(forKey: "pushToken") ?? ""
+    let params = ["USER_ID": username, "USERPASSWORD": password, "MOBILEAPP_KEY": pushToken]
     presenter.login(with: params) { [weak self] in
       self?.stopAnimating()
         if self?.presenter.error != "" {

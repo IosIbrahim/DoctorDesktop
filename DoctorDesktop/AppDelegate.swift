@@ -9,9 +9,13 @@
 import UIKit
 import IQKeyboardManagerSwift
 import SwiftyBeaver
+import Firebase
+import FirebaseMessaging
+import FirebaseCore
+
 
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate ,MessagingDelegate,UNUserNotificationCenterDelegate {
 
   var window: UIWindow?
   static var dependencyRegistry: DependencyRegistry!
@@ -21,10 +25,92 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
   func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
     initSwiftyBeaver()
     AppDelegate.enableScreenLogging()
-    IQKeyboardManager.shared.enable = true
+    IQKeyboardManager.shared.isEnabled = true
+      
+    initFirebase(application)
+    Messaging.messaging().delegate = self
+      
+      if #available(iOS 10.0, *) {
+          // For iOS 10 display notification (sent via APNS)
+          
+          UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { (_, error) in
+              if error == nil {
+                  print("Push notifications permission granted")
+              }
+          }
+          UNUserNotificationCenter.current().delegate = self
+          UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { (_, error) in
+              if error == nil {
+                  print("Push notifications permission granted")
+              }
+          }
+          
+                      let authOptions: UNAuthorizationOptions = [.alert, .badge, .sound]
+                      UNUserNotificationCenter.current().requestAuthorization(
+                          options: authOptions,
+                          completionHandler: {_, _ in })
+      } else {
+          
+          let settings: UIUserNotificationSettings =
+              UIUserNotificationSettings(types: [.alert, .badge, .sound], categories: nil)
+      }
+      
     return true
   }
+    
+    func initFirebase(_ application: UIApplication) {
+        FirebaseApp.configure()
+//        GMSServices.provideAPIKey(gcmMessageIDKey)
+        if #available(iOS 10.0, *) {
+            // For iOS 10 display notification (sent via APNS)
+            UNUserNotificationCenter.current().delegate = self
+            
+            let authOptions: UNAuthorizationOptions = [.alert, .badge, .sound]
+            UNUserNotificationCenter.current().requestAuthorization(
+                options: authOptions,
+                completionHandler: {_, _ in })
+        } else {
+            let settings: UIUserNotificationSettings =
+                UIUserNotificationSettings(types: [.alert, .badge, .sound], categories: nil)
+            application.registerUserNotificationSettings(settings)
+        }
+        
+        application.registerForRemoteNotifications()
+        Messaging.messaging().delegate = self
+    }
 
+    
+    func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any]) {
+        print(userInfo)
+    }
+
+    func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any],
+                     fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
+     
+      print(userInfo)
+
+      completionHandler(UIBackgroundFetchResult.newData)
+    }
+    
+    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        if let refreshedToken =         Messaging.messaging().fcmToken {
+            print("InstanceID token: \(refreshedToken)")
+            UserDefaults.standard.set(refreshedToken, forKey: "pushToken")
+        }
+    }
+  
+    func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
+        
+    }
+    
+    func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
+        print("Firebase registration token: \(fcmToken ?? "")")
+        let dataDict:[String: String] = ["token": fcmToken ?? ""]
+        NotificationCenter.default.post(name: Notification.Name("FCMToken"), object: nil, userInfo: dataDict)
+        UserDefaults.standard.set(fcmToken, forKey: "pushToken")
+    }
+    
+    
   func initSwiftyBeaver() {
     // add log destinations. at least one is needed!
     let console = ConsoleDestination()  // log to Xcode Console

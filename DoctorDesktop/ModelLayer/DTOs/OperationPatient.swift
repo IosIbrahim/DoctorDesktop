@@ -42,6 +42,17 @@ class OperationPatient : Codable {
     let nOTES : String?
     let gENDER_AGE_NAME_AR : String?
     let gENDER_AGE_NAME_EN : String?
+    // Insurance / financial-category fields. The web "Category" column
+    // maps to whichever of these the server populates — different BHG
+    // environments return the value under slightly different keys, so
+    // we try them all and fall back through.
+    let cONTRACT_NAME_AR : String?
+    let cONTRACT_NAME_EN : String?
+    let cATEGORY_NAME_AR : String?
+    let cATEGORY_NAME_EN : String?
+    /// Financial account / file number — shown in the web dashboard, useful
+    /// fallback for the insurance row when no contract name is present.
+    let pATFINANACCOUNT : String?
     
     enum CodingKeys: String, CodingKey {
         
@@ -79,6 +90,11 @@ class OperationPatient : Codable {
         case nOTES = "NOTES"
         case gENDER_AGE_NAME_AR = "GENDER_AGE_NAME_AR"
         case gENDER_AGE_NAME_EN = "GENDER_AGE_NAME_EN"
+        case cONTRACT_NAME_AR  = "CONTRACT_NAME_AR"
+        case cONTRACT_NAME_EN  = "CONTRACT_NAME_EN"
+        case cATEGORY_NAME_AR  = "CATEGORY_NAME_AR"
+        case cATEGORY_NAME_EN  = "CATEGORY_NAME_EN"
+        case pATFINANACCOUNT   = "PATFINANACCOUNT"
     }
     
     required init(from decoder: Decoder) throws {
@@ -117,23 +133,37 @@ class OperationPatient : Codable {
         nOTES = try values.decodeIfPresent(String.self, forKey: .nOTES)
         gENDER_AGE_NAME_AR = try values.decodeIfPresent(String.self, forKey: .gENDER_AGE_NAME_AR)
         gENDER_AGE_NAME_EN = try values.decodeIfPresent(String.self, forKey: .gENDER_AGE_NAME_EN)
+        cONTRACT_NAME_AR   = try values.decodeIfPresent(String.self, forKey: .cONTRACT_NAME_AR)
+        cONTRACT_NAME_EN   = try values.decodeIfPresent(String.self, forKey: .cONTRACT_NAME_EN)
+        cATEGORY_NAME_AR   = try values.decodeIfPresent(String.self, forKey: .cATEGORY_NAME_AR)
+        cATEGORY_NAME_EN   = try values.decodeIfPresent(String.self, forKey: .cATEGORY_NAME_EN)
+        pATFINANACCOUNT    = try values.decodeIfPresent(String.self, forKey: .pATFINANACCOUNT)
     }
     
 }
 
 struct OR_PATIENTS : Codable {
     var oR_PATIENTS_ROW = [OperationPatient]()
-    
+
     enum CodingKeys: String, CodingKey {
-        
         case oR_PATIENTS_ROW = "OR_PATIENTS_ROW"
     }
-    
+
+    /// BHG quirk: the server returns `OR_PATIENTS_ROW` as a single object
+    /// when there's only one row, and as an array when there are multiple.
+    /// Decoding strictly as `[OperationPatient]` blows up on single-row
+    /// responses (which then surfaces as "no operations" in the UI even
+    /// though the doctor has one scheduled). Handle both shapes here.
     init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
-        oR_PATIENTS_ROW = try values.decodeIfPresent([OperationPatient].self, forKey: .oR_PATIENTS_ROW)!
+        if let arr = try? values.decode([OperationPatient].self, forKey: .oR_PATIENTS_ROW) {
+            oR_PATIENTS_ROW = arr
+        } else if let single = try? values.decode(OperationPatient.self, forKey: .oR_PATIENTS_ROW) {
+            oR_PATIENTS_ROW = [single]
+        } else {
+            oR_PATIENTS_ROW = []
+        }
     }
-    
 }
 struct Root : Codable {
     let oR_PATIENTS : OR_PATIENTS?

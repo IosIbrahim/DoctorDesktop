@@ -19,7 +19,7 @@ protocol ModelLayer {
     func getInpatientPatients(with params: [String: String], finished: @escaping InpatientPatientsBlock)
     func getOutpatientClinics(with params: [String: String], finished: @escaping OutpatientClinicsBlock)
     func getOutpatientPatients(with params: [String: String], finished: @escaping OutpatientPatientsBlock)
-    func changePatientStatus(with params: [String: String], finished: @escaping OutpatientPatientsBlock)
+    func changePatientStatus(with params: [String: String], status: String, finished: @escaping (Bool, String?) -> Void)
     
     func getEmergencyPatients(with params: [String: String], finished: @escaping EmergencyPatientsBlock)
     func getOperationPatients(with params: [String: String], finished: @escaping ([OperationPatient]) -> Void)
@@ -117,10 +117,30 @@ class ModelLayerImpl: ModelLayer {
     }
   }
     
-    func changePatientStatus(with params: [String: String], finished: @escaping OutpatientPatientsBlock) {
-      networkLayer.changePatientStatus(with: params) { data in
-        let outpatientPatients = self.translationLayer.getOutpatientPatientsDTOsFromJson(data)
-        finished(outpatientPatients)
+    /// Reports `(success, errorMessage)`:
+    ///   • success=true  → server accepted, caller should advance the local state
+    ///   • success=false → either a network failure or the server returned a
+    ///                     `{"Message":"..."}` error envelope; the message is
+    ///                     surfaced so the caller can show it to the user
+    ///
+    /// IMPORTANT: do NOT route this through the OutpatientPatients translation
+    /// layer — these endpoints don't return a CLINIC_PATIENTS_ROW payload, so
+    /// the parser would silently swallow real errors as "empty array OK".
+    func changePatientStatus(with params: [String: String],
+                             status: String,
+                             finished: @escaping (Bool, String?) -> Void) {
+      networkLayer.changePatientStatus(with: params, status: status) { data in
+        // `try?` wraps in Optional and so does `as?` — without the outer
+        // parens we'd end up with `[String: Any]??` and `if let` would only
+        // peel one layer.
+        if let json = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any],
+           let message = json["Message"] as? String {
+          // Server's standard error envelope.
+          finished(false, message)
+          return
+        }
+        // No "Message" key → server accepted (200 OK with empty body or success payload).
+        finished(true, nil)
       }
     }
   

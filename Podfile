@@ -12,7 +12,11 @@ target 'DoctorDesktop' do
   pod 'Alamofire'
   pod 'MaterialComponents/Tabs'
   pod 'SwinjectStoryboard'
-
+  
+  pod 'Kingfisher'
+  pod 'SwiftyJSON'
+  pod 'Reachability'
+  
   pod 'DropDown'
   pod 'SCLAlertView' , :git => 'https://github.com/vikmeup/SCLAlertView-Swift'
   pod 'ObjectMapper'
@@ -23,22 +27,21 @@ target 'DoctorDesktop' do
   pod 'VHBoomMenuButton/Swift'
   pod 'Swinject'
   pod 'UICollectionViewLeftAlignedLayout'
-  pod 'Kingfisher'
   pod 'PocketSVG', :inhibit_warnings => true
   pod 'SwiftyBeaver'
-  pod 'SwiftyJSON'
-  pod 'Reachability'
+ 
   pod 'MZFormSheetController', '~> 3.1'
   pod 'MOLH'
   pod 'OhhAuth'
   pod 'OAuthSwift', '~> 1.2.0'
   pod 'Stuff/Codable'
   pod 'PopupDialog'
+  pod 'Firebase/Messaging'
 end
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     target.build_configurations.each do |config|
-      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '12.0'
+      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '13.0'
       config.build_settings['DEBUG_INFORMATION_FORMAT'] = 'dwarf-with-dsym'
     end
   end

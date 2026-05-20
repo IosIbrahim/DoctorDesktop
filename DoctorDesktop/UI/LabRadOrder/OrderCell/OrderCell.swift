@@ -7,7 +7,6 @@
 //
 
 import UIKit
-import Toastlity
 
 class OrderCell: UICollectionViewCell {
   @IBOutlet weak var cellView: UIView!
@@ -73,14 +72,5 @@ extension OrderCell {
 
 
 
-extension ToastSettings {
-    static var agent: ToastSettings {
-        var settings = ToastSettings.default
-        settings.mode = .top
-        settings.backgroundColor = .blue
-        settings.textColor = .white
-        settings.font = .boldSystemFont(ofSize: 15)
-        settings.autoHide = true
-        return settings
-    }
-}
+// (Toastlity's ToastSettings extension removed — replaced by the
+// in-project `ToastBarSettings.agent` static in ToastBar.swift.)

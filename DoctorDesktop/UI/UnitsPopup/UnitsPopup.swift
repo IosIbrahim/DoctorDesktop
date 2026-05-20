@@ -23,6 +23,9 @@ class UnitsPopup: UIViewController {
   var selectedDate = Date()
   /// Called when the user picks a new date from the calendar inside this screen.
   var onDateChanged: ((Date) -> Void)?
+  /// When true, this popup is showing inpatient floors (not outpatient clinics).
+  /// Hides the date/calendar button and switches the header label to "Floors".
+  var isInpatient = false
 
   // MARK: - Private helpers
   private let dateFormatter: DateFormatter = {
@@ -122,7 +125,13 @@ class UnitsPopup: UIViewController {
     UnitsPopupCell.register(with: tableView)
     tableView.delegate   = self
     tableView.dataSource = self
-    setupNavBarDateButton()
+    if isInpatient {
+        // Inpatient floors are not date-scoped — hide the calendar entirely.
+        clinicsHeaderLabel.text = "Floors"
+        emptyLabel.text = "No floors available"
+    } else {
+        setupNavBarDateButton()
+    }
     setupBackButton()
 
     // Add spinner and empty label over the table
@@ -214,12 +223,15 @@ class UnitsPopup: UIViewController {
     datePopup.datePicker.date = selectedDate
 
     let popup = PopupDialog(viewController: datePopup)
-    let doneButton = PopupDialogButton(title: "Done") { [weak self, weak datePopup] in
-      guard let self = self, let picker = datePopup?.datePicker else { return }
-      self.applyNewDate(picker.date)
+    // Auto-apply on selection — no "Done" button.
+    datePopup.onDateSelected = { [weak self, weak popup] date in
+      guard let self = self else { return }
+      popup?.dismiss(animated: true) {
+        self.applyNewDate(date)
+      }
     }
     let cancelButton = PopupDialogButton(title: "Cancel", action: nil)
-    popup.addButtons([doneButton, cancelButton])
+    popup.addButton(cancelButton)
     present(popup, animated: true)
   }
 

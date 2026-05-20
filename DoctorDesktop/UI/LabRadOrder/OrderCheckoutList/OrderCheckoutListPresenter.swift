@@ -82,6 +82,8 @@ class OrderCheckoutListPresenterImpl: OrderCheckoutListPresenter {
   
   func saveOrder(finished: @escaping MessageBlock) {
     let dateFormatter = DateFormatter()
+    // Pin POSIX — server rejects strings with U+202F / Arabic digits.
+    dateFormatter.locale = Locale(identifier: "en_US_POSIX")
     dateFormatter.dateFormat = "dd-MM-yyyy HH.mm.ss"
     let now = dateFormatter.string(from: Date())
     var labRequest = [[String:Any]]()

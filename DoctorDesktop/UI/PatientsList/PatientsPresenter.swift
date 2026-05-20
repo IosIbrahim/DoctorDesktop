@@ -66,7 +66,9 @@ protocol PatientsPresenter {
   func getOutpatientPatients(withDate: Date, selectedClinicIndex: Int, finished: @escaping EmptyBlock)
   func getEmergencyPatients(withDate: Date, finished: @escaping EmptyBlock)
   func getOperationPatients(withDate: Date, finished: @escaping EmptyBlock)
-  func changePatientStatus(index: Int, finished: @escaping EmptyBlock)
+  /// Reports `(success, errorMessage)` so the caller only refreshes the UI
+  /// when the server confirms — and can show the message on failure.
+  func changePatientStatus(index: Int, finished: @escaping (Bool, String?) -> Void)
 
   func getClinicalPatients(date: Date, finished: @escaping EmptyBlock)
   func loadFlagImage(flageImageName: String, finished: @escaping ImageBlock)
@@ -94,28 +96,31 @@ class PatientsPresenterImpl: PatientsPresenter {
         self.componentType = componentType
         self.user = user
         self.permission = permission
+        // CRITICAL: pin to en_US_POSIX so the formatter emits a regular space
+        // (U+0020) between time and AM/PM, Western digits, and a Gregorian
+        // calendar regardless of the user's iOS region / locale / 12-vs-24h
+        // preference. iOS 15.4+ silently inserts U+202F (narrow no-break
+        // space) on the default locale, which the .NET backend rejects with
+        // `{"message":"String was not recognized as a valid DateTime."}`.
+        formatter.locale = Locale(identifier: "en_US_POSIX")
         formatter.dateFormat = "dd/MM/yyyy HH:mm:ss"
   }
 
   var title: String {
     switch componentType {
-    case .nicu:
-        return "NICU"
-    case .inpatient:
-      return "Inpatients"
-    case .ICU:
-      return "ICU"
-    case .outpatient:
-      return "Outpatients"
-    case .emergency:
-      return "Emergency"
-    case .consultation:
-      return "Consultations"
-    case .clinicalAlert:
-      return "Clinical Alerts"
+    case .nicu: return "NICU"
+    case .ICU: return "ICU"
+    case .inpatient:return "Inpatients"
+    case .outpatient: return "Outpatients"
+    case .emergency:return "Emergency"
+    case .consultation: return "Consultations"
+//    case .clinicalAlert:
+//      return "Clinical Alerts"
+//    case .operations:
+//        return "Operations"
+ //   default: return ""
     case .operations:
         return "Operations"
-    default: return ""
     }
   }
   
@@ -226,10 +231,15 @@ extension PatientsPresenterImpl {
   }
     func getOperationPatients(withDate date: Date, finished: @escaping EmptyBlock) {
         let params = [
-            "BRANCH_ID": user.branch ?? "",
-            "USER_ID": user.userName ?? "",
-            "COMPUTER_NAME": "iOS",
-            "USER_OPEN_FLAG": "D",
+            "BRANCH_ID":             user.branch ?? "",
+            "USER_ID":               user.userName ?? "",
+            "COMPUTER_NAME":         "iOS",
+            "USER_OPEN_FLAG":        "D",
+            // REQ_DOC_ID filters the OR schedule to operations where the
+            // logged-in doctor is the surgeon. Matches Android's behaviour
+            // and the URL your friend tested with (REQ_DOC_ID=43 = the
+            // user's EMPID).
+            "REQ_DOC_ID":            user.id ?? "",
             "DATE_FROM_STR_FORMATED": formatter.string(from: date)
         ]
         
@@ -240,28 +250,42 @@ extension PatientsPresenterImpl {
         }
     }
     
-    func changePatientStatus(index: Int, finished: @escaping EmptyBlock) {
-        var model = outpatientPatients[index]
-        if model.serVStatus != "D" {
-            let params = [
-                "BRANCH_ID": user.branch ?? "",
-                "USER_ID": user.userName ?? "",
-                "COMPUTER_NAME": "iOS",
-                "LAN": "0",
-                "SER": model.serVStatus ?? ""
-            ]
-            
-            modelLayer.changePatientStatus(with: params) { _ in
-                if model.serVStatus == "B"{
-                    self.outpatientPatients[index].serVStatus = "A"
-                }else if model.serVStatus == "A"{
-                    self.outpatientPatients[index].serVStatus = "S"
-                }else if model.serVStatus == "S" {
-                    self.outpatientPatients[index].serVStatus = "D"
-                }
-                finished()
-            }
+    func changePatientStatus(index: Int, finished: @escaping (Bool, String?) -> Void) {
+        let model = outpatientPatients[index]
+        // Only B (Arrival) → A (Check In) → S (Check Out) drive a server call.
+        // D (Done) is terminal; anything else (CALL, C, "") has no endpoint.
+        guard let status = model.serVStatus,
+              ["B", "A", "S"].contains(status) else {
+            finished(false, nil)
+            return
+        }
 
+        // Param shape mirrors the Android adapter (`lan` lowercase, SER is
+        // the row's visit/reservation serial — NOT the status code).
+        let params: [String: String] = [
+            "BRANCH_ID": user.branch ?? "",
+            "USER_ID":   user.userName ?? "",
+            "SER":       model.ser ?? "",
+            "lan":       "0",
+        ]
+
+        modelLayer.changePatientStatus(with: params, status: status) { success, errorMessage in
+            // CRITICAL: only advance the local state when the server confirms.
+            // If we advanced optimistically on every callback, a 4xx/5xx (e.g.
+            // 405 Method Not Allowed, 401 Unauthorized) would still flip the
+            // button to the next stage and the doctor would think the action
+            // succeeded.
+            guard success else {
+                finished(false, errorMessage)
+                return
+            }
+            switch status {
+            case "B": self.outpatientPatients[index].serVStatus = "A"
+            case "A": self.outpatientPatients[index].serVStatus = "S"
+            case "S": self.outpatientPatients[index].serVStatus = "D"
+            default: break
+            }
+            finished(true, nil)
         }
     }
 }

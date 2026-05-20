@@ -8,7 +8,6 @@
 
 import Foundation
 import Alamofire
-import Toastlity
 typealias Components = [Component]
 typealias ComponentsBlock = ((Components) -> Void)
 typealias UserAndComponentsBlock = ((User, Components) -> Void)
@@ -38,49 +37,50 @@ extension LoginPresenterImpl {
             self?.user = user
             self?.components = components
             
-//            self?.components = components.filter({ component in
-//              if let mobileFlag = component.mobileFlag {
-//                  return mobileFlag == 1
-//              } else {
-//                return false
-//              }
-//            })
-            var not:Component?
-            var search:Component?
-
-            var searchFound:Bool = false
-            for item in components {
-                if not == nil {
-                    not = item
-                    not?.updateName("Notifications")
-                    not?.patientsCount = ""
-                    not?.id = 0
-                    not?.processInfoCode = 1
-                }else if !searchFound && search == nil {
-                    search = item
-                    search?.updateName("Search")
-                    search?.patientsCount = ""
-                    search?.id = 0
-                    search?.processInfoCode = 72
-                }
-                
-                if item.name == "Search" {
-                    searchFound = true
-                    if let new = not {
-                        self?.components.append(new)
-                    }
-                    self?.components.append(item)
-                }
-                
+            // Filter by whether the component maps to a known ComponentType
+            // rather than the server's MOBILE_FLAG value. The test server
+            // (MobileApitest) returns MOBILE_FLAG=0 for the same modules
+            // that the live server returns MOBILE_FLAG=1 — relying on the
+            // flag means tiles disappear when switching environments.
+            self?.components = components.filter { component in
+                ComponentType(rawValue: component.processInfoCode) != nil
             }
-            if !searchFound {
-                if let first = not {
-                    self?.components.append(first)
-                }
-                if let last = search {
-                    self?.components.append(last)
-                }
-            }
+//            var not:Component?
+//            var search:Component?
+//
+//            var searchFound:Bool = false
+//            for item in components {
+//                if not == nil {
+//                    not = item
+//                    not?.updateName("Notifications")
+//                    not?.patientsCount = ""
+//                    not?.id = 0
+//                    not?.processInfoCode = 1
+//                }else if !searchFound && search == nil {
+//                    search = item
+//                    search?.updateName("Search")
+//                    search?.patientsCount = ""
+//                    search?.id = 0
+//                    search?.processInfoCode = 72
+//                }
+//                
+//                if item.name == "Search" {
+//                    searchFound = true
+//                    if let new = not {
+//                        self?.components.append(new)
+//                    }
+//                    self?.components.append(item)
+//                }
+//                
+//            }
+//            if !searchFound {
+//                if let first = not {
+//                    self?.components.append(first)
+//                }
+//                if let last = search {
+//                    self?.components.append(last)
+//                }
+//            }
         }else {
             self?.error = "Unknwon Error has occured please try again!"
         }

@@ -25,6 +25,7 @@ enum NavigationState {
   atOverviewCollection,
   atOverviewSectionDetails,
   atVitalSignsEntry,   // EmergencyTriageVC opened from Overview + button
+  atOperationsList,    // view-only OR schedule for the logged-in doctor
   atWebViewer
 }
 
@@ -55,6 +56,7 @@ class RootNavigationCoordinatorImpl: NavigationCoordinator {
     case .atOverviewCollection: navState = .atPatientList
     case .atOverviewSectionDetails: navState = .atOverviewCollection
     case .atVitalSignsEntry:        navState = .atOverviewSectionDetails
+    case .atOperationsList:         navState = .atComponentCollection
     case .atWebViewer: navState = .atOverviewSectionDetails
     }
   }
@@ -66,7 +68,17 @@ class RootNavigationCoordinatorImpl: NavigationCoordinator {
   func next(arguments: Dictionary<String, Any>?) {
     switch navState {
     case .atLogin: showComponentCollection(arguments: arguments)
-    case .atComponentCollection: showPatientList(arguments: arguments)
+    case .atComponentCollection:
+      // Operations has its own dedicated, view-only screen — bypass
+      // PatientsViewController entirely so the doctor doesn't see the
+      // Inpatient/Outpatient list chrome (status buttons, payment $ icon,
+      // etc.) for OR appointments.
+      if (arguments?["componentType"] as? ComponentType) == .operations {
+        showOperationsList(arguments: arguments)
+      } else {
+        showPatientList(arguments: arguments)
+      }
+    case .atOperationsList: break
     case .atPatientList:
       guard let viewType = arguments!["viewType"] as? String else { break }
       switch viewType {
@@ -133,9 +145,17 @@ class RootNavigationCoordinatorImpl: NavigationCoordinator {
     let patientsViewController = registry.makePatientsViewController(with: componentType, user: user,permission: permission)
     // For types that immediately push UnitsPopup, push PatientsViewController silently
     // so only UnitsPopup slides in and the user never sees the underlying blank screen.
-    let showsUnitsPopup: Bool = [ComponentType.outpatient, .inpatient, .ICU, .nicu].contains(componentType)
+ //   let showsUnitsPopup: Bool = [ComponentType.outpatient, .inpatient, .ICU, .nicu].contains(componentType)
+      let showsUnitsPopup: Bool = [ComponentType.outpatient, .inpatient].contains(componentType)
     rootViewController.navigationController?.pushViewController(patientsViewController, animated: !showsUnitsPopup)
     navState = .atPatientList
+  }
+
+  func showOperationsList(arguments: Dictionary<String, Any>?) {
+    guard let user = arguments?["user"] as? User else { return }
+    let vc = registry.makeOperationsListViewController(with: user)
+    rootViewController.navigationController?.pushViewController(vc, animated: true)
+    navState = .atOperationsList
   }
 
   func showEmergencyTriage(arguments: Dictionary<String, Any>?) {
@@ -194,8 +214,8 @@ class RootNavigationCoordinatorImpl: NavigationCoordinator {
       guard let patient = arguments?["patient"] as? Patient,
           let permision = arguments?["permission"] as? PermissionModel,
           let user = arguments?["user"] as? User else { return }
-      let overviewCollectionViewController = registry.makeOverviewCollectionViewController(with: patient, user: user,permision: permision)
-      rootViewController.navigationController?.pushViewController(overviewCollectionViewController, animated: true)
+      let liteVC = registry.makeLiteOverviewViewController(with: patient, user: user, permission: permision)
+      rootViewController.navigationController?.pushViewController(liteVC, animated: true)
       navState = .atOverviewCollection
   }
 

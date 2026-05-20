@@ -74,6 +74,16 @@ class PatientsViewController: UIViewController, NVActivityIndicatorViewable {
   override func viewWillDisappear(_ animated: Bool) {
     super.viewWillDisappear(true)
     if isMovingFromParentViewController {
+      // CRITICAL: detach the data source BEFORE the back-pop animation
+      // begins. UITableView keeps re-requesting cells during the slide-out
+      // and a parallel viewWillAppear on the destination VC may already be
+      // mutating presenter.inpatientPatients (e.g. clearData() in
+      // backToClinics / didSelectDate), which crashes the in-flight
+      // cellForRowAt call with "Index out of range" on
+      // inpatientPatients[indexPath.row]. With dataSource = nil the table
+      // no longer asks for any more rows during dismissal.
+      tableView.dataSource = nil
+      tableView.delegate   = nil
       navigationCoordinator?.movingBack()
     }
   }
@@ -81,6 +91,13 @@ class PatientsViewController: UIViewController, NVActivityIndicatorViewable {
   override func viewDidLoad() {
     super.viewDidLoad()
     self.title = presenter.title
+    tableView.estimatedRowHeight = 130
+    // Modern card-on-canvas look: soft gray background lets the white
+    // cards "float" with their drop shadows; default separator lines
+    // would clash with the rounded card edges.
+    tableView.backgroundColor = UIColor(red: 0.95, green: 0.96, blue: 0.97, alpha: 1)
+    tableView.separatorStyle = .none
+    view.backgroundColor = UIColor(red: 0.95, green: 0.96, blue: 0.97, alpha: 1)
     registerCell()
       
   //  navigationController?.navigationBar.largeTitleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.black]
@@ -89,7 +106,6 @@ class PatientsViewController: UIViewController, NVActivityIndicatorViewable {
     navigationController?.navigationBar.titleTextAttributes = textAttributes
 
     self.navigationController?.navigationBar.tintColor = UIColor.green
-    //self.navigationController?.navigationBar.backgroundColor = UIColor.blue
     countView.layer.cornerRadius = countView.bounds.width/2
     dropDownView.layer.cornerRadius = 10
     dateView.layer.cornerRadius = 10
@@ -114,15 +130,56 @@ class PatientsViewController: UIViewController, NVActivityIndicatorViewable {
     }
 
     switch presenter.componentType {
-    case .emergency, .clinicalAlert:
+  //  case .emergency, .clinicalAlert:
+    case .emergency :
       getPatientsDetails(withSelectedUnitIndex: -1)
-    case .outpatient, .inpatient, .ICU, .nicu:
+  //  case .outpatient, .inpatient, .ICU, .nicu:
+    case .outpatient, .inpatient:
       // Hide content — UnitsPopup is about to be pushed immediately on top.
       setContentVisible(false)
       getPatientsUnits()
+      // Replace the default back button so pressing back from the patient
+      // list returns to the clinics popup (re-pushed + refreshed) instead
+      // of popping all the way to the home grid.
+      installClinicsBackButton()
     default:
       getPatientsUnits()
     }
+  }
+
+  /// Custom back button for the outpatient/inpatient flow: re-pushes
+  /// UnitsPopup (with a fresh fetch) so the user can pick a different
+  /// clinic / floor without leaving the screen.
+  private func installClinicsBackButton() {
+    let title: String
+    switch presenter.componentType {
+    case .inpatient: title = "Floors"
+    default:         title = "Clinics"
+    }
+    navigationItem.leftBarButtonItem = UIBarButtonItem(
+      title: "‹ \(title)",
+      style: .plain,
+      target: self,
+      action: #selector(backToClinics)
+    )
+  }
+
+  @objc private func backToClinics() {
+    // Reset selection state so the same clinic can be picked again, then
+    // re-push UnitsPopup. getPatientsUnits() pushes it immediately and
+    // refreshes its data from the server.
+    selectedUnitIndex = nil
+    presenter.clearData()
+    // CRITICAL: reload BEFORE the next floor selection re-shows the table.
+    // Without this, the tableView keeps the previous floor's row-count
+    // cache (e.g. 5 rows) while `inpatientPatients` is now empty —
+    // the brief window between popping UnitsPopup and the next
+    // `getPatientsDetails` callback triggers a layout pass that asks for
+    // `cellForRowAt` rows that no longer exist, crashing on
+    // `inpatientPatients[indexPath.row]` (Index out of range).
+    tableView.reloadData()
+    setContentVisible(false)
+    getPatientsUnits()
   }
 
   // MARK: - Content visibility helper
@@ -196,6 +253,7 @@ extension PatientsViewController {
     let unitsPopup = unitsPopupMaker(presenter.title, self.presenter.patientUnits)
     unitsPopup.delegate = self
     unitsPopup.selectedDate = selectedDate
+    unitsPopup.isInpatient = (presenter.componentType == .inpatient)
 
     unitsPopup.onDateChanged = { [weak self, weak unitsPopup] newDate in
       guard let self = self, let popup = unitsPopup else { return }
@@ -215,14 +273,30 @@ extension PatientsViewController {
   fileprivate func showDatePopupDialog() {
     let datePopup = DatePopup()
     self.popupDialog = PopupDialog(viewController: datePopup)
-    
-    let doneButton = PopupDialogButton(title: "Done") {
-      self.didSelectDate(date: datePopup.datePicker.date)
+
+    // Auto-apply: tap a date → dismiss + run `didSelectDate`. No "Done"
+    // button needed. Cancel is kept so the user can back out without
+    // changing the date (and to give the dialog a tap target so it's
+    // dismissable without an explicit picker interaction).
+    datePopup.onDateSelected = { [weak self] date in
+      guard let self = self else { return }
+      self.popupDialog?.dismiss(animated: true) {
+        self.didSelectDate(date: date)
+      }
     }
+
     let cancelButton = PopupDialogButton(title: "Cancel", action: nil)
-    
-    self.popupDialog?.addButtons([doneButton, cancelButton])
+    self.popupDialog?.addButton(cancelButton)
     self.present(popupDialog!, animated: true, completion: nil)
+  }
+
+  fileprivate func showPaymentRequiredPopup() {
+    let popup = PopupDialog(
+      title: "Payment Required",
+      message: "This patient has not completed payment yet. Please confirm payment with the cashier before opening the overview."
+    )
+    popup.addButton(PopupDialogButton(title: "OK", action: nil))
+    present(popup, animated: true, completion: nil)
   }
   
   fileprivate func setupDropDownMenu(dropDown: DropDown) {
@@ -252,10 +326,11 @@ extension PatientsViewController {
   
   fileprivate func registerCell() {
     switch presenter.componentType {
-    case .inpatient, .ICU ,.nicu, .operations: InpatientCell.register(with: tableView)
+  //  case .inpatient, .ICU ,.nicu, .operations: InpatientCell.register(with: tableView)
+    case .inpatient: InpatientCell.register(with: tableView)
     case .outpatient: OutpatientCell.register(with: tableView)
     case .emergency: EmergencyCell.register(with: tableView)
-    case .clinicalAlert: ClinicalAlertCell.register(with: tableView)
+  //  case .clinicalAlert: ClinicalAlertCell.register(with: tableView)
     default: break
     }
   }
@@ -268,12 +343,12 @@ extension PatientsViewController {
         self.setupDropDownMenu(dropDown: self.dropDown)
         popup.reloadWith(units: self.presenter.patientUnits)
       }
-    case .ICU:
-      let popup = showUnitsPopupDialog()
-      presenter.getInpatientUnits(isICU: 1) {
-        self.setupDropDownMenu(dropDown: self.dropDown)
-        popup.reloadWith(units: self.presenter.patientUnits)
-      }
+//    case .ICU:
+//      let popup = showUnitsPopupDialog()
+//      presenter.getInpatientUnits(isICU: 1) {
+//        self.setupDropDownMenu(dropDown: self.dropDown)
+//        popup.reloadWith(units: self.presenter.patientUnits)
+//      }
     case .outpatient:
       // Push UnitsPopup immediately (shows spinner) — no waiting, no white flash.
       // Populate it once the API responds.
@@ -282,20 +357,20 @@ extension PatientsViewController {
         self.setupDropDownMenu(dropDown: self.dropDown)
         popup.reloadWith(units: self.presenter.patientUnits)
       }
-    case .operations:
-        presenter.getOperationPatients(withDate: selectedDate) {
-            self.tableView.reloadData()
-        }
+//    case .operations:
+//        presenter.getOperationPatients(withDate: selectedDate) {
+//            self.tableView.reloadData()
+//        }
     case .emergency:
       getPatientsDetails(withSelectedUnitIndex: -1)
-    case .clinicalAlert:
-      break
-    case .nicu:
-      let popup = showUnitsPopupDialog()
-      presenter.getInpatientUnits(isICU: 2) {
-        self.setupDropDownMenu(dropDown: self.dropDown)
-        popup.reloadWith(units: self.presenter.patientUnits)
-      }
+//    case .clinicalAlert:
+//      break
+//    case .nicu:
+//      let popup = showUnitsPopupDialog()
+//      presenter.getInpatientUnits(isICU: 2) {
+//        self.setupDropDownMenu(dropDown: self.dropDown)
+//        popup.reloadWith(units: self.presenter.patientUnits)
+//      }
     default: break
     }
   }
@@ -304,21 +379,21 @@ extension PatientsViewController {
     startAnimating(message: "Load Patients Details...")
     
     switch presenter.componentType {
-    case .nicu:
-        presenter.getInpatientPatients(withSelectedUnitIndex: index, isICU: 2) {
-          self.stopAnimating()
-          self.tableView.reloadData()
-        }
+//    case .nicu:
+//        presenter.getInpatientPatients(withSelectedUnitIndex: index, isICU: 2) {
+//          self.stopAnimating()
+//          self.tableView.reloadData()
+//        }
     case .inpatient:
       presenter.getInpatientPatients(withSelectedUnitIndex: index, isICU: 0) {
         self.stopAnimating()
         self.tableView.reloadData()
       }
-    case .ICU:
-      presenter.getInpatientPatients(withSelectedUnitIndex: index, isICU: 1) {
-        self.stopAnimating()
-        self.tableView.reloadData()
-      }
+//    case .ICU:
+//      presenter.getInpatientPatients(withSelectedUnitIndex: index, isICU: 1) {
+//        self.stopAnimating()
+//        self.tableView.reloadData()
+//      }
     case .outpatient:
       presenter.getOutpatientPatients(withDate: selectedDate, selectedClinicIndex: index) {
         self.stopAnimating()
@@ -327,20 +402,27 @@ extension PatientsViewController {
     case .emergency:
       presenter.getEmergencyPatients(withDate: selectedDate) {
         self.stopAnimating()
+        // Defensive: ensure the table is unhidden when fresh emergency
+        // data arrives. If any prior code path (e.g. an earlier
+        // `didSelectDate`) hid the content area, the user would see the
+        // tab counts update but the rows would never appear because no
+        // emergency path calls `setContentVisible(true)`. Re-asserting
+        // visibility on every reload keeps the contract simple.
+        self.setContentVisible(true)
         self.triagedCountLabel.text = "\(self.presenter.triagedEmergencyPatients.count)"
         self.notTriagedCountLabel.text = "\(self.presenter.notTriagedEmergencyPatients.count)"
         self.tableView.reloadData()
       }
-    case .clinicalAlert:
-      presenter.getClinicalPatients(date: Date(), finished: {
-        self.stopAnimating()
-        self.tableView.reloadData()
-      })
-    case .operations:
-        presenter.getOperationPatients(withDate: Date(), finished: {
-            self.stopAnimating()
-            self.tableView.reloadData()
-        })
+//    case .clinicalAlert:
+//      presenter.getClinicalPatients(date: Date(), finished: {
+//        self.stopAnimating()
+//        self.tableView.reloadData()
+//      })
+//    case .operations:
+//        presenter.getOperationPatients(withDate: Date(), finished: {
+//            self.stopAnimating()
+//            self.tableView.reloadData()
+//        })
     default: break
     }
   }
@@ -373,7 +455,19 @@ extension PatientsViewController {
     selectedDate = date
     selectedUnitIndex = nil   // allow re-selection of same clinic index on new date
     presenter.clearData()
-    setContentVisible(false)  // hide content — UnitsPopup is about to appear again
+    // Same staleness fix as `backToClinics()` — pair `clearData()` with a
+    // reload so the table never sees a row-count > array-count.
+    tableView.reloadData()
+    // Only hide content for clinic/floor flows (a UnitsPopup is about to be
+    // pushed and we don't want the stale table peeking under it). The
+    // emergency flow has NO UnitsPopup — it goes straight from date change
+    // to fetch-and-reload — so hiding the table here would leave it
+    // permanently hidden because no code path on the emergency side calls
+    // `setContentVisible(true)`. That's the bug where the patient count
+    // updated to 45/3 but the table stayed empty after picking a date.
+    if presenter.componentType != .emergency {
+      setContentVisible(false)
+    }
     getPatientsUnits()
   }
 }
@@ -381,7 +475,8 @@ extension PatientsViewController {
 extension PatientsViewController: UITableViewDataSource {
   func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
     switch presenter.componentType {
-    case .inpatient,.nicu, .ICU: return presenter.inpatientPatients.count
+   // case .inpatient,.nicu, .ICU: return presenter.inpatientPatients.count
+    case .inpatient: return presenter.inpatientPatients.count
     case .outpatient: return presenter.outpatientPatients.count
     case .emergency:
       if self.isTriagedSelected {
@@ -389,34 +484,46 @@ extension PatientsViewController: UITableViewDataSource {
       } else {
         return presenter.notTriagedEmergencyPatients.count
       }
-    case .clinicalAlert: return presenter.clinicalPatients.count
-    case .operations: return presenter.operationPatients.count
+ //   case .clinicalAlert: return presenter.clinicalPatients.count
+ //   case .operations: return presenter.operationPatients.count
 
     default: return 0
     }
   }
   
   func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    // Defensive bounds checks. UITableView caches the row count returned by
+    // `numberOfRowsInSection` at the last `reloadData()`, so any mutation of
+    // the underlying array without a paired reload can leave the table asking
+    // for indexes that no longer exist (see `backToClinics()` / `didSelectDate`).
+    // The concrete fix lives in those callers; this guard is a safety net so
+    // a future code path with the same shape returns an empty cell instead of
+    // crashing on `Index out of range`.
     switch presenter.componentType {
-    case .inpatient,.nicu, .ICU:
+ //   case .inpatient,.nicu, .ICU:
+    case .inpatient:
+      guard indexPath.row < presenter.inpatientPatients.count else { return UITableViewCell() }
       return self.inpatientCellMaker(tableView, indexPath, self.presenter.inpatientPatients[indexPath.row])
     case .outpatient:
+        guard indexPath.row < presenter.outpatientPatients.count else { return UITableViewCell() }
         let cell = outpatientCellMaker(tableView, indexPath, presenter.outpatientPatients[indexPath.row])
         cell.selectIndex = indexPath.row
         cell.delegade = self
       return cell
     case .emergency:
-      let emergencyCellPresenter = self.isTriagedSelected ?
-        EmergencyCellPresenterImpl(with: presenter.triagedEmergencyPatients[indexPath.row]) :
-        EmergencyCellPresenterImpl(with: presenter.notTriagedEmergencyPatients[indexPath.row])
+      let source = self.isTriagedSelected
+        ? presenter.triagedEmergencyPatients
+        : presenter.notTriagedEmergencyPatients
+      guard indexPath.row < source.count else { return UITableViewCell() }
+      let emergencyCellPresenter = EmergencyCellPresenterImpl(with: source[indexPath.row])
       return EmergencyCell.dequeue(from: tableView, for: indexPath, with: emergencyCellPresenter)
-    case .clinicalAlert :
-      return clinicalAlertCellMaker(tableView, indexPath, presenter.clinicalPatients[indexPath.row])
-    case .operations:
-        let cell = UITableViewCell()
-        cell.backgroundColor = .black
-        cell.frame = CGRect(x: 0, y: 0, width: 250, height: 100)
-        return cell
+//    case .clinicalAlert :
+//      return clinicalAlertCellMaker(tableView, indexPath, presenter.clinicalPatients[indexPath.row])
+//    case .operations:
+//        let cell = UITableViewCell()
+//        cell.backgroundColor = .black
+//        cell.frame = CGRect(x: 0, y: 0, width: 250, height: 100)
+//        return cell
     default:
         
       return UITableViewCell()
@@ -424,11 +531,24 @@ extension PatientsViewController: UITableViewDataSource {
   }
 }
 
-extension PatientsViewController:OutpatientStatus {
-    func changeStatus(_ index:Int) {
-        presenter.changePatientStatus(index: index) {
+extension PatientsViewController: OutpatientStatus {
+    func changeStatus(_ index: Int) {
+        presenter.changePatientStatus(index: index) { success, errorMessage in
             DispatchQueue.main.async {
-                self.tableView.reloadData()
+                if success {
+                    // Server confirmed → reload so the button advances to the
+                    // next stage (B → A → S → D).
+                    self.tableView.reloadData()
+                } else {
+                    // Server rejected (or network failure). Leave the row's
+                    // status untouched and surface the message to the doctor.
+                    let popup = PopupDialog(
+                        title: "Action Failed",
+                        message: errorMessage ?? "The server rejected this action. Please try again."
+                    )
+                    popup.addButton(PopupDialogButton(title: "OK", action: nil))
+                    self.present(popup, animated: true, completion: nil)
+                }
             }
         }
     }
@@ -436,38 +556,45 @@ extension PatientsViewController:OutpatientStatus {
 
 extension PatientsViewController: UITableViewDelegate {
   func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-//    switch presenter.componentType {
-//    case .inpatient, .ICU , .nicu,.operations: return 110
-//    case .outpatient: return 150
-//    case .emergency: return 75
-//    case .clinicalAlert: return 100
-//    
-//    default: return UITableViewAutomaticDimension
-//    }
-      return UITableViewAutomaticDimension
+    switch presenter.componentType {
+    case .emergency:    return UITableViewAutomaticDimension
+  //  case .clinicalAlert: return 100
+  //  case .inpatient, .ICU, .nicu, .operations: return 110
+    case .inpatient:    return 124
+    case .outpatient:   return 100
+    default:            return UITableViewAutomaticDimension
+    }
   }
   
   func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
     tableView.deselectRow(at: indexPath, animated: true)
+    // Same staleness concern as `cellForRowAt` — bail early if the tap somehow
+    // lands on a row that has already been removed from the data source.
     switch presenter.componentType {
     case .outpatient:
-        self.initializePatientOverviewSideMenu(patient: presenter.outpatientPatients[indexPath.row])
+        guard indexPath.row < presenter.outpatientPatients.count else { return }
+        let patient = presenter.outpatientPatients[indexPath.row]
+
+        // Block overview when payment isn't confirmed (gray $ icon).
+        if (patient.cashierFlag ?? "0") != "1" {
+            showPaymentRequiredPopup()
+            return
+        }
+
+        self.initializePatientOverviewSideMenu(patient: patient)
         let args = ["viewType":"overview",
-                    "patient":presenter.outpatientPatients[indexPath.row],
+                    "patient": patient,
                     "permission":presenter.permission,
                     "user":presenter.user] as [String : Any]
-        
-        print(presenter.outpatientPatients[indexPath.row].id)
-        
-        UserDefaults.standard.set(presenter.outpatientPatients[indexPath.row].id, forKey: "patient_id") //setObject
 
-          UserDefaults.standard.set(presenter.outpatientPatients[indexPath.row].visitId, forKey: "visit_id") //setObject
-        
-       
+        UserDefaults.standard.set(patient.id, forKey: "patient_id")
+        UserDefaults.standard.set(patient.visitId, forKey: "visit_id")
+
         navigationCoordinator?.next(arguments: args)
         
-    case .inpatient,.nicu, .ICU:
-        
+ //   case .inpatient,.nicu, .ICU:
+    case .inpatient:
+        guard indexPath.row < presenter.inpatientPatients.count else { return }
         UserDefaults.standard.set(presenter.inpatientPatients[indexPath.row].id, forKey: "patient_id") //setObject
 
           UserDefaults.standard.set(presenter.inpatientPatients[indexPath.row].visitId, forKey: "visit_id") //setObject
@@ -479,24 +606,23 @@ extension PatientsViewController: UITableViewDelegate {
                   "user":presenter.user] as [String : Any]
       navigationCoordinator?.next(arguments: args)
     case .emergency:
+      let source = self.isTriagedSelected
+        ? presenter.triagedEmergencyPatients
+        : presenter.notTriagedEmergencyPatients
+      guard indexPath.row < source.count else { return }
       var args = ["viewType":"overview",
                   "user":presenter.user] as [String : Any]
-      if self.isTriagedSelected {
-        self.initializePatientOverviewSideMenu(patient: self.presenter.triagedEmergencyPatients[indexPath.row])
-        args["patient"] = presenter.triagedEmergencyPatients[indexPath.row]
-      } else {
-        self.initializePatientOverviewSideMenu(patient: self.presenter.notTriagedEmergencyPatients[indexPath.row])
-        args["patient"] = presenter.notTriagedEmergencyPatients[indexPath.row]
-      }
+      self.initializePatientOverviewSideMenu(patient: source[indexPath.row])
+      args["patient"] = source[indexPath.row]
         args["permission"] = presenter.permission
       navigationCoordinator?.next(arguments: args)
       //present(SideMenuManager.default.menuLeftNavigationController!, animated: true, completion: nil)
-    case .clinicalAlert:
-      let clinicalInfoPopup = clinicalInfoPopupMaker(presenter.clinicalPatients[indexPath.row])
-      let popupDialog = PopupDialog(viewController: clinicalInfoPopup)
-      let cancelButton = PopupDialogButton(title: "Cancel", action: nil)
-      popupDialog.addButtons([cancelButton])
-      present(popupDialog, animated: true, completion: nil)
+//    case .clinicalAlert:
+//      let clinicalInfoPopup = clinicalInfoPopupMaker(presenter.clinicalPatients[indexPath.row])
+//      let popupDialog = PopupDialog(viewController: clinicalInfoPopup)
+//      let cancelButton = PopupDialogButton(title: "Cancel", action: nil)
+//      popupDialog.addButtons([cancelButton])
+//      present(popupDialog, animated: true, completion: nil)
     default: break
     }
   }

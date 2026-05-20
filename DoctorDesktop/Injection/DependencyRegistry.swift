@@ -20,6 +20,8 @@ protocol DependencyRegistry {
   func makeEmergencyTriageViewController(with patient: EmergencyPatient, user: User) -> EmergencyTriageViewController
   func makeVitalSignsEntryViewController(with patient: Patient, user: User) -> VitalSignsEntryViewController
   func makeProgressNotesViewController(with patient: Patient, user: User, visitIdArray: String) -> ProgressNotesViewController
+  func makeLiteOverviewViewController(with patient: Patient, user: User, permission: PermissionModel) -> LiteOverviewViewController
+  func makeOperationsListViewController(with user: User) -> OperationsListViewController
 
   typealias rootNavigationCoordinatorMaker = (UIViewController) -> NavigationCoordinator
   typealias ComponentCellMaker = (UICollectionView, IndexPath, Component, ColorAndImageTuple) -> ComponentCell
@@ -230,6 +232,8 @@ class DependencyRegistryImpl: DependencyRegistry {
     registerEmergencyTriageViewController()
     registerVitalSignsEntryViewController()
     registerProgressNotesViewController()
+    registerLiteOverviewViewController()
+    registerOperationsListViewController()
   }
   
   //MARK: - Maker Methods
@@ -602,5 +606,45 @@ extension DependencyRegistryImpl {
 
   func makeProgressNotesViewController(with patient: Patient, user: User, visitIdArray: String) -> ProgressNotesViewController {
     return container.resolve(ProgressNotesViewController.self, arguments: patient, user, visitIdArray)!
+  }
+}
+
+// MARK: - LiteOverview (patient header + Remarks card → navigates to ProgressNotes)
+extension DependencyRegistryImpl {
+  func registerLiteOverviewViewController() {
+    container.register(LiteOverviewViewController.self) { (r, patient: Patient, user: User, permission: PermissionModel) in
+      let overviewPresenter = r.resolve(OverviewPresenter.self, arguments: patient, user, permission)!
+      let vc = LiteOverviewViewController()
+      // Inject a maker so the Lite VC can build its embedded ProgressNotes
+      // child without having to know about the Swinject container.
+      let progressNotesMaker: (String) -> ProgressNotesViewController = { visitIdArray in
+        return self.makeProgressNotesViewController(with: patient, user: user, visitIdArray: visitIdArray)
+      }
+      vc.configure(with: overviewPresenter,
+                   navigationCoordinator: self.navigationCoordinator,
+                   progressNotesMaker: progressNotesMaker)
+      return vc
+    }
+  }
+
+  func makeLiteOverviewViewController(with patient: Patient, user: User, permission: PermissionModel) -> LiteOverviewViewController {
+    return container.resolve(LiteOverviewViewController.self, arguments: patient, user, permission)!
+  }
+}
+
+// MARK: - OperationsListViewController (view-only OR schedule)
+extension DependencyRegistryImpl {
+  func registerOperationsListViewController() {
+    container.register(OperationsListViewController.self) { (r, user: User) in
+      let presenter = OperationsListPresenterImpl(modelLayer: r.resolve(ModelLayer.self)!,
+                                                  user: user)
+      let vc = OperationsListViewController()
+      vc.configure(with: presenter, navigationCoordinator: self.navigationCoordinator)
+      return vc
+    }
+  }
+
+  func makeOperationsListViewController(with user: User) -> OperationsListViewController {
+    return container.resolve(OperationsListViewController.self, argument: user)!
   }
 }

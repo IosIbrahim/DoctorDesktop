@@ -19,7 +19,7 @@
 
 # General information
 
-Stuff is a collection of code 'snippets' that are to small to create a library for and which do not fit in an other library. Run the unit tests to see the code in action.
+Stuff is a collection of code 'snippets' that are too small to create a library for and which do not fit in an other library. Run the unit tests to see the code in action.
 
 - [Print](#print) - For creating a nice output log
 - [Enum](#enum) - Adding functionality to an enum
@@ -66,6 +66,15 @@ The output of the code above is:
 🚫 .error ⏱ 02/13/2017 09:52:51:855 📱 xctest [18960:?] 📂 PrintStuffTests.swift(21) ⚙️ testExample() ➡️
     Only errors are shown
 ```
+
+There is also a shortcut print statement for an error object. This will print the localizedDescription and set the warning level to .error. 
+```swift
+    Stuff.print(error)
+```
+
+Update: From now on printing .error will also give you a stacktrace.
+
+Update 04-04-2019 : You can now also set the minimumLogLevel to productionLogAll. This will make sure you can also see the logging in the console (menu 'Window',  'Devices and Simulators', 'Open Console') In most cases you should only use this if you want to see logging for an app that you distributed using Testflight.
 
 ## Enum
 
@@ -189,8 +198,6 @@ perl -p -e "s/($KEYWORDS)/ warning: \$1/"
 
 You can install this by adding the following line to your Podfile:
 
-⚠️WARNING: Swift 4 or later is required ⚠️
-
 ```
 pod "Stuff/Codable"
 ```
@@ -216,7 +223,7 @@ And here you can see how you can use these Stuff/Codable functions:
 
 ```swift
 func test() {
-   let initialObject = TestCodable(naam: "Edwin", id: 1)
+   let initialObject = TestCodable(naam: "Edwin", id: 1, testField: "tst")
 
    guard let json = initialObject.toJsonString() else {
       print("Could not create json from object")
@@ -245,12 +252,28 @@ func test() {
       return
    }
    print("inner object from json \(String(describing: innerObject))")
+   
+   guard let custom = try TestCodable(json: "{\"Naam\":\"UpperN\", \"Id\":5, \"Test_field\":\"lowerSnake\"}", keyPath: nil, codingStrategy: customCodingStragegy) else {
+      print("Could not custom case convert")
+      return
+   }
+   print("read object with custom key coding from json to \(String(describing:    
 }
 
 struct TestCodable : Codable {
    var naam: String?
    var id: Int?
+    var testField: String?    
 }
+```
+
+besides the keyPath a shown in the sample code above you could also add one or more of the folowing parameters which are part of the standard JSONDecoder. If these parameters are not supplied, then the default value (see what's after the =) will be used.
+
+```
+keyDecodingStrategy: JSONDecoder.KeyDecodingStrategy = .convertFromSnakeCase,
+dateDecodingStrategy: JSONDecoder.DateDecodingStrategy = .deferredToDate,
+dataDecodingStrategy: JSONDecoder.DataDecodingStrategy = .base64,
+nonConformingFloatDecodingStrategy: JSONDecoder.NonConformingFloatDecodingStrategy = .throw
 ```
 
 ## License

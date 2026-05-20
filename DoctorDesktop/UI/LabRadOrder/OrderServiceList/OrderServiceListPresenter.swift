@@ -61,6 +61,8 @@ class OrderServiceListPresenterImpl: OrderServiceListPresenter {
 extension OrderServiceListPresenterImpl {
   func validateServiceRow(withServicesIds servicesIds: [String], finished: @escaping EmptyBlock) {
     let dateFormatter = DateFormatter()
+    // Pin POSIX — server rejects strings with U+202F / Arabic digits.
+    dateFormatter.locale = Locale(identifier: "en_US_POSIX")
     dateFormatter.dateFormat = "dd-MM-yyyy HH.mm.ss"
     let dateString = dateFormatter.string(from: Date())
     
