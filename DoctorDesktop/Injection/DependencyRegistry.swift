@@ -8,6 +8,7 @@ protocol DependencyRegistry {
 
   func makeRootNavigationCoordinator(rootViewController: UIViewController) -> NavigationCoordinator
   func makeComponentCollectionViewController(with components: Components, user: User) -> ComponentCollectionViewController
+    func makeHTMLController() -> NotScrollableEditorViewController
     func makePatientsViewController(with componentType: ComponentType, user: User,permission:PermissionModel) -> PatientsViewController
   func makePatientOverviewViewController(with patient: Patient, user: User) -> PatientOverviewViewController
   func makeUnitsPopup(with title: String, patientUnits: PatientUnits) -> UnitsPopup
@@ -246,6 +247,11 @@ class DependencyRegistryImpl: DependencyRegistry {
   func makeComponentCollectionViewController(with components: Components, user: User) -> ComponentCollectionViewController {
     return container.resolve(ComponentCollectionViewController.self, arguments: components, user)!
   }
+    
+    func makeHTMLController() -> NotScrollableEditorViewController {
+      return NotScrollableEditorViewController()
+    }
+    
   
   func makeComponentCell(for collectionView: UICollectionView, at indexPath: IndexPath, component: Component, colorAndImage: ColorAndImageTuple) -> ComponentCell {
     let presenter = container.resolve(ComponentCellPresenter.self, arguments: component, colorAndImage)!

@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 48;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -28,6 +28,16 @@
 		0F49D3FE2F75585100E357FF /* HelpController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0F49D3FC2F75585100E357FF /* HelpController.xib */; };
 		0F49D4022F755FAF00E357FF /* HelpCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F49D4002F755FAF00E357FF /* HelpCell.swift */; };
 		0F49D4032F755FAF00E357FF /* HelpCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0F49D4012F755FAF00E357FF /* HelpCell.xib */; };
+		0F5F3CC5308790F9004217A3 /* EditorViewController+RichEditorViewDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F5F3CC2308790F9004217A3 /* EditorViewController+RichEditorViewDelegate.swift */; };
+		0F5F3CC6308790F9004217A3 /* EditorViewController+Toolbar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F5F3CC3308790F9004217A3 /* EditorViewController+Toolbar.swift */; };
+		0F5F3CC7308790F9004217A3 /* EditorViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F5F3CC1308790F9004217A3 /* EditorViewController.swift */; };
+		0F5F3CCB3087910B004217A3 /* NotScrollableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F5F3CC93087910B004217A3 /* NotScrollableViewController.swift */; };
+		0F5F3CCC3087910B004217A3 /* ScrollableEditorViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F5F3CCA3087910B004217A3 /* ScrollableEditorViewController.swift */; };
+		0F5F3CCD3087910B004217A3 /* FixedSizeEditorViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F5F3CC83087910B004217A3 /* FixedSizeEditorViewController.swift */; };
+		0FA8C39E305010000093F8E2 /* InfomaniakRichHTMLEditor in Frameworks */ = {isa = PBXBuildFile; productRef = 0FA8C39D305010000093F8E2 /* InfomaniakRichHTMLEditor */; };
+		0FA8C3A5305033080093F8E2 /* editor.css in Resources */ = {isa = PBXBuildFile; fileRef = 0FA8C3A4305033080093F8E2 /* editor.css */; };
+		0FA8C3A7305035270093F8E2 /* ToolbarAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FA8C3A6305035270093F8E2 /* ToolbarAction.swift */; };
+		0FA8C3A9305035760093F8E2 /* UIDivider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FA8C3A8305035760093F8E2 /* UIDivider.swift */; };
 		0FC00F682F32426300223775 /* NewOrderCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FC00F662F32426300223775 /* NewOrderCell.swift */; };
 		0FC00F692F32426300223775 /* NewOrderCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0FC00F672F32426300223775 /* NewOrderCell.xib */; };
 		0FC00F6D2F32491300223775 /* InnerServiceCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FC00F6B2F32491300223775 /* InnerServiceCell.swift */; };
@@ -284,6 +294,15 @@
 		0F49D3FC2F75585100E357FF /* HelpController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = HelpController.xib; sourceTree = "<group>"; };
 		0F49D4002F755FAF00E357FF /* HelpCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpCell.swift; sourceTree = "<group>"; };
 		0F49D4012F755FAF00E357FF /* HelpCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = HelpCell.xib; sourceTree = "<group>"; };
+		0F5F3CC1308790F9004217A3 /* EditorViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorViewController.swift; sourceTree = "<group>"; };
+		0F5F3CC2308790F9004217A3 /* EditorViewController+RichEditorViewDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EditorViewController+RichEditorViewDelegate.swift"; sourceTree = "<group>"; };
+		0F5F3CC3308790F9004217A3 /* EditorViewController+Toolbar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EditorViewController+Toolbar.swift"; sourceTree = "<group>"; };
+		0F5F3CC83087910B004217A3 /* FixedSizeEditorViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FixedSizeEditorViewController.swift; sourceTree = "<group>"; };
+		0F5F3CC93087910B004217A3 /* NotScrollableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotScrollableViewController.swift; sourceTree = "<group>"; };
+		0F5F3CCA3087910B004217A3 /* ScrollableEditorViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollableEditorViewController.swift; sourceTree = "<group>"; };
+		0FA8C3A4305033080093F8E2 /* editor.css */ = {isa = PBXFileReference; lastKnownFileType = text.css; path = editor.css; sourceTree = "<group>"; };
+		0FA8C3A6305035270093F8E2 /* ToolbarAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolbarAction.swift; sourceTree = "<group>"; };
+		0FA8C3A8305035760093F8E2 /* UIDivider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIDivider.swift; sourceTree = "<group>"; };
 		0FC00F662F32426300223775 /* NewOrderCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewOrderCell.swift; sourceTree = "<group>"; };
 		0FC00F672F32426300223775 /* NewOrderCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = NewOrderCell.xib; sourceTree = "<group>"; };
 		0FC00F6B2F32491300223775 /* InnerServiceCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InnerServiceCell.swift; sourceTree = "<group>"; };
@@ -359,8 +378,8 @@
 		363D1F9D208F48FD00CF163D /* vital.svg */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = vital.svg; sourceTree = "<group>"; };
 		363D1F9E208F48FD00CF163D /* lab.svg */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = lab.svg; sourceTree = "<group>"; };
 		363DACF11FDFA64700902A83 /* ComponentCellPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComponentCellPresenter.swift; sourceTree = "<group>"; };
-		364064A51FE91E6600903DF2 /* ComponentCollectionPresenter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ComponentCollectionPresenter.swift; path = ComponentCollectionPresenter.swift; sourceTree = "<group>"; };
-		364064A61FE91E6600903DF2 /* ComponentCollectionViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ComponentCollectionViewController.swift; path = ComponentCollectionViewController.swift; sourceTree = "<group>"; };
+		364064A51FE91E6600903DF2 /* ComponentCollectionPresenter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ComponentCollectionPresenter.swift; sourceTree = "<group>"; };
+		364064A61FE91E6600903DF2 /* ComponentCollectionViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ComponentCollectionViewController.swift; sourceTree = "<group>"; };
 		364343871FE98A83002C1FF0 /* UnitsDropDrownCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = UnitsDropDrownCell.xib; sourceTree = "<group>"; };
 		364343881FE98A83002C1FF0 /* UnitsPopupCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UnitsPopupCell.swift; sourceTree = "<group>"; };
 		364343891FE98A83002C1FF0 /* UnitsPopupCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = UnitsPopupCell.xib; sourceTree = "<group>"; };
@@ -513,6 +532,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F1A73B93E409D36BDF031D87 /* Pods_DoctorDesktop.framework in Frameworks */,
+				0FA8C39E305010000093F8E2 /* InfomaniakRichHTMLEditor in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -588,6 +608,30 @@
 				0F49D4012F755FAF00E357FF /* HelpCell.xib */,
 			);
 			path = HelpCell;
+			sourceTree = "<group>";
+		};
+		0F5F3CC4308790F9004217A3 /* EditorViewController */ = {
+			isa = PBXGroup;
+			children = (
+				0F5F3CC1308790F9004217A3 /* EditorViewController.swift */,
+				0F5F3CC2308790F9004217A3 /* EditorViewController+RichEditorViewDelegate.swift */,
+				0F5F3CC3308790F9004217A3 /* EditorViewController+Toolbar.swift */,
+			);
+			path = EditorViewController;
+			sourceTree = "<group>";
+		};
+		0FA8C39F30501B5D0093F8E2 /* HTMLEdit */ = {
+			isa = PBXGroup;
+			children = (
+				0FA8C3A4305033080093F8E2 /* editor.css */,
+				0FA8C3A8305035760093F8E2 /* UIDivider.swift */,
+				0FA8C3A6305035270093F8E2 /* ToolbarAction.swift */,
+				0F5F3CC83087910B004217A3 /* FixedSizeEditorViewController.swift */,
+				0F5F3CC93087910B004217A3 /* NotScrollableViewController.swift */,
+				0F5F3CCA3087910B004217A3 /* ScrollableEditorViewController.swift */,
+				0F5F3CC4308790F9004217A3 /* EditorViewController */,
+			);
+			path = HTMLEdit;
 			sourceTree = "<group>";
 		};
 		0FC00F652F32422C00223775 /* NewOrderCell */ = {
@@ -677,6 +721,7 @@
 		363768542091C5C400CE45D8 /* Overview */ = {
 			isa = PBXGroup;
 			children = (
+				0FA8C39F30501B5D0093F8E2 /* HTMLEdit */,
 				363768552091C5C400CE45D8 /* PatientHistoryFiltrationCell */,
 				363768592091C5C400CE45D8 /* OverviewSectionDetailsCells */,
 				3637687F2091C5C400CE45D8 /* OverviewSectionDetails */,
@@ -1000,6 +1045,8 @@
 		3658CB6D1FE82E78004EBEA8 /* PatientsList */ = {
 			isa = PBXGroup;
 			children = (
+				3658CB761FE85565004EBEA8 /* OutpatientCell */,
+				366F22E91FDF1E6C00557FD8 /* InpatientCell */,
 				3658CB6E1FE82EA9004EBEA8 /* PatientsPresenter.swift */,
 				3658CB701FE82ED3004EBEA8 /* PatientsViewController.swift */,
 			);
@@ -1229,13 +1276,10 @@
 			children = (
 				36883F1020710A1900A53AE7 /* WebViewer */,
 				36BCD4A91FDBEF0700DE0A72 /* Login */,
-				36BCD4AA1FDBF0D400DE0A72 /* ComponentCollection */,
-				365F8C921FDC0464003DB955 /* ComponentCell */,
+				36BCD4AA1FDBF0D400DE0A72 /* HomeComponentCollection */,
 				3658CB6D1FE82E78004EBEA8 /* PatientsList */,
 				364D6D5B1FE280940042457C /* UnitsPopup */,
 				3670B4721FEBB14700EC7495 /* DatePopup */,
-				366F22E91FDF1E6C00557FD8 /* InpatientCell */,
-				3658CB761FE85565004EBEA8 /* OutpatientCell */,
 				36F6BD481FEFEDE300F0CEED /* EmergencyCell */,
 				36393C9520894E85008410FD /* ClinicalAlertsScreen */,
 				368462131FE69F7300284402 /* PatientOverview */,
@@ -1258,16 +1302,16 @@
 			path = Login;
 			sourceTree = "<group>";
 		};
-		36BCD4AA1FDBF0D400DE0A72 /* ComponentCollection */ = {
+		36BCD4AA1FDBF0D400DE0A72 /* HomeComponentCollection */ = {
 			isa = PBXGroup;
 			children = (
 				364064A51FE91E6600903DF2 /* ComponentCollectionPresenter.swift */,
 				364064A61FE91E6600903DF2 /* ComponentCollectionViewController.swift */,
 				A8819600C0726706424E5879 /* HomeGreetingHeaderView.swift */,
 				E9D4A5A342D70BAA99B0CF23 /* HomeBackgroundView.swift */,
+				365F8C921FDC0464003DB955 /* ComponentCell */,
 			);
-			name = ComponentCollection;
-			path = ComponentCollection;
+			path = HomeComponentCollection;
 			sourceTree = "<group>";
 		};
 		36C3257C1FFE3EAD003F8766 /* OrderCell */ = {
@@ -1414,7 +1458,6 @@
 				2ED7F9723D6BA61ED2DFF04D /* OperationsListPresenter.swift */,
 				2F9BED9598DC82B36F2F697C /* OperationsListViewController.swift */,
 			);
-			name = Operations;
 			path = Operations;
 			sourceTree = "<group>";
 		};
@@ -1474,6 +1517,9 @@
 				Base,
 			);
 			mainGroup = 46B6469D1FD2E44100D8D340;
+			packageReferences = (
+				0FA8C39C305010000093F8E2 /* XCRemoteSwiftPackageReference "swift-rich-html-editor" */,
+			);
 			productRefGroup = 46B646A71FD2E44100D8D340 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -1525,6 +1571,7 @@
 				3656DD07274BC6D9008DC057 /* ChatCell.xib in Resources */,
 				363768892091C5C400CE45D8 /* PatientHistoryFiltrationCell.xib in Resources */,
 				3691B19E20165F3A00544BA4 /* OrderCheckoutCell.xib in Resources */,
+				0FA8C3A5305033080093F8E2 /* editor.css in Resources */,
 				363D1F97208F48E900CF163D /* catheterization.svg in Resources */,
 				363D1F93208F48E900CF163D /* scoring.svg in Resources */,
 				3637689E2091C5C400CE45D8 /* DietaryCell.xib in Resources */,
@@ -1747,6 +1794,7 @@
 				46B646AA1FD2E44100D8D340 /* AppDelegate.swift in Sources */,
 				0F49D3FD2F75585100E357FF /* HelpController.swift in Sources */,
 				36C3257A1FFE3EA1003F8766 /* OrderCell.swift in Sources */,
+				0FA8C3A7305035270093F8E2 /* ToolbarAction.swift in Sources */,
 				363768AD2091C5C400CE45D8 /* OverviewPresenter.swift in Sources */,
 				3608D4BB2088793400310D60 /* PediatricsScorePopUpCell.swift in Sources */,
 				36BCD4AC1FDBF10200DE0A72 /* LoginPresenter.swift in Sources */,
@@ -1761,6 +1809,9 @@
 				366D86492087E97A008B16BF /* EmergencyTriageViewController.swift in Sources */,
 				36BF0A1B2857677E00B6271E /* AppPopUpHandler.swift in Sources */,
 				3670B4751FEBB19200EC7495 /* DatePopup.swift in Sources */,
+				0F5F3CCB3087910B004217A3 /* NotScrollableViewController.swift in Sources */,
+				0F5F3CCC3087910B004217A3 /* ScrollableEditorViewController.swift in Sources */,
+				0F5F3CCD3087910B004217A3 /* FixedSizeEditorViewController.swift in Sources */,
 				363768A02091C5C400CE45D8 /* DietryCellPresenter.swift in Sources */,
 				366D85FA2087E76C008B16BF /* EmergencyTriage.swift in Sources */,
 				36F6BD4D1FEFEE3F00F0CEED /* EmergencyCell.swift in Sources */,
@@ -1859,7 +1910,11 @@
 				0F1A2B3C4D5E6F7A8B9C0D1E /* VisitDetail.swift in Sources */,
 				3650EEDB1FDC691F000A349C /* TranslationLayer.swift in Sources */,
 				7B04B70E3E5330C6943DD553 /* OperationCell.swift in Sources */,
+				0FA8C3A9305035760093F8E2 /* UIDivider.swift in Sources */,
 				EE68D04CA8D236053D08C93D /* OperationsListPresenter.swift in Sources */,
+				0F5F3CC5308790F9004217A3 /* EditorViewController+RichEditorViewDelegate.swift in Sources */,
+				0F5F3CC6308790F9004217A3 /* EditorViewController+Toolbar.swift in Sources */,
+				0F5F3CC7308790F9004217A3 /* EditorViewController.swift in Sources */,
 				6239EF275B01E80CF9F284B0 /* OperationsListViewController.swift in Sources */,
 				6F5F35F671AAF791B266A772 /* HomeGreetingHeaderView.swift in Sources */,
 				8076C645C8C6F2324E6BA264 /* HomeBackgroundView.swift in Sources */,
@@ -1996,8 +2051,9 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 11.1;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_ENFORCE_EXCLUSIVE_ACCESS = none;
-				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
@@ -2012,7 +2068,10 @@
 				DEVELOPMENT_TEAM = W8QAC6TS8B;
 				INFOPLIST_FILE = DoctorDesktop/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.khabeer.doctor.desktop.new.BGH;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -2034,7 +2093,10 @@
 				DEVELOPMENT_TEAM = W8QAC6TS8B;
 				INFOPLIST_FILE = DoctorDesktop/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.khabeer.doctor.desktop.new.BGH;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -2068,6 +2130,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		0FA8C39C305010000093F8E2 /* XCRemoteSwiftPackageReference "swift-rich-html-editor" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Infomaniak/swift-rich-html-editor";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.3.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		0FA8C39D305010000093F8E2 /* InfomaniakRichHTMLEditor */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0FA8C39C305010000093F8E2 /* XCRemoteSwiftPackageReference "swift-rich-html-editor" */;
+			productName = InfomaniakRichHTMLEditor;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 46B6469E1FD2E44100D8D340 /* Project object */;
 }

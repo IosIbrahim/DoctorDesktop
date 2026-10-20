@@ -67,7 +67,9 @@ class RootNavigationCoordinatorImpl: NavigationCoordinator {
     
   func next(arguments: Dictionary<String, Any>?) {
     switch navState {
-    case .atLogin: showComponentCollection(arguments: arguments)
+    case .atLogin:
+        showComponentCollection(arguments: arguments)
+       // navigateHTML()
     case .atComponentCollection:
       // Operations has its own dedicated, view-only screen — bypass
       // PatientsViewController entirely so the doctor doesn't see the
@@ -129,6 +131,11 @@ class RootNavigationCoordinatorImpl: NavigationCoordinator {
     case .atWebViewer: break
     }
   }
+    
+    func navigateHTML() {
+        let vc = registry.makeHTMLController()
+        rootViewController.navigationController?.pushViewController(vc, animated: true)
+    }
   
   func showComponentCollection(arguments: Dictionary<String, Any>?) {
     guard let component = arguments?["components"] as? Components,

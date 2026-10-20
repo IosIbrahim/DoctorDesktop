@@ -25,8 +25,26 @@ extension NotesViewController: UITableViewDelegate, UITableViewDataSource {
 
     func setupUi() {
         initTable()
-    }
+        let button = UIButton(type: UIButton.ButtonType.custom)
+        button.setImage(UIImage(named: "ic-more"), for: .normal)
+        button.addTarget(self, action:#selector(callMethod), for: .touchDragInside)
+        button.frame = CGRect(x: 0, y: 0, width: 30, height: 30)
+        let barButton = UIBarButtonItem(customView: button)
+        self.navigationItem.rightBarButtonItems = [barButton]
 
+    }
+    
+    @objc func callMethod() {
+        //do stuff here
+       // self.navigationController?.pushViewController(HTMLEditController(), animated: true)
+        let vc = NotScrollableEditorViewController()
+        vc.html = "you want to change"
+        self.navigationController?.pushViewController(vc, animated: true)
+
+        
+     }
+
+    
     func initTable() {
         tableView.register(UINib(nibName: "ChatCell", bundle: nil), forCellReuseIdentifier: "ChatCell")
         tableView.delegate        = self

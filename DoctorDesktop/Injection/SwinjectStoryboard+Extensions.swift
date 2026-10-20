@@ -14,6 +14,12 @@ extension SwinjectStoryboard {
     let dependencyRegistry: DependencyRegistry = AppDelegate.dependencyRegistry
     
     func main() {
+//        let appdelegate = UIApplication.shared.delegate as! AppDelegate
+//        if appdelegate.window?.rootViewController == nil {
+//            appdelegate.window = .init()
+//            appdelegate.window?.rootViewController = UINavigationController(rootViewController: vc)
+//            appdelegate.window?.makeKeyAndVisible()
+//        }
       dependencyRegistry.container.storyboardInitCompleted(LoginViewController.self) { r, vc in
         let coordinator = dependencyRegistry.makeRootNavigationCoordinator(rootViewController: vc)
         setupData(resolver: r, navigationCoordinator: coordinator)
@@ -21,6 +27,7 @@ extension SwinjectStoryboard {
         //NOTE: We don't have access to the constructor for this VC so we are using method injection
         vc.configure(with: presenter,
                      navigationCoordinator: coordinator)
+        
       }
     }
     main()
